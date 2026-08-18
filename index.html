@@ -374,7 +374,7 @@
       }
 
       .summary-card.clickable:hover {
-        transform: translateY(-6px);
+        transform: translateY(-6px) scale(1.03);
         box-shadow: 0 20px 38px rgba(85, 108, 121, 0.14);
       }
 
@@ -464,19 +464,10 @@
             </div>
 
             <div class="nav-item">
-              <button class="nav-button" type="button">학습메뉴</button>
-              <div class="dropdown-menu">
-                <a href="#">학습 로드맵</a>
-                <a href="#">관심사 탐색</a>
-                <a href="#">실습 기록</a>
-              </div>
-            </div>
-
-            <div class="nav-item">
               <button class="nav-button" type="button">행로 <span class="caret">▼</span></button>
               <div class="dropdown-menu">
                 <a href="Strength_page.html">강점</a>
-                <a href="#">취향</a>
+                <a href="Preference_page.html">취향</a>
                 <a href="#">앞으로의 계획</a>
               </div>
             </div>
@@ -523,10 +514,10 @@
              사용하는 목적에 따라 그 쓰임이 달라집니다.</p>
         </article>
 
-        <article class="summary-card">
+        <article class="summary-card clickable" id="preference-card" role="link" tabindex="0">
           <div class="card-tag">취향</div>
-          <h3>계획과<br />규칙성을 좋아함</h3>
-          <p>구체적인 계획과 규칙적인 루틴을 선호하며, 이를 통해 효율적인 작업을 수행합니다.</p>
+          <h3>나는<br />청사진 같은 사람입니다.</h3>
+          <p>아직 보이지 않는 목표를 구체적인 형태로 그려내고, 하나씩 현실로 완성합니다.</p>
         </article>
 
         <article class="summary-card">
@@ -576,6 +567,17 @@
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           window.location.href = 'Strength_page.html';
+        }
+      });
+
+      const preferenceCard = document.getElementById('preference-card');
+      preferenceCard.addEventListener('click', () => {
+        window.location.href = 'Preference_page.html';
+      });
+      preferenceCard.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          window.location.href = 'Preference_page.html';
         }
       });
     </script>
