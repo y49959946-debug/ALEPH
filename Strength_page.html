@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>강점 - 행로</title>
+    <style>
+      :root {
+        --bg-top: #f8fbff;
+        --bg-bottom: #edf6f4;
+        --panel: rgba(255, 255, 255, 0.7);
+        --panel-strong: #ffffff;
+        --line: #dfeae6;
+        --primary: #1c2a35;
+        --secondary: #5d7284;
+        --muted: #798b9a;
+        --soft-blue: #dfeaf9;
+        --soft-green: #dff5ee;
+        --soft-peach: #fcefe7;
+        --shadow: 0 18px 42px rgba(39, 62, 75, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: "Inter", "Pretendard", "Noto Sans KR", sans-serif;
+        background: linear-gradient(135deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+        color: var(--primary);
+      }
+
+      body {
+        overflow-x: hidden;
+      }
+
+      .page-shell {
+        width: min(1600px, calc(100% - 80px));
+        margin: 0 auto;
+        padding: 28px 0 120px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 18px;
+        z-index: 120;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      .topbar::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 100vw;
+        margin-left: -50vw;
+        border-bottom: 1px solid rgba(125, 141, 149, 0.28);
+      }
+
+      .nav-wrap {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 14px 0 12px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: blur(2px);
+      }
+
+      .nav-left {
+        display: flex;
+        align-items: center;
+        height: 52px;
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .nav-brand {
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 19px;
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        height: 100%;
+        font-family: "Georgia", "Times New Roman", serif;
+      }
+
+      .nav-brand-word {
+        display: inline-block;
+        font-size: clamp(38px, 3vw, 54px);
+        line-height: 0.9;
+        letter-spacing: 0.02em;
+        font-weight: 900;
+        color: #5f6770;
+        font-family: "Segoe UI", "Arial", sans-serif;
+        transform: scaleX(1.18) scaleY(1.08);
+        transform-origin: center;
+      }
+
+      .nav-brand-mark {
+        display: none;
+      }
+
+      .nav-item {
+        position: relative;
+      }
+
+      .nav-button {
+        border: none;
+        background: transparent;
+        color: var(--primary);
+        padding: 0;
+        border-radius: 0;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .nav-button:hover,
+      .nav-button.active {
+        background: transparent;
+        box-shadow: none;
+        opacity: 1;
+      }
+
+      .nav-brand:hover {
+        background: rgba(255, 255, 255, 0.7);
+        box-shadow: 0 10px 24px rgba(67, 90, 103, 0.08);
+      }
+
+      .nav-button .caret {
+        font-size: 11px;
+        opacity: 0.72;
+      }
+
+      .nav-badge {
+        color: var(--primary);
+        background: rgba(121, 139, 154, 0.22);
+        padding: 8px 16px;
+        border-radius: 10px;
+      }
+
+      .nav-button.current {
+        cursor: default;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: clamp(180px, 60vw, 230px);
+        max-width: calc(100vw - 32px);
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(147, 166, 175, 0.22);
+        border-radius: 20px;
+        box-shadow: 0 18px 38px rgba(38, 54, 64, 0.12);
+        padding: 12px;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .nav-item.open .dropdown-menu {
+        display: flex;
+      }
+
+      .dropdown-menu a {
+        text-decoration: none;
+        color: var(--primary);
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        background: #f8fafc;
+      }
+
+      .dropdown-menu a:hover {
+        background: #edf5f4;
+      }
+
+      .hero-copy {
+        margin-top: 40px;
+        max-width: 760px;
+      }
+
+      .hero-copy .eyebrow {
+        margin: 0 0 18px;
+        font-size: 13px;
+        letter-spacing: 2px;
+        color: var(--muted);
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .hero-copy h1 {
+        margin: 0;
+        font-size: clamp(36px, 4vw, 60px);
+        line-height: 1.15;
+        letter-spacing: -1px;
+        font-weight: 800;
+      }
+
+      .hero-copy p {
+        max-width: 620px;
+        margin-top: 20px;
+        font-size: 18px;
+        line-height: 1.8;
+        color: var(--secondary);
+      }
+
+      .story-panel {
+        margin-top: 64px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(142, 163, 177, 0.2);
+        border-radius: 30px;
+        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
+        padding: 34px 30px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .story-panel::before {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        top: -60px;
+        right: -30px;
+        border-radius: 50%;
+        background: rgba(177, 214, 255, 0.28);
+      }
+
+      .story-panel::after {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        left: -30px;
+        bottom: -70px;
+        border-radius: 28px;
+        background: rgba(160, 232, 201, 0.25);
+      }
+
+      .quote-mark {
+        position: relative;
+        z-index: 1;
+        font-size: 72px;
+        line-height: 1;
+        color: rgba(80, 96, 108, 0.32);
+      }
+
+      .story-panel p {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        font-size: 19px;
+        line-height: 1.9;
+        color: var(--secondary);
+      }
+
+      .story-grid {
+        margin-top: 72px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        gap: 28px;
+      }
+
+      .summary-card {
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(142, 163, 177, 0.2);
+        border-radius: 26px;
+        padding: 28px 22px;
+        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .summary-card:nth-child(1) { background: linear-gradient(180deg, #f9fbff, #edf4ff); }
+      .summary-card:nth-child(2) { background: linear-gradient(180deg, #fffdf7, #f9f1e7); }
+      .summary-card:nth-child(3) { background: linear-gradient(180deg, #f8fffb, #edf9f4); }
+
+      .card-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 90px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.75);
+        border: 1px solid rgba(148, 164, 177, 0.15);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--primary);
+      }
+
+      .summary-card h3 {
+        margin: 0;
+        font-size: clamp(22px, 2vw, 28px);
+        line-height: 1.25;
+      }
+
+      .summary-card p {
+        margin: 0;
+        color: var(--secondary);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .story-card-label {
+        display: inline-block;
+        margin-bottom: 2px;
+        font-size: 11px;
+        letter-spacing: 1.15px;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: var(--primary);
+      }
+
+      @media (max-width: 1024px) {
+        .page-shell {
+          width: min(100% - 30px, 1200px);
+        }
+
+        .summary {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .nav-wrap {
+          width: 100%;
+          gap: 12px;
+          justify-content: flex-end;
+          flex-wrap: nowrap;
+        }
+
+        .hero-copy h1 {
+          font-size: 36px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <nav class="nav-wrap" aria-label="메인 네비게이션">
+          <div class="nav-left">
+            <a class="nav-brand" href="main-screen.html" aria-label="HR 로고">
+              <span class="nav-brand-word">HR</span>
+            </a>
+          </div>
+
+          <div class="nav-right">
+            <div class="nav-item">
+              <a class="nav-button" href="main-screen.html">메인 화면</a>
+            </div>
+
+            <div class="nav-item">
+              <button class="nav-button" type="button">학습메뉴</button>
+              <div class="dropdown-menu">
+                <a href="#">학습 로드맵</a>
+                <a href="#">관심사 탐색</a>
+                <a href="#">실습 기록</a>
+              </div>
+            </div>
+
+            <div class="nav-item">
+              <button class="nav-button nav-badge" type="button">행로 <span class="caret">▼</span></button>
+              <div class="dropdown-menu">
+                <a href="Strength_page.html">강점</a>
+                <a href="#">취향</a>
+                <a href="#">앞으로의 계획</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero-copy">
+          <p class="eyebrow">Personal Journey · 강점</p>
+          <h1>나는 칼 같은 사람입니다.</h1>
+          <p>
+            칼은 갈고닦을수록 날카로워지고, 사용하는 목적에 따라 그 쓰임이 달라집니다.
+            복잡한 상황에서도 구조를 정리하고 실용적인 해결책을 찾아내는 능력이 저의 강점입니다.
+          </p>
+        </section>
+
+        <section class="story-panel" aria-label="성장 이야기 인용">
+          <div class="quote-mark">“</div>
+          <p>
+            경험은 칼을 갈아주는 숫돌과 같습니다. 아직 완성된 칼은 아니지만, 새로운 경험을 쌓고 부족한
+            부분을 연마할수록 더 날카롭고 정확한 사람이 되어갈 것입니다.
+          </p>
+        </section>
+
+        <section class="story-grid" aria-label="강점 상세">
+          <article class="summary-card">
+            <span class="story-card-label">SITUATION — 상황</span>
+            <h3>처음엔 막막했지만</h3>
+            <p>
+              웹 개발을 처음 접했을 때는 HTML, CSS, JavaScript와 같은 기술들이 각각 어떤 역할을 하는지조차
+              명확하게 알지 못했습니다. 처음에는 코드를 따라 작성하는 것만으로도 결과물이 만들어졌지만,
+              조금만 원하는 형태에서 벗어나면 어디서 문제가 발생했는지 찾기 어려웠습니다.
+            </p>
+            <p>
+              특히 직접 포트폴리오 웹사이트를 만들면서 제가 생각한 디자인과 실제 화면의 차이를 해결하는 과정에서
+              부족한 부분을 많이 느꼈습니다.
+            </p>
+          </article>
+
+          <article class="summary-card">
+            <span class="story-card-label">ACTION — 행동</span>
+            <h3>이해하는 데 집중했습니다</h3>
+            <p>
+              그래서 단순히 코드를 복사해서 사용하는 것보다 왜 이렇게 작성해야 하는지 이해하는 것에
+              집중했습니다.
+            </p>
+            <p>
+              문제가 발생하면 바로 다른 코드를 가져오기보다 현재 작성한 코드가 어떤 방식으로 동작하는지
+              확인하고, 하나씩 수정하면서 결과를 비교했습니다. 또한 새롭게 배운 HTML, CSS, JavaScript를
+              직접 포트폴리오에 적용해보면서 배운 내용을 실제 결과물로 연결하려고 했습니다.
+            </p>
+            <p>
+              이해하기 어려운 개념은 작은 예제를 만들어 직접 실행해보고, 같은 기능을 여러 가지 방법으로
+              구현해보며 차이를 비교했습니다.
+            </p>
+          </article>
+
+          <article class="summary-card">
+            <span class="story-card-label">RESULT — 결과</span>
+            <h3>점점 더 성장하고 있습니다</h3>
+            <p>
+              그 과정을 반복하면서 처음에는 단순히 코드를 따라 작성하는 수준이었다면, 지금은 원하는 결과를
+              만들기 위해 어떤 기술과 방법을 사용해야 할지 스스로 고민하는 단계까지 발전하고 있습니다.
+            </p>
+            <p>
+              아직 많은 프로젝트나 실무 경험을 가진 사람은 아니지만, 새로운 기술을 접했을 때 두려워하기보다
+              직접 부딪혀보고 부족한 부분을 찾아 채워가는 방법을 배웠습니다.
+            </p>
+            <p>
+              앞으로도 경험을 하나씩 쌓아가며 제 부족한 부분을 끊임없이 갈고닦는 사람이 되고 싶습니다.
+            </p>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const navItems = document.querySelectorAll('.nav-item');
+
+      navItems.forEach((item) => {
+        if (!item.querySelector('.dropdown-menu')) return;
+        const button = item.querySelector('.nav-button');
+        button.addEventListener('click', () => {
+          const isOpen = item.classList.contains('open');
+          navItems.forEach((other) => {
+            other.classList.remove('open');
+            other.querySelector('.nav-button').classList.remove('active');
+          });
+
+          if (!isOpen) {
+            item.classList.add('open');
+            button.classList.add('active');
+          }
+        });
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.nav-item')) {
+          navItems.forEach((item) => {
+            item.classList.remove('open');
+            item.querySelector('.nav-button').classList.remove('active');
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
