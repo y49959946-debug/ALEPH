@@ -468,7 +468,7 @@
               <div class="dropdown-menu">
                 <a href="Strength_page.html">강점</a>
                 <a href="Preference_page.html">취향</a>
-                <a href="#">앞으로의 계획</a>
+                <a href="Plan_page.html">앞으로의 계획</a>
               </div>
             </div>
           </div>
@@ -520,7 +520,7 @@
           <p>아직 보이지 않는 목표를 구체적인 형태로 그려내고, 하나씩 현실로 완성합니다.</p>
         </article>
 
-        <article class="summary-card">
+        <article class="summary-card clickable" id="plan-card" role="link" tabindex="0">
           <div class="card-tag">계획</div>
           <h3>앞으로의<br />성장 방향</h3>
           <p>기술을 익히고, 더 나은 결과물을 만들며, 개인의 가치를 자연스럽게 드러내는 방향으로 나아갑니다.</p>
@@ -578,6 +578,17 @@
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           window.location.href = 'Preference_page.html';
+        }
+      });
+
+      const planCard = document.getElementById('plan-card');
+      planCard.addEventListener('click', () => {
+        window.location.href = 'Plan_page.html';
+      });
+      planCard.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          window.location.href = 'Plan_page.html';
         }
       });
     </script>
