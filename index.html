@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --bg-top: #f8fbff;
+        --bg-bottom: #edf6f4;
+        --panel: rgba(255, 255, 255, 0.7);
+        --panel-strong: #ffffff;
+        --line: #dfeae6;
+        --primary: #1c2a35;
+        --secondary: #5d7284;
+        --muted: #798b9a;
+        --soft-blue: #dfeaf9;
+        --soft-green: #dff5ee;
+        --soft-peach: #fcefe7;
+        --shadow: 0 18px 42px rgba(39, 62, 75, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: "Inter", "Pretendard", "Noto Sans KR", sans-serif;
+        background: linear-gradient(135deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+        color: var(--primary);
+      }
+
+      body {
+        overflow-x: hidden;
+      }
+
+      .page-shell {
+        width: min(1600px, calc(100% - 80px));
+        margin: 0 auto;
+        padding: 28px 0 120px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 18px;
+        z-index: 120;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      .topbar::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 100vw;
+        margin-left: -50vw;
+        border-bottom: 1px solid rgba(125, 141, 149, 0.28);
+      }
+
+      .nav-wrap {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 14px 0 12px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: blur(2px);
+      }
+
+      .nav-left {
+        display: flex;
+        align-items: center;
+        height: 52px;
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .nav-brand {
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 19px;
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        height: 100%;
+        font-family: "Georgia", "Times New Roman", serif;
+      }
+
+      .nav-brand-word {
+        display: inline-block;
+        font-size: clamp(38px, 3vw, 54px);
+        line-height: 0.9;
+        letter-spacing: 0.02em;
+        font-weight: 900;
+        color: #5f6770;
+        font-family: "Segoe UI", "Arial", sans-serif;
+        transform: scaleX(1.18) scaleY(1.08);
+        transform-origin: center;
+      }
+
+      .nav-brand-mark {
+        display: none;
+      }
+
+      .nav-item {
+        position: relative;
+      }
+
+      .nav-button {
+        border: none;
+        background: transparent;
+        color: var(--primary);
+        padding: 0;
+        border-radius: 0;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .nav-button:hover,
+      .nav-button.active {
+        background: transparent;
+        box-shadow: none;
+        opacity: 1;
+      }
+
+      .nav-brand:hover {
+        background: rgba(255, 255, 255, 0.7);
+        box-shadow: 0 10px 24px rgba(67, 90, 103, 0.08);
+      }
+
+      .nav-button .caret {
+        font-size: 11px;
+        opacity: 0.72;
+      }
+
+      .nav-button.current {
+        cursor: default;
+        color: var(--primary);
+        background: rgba(121, 139, 154, 0.22);
+        padding: 8px 16px;
+        border-radius: 10px;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: clamp(180px, 60vw, 230px);
+        max-width: calc(100vw - 32px);
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(147, 166, 175, 0.22);
+        border-radius: 20px;
+        box-shadow: 0 18px 38px rgba(38, 54, 64, 0.12);
+        padding: 12px;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .nav-item.open .dropdown-menu {
+        display: flex;
+      }
+
+      .dropdown-menu a {
+        text-decoration: none;
+        color: var(--primary);
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        background: #f8fafc;
+      }
+
+      .dropdown-menu a:hover {
+        background: #edf5f4;
+      }
+
+      .hero {
+        margin-top: 40px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+        gap: 40px;
+        min-height: clamp(420px, 70vh, 620px);
+      }
+
+      .hero-copy {
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-copy .eyebrow {
+        margin: 0 0 18px;
+        font-size: 13px;
+        letter-spacing: 2px;
+        color: var(--muted);
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .hero-copy h1 {
+        margin: 0;
+        font-size: clamp(42px, 4vw, 72px);
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+        font-weight: 800;
+      }
+
+      .route-def {
+        margin-top: 28px;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255,255,255,0.6);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .route-def .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1d2c3b, #7a95a9);
+        box-shadow: 0 0 0 6px rgba(29, 44, 59, 0.08);
+      }
+
+      .route-text {
+        max-width: 620px;
+        margin-top: 20px;
+        font-size: 18px;
+        line-height: 1.8;
+        color: var(--secondary);
+      }
+
+      .hero-visual {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .feature-frame {
+        width: min(520px, 100%);
+        aspect-ratio: 1 / 1;
+        border-radius: 32px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(232,243,247,0.9));
+        border: 1px solid rgba(146, 162, 174, 0.2);
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-frame::before {
+        content: "";
+        position: absolute;
+        inset: 6% 7% auto auto;
+        width: 34%;
+        height: 34%;
+        border-radius: 50%;
+        background: rgba(161, 202, 238, 0.25);
+      }
+
+      .feature-frame::after {
+        content: "";
+        position: absolute;
+        left: 8%;
+        bottom: 8%;
+        width: 42%;
+        height: 42%;
+        border-radius: 28px;
+        background: rgba(157, 230, 198, 0.28);
+      }
+
+      .image-card {
+        position: absolute;
+        inset: 9% 10%;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #f6fbff 0%, #edf4f8 40%, #ebf7f2 100%);
+        border: 1px solid rgba(117, 145, 160, 0.12);
+        overflow: hidden;
+      }
+
+      .image-card .mini-blob {
+        position: absolute;
+        border-radius: 50%;
+      }
+
+      .image-card .mini-blob.one {
+        width: 150px;
+        height: 150px;
+        right: 30px;
+        top: 26px;
+        background: rgba(171, 205, 255, 0.5);
+      }
+
+      .image-card .mini-blob.two {
+        width: 190px;
+        height: 190px;
+        left: 38px;
+        bottom: 30px;
+        background: rgba(152, 229, 196, 0.55);
+      }
+
+      .image-card .line-stack {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 75%;
+        height: 48%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .image-card .line-stack span {
+        display: block;
+        height: 18px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(56, 74, 86, 0.9), rgba(117, 137, 152, 0.65));
+        box-shadow: 0 8px 18px rgba(33, 49, 61, 0.08);
+      }
+
+      .image-card .line-stack span:nth-child(1) { width: 100%; }
+      .image-card .line-stack span:nth-child(2) { width: 80%; }
+      .image-card .line-stack span:nth-child(3) { width: 90%; }
+
+      .summary {
+        margin-top: 64px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        gap: 28px;
+      }
+
+      .summary-card {
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(142, 163, 177, 0.2);
+        border-radius: 26px;
+        padding: 28px 22px;
+        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
+        min-height: 220px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .summary-card.clickable {
+        cursor: pointer;
+      }
+
+      .summary-card.clickable:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 38px rgba(85, 108, 121, 0.14);
+      }
+
+      .summary-card:nth-child(1) { background: linear-gradient(180deg, #f9fbff, #edf4ff); }
+      .summary-card:nth-child(2) { background: linear-gradient(180deg, #fffdf7, #f9f1e7); }
+      .summary-card:nth-child(3) { background: linear-gradient(180deg, #f8fffb, #edf9f4); }
+
+      .card-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 90px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.75);
+        border: 1px solid rgba(148, 164, 177, 0.15);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--primary);
+      }
+
+      .summary-card h3 {
+        margin: 18px 0 10px;
+        font-size: clamp(24px, 2vw, 34px);
+        line-height: 1.2;
+      }
+
+      .summary-card p {
+        margin: 0;
+        color: var(--secondary);
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      @media (max-width: 1024px) {
+        .page-shell {
+          width: min(100% - 30px, 1200px);
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+          gap: 26px;
+        }
+
+        .summary {
+          grid-template-columns: 1fr;
+        }
+
+        .feature-frame {
+          width: min(100%, 420px);
+        }
+      }
+
+      @media (max-width: 680px) {
+        .topbar {
+          justify-content: flex-end;
+        }
+
+        .nav-wrap {
+          width: 100%;
+          gap: 12px;
+          justify-content: flex-end;
+          flex-wrap: nowrap;
+        }
+
+        .hero-copy h1 {
+          font-size: 42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <nav class="nav-wrap" aria-label="메인 네비게이션">
+          <div class="nav-left">
+            <a class="nav-brand" href="index.html" aria-label="HR 로고">
+              <span class="nav-brand-word">HR</span>
+            </a>
+          </div>
+
+          <div class="nav-right">
+            <div class="nav-item">
+              <span class="nav-button current" aria-current="page">메인 화면</span>
+            </div>
+
+            <div class="nav-item">
+              <button class="nav-button" type="button">학습메뉴</button>
+              <div class="dropdown-menu">
+                <a href="#">학습 로드맵</a>
+                <a href="#">관심사 탐색</a>
+                <a href="#">실습 기록</a>
+              </div>
+            </div>
+
+            <div class="nav-item">
+              <button class="nav-button" type="button">행로 <span class="caret">▼</span></button>
+              <div class="dropdown-menu">
+                <a href="Strength_page.html">강점</a>
+                <a href="#">취향</a>
+                <a href="#">앞으로의 계획</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <main class="hero">
+        <section class="hero-copy">
+          <p class="eyebrow">Personal Journey</p>
+          <h1>나의 행로를 따라가보세요</h1>
+
+          <div class="route-def">
+            <span class="dot"></span>
+            <span>행로란?</span>
+          </div>
+
+          <p class="route-text">
+            행로(行路)는 다니는 길 또는 길을 가다라는 뜻입니다. 한자로는 다닐 행(行) 자와 길 로(路) 자를 씁니다.
+            보통 사람이 걸어가는 실제 길을 뜻하거나, 비유적으로 인생의 여정을 뜻할 때 쓰입니다.
+          </p>
+        </section>
+
+        <section class="hero-visual" aria-label="메인 이미지 영역">
+          <div class="feature-frame">
+            <div class="image-card">
+              <div class="mini-blob one"></div>
+              <div class="mini-blob two"></div>
+              <div class="line-stack">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <section class="summary" aria-label="핵심 요약">
+        <article class="summary-card clickable" id="strength-card" role="link" tabindex="0">
+          <div class="card-tag">강점</div>
+          <h3>나는<br />칼 같은 사람입니다.</h3>
+          <p>칼은 갈고닦을수록 날카로워지고,
+             사용하는 목적에 따라 그 쓰임이 달라집니다.</p>
+        </article>
+
+        <article class="summary-card">
+          <div class="card-tag">취향</div>
+          <h3>계획과<br />규칙성을 좋아함</h3>
+          <p>구체적인 계획과 규칙적인 루틴을 선호하며, 이를 통해 효율적인 작업을 수행합니다.</p>
+        </article>
+
+        <article class="summary-card">
+          <div class="card-tag">계획</div>
+          <h3>앞으로의<br />성장 방향</h3>
+          <p>기술을 익히고, 더 나은 결과물을 만들며, 개인의 가치를 자연스럽게 드러내는 방향으로 나아갑니다.</p>
+        </article>
+      </section>
+    </div>
+
+    <script>
+      const navItems = document.querySelectorAll('.nav-item');
+
+      navItems.forEach((item) => {
+        if (!item.querySelector('.dropdown-menu')) return;
+        const button = item.querySelector('.nav-button');
+        button.addEventListener('click', () => {
+          const isOpen = item.classList.contains('open');
+          navItems.forEach((other) => {
+            other.classList.remove('open');
+            other.querySelector('.nav-button').classList.remove('active');
+          });
+
+          if (!isOpen) {
+            item.classList.add('open');
+            button.classList.add('active');
+          }
+        });
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.nav-item')) {
+          navItems.forEach((item) => {
+            item.classList.remove('open');
+            item.querySelector('.nav-button').classList.remove('active');
+          });
+        }
+      });
+
+      const strengthCard = document.getElementById('strength-card');
+      strengthCard.addEventListener('click', () => {
+        window.location.href = 'Strength_page.html';
+      });
+      strengthCard.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          window.location.href = 'Strength_page.html';
+        }
+      });
+    </script>
+  </body>
+</html>
