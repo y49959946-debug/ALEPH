@@ -15,6 +15,7 @@
 			background: #142b2a;
 			color: #fff;
 			font-family: "Courier New", monospace;
+			font-weight: bold;
 		}
 
 		body {
@@ -118,6 +119,33 @@
 			background: #c9bd87;
 		}
 
+		.exit-button {
+			display: block;
+			margin: 14px auto 0;
+			padding: 14px 0;
+			width: 260px;
+			background: #263734;
+			border: none;
+			box-shadow: 0 0 0 6px #17252b;
+			color: #cdd8d0;
+			font-family: inherit;
+			font-size: 18px;
+			font-weight: bold;
+			letter-spacing: 3px;
+			cursor: pointer;
+			transition: transform 0.12s ease, background 0.12s ease;
+		}
+
+		.exit-button:hover {
+			background: #34433a;
+			transform: translateY(-2px);
+		}
+
+		.exit-button:active {
+			transform: translateY(0);
+			background: #1c2926;
+		}
+
 		.hint {
 			margin-top: 16px;
 			font-size: 13px;
@@ -131,7 +159,7 @@
 		<div class="panel">
 			<div class="panel-inner">
 				<h1 class="title">CLEAR!</h1>
-				<p class="subtitle">맵 안의 모든 몬스터를 처치했습니다</p>
+				<p class="subtitle" id="playerNameLine">맵 안의 모든 몬스터를 처치했습니다</p>
 
 				<div class="survival-box">
 					<span class="survival-label">CLEAR TIME</span>
@@ -139,6 +167,7 @@
 				</div>
 
 				<button class="retry-button" id="retryButton" type="button">다시하기</button>
+				<button class="exit-button" id="exitButton" type="button">나가기</button>
 				<p class="hint">다시하기를 누르면 처음부터 새로 시작합니다</p>
 			</div>
 		</div>
@@ -146,18 +175,29 @@
 
 	<script>
 		function formatClock(ms) {
-			const totalSec = Math.floor(ms / 1000);
-			const m = Math.floor(totalSec / 60);
-			const s = totalSec % 60;
-			return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+			const totalMs = Math.max(0, Math.floor(ms));
+			const m = Math.floor(totalMs / 60000);
+			const s = Math.floor(totalMs / 1000) % 60;
+			const msPart = totalMs % 1000;
+			return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(msPart).padStart(3, '0')}`;
 		}
 
 		const lastSurvivalMs = Number(sessionStorage.getItem('lastSurvivalMs') || 0);
 		document.getElementById('clearTime').textContent = formatClock(lastSurvivalMs);
 
+		const playerName = localStorage.getItem('playerName');
+		if (playerName) {
+			document.getElementById('playerNameLine').textContent = `${playerName}님, 맵 안의 모든 몬스터를 처치했습니다`;
+		}
+
 		document.getElementById('retryButton').addEventListener('click', () => {
 			sessionStorage.removeItem('lastSurvivalMs');
 			window.location.href = 'Screen.html';
+		});
+
+		document.getElementById('exitButton').addEventListener('click', () => {
+			sessionStorage.removeItem('lastSurvivalMs');
+			window.location.href = '../index.html';
 		});
 	</script>
 </body>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Enter Name</title>
+	<style>
+		* { box-sizing: border-box; }
+
+		html, body {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			overflow: hidden;
+			background: #142b2a;
+			color: #fff;
+			font-family: "Courier New", monospace;
+			font-weight: bold;
+		}
+
+		body {
+			display: grid;
+			place-items: center;
+		}
+
+		.stage {
+			position: relative;
+			width: min(100vw, 177.7778vh);
+			height: min(56.25vw, 100vh);
+			background: radial-gradient(ellipse at 50% 40%, rgba(20, 43, 42, 0.4), #0a1615 70%);
+			box-shadow: 0 0 0 8px #0a1719, 0 18px 50px rgba(0, 0, 0, .42);
+			display: grid;
+			place-items: center;
+			image-rendering: pixelated;
+		}
+
+		.panel {
+			width: min(560px, 86%);
+			padding: 12px;
+			background: #17252b;
+			box-shadow:
+				0 0 0 6px #0b1210,
+				0 18px 40px rgba(0, 0, 0, .5);
+		}
+
+		.panel-inner {
+			background: #87906c;
+			padding: 40px 36px;
+			text-align: center;
+			box-shadow: inset 0 0 0 6px #263734;
+		}
+
+		.title {
+			margin: 0;
+			font-size: clamp(28px, 4.5vw, 42px);
+			font-weight: bold;
+			letter-spacing: 3px;
+			color: #f4e8b5;
+			text-shadow: 3px 3px 0 #263734;
+		}
+
+		.subtitle {
+			margin: 14px 0 0;
+			font-size: 14px;
+			letter-spacing: 1px;
+			color: #263734;
+			font-weight: bold;
+		}
+
+		.name-box {
+			margin: 30px auto 0;
+			background: #263734;
+			padding: 4px;
+			box-shadow: 0 0 0 4px #17252b;
+		}
+
+		.name-input {
+			display: block;
+			width: 320px;
+			max-width: 100%;
+			padding: 14px 16px;
+			background: #f4e8b5;
+			border: none;
+			color: #202d2d;
+			font-family: inherit;
+			font-size: 22px;
+			font-weight: bold;
+			letter-spacing: 2px;
+			text-align: center;
+		}
+
+		.name-input:focus {
+			outline: none;
+			background: #fff8dd;
+		}
+
+		.error {
+			margin-top: 12px;
+			min-height: 18px;
+			font-size: 13px;
+			letter-spacing: 1px;
+			color: #7a2020;
+			font-weight: bold;
+		}
+
+		.start-button {
+			display: block;
+			margin: 22px auto 0;
+			padding: 16px 0;
+			width: 260px;
+			background: #e8d995;
+			border: none;
+			box-shadow: 0 0 0 6px #17252b;
+			color: #202d2d;
+			font-family: inherit;
+			font-size: 22px;
+			font-weight: bold;
+			letter-spacing: 3px;
+			cursor: pointer;
+			transition: transform 0.12s ease, background 0.12s ease;
+		}
+
+		.start-button:hover {
+			background: #f4e8b5;
+			transform: translateY(-3px);
+		}
+
+		.start-button:active {
+			transform: translateY(0);
+			background: #c9bd87;
+		}
+
+		.hint {
+			margin-top: 14px;
+			font-size: 12px;
+			letter-spacing: 1px;
+			color: #34433a;
+		}
+	</style>
+</head>
+<body>
+	<div class="stage">
+		<div class="panel">
+			<div class="panel-inner">
+				<h1 class="title">PIXEL MEADOW</h1>
+				<p class="subtitle">플레이어 이름을 입력하세요</p>
+
+				<div class="name-box">
+					<input class="name-input" id="nameInput" type="text" maxlength="10" placeholder="이름 입력" autocomplete="off" />
+				</div>
+				<p class="error" id="errorMsg"></p>
+
+				<button class="start-button" id="startButton" type="button">시작하기</button>
+				<p class="hint">최대 10자, 엔터로도 시작할 수 있습니다</p>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const input = document.getElementById('nameInput');
+		const errorMsg = document.getElementById('errorMsg');
+
+		const savedName = localStorage.getItem('playerName');
+		if (savedName) input.value = savedName;
+		input.focus();
+
+		function startGame() {
+			const name = input.value.trim();
+			if (!name) {
+				errorMsg.textContent = '이름을 입력해주세요.';
+				input.focus();
+				return;
+			}
+			localStorage.setItem('playerName', name);
+			window.location.href = 'Screen.html';
+		}
+
+		document.getElementById('startButton').addEventListener('click', startGame);
+		input.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') startGame();
+		});
+	</script>
+</body>
+</html>

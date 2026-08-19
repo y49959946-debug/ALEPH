@@ -13,6 +13,7 @@
 			margin: 0;
 			background: transparent;
 			font-family: "Courier New", monospace;
+			font-weight: bold;
 			overflow: hidden;
 		}
 
@@ -154,19 +155,31 @@
 	<script>
 		// weight 1 = normal odds. extra_shot is strong enough to pull down on
 		// purpose so it doesn't show up as often as the other four.
+		// extra_shot's desc shows live progress (Screen.html passes how many
+		// times it's already been picked via ?extraShotCount=N, max 6).
+		const EXTRA_SHOT_MAX_PICKS = 6;
+		const extraShotCount = Number(new URLSearchParams(location.search).get('extraShotCount') || 0);
 		const UPGRADES = [
 			{ key: 'atk_speed', title: '마법 발사 속도 증가', desc: '마법 발사 속도가\n15% 빨라집니다.', weight: 1 },
-			{ key: 'extra_shot', title: '마법 발사 개수 추가', desc: '마법이 1개 더\n발사됩니다.', weight: 0.5 },
+			{
+				key: 'extra_shot',
+				title: '마법 발사 개수 추가',
+				desc: `마법이 1개 더 발사됩니다.\n(${extraShotCount}/${EXTRA_SHOT_MAX_PICKS}회 획득, ${EXTRA_SHOT_MAX_PICKS - extraShotCount}회 남음)`,
+				weight: 0.5,
+			},
 			{ key: 'move_speed', title: '이동 속도 증가', desc: '이동 속도가\n10% 빨라집니다.', weight: 1 },
 			{ key: 'full_heal', title: 'HP 전부 회복', desc: '체력을 모두\n회복합니다.', weight: 1 },
 			{ key: 'damage_up', title: '데미지 증가', desc: '마법 데미지가\n5% 증가합니다.', weight: 1 },
 		];
 
-		// "마법 관통 추가"(rare/gold)와 "마법 난사"(epic/diamond, 한 등급 더 위)는
-		// 10레벨 배수일 때만 후보 풀에 들어갑니다 (Screen.html이 ?pierce=1&volley=1로
-		// 알려줌). 후보 풀에 들어간다고 반드시 나오는 건 아니고, 여전히 3장만 랜덤으로 뽑힘.
+		// "마법 관통 추가"(rare/gold), "마법 파동"과 "마법 난사"(둘 다 epic/diamond,
+		// 한 등급 더 위)는 10레벨 배수일 때만 후보 풀에 들어갑니다 (Screen.html이
+		// ?pierce=1&wave=1&spray=1로 알려줌). 파동/난사는 한 번 뽑으면 그걸로 끝인
+		// 일회성 해금(5% 확률 고정)이라, 뽑고 나면 waveMaxed=1 / sprayMaxed=1로
+		// 후보에서 빠져서 다시는 안 나옵니다.
 		const PIERCE_UPGRADE = { key: 'pierce', title: '마법 관통 추가', desc: '마법이 적을\n1명 더 관통합니다.', weight: 0.4 }; // 1 / 2.5
-		const VOLLEY_UPGRADE = { key: 'volley', title: '마법 난사', desc: '15% 확률로 마법이\n사방으로 무더기 발사됩니다.', weight: 0.2 };
+		const WAVE_UPGRADE = { key: 'wave', title: '마법 파동', desc: '2초마다 5% 확률로\n마법이 사방으로\n무더기 발사됩니다.', weight: 0.2 };
+		const SPRAY_UPGRADE = { key: 'spray', title: '마법 난사', desc: '2초마다 5% 확률로\n공격 방향 10~15발이\n45도 각도로 퍼져나갑니다.', weight: 0.2 };
 
 		function buildPool() {
 			const params = new URLSearchParams(location.search);
@@ -175,7 +188,8 @@
 				pool = pool.filter((u) => u.key !== 'extra_shot');
 			}
 			if (params.get('pierce') === '1') pool.push(PIERCE_UPGRADE);
-			if (params.get('volley') === '1') pool.push(VOLLEY_UPGRADE);
+			if (params.get('wave') === '1' && params.get('waveMaxed') !== '1') pool.push(WAVE_UPGRADE);
+			if (params.get('spray') === '1' && params.get('sprayMaxed') !== '1') pool.push(SPRAY_UPGRADE);
 			return pool;
 		}
 
@@ -199,11 +213,11 @@
 		pickThree().forEach((upgrade) => {
 			const card = document.createElement('div');
 			if (upgrade.key === 'pierce') card.className = 'card rare';
-			else if (upgrade.key === 'volley') card.className = 'card epic';
+			else if (upgrade.key === 'wave' || upgrade.key === 'spray') card.className = 'card epic';
 			else card.className = 'card';
 			card.innerHTML = `
 				<div class="card-title">${upgrade.title}</div>
-				<div class="card-desc">${upgrade.desc.replace('\n', '<br>')}</div>
+				<div class="card-desc">${upgrade.desc.replace(/\n/g, '<br>')}</div>
 			`;
 			card.addEventListener('click', () => {
 				window.parent.postMessage({ source: 'level-card', key: upgrade.key }, '*');
