@@ -146,11 +146,117 @@
 			background: #1c2926;
 		}
 
+		.ranking-button {
+			display: block;
+			margin: 14px auto 0;
+			padding: 14px 0;
+			width: 260px;
+			background: #3a5a6b;
+			border: none;
+			box-shadow: 0 0 0 6px #17252b;
+			color: #eaf4f8;
+			font-family: inherit;
+			font-size: 18px;
+			font-weight: bold;
+			letter-spacing: 3px;
+			cursor: pointer;
+			transition: transform 0.12s ease, background 0.12s ease;
+		}
+
+		.ranking-button:hover {
+			background: #4c7085;
+			transform: translateY(-2px);
+		}
+
+		.ranking-button:active {
+			transform: translateY(0);
+			background: #2c4552;
+		}
+
 		.hint {
 			margin-top: 16px;
 			font-size: 13px;
 			letter-spacing: 1px;
 			color: #34433a;
+		}
+
+		.ranking-overlay {
+			position: fixed;
+			inset: 0;
+			background: rgba(10, 22, 20, 0.72);
+			display: none;
+			place-items: center;
+			z-index: 500;
+		}
+
+		.ranking-overlay.visible {
+			display: grid;
+		}
+
+		.ranking-panel {
+			width: min(560px, 86%);
+			padding: 12px;
+			background: #17252b;
+			box-shadow:
+				0 0 0 6px #0b1210,
+				0 18px 40px rgba(0, 0, 0, .5);
+		}
+
+		.ranking-panel-inner {
+			background: #87906c;
+			padding: 34px 30px;
+			text-align: center;
+			box-shadow: inset 0 0 0 6px #263734;
+		}
+
+		.ranking-title {
+			margin: 0 0 22px;
+			font-size: clamp(26px, 4vw, 36px);
+			letter-spacing: 3px;
+			color: #f4e8b5;
+			text-shadow: 3px 3px 0 #263734;
+		}
+
+		.ranking-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			background: #66785e;
+			padding: 12px 18px;
+			margin-top: 10px;
+			font-size: 16px;
+			color: #f4e8b5;
+		}
+
+		.ranking-row:first-child {
+			margin-top: 0;
+		}
+
+		.ranking-close-button {
+			display: block;
+			margin: 24px auto 0;
+			padding: 12px 0;
+			width: 200px;
+			background: #e8d995;
+			border: none;
+			box-shadow: 0 0 0 6px #17252b;
+			color: #202d2d;
+			font-family: inherit;
+			font-size: 16px;
+			font-weight: bold;
+			letter-spacing: 3px;
+			cursor: pointer;
+			transition: transform 0.12s ease, background 0.12s ease;
+		}
+
+		.ranking-close-button:hover {
+			background: #f4e8b5;
+			transform: translateY(-2px);
+		}
+
+		.ranking-close-button:active {
+			transform: translateY(0);
+			background: #c9bd87;
 		}
 	</style>
 </head>
@@ -167,8 +273,19 @@
 				</div>
 
 				<button class="retry-button" id="retryButton" type="button">다시하기</button>
+				<button class="ranking-button" id="rankingButton" type="button">랭킹</button>
 				<button class="exit-button" id="exitButton" type="button">나가기</button>
 				<p class="hint">다시하기를 누르면 처음부터 새로 시작합니다</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="ranking-overlay" id="rankingOverlay">
+		<div class="ranking-panel">
+			<div class="ranking-panel-inner">
+				<h2 class="ranking-title">RANKING</h2>
+				<div id="rankingRows"></div>
+				<button class="ranking-close-button" id="rankingCloseButton" type="button">닫기</button>
 			</div>
 		</div>
 	</div>
@@ -198,6 +315,47 @@
 		document.getElementById('exitButton').addEventListener('click', () => {
 			sessionStorage.removeItem('lastSurvivalMs');
 			window.location.href = '../index.html';
+		});
+
+		// Same storage key/shape Screen.html writes to when a run clears:
+		// [{ name, ms }], ascending by ms (fastest first), top 3 only.
+		const RANKING_KEY = 'pixelMeadowRanking';
+		const RANKING_SIZE = 3;
+
+		function getRanking() {
+			try {
+				const raw = JSON.parse(localStorage.getItem(RANKING_KEY));
+				return Array.isArray(raw) ? raw : [];
+			} catch {
+				return [];
+			}
+		}
+
+		function renderRanking() {
+			const ranking = getRanking();
+			const rowsEl = document.getElementById('rankingRows');
+			rowsEl.innerHTML = '';
+			for (let i = 0; i < RANKING_SIZE; i += 1) {
+				const entry = ranking[i];
+				const row = document.createElement('div');
+				row.className = 'ranking-row';
+				row.innerHTML = `
+					<span>${String(i + 1).padStart(2, '0')}  ${entry ? entry.name : '---'}</span>
+					<span>${entry ? formatClock(entry.ms) : '--:--.---'}</span>
+				`;
+				rowsEl.appendChild(row);
+			}
+		}
+
+		const rankingOverlay = document.getElementById('rankingOverlay');
+
+		document.getElementById('rankingButton').addEventListener('click', () => {
+			renderRanking();
+			rankingOverlay.classList.add('visible');
+		});
+
+		document.getElementById('rankingCloseButton').addEventListener('click', () => {
+			rankingOverlay.classList.remove('visible');
 		});
 	</script>
 </body>
