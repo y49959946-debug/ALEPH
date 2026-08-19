@@ -282,7 +282,7 @@
 			const panelX = 650;
 			const panelY = 230;
 			const panelW = 620;
-			const panelH = settingsView === 'ranking' ? 500 : 430;
+			const panelH = settingsView === 'ranking' ? 500 : 640;
 			rect(0, 0, W, H, 'rgba(10, 22, 20, 0.42)');
 			rect(panelX + 12, panelY, panelW - 24, 12, '#17252b');
 			rect(panelX, panelY + 12, panelW, panelH - 24, '#17252b');
@@ -311,12 +311,14 @@
 				return;
 			}
 
-			drawButton(panelX + 95, panelY + 145, 430, 70, 'RANKING');
-			drawButton(panelX + 95, panelY + 240, 430, 70, 'EXIT');
+			drawButton(panelX + 95, panelY + 145, 430, 70, '랭킹');
+			drawButton(panelX + 95, panelY + 240, 430, 70, '다시하기');
+			drawButton(panelX + 95, panelY + 335, 430, 70, '게임 재개');
+			drawButton(panelX + 95, panelY + 430, 430, 70, '나가기');
 			ctx.fillStyle = '#34433a';
 			ctx.font = '18px Courier New, monospace';
 			ctx.textAlign = 'center';
-			ctx.fillText('ESC  CLOSE', panelX + panelW / 2, panelY + 370);
+			ctx.fillText('ESC  CLOSE', panelX + panelW / 2, panelY + 530);
 		}
 
 		function canvasPoint(event) {
@@ -327,12 +329,19 @@
 			};
 		}
 
+		// Opening the settings panel freezes the game (same `paused` flag the
+		// level-up cards use) so nothing moves, spawns, or attacks behind it.
+		function setSettingsOpen(open) {
+			settingsOpen = open;
+			settingsView = 'menu';
+			paused = open;
+		}
+
 		canvas.addEventListener('click', (event) => {
 			const { x, y } = canvasPoint(event);
 			const gearX = W - 112;
 			if (x >= gearX && x <= gearX + 80 && y >= 42 && y <= 122) {
-				settingsOpen = !settingsOpen;
-				settingsView = 'menu';
+				setSettingsOpen(!settingsOpen);
 				return;
 			}
 
@@ -345,17 +354,38 @@
 				return;
 			}
 
-			if (x >= panelX + 95 && x <= panelX + 525 && y >= 375 && y <= 445) {
+			if (x < panelX + 95 || x > panelX + 525) return;
+			if (y >= 375 && y <= 445) {
 				settingsView = 'ranking';
-			} else if (x >= panelX + 95 && x <= panelX + 525 && y >= 470 && y <= 540) {
-				settingsOpen = false;
+			} else if (y >= 470 && y <= 540) {
+				restartGame();
+			} else if (y >= 565 && y <= 635) {
+				resumeGame();
+			} else if (y >= 660 && y <= 730) {
+				exitToPortfolio();
 			}
 		});
 
+		function restartGame() {
+			window.location.reload();
+		}
+
+		function resumeGame() {
+			setSettingsOpen(false);
+		}
+
+		function exitToPortfolio() {
+			window.location.href = '../index.html';
+		}
+
 		window.addEventListener('keydown', (event) => {
-			if (event.code === 'Escape' && settingsOpen) {
-				settingsOpen = false;
-				settingsView = 'menu';
+			if (event.code !== 'Escape') return;
+			if (settingsOpen) {
+				setSettingsOpen(false);
+			} else if (!paused) {
+				// Don't let ESC open settings over something else that's already
+				// pausing the game (e.g. a level-up card).
+				setSettingsOpen(true);
 			}
 		});
 
@@ -507,8 +537,6 @@
 				cardFrame = null;
 			}
 			paused = false;
-			lastTime = performance.now(); // avoid a huge dt spike from the paused time
-			requestAnimationFrame(tick);
 		});
 
 		function setAnimation(name) {
@@ -932,21 +960,25 @@
 
 		function tick(now) {
 			if (gameOver) return; // stop the loop once we're on our way to the game-over screen
-			if (paused) return; // frozen while a level-up card is showing
 
 			const dt = Math.min(50, now - lastTime); // guard against huge jumps (e.g. tab switch)
 			lastTime = now;
 
-			elapsedMs += dt;
-			updateState();
-			updateMovement(dt);
-			updateAnimation(dt);
-			updateSlimeSpawning(dt);
-			updateBossSpawning(dt);
-			updateSlimes(dt);
-			updateCollisions(dt);
-			updateAttacks(dt);
-			updateProjectiles(dt);
+			// While paused (settings panel or a level-up card is showing), keep
+			// rendering every frame - just skip the simulation - so the overlay
+			// itself still draws and stays responsive to clicks.
+			if (!paused) {
+				elapsedMs += dt;
+				updateState();
+				updateMovement(dt);
+				updateAnimation(dt);
+				updateSlimeSpawning(dt);
+				updateBossSpawning(dt);
+				updateSlimes(dt);
+				updateCollisions(dt);
+				updateAttacks(dt);
+				updateProjectiles(dt);
+			}
 			draw();
 
 			requestAnimationFrame(tick);
