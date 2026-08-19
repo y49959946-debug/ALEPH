@@ -178,8 +178,8 @@
 		// 일회성 해금(5% 확률 고정)이라, 뽑고 나면 waveMaxed=1 / sprayMaxed=1로
 		// 후보에서 빠져서 다시는 안 나옵니다.
 		const PIERCE_UPGRADE = { key: 'pierce', title: '마법 관통 추가', desc: '마법이 적을\n1명 더 관통합니다.', weight: 0.4 }; // 1 / 2.5
-		const WAVE_UPGRADE = { key: 'wave', title: '마법 파동', desc: '2초마다 5% 확률로\n마법이 사방으로\n무더기 발사됩니다.', weight: 0.2 };
-		const SPRAY_UPGRADE = { key: 'spray', title: '마법 난사', desc: '2초마다 5% 확률로\n공격 방향 10~15발이\n45도 각도로 퍼져나갑니다.', weight: 0.2 };
+		const WAVE_UPGRADE = { key: 'wave', title: '마법 파동', desc: '1초마다 5% 확률로\n마법이 사방으로\n무더기 발사됩니다.', weight: 0.2 };
+		const SPRAY_UPGRADE = { key: 'spray', title: '마법 난사', desc: '1초마다 5% 확률로\n공격 방향 10~15발이\n45도 각도로 퍼져나갑니다.', weight: 0.2 };
 
 		function buildPool() {
 			const params = new URLSearchParams(location.search);

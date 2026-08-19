@@ -512,7 +512,7 @@
 		//   additively). Only offered on levels that are multiples of 10.
 		// wave / spray ("epic"/diamond, same tier): one-time unlocks (repeat
 		//   picks do nothing, so each is dropped from the pool once taken) -
-		//   grants a flat 5% chance, rolled independently every 2 seconds
+		//   grants a flat 5% chance, rolled independently every 1 second
 		//   (not tied to attacks). On success, wave fires a huge burst in
 		//   every direction, spray fires 10-15 projectiles toward the current
 		//   attack direction spread across a 45 degree cone. Both only
@@ -1024,7 +1024,7 @@
 
 		// ===== Epic-tier passives (wave / spray) =====
 		// Both run on their own timer, completely independent of the normal
-		// attack cooldown above - a fresh check every 2 seconds.
+		// attack cooldown above - a fresh check every 1 second.
 		const PASSIVE_CHECK_MS = 1000;
 		const WAVE_PROJECTILE_COUNT = 6;
 		const WAVE_LAYER_COUNT = 2; // 6 x 2 = 12 total (half of the old 24), second ring still staggered
