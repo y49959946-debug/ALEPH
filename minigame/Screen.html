@@ -977,15 +977,15 @@
 			return nearest;
 		}
 
-		function spawnProjectile(spellKey, spell, angle, isSpecial = false) {
+		function spawnProjectile(spellKey, spell, angle, isSpecial = false, speed = PROJECTILE_SPEED) {
 			projectiles.push({
 				spellKey,
 				isSpecial,
 				damage: Math.round(spell.damage * damageMultiplier),
 				x: player.x,
 				y: player.y,
-				vx: Math.cos(angle) * PROJECTILE_SPEED,
-				vy: Math.sin(angle) * PROJECTILE_SPEED,
+				vx: Math.cos(angle) * speed,
+				vy: Math.sin(angle) * speed,
 				life: PROJECTILE_MAX_LIFE_MS,
 				pierceLeft: pierceCount, // extra hits beyond the first before it's spent
 				hitIds: [],
@@ -1025,9 +1025,9 @@
 		// ===== Epic-tier passives (wave / spray) =====
 		// Both run on their own timer, completely independent of the normal
 		// attack cooldown above - a fresh check every 2 seconds.
-		const PASSIVE_CHECK_MS = 2000;
-		const WAVE_PROJECTILE_COUNT = 12;
-		const WAVE_LAYER_COUNT = 2; // 12 x 2 = 24 total, second ring staggered between the first
+		const PASSIVE_CHECK_MS = 1000;
+		const WAVE_PROJECTILE_COUNT = 6;
+		const WAVE_LAYER_COUNT = 2; // 6 x 2 = 12 total (half of the old 24), second ring still staggered
 		const SPRAY_MIN_COUNT = 10;
 		const SPRAY_MAX_COUNT = 15;
 		const SPRAY_CONE_RAD = Math.PI / 4; // 45 degrees total spread
@@ -1058,7 +1058,11 @@
 			const count = SPRAY_MIN_COUNT + Math.floor(Math.random() * (SPRAY_MAX_COUNT - SPRAY_MIN_COUNT + 1));
 			for (let i = 0; i < count; i += 1) {
 				const angle = baseAngle + (Math.random() - 0.5) * SPRAY_CONE_RAD;
-				spawnProjectile(spellKey, spell, angle, true); // orange recolor, same as 마법 파동
+				// Randomized speed (70%-130%) so the bolts drift apart over
+				// time instead of moving as one uniform front - reads more
+				// like several separate casts going out at once.
+				const speed = PROJECTILE_SPEED * (0.7 + Math.random() * 0.6);
+				spawnProjectile(spellKey, spell, angle, true, speed); // orange recolor, same as 마법 파동
 			}
 		}
 
@@ -1105,27 +1109,55 @@
 			}
 		}
 
+		// 마법 파동 / 마법 난사 bolts get an orange recolor. ctx.filter is very
+		// expensive to run per-projectile per-frame (that was the source of
+		// the lag when a wave/spray burst was on screen), so instead we
+		// hue-rotate each spell's flying-orb frame ONCE into an offscreen
+		// canvas and just blit that cached bitmap afterwards - no per-frame
+		// filter cost no matter how many orange bolts are alive at once.
+		const orangeTintCache = {};
+
+		function getOrangeTintedSprite(spellKey) {
+			if (orangeTintCache[spellKey]) return orangeTintCache[spellKey];
+			const sheet = spellSheets[spellKey];
+			if (!sheet.complete || sheet.naturalWidth === 0) return null;
+
+			const off = document.createElement('canvas');
+			off.width = SPELL_FRAME_SIZE;
+			off.height = SPELL_FRAME_SIZE;
+			const offCtx = off.getContext('2d');
+			offCtx.filter = 'hue-rotate(110deg) saturate(1.4) brightness(1.1)';
+			offCtx.drawImage(
+				sheet,
+				2 * SPELL_FRAME_SIZE, 0, SPELL_FRAME_SIZE, SPELL_FRAME_SIZE,
+				0, 0, SPELL_FRAME_SIZE, SPELL_FRAME_SIZE
+			);
+			orangeTintCache[spellKey] = off;
+			return off;
+		}
+
 		function drawProjectiles() {
 			projectiles.forEach((p) => {
-				const sheet = spellSheets[p.spellKey];
-				if (!sheet.complete || sheet.naturalWidth === 0) return;
 				const size = SPELL_DISPLAY_SIZE;
-				// Frame 2 (fully "charged") is used as the flying orb look.
-				const sx = 2 * SPELL_FRAME_SIZE;
-				ctx.save();
+				let source;
+				let sx = 2 * SPELL_FRAME_SIZE; // frame 2 (fully "charged") is the flying orb look
+				let sy = 0;
+
 				if (p.isSpecial) {
-					// 마법 파동 / 마법 난사 bolts get an orange recolor
-					// (hue-rotated off the sprite's normal purple) plus a
-					// matching orange glow, distinct from regular shots.
-					ctx.filter = 'hue-rotate(110deg) saturate(1.4) brightness(1.1)';
-					ctx.shadowColor = 'rgba(255, 150, 40, 0.9)';
+					source = getOrangeTintedSprite(p.spellKey);
+					if (!source) return;
+					sx = 0; // the cached canvas holds just that one frame
 				} else {
-					ctx.shadowColor = 'rgba(190, 140, 255, 0.9)';
+					source = spellSheets[p.spellKey];
+					if (!source.complete || source.naturalWidth === 0) return;
 				}
+
+				ctx.save();
+				ctx.shadowColor = p.isSpecial ? 'rgba(255, 150, 40, 0.9)' : 'rgba(190, 140, 255, 0.9)';
 				ctx.shadowBlur = 14;
 				ctx.drawImage(
-					sheet,
-					sx, 0, SPELL_FRAME_SIZE, SPELL_FRAME_SIZE,
+					source,
+					sx, sy, SPELL_FRAME_SIZE, SPELL_FRAME_SIZE,
 					p.x - size / 2, p.y - size / 2,
 					size, size
 				);
