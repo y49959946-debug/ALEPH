@@ -486,22 +486,29 @@
 		}
 
 		// ===== Level-up cards (every 5 levels) =====
-		// atk_speed: -20% attack interval (stacks multiplicatively).
-		// extra_shot: +1 projectile per attack (stacks additively).
+		// atk_speed: -15% attack interval (stacks multiplicatively).
+		// extra_shot: +1 projectile per attack (stacks additively, capped at 6 picks).
 		// move_speed: +10% move speed (stacks multiplicatively).
 		// full_heal: instant one-time full heal, no persistent effect.
-		// damage_up: spell damage +5 flat (stacks additively).
-		// pierce: +1 enemy a projectile can punch through (stacks additively).
-		// Only offered as a possible option on levels that are multiples of 10,
-		// and even then it's just one of the pool card.html rolls 3 from.
+		// damage_up: spell damage x1.05 (stacks multiplicatively).
+		// pierce ("rare"/gold): +1 enemy a projectile can punch through (stacks
+		//   additively). Only offered on levels that are multiples of 10.
+		// volley ("epic"/diamond, one tier rarer than pierce): +15% chance per
+		//   attack (stacks additively, capped at 100%) that a huge burst of
+		//   projectiles fires in every direction instead of the normal shot.
+		//   Also only offered on levels that are multiples of 10.
+		// Being in the pool doesn't guarantee a card shows - card.html still
+		// only rolls 3 out of whatever's offered.
+		const EXTRA_SHOT_MAX_PICKS = 6;
 		let lastCardLevel = 0;
 		let paused = false;
 		let cardFrame = null;
 		let attackIntervalMultiplier = 1;
 		let moveSpeedMultiplier = 1;
-		let damageBonus = 0;
+		let damageMultiplier = 1;
 		let extraProjectileCount = 0;
 		let pierceCount = 0;
+		let volleyChance = 0;
 
 		function maybeShowLevelCard() {
 			if (playerLevel > lastCardLevel && playerLevel % 5 === 0) {
@@ -513,19 +520,25 @@
 		function showLevelCard() {
 			paused = true;
 			cardFrame = document.createElement('iframe');
-			const offerPierce = playerLevel % 10 === 0;
-			cardFrame.src = 'card.html' + (offerPierce ? '?pierce=1' : '');
+			const offerRareTier = playerLevel % 10 === 0;
+			const params = new URLSearchParams();
+			if (offerRareTier) params.set('pierce', '1');
+			if (offerRareTier) params.set('volley', '1');
+			if (extraProjectileCount >= EXTRA_SHOT_MAX_PICKS) params.set('extraShotMaxed', '1');
+			const query = params.toString();
+			cardFrame.src = 'card.html' + (query ? '?' + query : '');
 			cardFrame.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:1000;';
 			document.body.appendChild(cardFrame);
 		}
 
 		function applyCardUpgrade(key) {
-			if (key === 'atk_speed') attackIntervalMultiplier *= 0.8;
-			else if (key === 'extra_shot') extraProjectileCount += 1;
+			if (key === 'atk_speed') attackIntervalMultiplier *= 0.85;
+			else if (key === 'extra_shot') extraProjectileCount = Math.min(EXTRA_SHOT_MAX_PICKS, extraProjectileCount + 1);
 			else if (key === 'move_speed') moveSpeedMultiplier *= 1.1;
 			else if (key === 'full_heal') health.current = health.max;
-			else if (key === 'damage_up') damageBonus += 5;
+			else if (key === 'damage_up') damageMultiplier *= 1.05;
 			else if (key === 'pierce') pierceCount += 1;
+			else if (key === 'volley') volleyChance = Math.min(1, volleyChance + 0.15);
 		}
 
 		window.addEventListener('message', (event) => {
@@ -661,16 +674,22 @@
 			return 10 + 10 * Math.floor(elapsedMs / 30000);
 		}
 
-		// Boss slimes reuse a regular slime's art/type (whichever are currently
-		// unlocked) but 3x the display size - hitbox and HP/XP scale along with
-		// it (10x stats), which puts a normal-boss at 200 HP, poison-boss at
-		// 400 HP, ice-boss at 800 HP.
+		// Every time the cap steps up (every 30s) all slime HP - regular and
+		// boss alike - goes up another 20% from its base value.
+		function hpTierMultiplier() {
+			return 1 + 0.2 * Math.floor(elapsedMs / 30000);
+		}
+
+		// Boss slimes reuse a regular slime's art/type but 3x the display size -
+		// hitbox and HP/XP scale along with it (10x stats before the tier bonus
+		// above), which puts a normal-boss at 200 HP, poison-boss at 400 HP,
+		// ice-boss at 800 HP at the very start of the game.
 		const BOSS_SIZE_MULTIPLIER = 3;
 		const BOSS_STAT_MULTIPLIER = 10;
 
-		function spawnSlime(isBoss = false) {
+		function spawnSlime(isBoss = false, forcedType = null) {
 			const types = unlockedSlimeTypes();
-			const type = types[Math.floor(Math.random() * types.length)];
+			const type = forcedType || types[Math.floor(Math.random() * types.length)];
 			// Spawn just outside a random edge so it visibly walks onto the field.
 			const margin = isBoss ? SLIME_DISPLAY_SIZE * BOSS_SIZE_MULTIPLIER : 50;
 			const edge = Math.floor(Math.random() * 4);
@@ -683,7 +702,8 @@
 
 			const base = SLIME_TYPES[type];
 			const size = isBoss ? SLIME_DISPLAY_SIZE * BOSS_SIZE_MULTIPLIER : SLIME_DISPLAY_SIZE;
-			const hp = isBoss ? base.hp * BOSS_STAT_MULTIPLIER : base.hp;
+			const statMult = (isBoss ? BOSS_STAT_MULTIPLIER : 1) * hpTierMultiplier();
+			const hp = Math.round(base.hp * statMult);
 			const xp = isBoss ? base.xp * BOSS_STAT_MULTIPLIER : base.xp;
 
 			slimes.push({ id: nextSlimeId++, type, x, y, facing: 1, frameIndex: 0, frameElapsed: 0, hp, xp, size, isBoss });
@@ -701,16 +721,40 @@
 			for (let i = 0; i < toSpawn; i += 1) spawnSlime();
 		}
 
-		// A boss spawns every 60s on the dot, on top of the regular cap (it
-		// isn't blocked by currentSlimeCap() - it's a guaranteed extra spawn).
-		const BOSS_SPAWN_INTERVAL_MS = 60 * 1000;
-		let bossSpawnTimer = BOSS_SPAWN_INTERVAL_MS;
+		// Fixed boss schedule instead of a repeating timer: 1:00 normal boss,
+		// 2:00 poison boss, 3:00 ice boss, 4:00 two random bosses, 5:00 three
+		// random bosses (the final wave - clearing the field after this wins).
+		const FINAL_WAVE_MS = 5 * 60 * 1000;
+		const BOSS_SCHEDULE = [
+			{ atMs: 1 * 60 * 1000, forcedType: 'normal', count: 1 },
+			{ atMs: 2 * 60 * 1000, forcedType: 'poison', count: 1 },
+			{ atMs: 3 * 60 * 1000, forcedType: 'ice', count: 1 },
+			{ atMs: 4 * 60 * 1000, forcedType: null, count: 2 },
+			{ atMs: FINAL_WAVE_MS, forcedType: null, count: 3 },
+		];
+		let bossScheduleIndex = 0;
+		let finalWaveSpawned = false;
 
-		function updateBossSpawning(dt) {
-			bossSpawnTimer -= dt;
-			if (bossSpawnTimer > 0) return;
-			bossSpawnTimer = BOSS_SPAWN_INTERVAL_MS;
-			spawnSlime(true);
+		function updateBossSchedule() {
+			while (bossScheduleIndex < BOSS_SCHEDULE.length && elapsedMs >= BOSS_SCHEDULE[bossScheduleIndex].atMs) {
+				const wave = BOSS_SCHEDULE[bossScheduleIndex];
+				for (let i = 0; i < wave.count; i += 1) spawnSlime(true, wave.forcedType);
+				if (wave.atMs === FINAL_WAVE_MS) finalWaveSpawned = true;
+				bossScheduleIndex += 1;
+			}
+		}
+
+		let cleared = false;
+
+		function triggerClear() {
+			if (cleared) return;
+			cleared = true;
+			sessionStorage.setItem('lastSurvivalMs', String(Math.floor(elapsedMs)));
+			window.location.href = 'clear_screen.html';
+		}
+
+		function checkClearCondition() {
+			if (finalWaveSpawned && slimes.length === 0) triggerClear();
 		}
 
 		function updateSlimes(dt) {
@@ -854,12 +898,44 @@
 			return nearest;
 		}
 
+		const VOLLEY_PROJECTILE_COUNT = 12;
+		const VOLLEY_LAYER_COUNT = 2; // 12 x 2 = 24 total, second ring staggered between the first
+
+		function spawnProjectile(spellKey, spell, angle, isVolley = false) {
+			projectiles.push({
+				spellKey,
+				isVolley,
+				damage: Math.round(spell.damage * damageMultiplier),
+				x: player.x,
+				y: player.y,
+				vx: Math.cos(angle) * PROJECTILE_SPEED,
+				vy: Math.sin(angle) * PROJECTILE_SPEED,
+				life: PROJECTILE_MAX_LIFE_MS,
+				pierceLeft: pierceCount, // extra hits beyond the first before it's spent
+				hitIds: [],
+			});
+		}
+
 		function fireSpell() {
 			const target = findNearestSlime();
 			if (!target) return;
 
 			const spellKey = currentSpellKey();
 			const spell = SPELLS[spellKey];
+
+			if (volleyChance > 0 && Math.random() < volleyChance) {
+				// Diamond-tier volley: two staggered rings fire in every
+				// direction at once instead of the normal aimed shot(s).
+				for (let layer = 0; layer < VOLLEY_LAYER_COUNT; layer += 1) {
+					const layerOffset = layer * (Math.PI / VOLLEY_PROJECTILE_COUNT);
+					for (let i = 0; i < VOLLEY_PROJECTILE_COUNT; i += 1) {
+						const angle = layerOffset + (Math.PI * 2 * i) / VOLLEY_PROJECTILE_COUNT;
+						spawnProjectile(spellKey, spell, angle, true);
+					}
+				}
+				return;
+			}
+
 			const baseAngle = Math.atan2(
 				(target.y - target.size / 2) - player.y,
 				target.x - player.x
@@ -872,18 +948,7 @@
 			const startOffset = -((shotCount - 1) / 2) * spreadStep;
 
 			for (let i = 0; i < shotCount; i += 1) {
-				const angle = baseAngle + startOffset + i * spreadStep;
-				projectiles.push({
-					spellKey,
-					damage: spell.damage + damageBonus,
-					x: player.x,
-					y: player.y,
-					vx: Math.cos(angle) * PROJECTILE_SPEED,
-					vy: Math.sin(angle) * PROJECTILE_SPEED,
-					life: PROJECTILE_MAX_LIFE_MS,
-					pierceLeft: pierceCount, // extra hits beyond the first before it's spent
-					hitIds: [],
-				});
+				spawnProjectile(spellKey, spell, baseAngle + startOffset + i * spreadStep);
 			}
 		}
 
@@ -936,7 +1001,15 @@
 				// Frame 2 (fully "charged") is used as the flying orb look.
 				const sx = 2 * SPELL_FRAME_SIZE;
 				ctx.save();
-				ctx.shadowColor = 'rgba(190, 140, 255, 0.9)';
+				if (p.isVolley) {
+					// Volley bolts get an orange recolor (hue-rotated off the
+					// sprite's normal purple) plus a matching orange glow, so
+					// they read as visually distinct from regular shots.
+					ctx.filter = 'hue-rotate(110deg) saturate(1.4) brightness(1.1)';
+					ctx.shadowColor = 'rgba(255, 150, 40, 0.9)';
+				} else {
+					ctx.shadowColor = 'rgba(190, 140, 255, 0.9)';
+				}
 				ctx.shadowBlur = 14;
 				ctx.drawImage(
 					sheet,
@@ -959,7 +1032,7 @@
 		let lastTime = performance.now();
 
 		function tick(now) {
-			if (gameOver) return; // stop the loop once we're on our way to the game-over screen
+			if (gameOver || cleared) return; // stop the loop once we're on our way to the end screen
 
 			const dt = Math.min(50, now - lastTime); // guard against huge jumps (e.g. tab switch)
 			lastTime = now;
@@ -973,11 +1046,12 @@
 				updateMovement(dt);
 				updateAnimation(dt);
 				updateSlimeSpawning(dt);
-				updateBossSpawning(dt);
+				updateBossSchedule();
 				updateSlimes(dt);
 				updateCollisions(dt);
 				updateAttacks(dt);
 				updateProjectiles(dt);
+				checkClearCondition();
 			}
 			draw();
 

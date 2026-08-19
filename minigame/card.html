@@ -91,6 +91,31 @@
 			color: #5a3d07;
 		}
 
+		/* Next tier up from rare (volley) - icy diamond, brighter glow. */
+		.card.epic {
+			background: linear-gradient(160deg, #eaf9ff 0%, #9fe3f7 55%, #4fc3e8 100%);
+			box-shadow:
+				0 0 0 6px #17252b,
+				0 0 30px rgba(120, 210, 245, 0.85),
+				0 14px 30px rgba(0, 0, 0, 0.45);
+		}
+
+		.card.epic:hover {
+			background: linear-gradient(160deg, #ffffff 0%, #c3f0ff 55%, #6fd4f2 100%);
+			box-shadow:
+				0 0 0 6px #17252b,
+				0 0 42px rgba(140, 220, 250, 1),
+				0 14px 30px rgba(0, 0, 0, 0.45);
+		}
+
+		.card.epic .card-title {
+			color: #0d3a4a;
+		}
+
+		.card.epic .card-desc {
+			color: #14495c;
+		}
+
 		.card-title {
 			font-size: 17px;
 			font-weight: bold;
@@ -130,22 +155,27 @@
 		// weight 1 = normal odds. extra_shot is strong enough to pull down on
 		// purpose so it doesn't show up as often as the other four.
 		const UPGRADES = [
-			{ key: 'atk_speed', title: '마법 발사 속도 증가', desc: '마법 발사 속도가\n20% 빨라집니다.', weight: 1 },
+			{ key: 'atk_speed', title: '마법 발사 속도 증가', desc: '마법 발사 속도가\n15% 빨라집니다.', weight: 1 },
 			{ key: 'extra_shot', title: '마법 발사 개수 추가', desc: '마법이 1개 더\n발사됩니다.', weight: 0.5 },
 			{ key: 'move_speed', title: '이동 속도 증가', desc: '이동 속도가\n10% 빨라집니다.', weight: 1 },
 			{ key: 'full_heal', title: 'HP 전부 회복', desc: '체력을 모두\n회복합니다.', weight: 1 },
-			{ key: 'damage_up', title: '데미지 증가', desc: '마법 데미지가\n5 증가합니다.', weight: 1 },
+			{ key: 'damage_up', title: '데미지 증가', desc: '마법 데미지가\n5% 증가합니다.', weight: 1 },
 		];
 
-		// "마법 관통 추가" only ever enters the pool on levels that are multiples
-		// of 10 (Screen.html passes ?pierce=1 in that case). Being in the pool
-		// doesn't guarantee it's shown - it still has to be one of the 3 rolled.
+		// "마법 관통 추가"(rare/gold)와 "마법 난사"(epic/diamond, 한 등급 더 위)는
+		// 10레벨 배수일 때만 후보 풀에 들어갑니다 (Screen.html이 ?pierce=1&volley=1로
+		// 알려줌). 후보 풀에 들어간다고 반드시 나오는 건 아니고, 여전히 3장만 랜덤으로 뽑힘.
 		const PIERCE_UPGRADE = { key: 'pierce', title: '마법 관통 추가', desc: '마법이 적을\n1명 더 관통합니다.', weight: 0.4 }; // 1 / 2.5
+		const VOLLEY_UPGRADE = { key: 'volley', title: '마법 난사', desc: '15% 확률로 마법이\n사방으로 무더기 발사됩니다.', weight: 0.2 };
 
 		function buildPool() {
 			const params = new URLSearchParams(location.search);
-			const pool = [...UPGRADES];
+			let pool = [...UPGRADES];
+			if (params.get('extraShotMaxed') === '1') {
+				pool = pool.filter((u) => u.key !== 'extra_shot');
+			}
 			if (params.get('pierce') === '1') pool.push(PIERCE_UPGRADE);
+			if (params.get('volley') === '1') pool.push(VOLLEY_UPGRADE);
 			return pool;
 		}
 
@@ -168,7 +198,9 @@
 		const cardsEl = document.getElementById('cards');
 		pickThree().forEach((upgrade) => {
 			const card = document.createElement('div');
-			card.className = upgrade.key === 'pierce' ? 'card rare' : 'card';
+			if (upgrade.key === 'pierce') card.className = 'card rare';
+			else if (upgrade.key === 'volley') card.className = 'card epic';
+			else card.className = 'card';
 			card.innerHTML = `
 				<div class="card-title">${upgrade.title}</div>
 				<div class="card-desc">${upgrade.desc.replace('\n', '<br>')}</div>
