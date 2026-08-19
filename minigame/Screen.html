@@ -515,8 +515,8 @@
 		//   grants a flat 5% chance, rolled independently every 1 second
 		//   (not tied to attacks). On success, wave fires a huge burst in
 		//   every direction, spray fires 10-15 projectiles toward the current
-		//   attack direction spread across a 45 degree cone. Both only
-		//   offered on levels that are multiples of 10.
+		//   attack direction spread across a 45 degree cone. Offered on every
+		//   5-level milestone (same cadence as the other cards).
 		// Being in the pool doesn't guarantee a card shows - card.html still
 		// only rolls 3 out of whatever's offered.
 		const EXTRA_SHOT_MAX_PICKS = 6;
@@ -548,11 +548,11 @@
 		function showLevelCard(milestoneLevel) {
 			paused = true;
 			cardFrame = document.createElement('iframe');
-			const offerRareTier = milestoneLevel % 10 === 0;
+			const offerRareTier = milestoneLevel % 10 === 0; // pierce stays 10-level-only
 			const params = new URLSearchParams();
 			if (offerRareTier) params.set('pierce', '1');
-			if (offerRareTier) params.set('wave', '1');
-			if (offerRareTier) params.set('spray', '1');
+			params.set('wave', '1'); // wave/spray now offered every 5-level milestone
+			params.set('spray', '1');
 			params.set('extraShotCount', String(extraProjectileCount));
 			if (extraProjectileCount >= EXTRA_SHOT_MAX_PICKS) params.set('extraShotMaxed', '1');
 			if (waveChance > 0) params.set('waveMaxed', '1');
@@ -667,7 +667,7 @@
 		// ===== Slimes =====
 		// Green (normal) slimes appear from the start. Poison joins in at 1:30,
 		// ice joins in at 3:00 (earlier types keep spawning too - it stacks).
-		// The live-slime cap starts at 20 and grows by 7 every 30 seconds; the
+		// The live-slime cap starts at 20 and grows by 7 every 20 seconds; the
 		// actual number on screen at any moment is randomized up to that cap.
 		const SLIME_FRAME_SIZE = 128;
 		const SLIME_DISPLAY_SIZE = 64;
@@ -704,14 +704,16 @@
 			return Object.keys(SLIME_TYPES).filter((key) => elapsedMs >= SLIME_TYPES[key].unlockMs);
 		}
 
+		const SPAWN_TIER_MS = 20000;
+
 		function currentSlimeCap() {
-			return 20 + 7 * Math.floor(elapsedMs / 30000);
+			return 20 + 7 * Math.floor(elapsedMs / SPAWN_TIER_MS);
 		}
 
-		// Every time the cap steps up (every 30s) all slime HP - regular and
+		// Every time the cap steps up (every 20s) all slime HP - regular and
 		// boss alike - goes up another 15% from its base value.
 		function hpTierMultiplier() {
-			return 1 + 0.15 * Math.floor(elapsedMs / 30000);
+			return 1 + 0.15 * Math.floor(elapsedMs / SPAWN_TIER_MS);
 		}
 
 		// Boss slimes reuse a regular slime's art/type but 3x the display size -
@@ -743,7 +745,7 @@
 			slimes.push({ id: nextSlimeId++, type, x, y, facing: 1, frameIndex: 0, frameElapsed: 0, hp, xp, size, isBoss });
 		}
 
-		// Every 30s the tier changes and gets an entirely fresh spawn budget
+		// Every 20s the tier changes and gets an entirely fresh spawn budget
 		// equal to that tier's full cap value (20, 27, 34, 41...) - not the
 		// +7 delta, and not reduced by how many are alive or were spawned in
 		// a previous tier. E.g. tier goes 20 -> 27 -> 34: the moment the cap
@@ -758,7 +760,7 @@
 			if (nextSpawnCheck > 0) return;
 			nextSpawnCheck = 800 + Math.random() * 1200; // re-roll the target every ~0.8-2s
 
-			const tier = Math.floor(elapsedMs / 30000);
+			const tier = Math.floor(elapsedMs / SPAWN_TIER_MS);
 			if (tier !== spawnTier) {
 				spawnTier = tier;
 				tierSpawnedCount = 0; // brand new budget for this tier, no carry-over

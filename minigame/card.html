@@ -172,11 +172,12 @@
 			{ key: 'damage_up', title: '데미지 증가', desc: '마법 데미지가\n5% 증가합니다.', weight: 1 },
 		];
 
-		// "마법 관통 추가"(rare/gold), "마법 파동"과 "마법 난사"(둘 다 epic/diamond,
-		// 한 등급 더 위)는 10레벨 배수일 때만 후보 풀에 들어갑니다 (Screen.html이
-		// ?pierce=1&wave=1&spray=1로 알려줌). 파동/난사는 한 번 뽑으면 그걸로 끝인
-		// 일회성 해금(5% 확률 고정)이라, 뽑고 나면 waveMaxed=1 / sprayMaxed=1로
-		// 후보에서 빠져서 다시는 안 나옵니다.
+		// "마법 관통 추가"(rare/gold)는 10레벨 배수일 때만 후보 풀에 들어갑니다.
+		// "마법 파동"과 "마법 난사"(둘 다 epic/diamond, 한 등급 더 위)는 이제 다른
+		// 카드들과 똑같이 5레벨마다 후보로 들어갑니다 (Screen.html이 ?pierce=1&
+		// wave=1&spray=1로 알려줌). 파동/난사는 한 번 뽑으면 그걸로 끝인 일회성
+		// 해금(5% 확률 고정)이라, 뽑고 나면 waveMaxed=1 / sprayMaxed=1로 후보에서
+		// 빠져서 다시는 안 나옵니다.
 		const PIERCE_UPGRADE = { key: 'pierce', title: '마법 관통 추가', desc: '마법이 적을\n1명 더 관통합니다.', weight: 0.4 }; // 1 / 2.5
 		const WAVE_UPGRADE = { key: 'wave', title: '마법 파동', desc: '1초마다 5% 확률로\n마법이 사방으로\n무더기 발사됩니다.', weight: 0.2 };
 		const SPRAY_UPGRADE = { key: 'spray', title: '마법 난사', desc: '1초마다 5% 확률로\n공격 방향 10~15발이\n45도 각도로 퍼져나갑니다.', weight: 0.2 };
