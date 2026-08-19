@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Boss Slime Preview</title>
+	<style>
+		* { box-sizing: border-box; }
+
+		html, body {
+			height: 100%;
+			margin: 0;
+			background: #142b2a;
+			color: #fff;
+			font-family: "Courier New", monospace;
+		}
+
+		body {
+			display: grid;
+			place-items: center;
+		}
+
+		.stage {
+			position: relative;
+			width: min(1400px, 96vw);
+			padding: 60px 40px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 40px;
+		}
+
+		.title {
+			margin: 0;
+			font-size: 22px;
+			letter-spacing: 3px;
+			color: #f4e8b5;
+		}
+
+		.subtitle {
+			margin: -24px 0 0;
+			font-size: 13px;
+			color: rgba(230, 230, 220, 0.6);
+			text-align: center;
+			line-height: 1.7;
+		}
+
+		.row {
+			display: flex;
+			gap: 90px;
+		}
+
+		.boss {
+			position: relative;
+			width: 192px; /* 64 * 3 */
+			height: 192px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: flex-end;
+		}
+
+		.boss-glow {
+			position: absolute;
+			inset: -30px;
+			border-radius: 50%;
+			background: radial-gradient(circle, rgba(220, 60, 60, 0.35), transparent 70%);
+			pointer-events: none;
+		}
+
+		.boss-tag {
+			position: absolute;
+			top: -34px;
+			left: 50%;
+			transform: translateX(-50%);
+			color: #ffd76a;
+			font-size: 15px;
+			font-weight: bold;
+			letter-spacing: 2px;
+		}
+
+		.sprite {
+			width: 192px;
+			height: 192px;
+			background-repeat: no-repeat;
+			background-position: 0 0;
+			image-rendering: pixelated;
+		}
+
+		.stats {
+			margin-top: 18px;
+			text-align: center;
+			font-size: 13px;
+			line-height: 1.9;
+			color: rgba(230, 230, 220, 0.85);
+		}
+
+		.stats b {
+			color: #f4e8b5;
+		}
+	</style>
+</head>
+<body>
+	<div class="stage">
+		<h1 class="title">BOSS SLIME PREVIEW</h1>
+		<p class="subtitle">
+			실제 게임(Screen.html)에서는 이 화면과 별개로, 1분마다 그 시점에 나올 수 있는<br>
+			슬라임 타입 중 하나가 무작위로 보스로 스폰됩니다. 여기서는 3종을 한 번에 보여줍니다.
+		</p>
+		<div class="row" id="row"></div>
+	</div>
+
+	<script>
+		const FRAME_SIZE = 128;
+		const BOUNCE_TIMELINE = [
+			{ duration: 520, y: 0 },
+			{ duration: 90, y: 3 },
+			{ duration: 160, y: -16 },
+			{ duration: 110, y: 2 },
+		];
+
+		// Mirrors Screen.html's SLIME_TYPES base stats and BOSS_STAT_MULTIPLIER (10x).
+		const BOSSES = [
+			{ label: '초록 (NORMAL)', src: 'assets/slime_normal_strip.png', baseHp: 20, baseXp: 3 },
+			{ label: '독 (POISON)', src: 'assets/slime_poison_strip.png', baseHp: 40, baseXp: 6 },
+			{ label: '얼음 (ICE)', src: 'assets/slime_ice_strip.png', baseHp: 80, baseXp: 9 },
+		];
+		const STAT_MULTIPLIER = 10;
+
+		const row = document.getElementById('row');
+
+		BOSSES.forEach((boss, i) => {
+			const wrap = document.createElement('div');
+			wrap.innerHTML = `
+				<div class="boss">
+					<div class="boss-glow"></div>
+					<div class="boss-tag">BOSS</div>
+					<div class="sprite" style="background-image:url(${boss.src}); background-size:${FRAME_SIZE * 4}px ${FRAME_SIZE}px;"></div>
+				</div>
+				<div class="stats">
+					${boss.label}<br>
+					HP <b>${boss.baseHp * STAT_MULTIPLIER}</b> (기본 ${boss.baseHp} x${STAT_MULTIPLIER})<br>
+					EXP <b>${boss.baseXp * STAT_MULTIPLIER}</b> (기본 ${boss.baseXp} x${STAT_MULTIPLIER})
+				</div>
+			`;
+			row.appendChild(wrap);
+
+			const spriteEl = wrap.querySelector('.sprite');
+			let frameIndex = 0;
+
+			function applyFrame() {
+				const f = BOUNCE_TIMELINE[frameIndex];
+				spriteEl.style.backgroundPosition = `${-frameIndex * FRAME_SIZE}px 0px`;
+				spriteEl.style.transform = `translateY(${f.y}px)`;
+			}
+
+			function scheduleNext() {
+				const f = BOUNCE_TIMELINE[frameIndex];
+				setTimeout(() => {
+					frameIndex = (frameIndex + 1) % BOUNCE_TIMELINE.length;
+					applyFrame();
+					scheduleNext();
+				}, f.duration);
+			}
+
+			applyFrame();
+			setTimeout(scheduleNext, i * 200);
+		});
+	</script>
+</body>
+</html>

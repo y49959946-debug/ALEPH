@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Game Over</title>
+	<style>
+		* { box-sizing: border-box; }
+
+		html, body {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			overflow: hidden;
+			background: #142b2a;
+			color: #fff;
+			font-family: "Courier New", monospace;
+		}
+
+		body {
+			display: grid;
+			place-items: center;
+		}
+
+		.stage {
+			position: relative;
+			width: min(100vw, 177.7778vh);
+			height: min(56.25vw, 100vh);
+			background: radial-gradient(ellipse at 50% 40%, rgba(20, 43, 42, 0.4), #0a1615 70%);
+			box-shadow: 0 0 0 8px #0a1719, 0 18px 50px rgba(0, 0, 0, .42);
+			display: grid;
+			place-items: center;
+			image-rendering: pixelated;
+		}
+
+		.panel {
+			width: min(620px, 86%);
+			padding: 12px;
+			background: #17252b;
+			box-shadow:
+				0 0 0 6px #0b1210,
+				0 18px 40px rgba(0, 0, 0, .5);
+		}
+
+		.panel-inner {
+			background: #87906c;
+			padding: 40px 36px;
+			text-align: center;
+			box-shadow: inset 0 0 0 6px #263734;
+		}
+
+		.title {
+			margin: 0;
+			font-size: clamp(36px, 6vw, 56px);
+			font-weight: bold;
+			letter-spacing: 4px;
+			color: #dc4f49;
+			text-shadow: 4px 4px 0 #3c1414;
+		}
+
+		.subtitle {
+			margin: 18px 0 0;
+			font-size: 15px;
+			letter-spacing: 2px;
+			color: #263734;
+			font-weight: bold;
+		}
+
+		.survival-box {
+			margin: 26px auto 0;
+			width: fit-content;
+			background: #263734;
+			padding: 14px 28px;
+			box-shadow: 0 0 0 4px #17252b;
+		}
+
+		.survival-label {
+			display: block;
+			font-size: 12px;
+			letter-spacing: 2px;
+			color: #9ab3a8;
+			font-weight: bold;
+		}
+
+		.survival-time {
+			display: block;
+			margin-top: 6px;
+			font-size: 34px;
+			font-weight: bold;
+			color: #f4e8b5;
+			letter-spacing: 2px;
+		}
+
+		.retry-button {
+			display: block;
+			margin: 34px auto 0;
+			padding: 16px 0;
+			width: 260px;
+			background: #e8d995;
+			border: none;
+			box-shadow: 0 0 0 6px #17252b;
+			color: #202d2d;
+			font-family: inherit;
+			font-size: 22px;
+			font-weight: bold;
+			letter-spacing: 3px;
+			cursor: pointer;
+			transition: transform 0.12s ease, background 0.12s ease;
+		}
+
+		.retry-button:hover {
+			background: #f4e8b5;
+			transform: translateY(-3px);
+		}
+
+		.retry-button:active {
+			transform: translateY(0);
+			background: #c9bd87;
+		}
+
+		.hint {
+			margin-top: 16px;
+			font-size: 13px;
+			letter-spacing: 1px;
+			color: #34433a;
+		}
+	</style>
+</head>
+<body>
+	<div class="stage">
+		<div class="panel">
+			<div class="panel-inner">
+				<h1 class="title">GAME OVER</h1>
+				<p class="subtitle">체력이 모두 소진되었습니다</p>
+
+				<div class="survival-box">
+					<span class="survival-label">SURVIVAL TIME</span>
+					<span class="survival-time" id="survivalTime">00:00</span>
+				</div>
+
+				<button class="retry-button" id="retryButton" type="button">다시하기</button>
+				<p class="hint">다시하기를 누르면 처음부터 새로 시작합니다</p>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function formatClock(ms) {
+			const totalSec = Math.floor(ms / 1000);
+			const m = Math.floor(totalSec / 60);
+			const s = totalSec % 60;
+			return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+		}
+
+		const lastSurvivalMs = Number(sessionStorage.getItem('lastSurvivalMs') || 0);
+		document.getElementById('survivalTime').textContent = formatClock(lastSurvivalMs);
+
+		document.getElementById('retryButton').addEventListener('click', () => {
+			sessionStorage.removeItem('lastSurvivalMs');
+			window.location.href = 'Screen.html';
+		});
+	</script>
+</body>
+</html>

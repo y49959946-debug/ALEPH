@@ -1,0 +1,120 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #0b0b12;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  overflow: hidden;
+}
+
+.stage {
+  position: relative;
+  width: 900px;
+  max-width: 96vw;
+  height: 320px;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(140, 90, 255, 0.14), transparent 65%),
+    linear-gradient(180deg, #12101c 0%, #0a0912 65%, #08070d 100%);
+  box-shadow:
+    0 0 0 1px rgba(180, 140, 255, 0.15) inset,
+    0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.stage-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 10% 20%, rgba(200, 170, 255, 0.6), transparent 60%),
+    radial-gradient(2px 2px at 80% 15%, rgba(200, 170, 255, 0.5), transparent 60%),
+    radial-gradient(1.5px 1.5px at 60% 35%, rgba(200, 170, 255, 0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 30% 55%, rgba(200, 170, 255, 0.35), transparent 60%),
+    radial-gradient(2px 2px at 90% 60%, rgba(200, 170, 255, 0.3), transparent 60%);
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  color: rgba(230, 220, 255, 0.55);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* ===== 마법 구체 배치 ===== */
+
+.spell-row {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 140px;
+}
+
+.spell {
+  --frame-size: 128px;
+  position: relative;
+  width: var(--frame-size);
+  height: var(--frame-size);
+}
+
+.spell-label {
+  position: absolute;
+  left: 50%;
+  bottom: -30px;
+  transform: translateX(-50%);
+  color: rgba(230, 220, 255, 0.5);
+  font-size: 12px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.stage-frame {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: calc(var(--frame-size) * 3) var(--frame-size);
+  image-rendering: auto;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 320ms ease, transform 320ms ease, filter 320ms ease;
+  filter: drop-shadow(0 0 0 rgba(190, 140, 255, 0));
+}
+
+.stage-frame.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stage-frame.is-charged {
+  filter: drop-shadow(0 0 14px rgba(190, 140, 255, 0.75));
+  animation: pulse 900ms ease-in-out infinite;
+}
+
+.stage-frame.is-release {
+  transition: opacity 220ms ease-out, transform 220ms ease-out, filter 220ms ease-out;
+  opacity: 0;
+  transform: scale(1.55);
+  filter: drop-shadow(0 0 34px rgba(220, 190, 255, 0.95)) brightness(1.6);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}

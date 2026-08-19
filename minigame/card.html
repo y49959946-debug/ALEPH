@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Level Up</title>
+	<style>
+		* { box-sizing: border-box; }
+
+		html, body {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			background: transparent;
+			font-family: "Courier New", monospace;
+			overflow: hidden;
+		}
+
+		body {
+			display: grid;
+			place-items: center;
+		}
+
+		.backdrop {
+			position: fixed;
+			inset: 0;
+			background: rgba(10, 22, 20, 0.72);
+			display: grid;
+			place-items: center;
+		}
+
+		.panel {
+			text-align: center;
+		}
+
+		.title {
+			margin: 0 0 28px;
+			font-size: 40px;
+			font-weight: bold;
+			letter-spacing: 4px;
+			color: #f4e8b5;
+			text-shadow: 4px 4px 0 #17252b;
+		}
+
+		.cards {
+			display: flex;
+			gap: 26px;
+		}
+
+		.card {
+			width: 220px;
+			padding: 22px 18px;
+			background: #e8d995;
+			box-shadow: 0 0 0 6px #17252b, 0 14px 30px rgba(0, 0, 0, 0.45);
+			cursor: pointer;
+			transition: transform 0.12s ease, background 0.12s ease;
+			color: #202d2d;
+		}
+
+		.card:hover {
+			background: #f4e8b5;
+			transform: translateY(-8px);
+		}
+
+		.card:active {
+			transform: translateY(-2px);
+		}
+
+		/* Rarer pick (pierce) - richer gold with a glow so it stands out. */
+		.card.rare {
+			background: linear-gradient(160deg, #ffe07a 0%, #f0b429 60%, #d99a1c 100%);
+			box-shadow:
+				0 0 0 6px #17252b,
+				0 0 28px rgba(255, 197, 61, 0.7),
+				0 14px 30px rgba(0, 0, 0, 0.45);
+		}
+
+		.card.rare:hover {
+			background: linear-gradient(160deg, #fff0ac 0%, #ffc93c 60%, #e7ab2c 100%);
+			box-shadow:
+				0 0 0 6px #17252b,
+				0 0 38px rgba(255, 210, 90, 0.85),
+				0 14px 30px rgba(0, 0, 0, 0.45);
+		}
+
+		.card.rare .card-title {
+			color: #4a2e04;
+		}
+
+		.card.rare .card-desc {
+			color: #5a3d07;
+		}
+
+		.card-title {
+			font-size: 17px;
+			font-weight: bold;
+			letter-spacing: 1px;
+			line-height: 1.4;
+			min-height: 48px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.card-desc {
+			margin-top: 14px;
+			font-size: 13px;
+			line-height: 1.7;
+			color: #3c4a44;
+		}
+
+		.hint {
+			margin-top: 26px;
+			font-size: 13px;
+			letter-spacing: 1px;
+			color: #cdd8d0;
+		}
+	</style>
+</head>
+<body>
+	<div class="backdrop">
+		<div class="panel">
+			<h1 class="title">LEVEL UP!</h1>
+			<div class="cards" id="cards"></div>
+			<p class="hint">카드를 선택하세요</p>
+		</div>
+	</div>
+
+	<script>
+		// weight 1 = normal odds. extra_shot is strong enough to pull down on
+		// purpose so it doesn't show up as often as the other four.
+		const UPGRADES = [
+			{ key: 'atk_speed', title: '마법 발사 속도 증가', desc: '마법 발사 속도가\n20% 빨라집니다.', weight: 1 },
+			{ key: 'extra_shot', title: '마법 발사 개수 추가', desc: '마법이 1개 더\n발사됩니다.', weight: 0.5 },
+			{ key: 'move_speed', title: '이동 속도 증가', desc: '이동 속도가\n10% 빨라집니다.', weight: 1 },
+			{ key: 'full_heal', title: 'HP 전부 회복', desc: '체력을 모두\n회복합니다.', weight: 1 },
+			{ key: 'damage_up', title: '데미지 증가', desc: '마법 데미지가\n5 증가합니다.', weight: 1 },
+		];
+
+		// "마법 관통 추가" only ever enters the pool on levels that are multiples
+		// of 10 (Screen.html passes ?pierce=1 in that case). Being in the pool
+		// doesn't guarantee it's shown - it still has to be one of the 3 rolled.
+		const PIERCE_UPGRADE = { key: 'pierce', title: '마법 관통 추가', desc: '마법이 적을\n1명 더 관통합니다.', weight: 0.4 }; // 1 / 2.5
+
+		function buildPool() {
+			const params = new URLSearchParams(location.search);
+			const pool = [...UPGRADES];
+			if (params.get('pierce') === '1') pool.push(PIERCE_UPGRADE);
+			return pool;
+		}
+
+		function pickThree() {
+			const pool = buildPool();
+			const picked = [];
+			while (picked.length < 3 && pool.length > 0) {
+				const totalWeight = pool.reduce((sum, u) => sum + u.weight, 0);
+				let roll = Math.random() * totalWeight;
+				let i = 0;
+				while (i < pool.length - 1 && roll > pool[i].weight) {
+					roll -= pool[i].weight;
+					i += 1;
+				}
+				picked.push(pool.splice(i, 1)[0]);
+			}
+			return picked;
+		}
+
+		const cardsEl = document.getElementById('cards');
+		pickThree().forEach((upgrade) => {
+			const card = document.createElement('div');
+			card.className = upgrade.key === 'pierce' ? 'card rare' : 'card';
+			card.innerHTML = `
+				<div class="card-title">${upgrade.title}</div>
+				<div class="card-desc">${upgrade.desc.replace('\n', '<br>')}</div>
+			`;
+			card.addEventListener('click', () => {
+				window.parent.postMessage({ source: 'level-card', key: upgrade.key }, '*');
+			});
+			cardsEl.appendChild(card);
+		});
+	</script>
+</body>
+</html>

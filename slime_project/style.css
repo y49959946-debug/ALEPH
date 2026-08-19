@@ -1,0 +1,107 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #0b0b12;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  overflow: hidden;
+}
+
+.stage {
+  position: relative;
+  width: 900px;
+  max-width: 96vw;
+  height: 360px;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(140, 90, 255, 0.16), transparent 60%),
+    linear-gradient(180deg, #12101c 0%, #0a0912 65%, #08070d 100%);
+  box-shadow:
+    0 0 0 1px rgba(180, 140, 255, 0.15) inset,
+    0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.stage-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 10% 20%, rgba(200, 170, 255, 0.6), transparent 60%),
+    radial-gradient(2px 2px at 80% 15%, rgba(200, 170, 255, 0.5), transparent 60%),
+    radial-gradient(1.5px 1.5px at 60% 35%, rgba(200, 170, 255, 0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 30% 55%, rgba(200, 170, 255, 0.35), transparent 60%),
+    radial-gradient(2px 2px at 90% 60%, rgba(200, 170, 255, 0.3), transparent 60%);
+}
+
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 64px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180, 140, 255, 0.5), transparent);
+  box-shadow: 0 0 12px rgba(180, 140, 255, 0.5);
+}
+
+/* ===== 슬라임 배치 ===== */
+
+.slime-row {
+  position: absolute;
+  left: 50%;
+  bottom: 64px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 90px;
+}
+
+.slime {
+  --frame-size: 128px;
+
+  position: relative;
+  width: var(--frame-size);
+  height: var(--frame-size);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  image-rendering: auto;
+  will-change: transform, background-position;
+}
+
+.slime::after {
+  /* 그림자: 바운스 높이에 따라 script.js에서 opacity/scale 조절 */
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 56px;
+  height: 12px;
+  transform: translateX(-50%) scale(var(--shadow-scale, 1));
+  opacity: var(--shadow-opacity, 0.55);
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.55), transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  transition: transform 60ms linear, opacity 60ms linear;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  color: rgba(230, 220, 255, 0.55);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
