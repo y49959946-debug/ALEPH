@@ -279,78 +279,23 @@
       .feature-frame::before {
         content: "";
         position: absolute;
-        inset: 6% 7% auto auto;
-        width: 34%;
-        height: 34%;
-        border-radius: 50%;
-        background: rgba(161, 202, 238, 0.25);
+        inset: -30px;
+        background: url('Haengro.png') center / cover no-repeat;
+        filter: blur(36px) saturate(1.1);
+        transform: scale(1.15);
+        z-index: 0;
       }
 
-      .feature-frame::after {
-        content: "";
-        position: absolute;
-        left: 8%;
-        bottom: 8%;
-        width: 42%;
-        height: 42%;
-        border-radius: 28px;
-        background: rgba(157, 230, 198, 0.28);
-      }
-
-      .image-card {
-        position: absolute;
-        inset: 9% 10%;
-        border-radius: 26px;
-        background: linear-gradient(135deg, #f6fbff 0%, #edf4f8 40%, #ebf7f2 100%);
-        border: 1px solid rgba(117, 145, 160, 0.12);
-        overflow: hidden;
-      }
-
-      .image-card .mini-blob {
-        position: absolute;
-        border-radius: 50%;
-      }
-
-      .image-card .mini-blob.one {
-        width: 150px;
-        height: 150px;
-        right: 30px;
-        top: 26px;
-        background: rgba(171, 205, 255, 0.5);
-      }
-
-      .image-card .mini-blob.two {
-        width: 190px;
-        height: 190px;
-        left: 38px;
-        bottom: 30px;
-        background: rgba(152, 229, 196, 0.55);
-      }
-
-      .image-card .line-stack {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 75%;
-        height: 48%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 16px;
-      }
-
-      .image-card .line-stack span {
+      .feature-frame img {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         display: block;
-        height: 18px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, rgba(56, 74, 86, 0.9), rgba(117, 137, 152, 0.65));
-        box-shadow: 0 8px 18px rgba(33, 49, 61, 0.08);
+        -webkit-mask-image: radial-gradient(ellipse 78% 78% at center, black 55%, transparent 94%);
+        mask-image: radial-gradient(ellipse 78% 78% at center, black 55%, transparent 94%);
       }
-
-      .image-card .line-stack span:nth-child(1) { width: 100%; }
-      .image-card .line-stack span:nth-child(2) { width: 80%; }
-      .image-card .line-stack span:nth-child(3) { width: 90%; }
 
       .summary {
         margin-top: 64px;
@@ -500,15 +445,7 @@
 
         <section class="hero-visual" aria-label="메인 이미지 영역">
           <div class="feature-frame">
-            <div class="image-card">
-              <div class="mini-blob one"></div>
-              <div class="mini-blob two"></div>
-              <div class="line-stack">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
+            <img src="Haengro.png" alt="행로" />
           </div>
         </section>
       </main>
