@@ -7,33 +7,37 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+KR:wght@400;700;900&display=swap">
 <style>
 	* { box-sizing: border-box; }
+	html, body { height: 100%; }
 	body {
 		margin: 0;
 		font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
 		background: #1b1d24;
 		color: #eee;
-		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
 	}
 	header {
-		padding: 18px 28px;
+		flex-shrink: 0;
+		padding: 12px 24px;
 		border-bottom: 1px solid #2c2f3a;
 	}
 	header h1 {
 		margin: 0;
-		font-size: 20px;
+		font-size: 19px;
 	}
 	.layout {
+		flex: 1 1 auto;
 		display: grid;
 		grid-template-columns: 320px minmax(320px, 1fr) 320px;
-		gap: 24px;
-		padding: 24px;
+		gap: 16px;
+		padding: 16px;
 		align-items: start;
 	}
 	.panel {
 		background: #23262f;
 		border: 1px solid #2c2f3a;
 		border-radius: 12px;
-		padding: 20px;
+		padding: 16px;
 		width: 320px;
 		min-width: 0;
 	}
@@ -60,7 +64,7 @@
 	}
 	.panel h2 {
 		font-size: 14px;
-		margin: 0 0 12px;
+		margin: 0 0 8px;
 		color: #9aa0ac;
 		text-transform: uppercase;
 		letter-spacing: .05em;
@@ -203,7 +207,7 @@
 		}
 	}
 	.field {
-		margin-bottom: 18px;
+		margin-bottom: 12px;
 	}
 	.field label {
 		display: flex;
@@ -234,7 +238,7 @@
 	textarea {
 		width: 100%;
 		resize: vertical;
-		min-height: 160px;
+		min-height: 110px;
 		background: #181a21;
 		border: 1px solid #3c4152;
 		border-radius: 8px;
@@ -283,7 +287,7 @@
 		width: auto;
 		height: auto;
 		max-width: 100%;
-		max-height: 70vh;
+		max-height: calc(100vh - 170px);
 		/* Checkerboard shows through wherever the canvas itself is
 		   transparent (a loaded image's own alpha) so that's visibly
 		   distinct from the opaque #14151a placeholder background. */
@@ -363,6 +367,22 @@
 		cursor: pointer;
 	}
 	.template-save-row button:hover { background: #96d0ff; }
+	.template-io-row {
+		display: flex;
+		gap: 8px;
+		margin-top: 10px;
+	}
+	.template-io-row button {
+		flex: 1;
+		padding: 8px;
+		border: 1px solid #3c4152;
+		border-radius: 8px;
+		background: transparent;
+		color: #c7cad3;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.template-io-row button:hover { border-color: #7dc4ff; color: #7dc4ff; }
 	.template-list {
 		margin-top: 16px;
 		display: flex;
@@ -530,6 +550,14 @@
 			<button id="saveTemplateBtn">저장</button>
 		</div>
 		<div class="hint">문구, 폰트, 글자크기, 색상, 위치, 캔버스 비율/크기가 저장돼요. 이미지는 저장되지 않아요.</div>
+
+		<div class="template-io-row">
+			<button type="button" id="exportTemplatesBtn">JSON 내보내기</button>
+			<button type="button" id="importTemplatesBtn">JSON 가져오기</button>
+			<input type="file" id="importTemplatesInput" accept="application/json,.json" hidden>
+		</div>
+		<div class="upload-msg" id="templateMsg"></div>
+
 		<div class="template-list" id="templateList"></div>
 	</div>
 </div>
@@ -565,6 +593,10 @@
 	const templateNameInput = document.getElementById('templateNameInput');
 	const saveTemplateBtn = document.getElementById('saveTemplateBtn');
 	const templateList = document.getElementById('templateList');
+	const exportTemplatesBtn = document.getElementById('exportTemplatesBtn');
+	const importTemplatesBtn = document.getElementById('importTemplatesBtn');
+	const importTemplatesInput = document.getElementById('importTemplatesInput');
+	const templateMsg = document.getElementById('templateMsg');
 
 	const state = {
 		image: null,
@@ -1240,6 +1272,125 @@
 
 	templateNameInput.addEventListener('keydown', (e) => {
 		if (e.key === 'Enter') saveTemplateBtn.click();
+	});
+
+	function showTemplateMsg(text, type) {
+		templateMsg.textContent = text;
+		templateMsg.className = 'upload-msg' + (type ? ' ' + type : '');
+	}
+
+	const TEMPLATE_REQUIRED_FIELDS = {
+		name: 'string',
+		text: 'string',
+		fontFamily: 'string',
+		fontSize: 'number',
+		color: 'string',
+		strokeColor: 'string',
+		strokeWidth: 'number',
+		x: 'number',
+		y: 'number',
+		canvasW: 'number',
+		canvasH: 'number',
+	};
+
+	// Checks one imported template entry against the required fields -
+	// returns a human-readable reason it was rejected, or null if it's valid.
+	function validateTemplateEntry(entry, index) {
+		if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+			return `${index + 1}번째 항목이 객체 형식이 아니에요.`;
+		}
+		for (const key in TEMPLATE_REQUIRED_FIELDS) {
+			const expectedType = TEMPLATE_REQUIRED_FIELDS[key];
+			const value = entry[key];
+			if (expectedType === 'string' && (typeof value !== 'string' || value.trim() === '')) {
+				return `${index + 1}번째 항목에 "${key}" 값이 없어요.`;
+			}
+			if (expectedType === 'number' && (typeof value !== 'number' || !Number.isFinite(value))) {
+				return `${index + 1}번째 항목에 "${key}" 값이 없거나 숫자가 아니에요.`;
+			}
+		}
+		return null;
+	}
+
+	exportTemplatesBtn.addEventListener('click', () => {
+		if (templates.length === 0) {
+			showTemplateMsg('내보낼 템플릿이 없어요.', 'error');
+			return;
+		}
+		const payload = templates.map(({ id, ...rest }) => rest);
+		const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'jjal-card-templates.json';
+		link.click();
+		URL.revokeObjectURL(url);
+		showTemplateMsg(`템플릿 ${templates.length}개를 JSON으로 내보냈어요.`, 'success');
+	});
+
+	importTemplatesBtn.addEventListener('click', () => importTemplatesInput.click());
+
+	importTemplatesInput.addEventListener('change', () => {
+		const file = importTemplatesInput.files[0];
+		importTemplatesInput.value = '';
+		if (!file) return;
+
+		const reader = new FileReader();
+		reader.onerror = () => {
+			showTemplateMsg('파일을 읽는 중 문제가 발생했어요.', 'error');
+		};
+		reader.onload = (e) => {
+			let parsed;
+			try {
+				parsed = JSON.parse(e.target.result);
+			} catch {
+				showTemplateMsg('JSON 형식이 올바르지 않아요 (문법 오류). 파일을 확인해주세요.', 'error');
+				return;
+			}
+
+			const list = Array.isArray(parsed)
+				? parsed
+				: (parsed && Array.isArray(parsed.templates) ? parsed.templates : null);
+			if (!list) {
+				showTemplateMsg('JSON 구조가 올바르지 않아요. 템플릿 배열이 필요해요.', 'error');
+				return;
+			}
+			if (list.length === 0) {
+				showTemplateMsg('가져올 템플릿이 없어요.', 'error');
+				return;
+			}
+			for (let i = 0; i < list.length; i++) {
+				const reason = validateTemplateEntry(list[i], i);
+				if (reason) {
+					showTemplateMsg(`가져오기를 취소했어요 — ${reason}`, 'error');
+					return;
+				}
+			}
+			if (templates.length + list.length > MAX_TEMPLATES) {
+				showTemplateMsg(`템플릿은 최대 ${MAX_TEMPLATES}개까지예요. 가져오면 ${templates.length + list.length}개가 되어 초과해요.`, 'error');
+				return;
+			}
+
+			const imported = list.map((entry, i) => ({
+				id: Date.now() + i,
+				name: entry.name,
+				text: entry.text,
+				fontFamily: entry.fontFamily,
+				fontSize: Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, entry.fontSize)),
+				color: entry.color,
+				strokeColor: entry.strokeColor,
+				strokeWidth: Math.min(30, Math.max(0, entry.strokeWidth)),
+				x: entry.x,
+				y: entry.y,
+				canvasW: clampCanvasDim(entry.canvasW),
+				canvasH: clampCanvasDim(entry.canvasH),
+			}));
+			templates = templates.concat(imported);
+			persistTemplates(templates);
+			renderTemplateList();
+			showTemplateMsg(`템플릿 ${imported.length}개를 가져왔어요.`, 'success');
+		};
+		reader.readAsText(file);
 	});
 
 	renderTemplateList();
