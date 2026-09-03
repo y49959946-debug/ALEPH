@@ -25,6 +25,36 @@
 		padding: 12px 24px;
 		border-bottom: 1px solid #2c2f3a;
 	}
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		min-width: 0;
+	}
+	.brand-logo {
+		position: relative;
+		width: 34px;
+		height: 40px;
+		flex: 0 0 34px;
+		background: #f5c84c;
+		border: 2px solid #17191f;
+		border-radius: 5px;
+		box-shadow: 3px 3px 0 #7dc4ff;
+		transform: rotate(-5deg);
+	}
+	.brand-logo::before {
+		content: '짤';
+		position: absolute;
+		inset: 4px 3px 4px;
+		display: grid;
+		place-items: center;
+		border: 1px solid rgba(23, 25, 31, .45);
+		border-radius: 2px;
+		color: #17191f;
+		font-family: 'Black Han Sans', sans-serif;
+		font-size: 17px;
+		line-height: 1;
+	}
 	header h1 {
 		margin: 0;
 		font-size: 19px;
@@ -276,6 +306,63 @@
 		background: none;
 		cursor: pointer;
 	}
+	textarea:disabled, select:disabled, input:disabled {
+		opacity: .45;
+		cursor: not-allowed;
+	}
+	.text-layer-list {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin-bottom: 10px;
+	}
+	.text-layer-empty {
+		font-size: 12px;
+		color: #6b7280;
+		text-align: center;
+		padding: 10px 0;
+	}
+	.text-layer-item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 7px 8px;
+		border: 1px solid #3c4152;
+		border-radius: 8px;
+		background: #181a21;
+		color: #c7cad3;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.text-layer-item:hover { border-color: #565c6e; }
+	.text-layer-item.is-active {
+		border-color: #7dc4ff;
+		background: #1d2430;
+		color: #eee;
+	}
+	.text-layer-item .layer-label {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.text-layer-item .layer-remove {
+		flex-shrink: 0;
+		width: 20px;
+		height: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 6px;
+		background: transparent;
+		color: #9aa0ac;
+		font-size: 14px;
+		line-height: 1;
+		cursor: pointer;
+	}
+	.text-layer-item .layer-remove:hover { background: #2c3140; color: #ff8a8a; }
 	.row {
 		display: flex;
 		align-items: center;
@@ -464,7 +551,10 @@
 <body>
 
 <header>
-	<h1>짤 카드 스튜디오</h1>
+	<div class="brand">
+		<div class="brand-logo" aria-hidden="true"></div>
+		<h1>짤 카드 스튜디오</h1>
+	</div>
 	<a class="back-link" href="../index.html">← 메인으로</a>
 </header>
 
@@ -512,9 +602,13 @@
 			<div class="upload-msg" id="uploadMsg"></div>
 		</div>
 
-		<h2>문구</h2>
+		<div class="section-header">
+			<h2>문구</h2>
+			<button type="button" class="expand-btn" id="addTextBtn" title="문구 추가">+</button>
+		</div>
+		<div class="text-layer-list" id="textLayerList"></div>
 		<div class="field">
-			<textarea id="captionInput" placeholder="카드에 넣을 문구를 입력하세요">여기에 문구 입력</textarea>
+			<textarea id="captionInput" placeholder="카드에 넣을 문구를 입력하세요"></textarea>
 		</div>
 
 		<h2>텍스트 조절</h2>
@@ -543,7 +637,7 @@
 			<span class="name" style="margin-left:auto">외곽선 색상</span>
 			<input type="color" id="strokeColorInput" value="#000000">
 		</div>
-		<div class="hint">캔버스 위에서 문구를 드래그하면 위치가, 오른쪽 아래 동그란 손잡이를 드래그하면 크기가 바뀌어요.</div>
+		<div class="hint">캔버스에서 문구를 클릭하면 선택되고, 드래그하면 위치가, 모서리 점을 드래그하면 크기가 바뀌어요.</div>
 
 		<h2 style="margin-top:18px">내보내기</h2>
 		<button class="primary" id="downloadBtn">카드 이미지 저장</button>
@@ -561,7 +655,7 @@
 			<input type="text" id="templateNameInput" placeholder="템플릿 이름">
 			<button id="saveTemplateBtn">저장</button>
 		</div>
-		<div class="hint">문구, 폰트, 글자크기, 색상, 위치, 캔버스 비율/크기가 저장돼요. 이미지는 저장되지 않아요.</div>
+		<div class="hint">추가한 모든 문구(폰트·글자크기·색상·위치 포함)와 캔버스 비율/크기가 저장돼요. 이미지는 저장되지 않아요.</div>
 
 		<div class="template-io-row">
 			<button type="button" id="exportTemplatesBtn">JSON 내보내기</button>
@@ -593,6 +687,8 @@
 	const dropzone = document.getElementById('dropzone');
 	const uploadMsg = document.getElementById('uploadMsg');
 	const captionInput = document.getElementById('captionInput');
+	const addTextBtn = document.getElementById('addTextBtn');
+	const textLayerList = document.getElementById('textLayerList');
 	const fontSelect = document.getElementById('fontSelect');
 	const sizeRange = document.getElementById('sizeRange');
 	const sizeVal = document.getElementById('sizeVal');
@@ -610,33 +706,152 @@
 	const importTemplatesInput = document.getElementById('importTemplatesInput');
 	const templateMsg = document.getElementById('templateMsg');
 
-	const state = {
-		image: null,
-		text: captionInput.value,
-		x: CW / 2,
-		y: CH - 90,
-		fontSize: Number(sizeRange.value),
-		fontFamily: fontSelect.value,
-		color: colorInput.value,
-		strokeColor: strokeColorInput.value,
-		strokeWidth: Number(strokeWidthRange.value),
-	};
-
 	const MIN_FONT_SIZE = 12;
 	const MAX_FONT_SIZE = 140;
 	const MIN_CANVAS_SIZE = 100;
 	const MAX_CANVAS_SIZE = 3000;
 
+	let nextTextId = 1;
+	function newTextLayer(overrides) {
+		return Object.assign({
+			id: nextTextId++,
+			text: '새 문구',
+			fontFamily: fontSelect.options[0].value,
+			fontSize: 48,
+			color: '#ffffff',
+			strokeColor: '#000000',
+			strokeWidth: 6,
+			x: CW / 2,
+			y: CH - 90,
+		}, overrides);
+	}
+
+	const state = {
+		image: null,
+		texts: [],
+		activeTextId: null,
+	};
+	state.texts.push(newTextLayer({ text: '여기에 문구 입력' }));
+	state.activeTextId = state.texts[0].id;
+	syncControlsFromActiveText();
+	renderTextLayerList();
+
+	function getActiveText() {
+		return state.texts.find((t) => t.id === state.activeTextId) || null;
+	}
+
+	function syncControlsFromActiveText() {
+		const t = getActiveText();
+		const has = !!t;
+		captionInput.disabled = !has;
+		fontSelect.disabled = !has;
+		sizeRange.disabled = !has;
+		strokeWidthRange.disabled = !has;
+		colorInput.disabled = !has;
+		strokeColorInput.disabled = !has;
+		if (!has) {
+			captionInput.value = '';
+			return;
+		}
+		captionInput.value = t.text;
+		fontSelect.value = t.fontFamily;
+		sizeRange.value = t.fontSize;
+		sizeVal.textContent = t.fontSize;
+		strokeWidthRange.value = t.strokeWidth;
+		strokeWidthVal.textContent = t.strokeWidth;
+		colorInput.value = t.color;
+		strokeColorInput.value = t.strokeColor;
+	}
+
+	function selectTextLayer(id) {
+		state.activeTextId = id;
+		syncControlsFromActiveText();
+		renderTextLayerList();
+		render();
+	}
+
+	function renderTextLayerList() {
+		textLayerList.innerHTML = '';
+		if (state.texts.length === 0) {
+			const empty = document.createElement('div');
+			empty.className = 'text-layer-empty';
+			empty.textContent = '문구가 없어요. + 버튼으로 추가하세요.';
+			textLayerList.appendChild(empty);
+			return;
+		}
+		state.texts.forEach((t) => {
+			const item = document.createElement('div');
+			item.className = 'text-layer-item' + (t.id === state.activeTextId ? ' is-active' : '');
+			item.addEventListener('click', () => selectTextLayer(t.id));
+
+			const label = document.createElement('span');
+			label.className = 'layer-label';
+			label.textContent = (t.text || '').split('\n')[0].trim() || '(빈 문구)';
+			item.appendChild(label);
+
+			const removeBtn = document.createElement('button');
+			removeBtn.type = 'button';
+			removeBtn.className = 'layer-remove';
+			removeBtn.textContent = '×';
+			removeBtn.title = '문구 삭제';
+			removeBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				removeTextLayer(t.id);
+			});
+			item.appendChild(removeBtn);
+
+			textLayerList.appendChild(item);
+		});
+	}
+
+	function addTextLayer() {
+		const active = getActiveText();
+		const base = active ? {
+			fontFamily: active.fontFamily,
+			fontSize: active.fontSize,
+			color: active.color,
+			strokeColor: active.strokeColor,
+			strokeWidth: active.strokeWidth,
+		} : {};
+		const offset = state.texts.length * 36;
+		const layer = newTextLayer(Object.assign({
+			text: '새 문구',
+			x: CW / 2,
+			y: Math.min(CH - 40, CH / 2 + offset),
+		}, base));
+		state.texts.push(layer);
+		state.activeTextId = layer.id;
+		syncControlsFromActiveText();
+		renderTextLayerList();
+		render();
+		captionInput.focus();
+		captionInput.select();
+	}
+
+	function removeTextLayer(id) {
+		state.texts = state.texts.filter((t) => t.id !== id);
+		if (state.activeTextId === id) {
+			state.activeTextId = state.texts.length ? state.texts[state.texts.length - 1].id : null;
+		}
+		syncControlsFromActiveText();
+		renderTextLayerList();
+		render();
+	}
+
+	addTextBtn.addEventListener('click', addTextLayer);
+
 	function setCanvasSize(newW, newH) {
-		const relX = state.x / CW;
-		const relY = state.y / CH;
+		const relPositions = state.texts.map((t) => ({ t, relX: t.x / CW, relY: t.y / CH }));
 
 		canvas.width = newW;
 		canvas.height = newH;
 		CW = newW;
 		CH = newH;
-		state.x = relX * CW;
-		state.y = relY * CH;
+
+		relPositions.forEach(({ t, relX, relY }) => {
+			t.x = relX * CW;
+			t.y = relY * CH;
+		});
 	}
 
 	function computePresetSize(w, h) {
@@ -687,14 +902,8 @@
 	function saveDraftMeta() {
 		try {
 			localStorage.setItem(DRAFT_KEY, JSON.stringify({
-				text: state.text,
-				fontFamily: state.fontFamily,
-				fontSize: state.fontSize,
-				color: state.color,
-				strokeColor: state.strokeColor,
-				strokeWidth: state.strokeWidth,
-				x: state.x,
-				y: state.y,
+				texts: state.texts,
+				activeTextId: state.activeTextId,
 				canvasW: CW,
 				canvasH: CH,
 			}));
@@ -734,23 +943,28 @@
 			else clearActiveRatioButtons();
 			syncCustomSizeInputs();
 
-			state.text = meta.text ?? state.text;
-			state.fontFamily = meta.fontFamily ?? state.fontFamily;
-			state.fontSize = meta.fontSize ?? state.fontSize;
-			state.color = meta.color ?? state.color;
-			state.strokeColor = meta.strokeColor ?? state.strokeColor;
-			state.strokeWidth = meta.strokeWidth ?? state.strokeWidth;
-			state.x = meta.x ?? state.x;
-			state.y = meta.y ?? state.y;
+			if (Array.isArray(meta.texts) && meta.texts.length) {
+				state.texts = meta.texts.map((t) => Object.assign(newTextLayer({}), t));
+			} else if (typeof meta.text === 'string') {
+				// legacy single-text draft shape from before multi-layer support
+				state.texts = [newTextLayer({
+					text: meta.text,
+					fontFamily: meta.fontFamily,
+					fontSize: meta.fontSize,
+					color: meta.color,
+					strokeColor: meta.strokeColor,
+					strokeWidth: meta.strokeWidth,
+					x: meta.x,
+					y: meta.y,
+				})];
+			}
+			state.activeTextId = state.texts.some((t) => t.id === meta.activeTextId)
+				? meta.activeTextId
+				: (state.texts[0] ? state.texts[0].id : null);
+			nextTextId = Math.max(nextTextId, ...state.texts.map((t) => t.id + 1));
 
-			captionInput.value = state.text;
-			fontSelect.value = state.fontFamily;
-			sizeRange.value = state.fontSize;
-			sizeVal.textContent = state.fontSize;
-			strokeWidthRange.value = state.strokeWidth;
-			strokeWidthVal.textContent = state.strokeWidth;
-			colorInput.value = state.color;
-			strokeColorInput.value = state.strokeColor;
+			syncControlsFromActiveText();
+			renderTextLayerList();
 		}
 
 		let imageDataUrl = null;
@@ -874,29 +1088,42 @@
 	});
 
 	captionInput.addEventListener('input', () => {
-		state.text = captionInput.value;
+		const t = getActiveText();
+		if (!t) return;
+		t.text = captionInput.value;
+		renderTextLayerList();
 		render();
 	});
 	sizeRange.addEventListener('input', () => {
-		state.fontSize = Number(sizeRange.value);
-		sizeVal.textContent = state.fontSize;
+		const t = getActiveText();
+		if (!t) return;
+		t.fontSize = Number(sizeRange.value);
+		sizeVal.textContent = t.fontSize;
 		render();
 	});
 	fontSelect.addEventListener('change', () => {
-		state.fontFamily = fontSelect.value;
+		const t = getActiveText();
+		if (!t) return;
+		t.fontFamily = fontSelect.value;
 		render();
 	});
 	strokeWidthRange.addEventListener('input', () => {
-		state.strokeWidth = Number(strokeWidthRange.value);
-		strokeWidthVal.textContent = state.strokeWidth;
+		const t = getActiveText();
+		if (!t) return;
+		t.strokeWidth = Number(strokeWidthRange.value);
+		strokeWidthVal.textContent = t.strokeWidth;
 		render();
 	});
 	colorInput.addEventListener('input', () => {
-		state.color = colorInput.value;
+		const t = getActiveText();
+		if (!t) return;
+		t.color = colorInput.value;
 		render();
 	});
 	strokeColorInput.addEventListener('input', () => {
-		state.strokeColor = strokeColorInput.value;
+		const t = getActiveText();
+		if (!t) return;
+		t.strokeColor = strokeColorInput.value;
 		render();
 	});
 
@@ -906,9 +1133,9 @@
 
 	const FIT_MARGIN = 32; // keeps corner handles + their hit area on-canvas
 
-	function measureAt(fontSize) {
-		ctx.font = `bold ${fontSize}px ${state.fontFamily}`;
-		const lines = wrapLines(state.text);
+	function measureAt(layer, fontSize) {
+		ctx.font = `bold ${fontSize}px ${layer.fontFamily}`;
+		const lines = wrapLines(layer.text);
 		const lineHeight = fontSize * 1.2;
 		let maxWidth = 0;
 		lines.forEach((line) => {
@@ -918,34 +1145,34 @@
 		return { lines, lineHeight, maxWidth, totalHeight: lineHeight * lines.length };
 	}
 
-	// Text can't be dragged wider/taller than the canvas - shrink it to fit
-	// (without touching the user's chosen size) so it, and its corner
+	// A layer can't be dragged wider/taller than the canvas - shrink it to
+	// fit (without touching the user's chosen size) so it, and its corner
 	// handles, never end up rendered outside the visible canvas.
-	function measureTextBlock() {
-		let fontSize = state.fontSize;
-		let m = measureAt(fontSize);
+	function measureTextBlock(layer) {
+		let fontSize = layer.fontSize;
+		let m = measureAt(layer, fontSize);
 		const maxW = CW - FIT_MARGIN * 2;
 		const maxH = CH - FIT_MARGIN * 2;
 		while (fontSize > 8 && (m.maxWidth > maxW || m.totalHeight > maxH)) {
 			fontSize -= 1;
-			m = measureAt(fontSize);
+			m = measureAt(layer, fontSize);
 		}
 		return { ...m, fontSize };
 	}
 
-	function textBounds() {
-		const { maxWidth, totalHeight } = measureTextBlock();
+	function textBounds(layer) {
+		const { maxWidth, totalHeight } = measureTextBlock(layer);
 		return { halfW: maxWidth / 2 + 10, halfH: totalHeight / 2 + 10 };
 	}
 
-	function textCorners() {
-		if (!state.text.trim()) return null;
-		const { halfW, halfH } = textBounds();
+	function textCorners(layer) {
+		if (!layer.text.trim()) return null;
+		const { halfW, halfH } = textBounds(layer);
 		return [
-			{ x: state.x - halfW, y: state.y - halfH },
-			{ x: state.x + halfW, y: state.y - halfH },
-			{ x: state.x - halfW, y: state.y + halfH },
-			{ x: state.x + halfW, y: state.y + halfH },
+			{ x: layer.x - halfW, y: layer.y - halfH },
+			{ x: layer.x + halfW, y: layer.y - halfH },
+			{ x: layer.x - halfW, y: layer.y + halfH },
+			{ x: layer.x + halfW, y: layer.y + halfH },
 		];
 	}
 
@@ -971,33 +1198,36 @@
 			ctx.fillText('이미지를 업로드하세요', CW / 2, CH / 2);
 		}
 
-		if (state.text.trim()) {
-			const { lines, lineHeight, totalHeight, fontSize } = measureTextBlock();
-			ctx.font = `bold ${fontSize}px ${state.fontFamily}`;
+		state.texts.forEach((layer) => {
+			if (!layer.text.trim()) return;
+			const { lines, lineHeight, totalHeight, fontSize } = measureTextBlock(layer);
+			ctx.font = `bold ${fontSize}px ${layer.fontFamily}`;
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
 			ctx.lineJoin = 'round';
-			ctx.lineWidth = state.strokeWidth;
-			ctx.strokeStyle = state.strokeColor;
-			ctx.fillStyle = state.color;
+			ctx.lineWidth = layer.strokeWidth;
+			ctx.strokeStyle = layer.strokeColor;
+			ctx.fillStyle = layer.color;
 
-			const startY = state.y - totalHeight / 2 + lineHeight / 2;
+			const startY = layer.y - totalHeight / 2 + lineHeight / 2;
 			lines.forEach((line, i) => {
 				const ly = startY + i * lineHeight;
-				if (state.strokeWidth > 0) ctx.strokeText(line, state.x, ly);
-				ctx.fillText(line, state.x, ly);
+				if (layer.strokeWidth > 0) ctx.strokeText(line, layer.x, ly);
+				ctx.fillText(line, layer.x, ly);
 			});
 
-			textCorners().forEach((corner) => {
-				ctx.beginPath();
-				ctx.arc(corner.x, corner.y, HANDLE_RADIUS, 0, Math.PI * 2);
-				ctx.fillStyle = '#7dc4ff';
-				ctx.fill();
-				ctx.lineWidth = 2;
-				ctx.strokeStyle = '#10131a';
-				ctx.stroke();
-			});
-		}
+			if (layer.id === state.activeTextId) {
+				textCorners(layer).forEach((corner) => {
+					ctx.beginPath();
+					ctx.arc(corner.x, corner.y, HANDLE_RADIUS, 0, Math.PI * 2);
+					ctx.fillStyle = '#7dc4ff';
+					ctx.fill();
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = '#10131a';
+					ctx.stroke();
+				});
+			}
+		});
 
 		scheduleDraftSave();
 	}
@@ -1005,6 +1235,7 @@
 	// --- drag text (move) and drag handle (resize) directly on canvas ---
 	const HANDLE_RADIUS = 12;
 	let dragMode = null; // 'move' | 'resize' | null
+	let dragLayer = null;
 	let dragOffset = { x: 0, y: 0 };
 	let resizeStart = { dist: 0, fontSize: 0 };
 
@@ -1016,52 +1247,79 @@
 		};
 	}
 
-	function hitTestBody(px, py) {
-		if (!state.text.trim()) return false;
-		const { halfW, halfH } = textBounds();
-		return Math.abs(px - state.x) <= halfW && Math.abs(py - state.y) <= halfH;
+	function hitTestBody(layer, px, py) {
+		if (!layer.text.trim()) return false;
+		const { halfW, halfH } = textBounds(layer);
+		return Math.abs(px - layer.x) <= halfW && Math.abs(py - layer.y) <= halfH;
 	}
 
-	function hitTestHandle(px, py) {
-		const corners = textCorners();
+	function hitTestHandle(layer, px, py) {
+		const corners = textCorners(layer);
 		if (!corners) return false;
 		return corners.some((c) => Math.hypot(px - c.x, py - c.y) <= HANDLE_RADIUS + 8);
 	}
 
+	// Topmost (last-drawn) layer whose body contains this point, or null.
+	function findLayerBodyHitAt(px, py) {
+		for (let i = state.texts.length - 1; i >= 0; i--) {
+			if (hitTestBody(state.texts[i], px, py)) return state.texts[i];
+		}
+		return null;
+	}
+
 	function pointerDown(clientX, clientY) {
 		const p = toCanvasCoords(clientX, clientY);
-		if (hitTestHandle(p.x, p.y)) {
+		const active = getActiveText();
+		if (active && hitTestHandle(active, p.x, p.y)) {
 			dragMode = 'resize';
-			resizeStart.dist = Math.max(1, Math.hypot(p.x - state.x, p.y - state.y));
-			resizeStart.fontSize = state.fontSize;
+			dragLayer = active;
+			resizeStart.dist = Math.max(1, Math.hypot(p.x - active.x, p.y - active.y));
+			resizeStart.fontSize = active.fontSize;
 			canvas.classList.add('resizing');
-		} else if (hitTestBody(p.x, p.y)) {
+			return;
+		}
+		const hit = findLayerBodyHitAt(p.x, p.y);
+		if (hit) {
+			if (hit.id !== state.activeTextId) {
+				state.activeTextId = hit.id;
+				syncControlsFromActiveText();
+				renderTextLayerList();
+			}
 			dragMode = 'move';
-			dragOffset.x = p.x - state.x;
-			dragOffset.y = p.y - state.y;
+			dragLayer = hit;
+			dragOffset.x = p.x - hit.x;
+			dragOffset.y = p.y - hit.y;
 			canvas.classList.add('dragging');
+			render();
 		}
 	}
 	function pointerMove(clientX, clientY) {
 		const p = toCanvasCoords(clientX, clientY);
-		if (dragMode === 'move') {
-			state.x = Math.min(CW, Math.max(0, p.x - dragOffset.x));
-			state.y = Math.min(CH, Math.max(0, p.y - dragOffset.y));
+		if (dragMode === 'move' && dragLayer) {
+			dragLayer.x = Math.min(CW, Math.max(0, p.x - dragOffset.x));
+			dragLayer.y = Math.min(CH, Math.max(0, p.y - dragOffset.y));
 			render();
-		} else if (dragMode === 'resize') {
-			const dist = Math.hypot(p.x - state.x, p.y - state.y);
+		} else if (dragMode === 'resize' && dragLayer) {
+			const dist = Math.hypot(p.x - dragLayer.x, p.y - dragLayer.y);
 			const scale = dist / resizeStart.dist;
 			const newSize = Math.round(Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, resizeStart.fontSize * scale)));
-			state.fontSize = newSize;
-			sizeRange.value = newSize;
-			sizeVal.textContent = newSize;
+			dragLayer.fontSize = newSize;
+			if (dragLayer.id === state.activeTextId) {
+				sizeRange.value = newSize;
+				sizeVal.textContent = newSize;
+			}
 			render();
 		} else {
-			canvas.style.cursor = hitTestHandle(p.x, p.y) ? 'nwse-resize' : (hitTestBody(p.x, p.y) ? 'grab' : 'default');
+			const active = getActiveText();
+			let cursor = 'default';
+			if (active && hitTestHandle(active, p.x, p.y)) cursor = 'nwse-resize';
+			else if (findLayerBodyHitAt(p.x, p.y)) cursor = 'grab';
+			canvas.style.cursor = cursor;
 		}
 	}
 	function pointerUp() {
 		dragMode = null;
+		dragLayer = null;
 		canvas.classList.remove('dragging', 'resizing');
 		canvas.style.cursor = '';
 	}
@@ -1091,22 +1349,10 @@
 		setActiveRatioButton(1, 1);
 		setCanvasRatio(1, 1);
 		state.image = null;
-		state.text = '여기에 문구 입력';
-		state.x = CW / 2;
-		state.y = CH - 90;
-		state.fontSize = 48;
-		state.fontFamily = fontSelect.options[0].value;
-		state.color = '#ffffff';
-		state.strokeColor = '#000000';
-		state.strokeWidth = 6;
-		captionInput.value = state.text;
-		sizeRange.value = state.fontSize;
-		sizeVal.textContent = state.fontSize;
-		fontSelect.value = state.fontFamily;
-		colorInput.value = state.color;
-		strokeColorInput.value = state.strokeColor;
-		strokeWidthRange.value = state.strokeWidth;
-		strokeWidthVal.textContent = state.strokeWidth;
+		state.texts = [newTextLayer({ text: '여기에 문구 입력', x: CW / 2, y: CH - 90 })];
+		state.activeTextId = state.texts[0].id;
+		syncControlsFromActiveText();
+		renderTextLayerList();
 		imageInput.value = '';
 		syncCustomSizeInputs();
 		clearDraft();
@@ -1142,33 +1388,40 @@
 
 	const THUMB_SIZE = 52;
 
+	// Legacy templates (saved before multi-layer support) stored their text
+	// fields flat on the template itself instead of in a `texts` array.
+	function templateLayers(tpl) {
+		return Array.isArray(tpl.texts) && tpl.texts.length ? tpl.texts : [tpl];
+	}
+
 	function drawTemplateThumb(canvasEl, tpl) {
+		const primary = templateLayers(tpl)[0];
 		const tctx = canvasEl.getContext('2d');
 		const S = THUMB_SIZE;
 		tctx.clearRect(0, 0, S, S);
 		tctx.fillStyle = '#14151a';
 		tctx.fillRect(0, 0, S, S);
 
-		const sample = (tpl.text || '').split('\n')[0].trim() || '문구';
-		let fontSize = Math.round(10 + ((tpl.fontSize - MIN_FONT_SIZE) / (MAX_FONT_SIZE - MIN_FONT_SIZE)) * 20);
+		const sample = (primary.text || '').split('\n')[0].trim() || '문구';
+		let fontSize = Math.round(10 + ((primary.fontSize - MIN_FONT_SIZE) / (MAX_FONT_SIZE - MIN_FONT_SIZE)) * 20);
 		tctx.textAlign = 'center';
 		tctx.textBaseline = 'middle';
 		tctx.lineJoin = 'round';
 
 		let width;
 		do {
-			tctx.font = `bold ${fontSize}px ${tpl.fontFamily}`;
+			tctx.font = `bold ${fontSize}px ${primary.fontFamily}`;
 			width = tctx.measureText(sample).width;
 			if (width > S - 10) fontSize -= 1;
 		} while (width > S - 10 && fontSize > 6);
 
-		const strokeWidth = tpl.strokeWidth > 0 ? Math.max(1, fontSize * (tpl.strokeWidth / tpl.fontSize)) : 0;
+		const strokeWidth = primary.strokeWidth > 0 ? Math.max(1, fontSize * (primary.strokeWidth / primary.fontSize)) : 0;
 		if (strokeWidth > 0) {
 			tctx.lineWidth = strokeWidth;
-			tctx.strokeStyle = tpl.strokeColor;
+			tctx.strokeStyle = primary.strokeColor;
 			tctx.strokeText(sample, S / 2, S / 2);
 		}
-		tctx.fillStyle = tpl.color;
+		tctx.fillStyle = primary.color;
 		tctx.fillText(sample, S / 2, S / 2);
 	}
 
@@ -1194,12 +1447,15 @@
 
 			const info = document.createElement('div');
 			info.className = 'info';
+			const layers = templateLayers(tpl);
+			const primary = layers[0];
 			const tname = document.createElement('div');
 			tname.className = 'tname';
 			tname.textContent = tpl.name;
 			const tmeta = document.createElement('div');
 			tmeta.className = 'tmeta';
-			tmeta.textContent = `${fontLabel(tpl.fontFamily)} · ${tpl.fontSize}px`;
+			tmeta.textContent = `${fontLabel(primary.fontFamily)} · ${primary.fontSize}px`
+				+ (layers.length > 1 ? ` · 문구 ${layers.length}개` : '');
 			info.appendChild(tname);
 			info.appendChild(tmeta);
 			item.appendChild(info);
@@ -1230,24 +1486,11 @@
 		else clearActiveRatioButtons();
 		syncCustomSizeInputs();
 
-		state.text = tpl.text;
-		state.fontFamily = tpl.fontFamily;
-		state.fontSize = tpl.fontSize;
-		state.color = tpl.color;
-		state.strokeColor = tpl.strokeColor;
-		state.strokeWidth = tpl.strokeWidth;
-		state.x = tpl.x;
-		state.y = tpl.y;
+		state.texts = templateLayers(tpl).map((t) => Object.assign(newTextLayer({}), t, { id: nextTextId++ }));
+		state.activeTextId = state.texts.length ? state.texts[0].id : null;
 
-		captionInput.value = state.text;
-		fontSelect.value = state.fontFamily;
-		sizeRange.value = state.fontSize;
-		sizeVal.textContent = state.fontSize;
-		strokeWidthRange.value = state.strokeWidth;
-		strokeWidthVal.textContent = state.strokeWidth;
-		colorInput.value = state.color;
-		strokeColorInput.value = state.strokeColor;
-
+		syncControlsFromActiveText();
+		renderTextLayerList();
 		render();
 	}
 
@@ -1259,21 +1502,18 @@
 
 	saveTemplateBtn.addEventListener('click', () => {
 		if (templates.length >= MAX_TEMPLATES) {
-			showUploadMsg(`템플릿은 최대 ${MAX_TEMPLATES}개까지 저장할 수 있어요. 기존 템플릿을 삭제한 뒤 다시 저장해주세요.`, 'error');
+			showTemplateMsg(`템플릿은 최대 ${MAX_TEMPLATES}개까지 저장할 수 있어요. 기존 템플릿을 삭제한 뒤 다시 저장해주세요.`, 'error');
+			return;
+		}
+		if (state.texts.length === 0) {
+			showTemplateMsg('저장할 문구가 없어요. + 버튼으로 문구를 추가한 뒤 저장해주세요.', 'error');
 			return;
 		}
 		const name = templateNameInput.value.trim() || `템플릿 ${templates.length + 1}`;
 		templates.push({
 			id: Date.now(),
 			name,
-			text: state.text,
-			fontFamily: state.fontFamily,
-			fontSize: state.fontSize,
-			color: state.color,
-			strokeColor: state.strokeColor,
-			strokeWidth: state.strokeWidth,
-			x: state.x,
-			y: state.y,
+			texts: state.texts.map(({ id, ...rest }) => rest),
 			canvasW: CW,
 			canvasH: CH,
 		});
@@ -1291,35 +1531,50 @@
 		templateMsg.className = 'upload-msg' + (type ? ' ' + type : '');
 	}
 
-	const TEMPLATE_REQUIRED_FIELDS = {
-		name: 'string',
-		text: 'string',
-		fontFamily: 'string',
-		fontSize: 'number',
-		color: 'string',
-		strokeColor: 'string',
-		strokeWidth: 'number',
-		x: 'number',
-		y: 'number',
-		canvasW: 'number',
-		canvasH: 'number',
-	};
+	const TEXT_LAYER_NUMBER_FIELDS = ['fontSize', 'strokeWidth', 'x', 'y'];
+	const TEXT_LAYER_COLOR_FIELDS = ['fontFamily', 'color', 'strokeColor'];
 
-	// Checks one imported template entry against the required fields -
-	// returns a human-readable reason it was rejected, or null if it's valid.
+	// Checks one text layer within an imported template - returns a
+	// human-readable reason it was rejected, or null if it's valid.
+	function validateTextLayer(entry, templateIndex, layerIndex) {
+		if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+			return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구가 올바른 형식이 아니에요.`;
+		}
+		if (typeof entry.text !== 'string') {
+			return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구에 "text" 값이 없어요.`;
+		}
+		for (const key of TEXT_LAYER_COLOR_FIELDS) {
+			if (typeof entry[key] !== 'string' || entry[key].trim() === '') {
+				return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구에 "${key}" 값이 없어요.`;
+			}
+		}
+		for (const key of TEXT_LAYER_NUMBER_FIELDS) {
+			if (typeof entry[key] !== 'number' || !Number.isFinite(entry[key])) {
+				return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구에 "${key}" 값이 없거나 숫자가 아니에요.`;
+			}
+		}
+		return null;
+	}
+
+	// Checks one imported template entry - returns a human-readable reason
+	// it was rejected, or null if it (and every one of its text layers) is valid.
 	function validateTemplateEntry(entry, index) {
 		if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
 			return `${index + 1}번째 항목이 객체 형식이 아니에요.`;
 		}
-		for (const key in TEMPLATE_REQUIRED_FIELDS) {
-			const expectedType = TEMPLATE_REQUIRED_FIELDS[key];
-			const value = entry[key];
-			if (expectedType === 'string' && (typeof value !== 'string' || value.trim() === '')) {
-				return `${index + 1}번째 항목에 "${key}" 값이 없어요.`;
-			}
-			if (expectedType === 'number' && (typeof value !== 'number' || !Number.isFinite(value))) {
-				return `${index + 1}번째 항목에 "${key}" 값이 없거나 숫자가 아니에요.`;
-			}
+		if (typeof entry.name !== 'string' || entry.name.trim() === '') {
+			return `${index + 1}번째 항목에 "name" 값이 없어요.`;
+		}
+		if (!Array.isArray(entry.texts) || entry.texts.length === 0) {
+			return `${index + 1}번째 항목에 문구(texts) 배열이 없어요.`;
+		}
+		for (let i = 0; i < entry.texts.length; i++) {
+			const reason = validateTextLayer(entry.texts[i], index, i);
+			if (reason) return reason;
+		}
+		if (typeof entry.canvasW !== 'number' || !Number.isFinite(entry.canvasW)
+			|| typeof entry.canvasH !== 'number' || !Number.isFinite(entry.canvasH)) {
+			return `${index + 1}번째 항목에 캔버스 크기(canvasW/canvasH) 값이 없어요.`;
 		}
 		return null;
 	}
@@ -1386,14 +1641,16 @@
 			const imported = list.map((entry, i) => ({
 				id: Date.now() + i,
 				name: entry.name,
-				text: entry.text,
-				fontFamily: entry.fontFamily,
-				fontSize: Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, entry.fontSize)),
-				color: entry.color,
-				strokeColor: entry.strokeColor,
-				strokeWidth: Math.min(30, Math.max(0, entry.strokeWidth)),
-				x: entry.x,
-				y: entry.y,
+				texts: entry.texts.map((t) => ({
+					text: t.text,
+					fontFamily: t.fontFamily,
+					fontSize: Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, t.fontSize)),
+					color: t.color,
+					strokeColor: t.strokeColor,
+					strokeWidth: Math.min(30, Math.max(0, t.strokeWidth)),
+					x: t.x,
+					y: t.y,
+				})),
 				canvasW: clampCanvasDim(entry.canvasW),
 				canvasH: clampCanvasDim(entry.canvasH),
 			}));
