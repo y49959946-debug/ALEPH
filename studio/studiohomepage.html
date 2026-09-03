@@ -637,7 +637,7 @@
 			<span class="name" style="margin-left:auto">외곽선 색상</span>
 			<input type="color" id="strokeColorInput" value="#000000">
 		</div>
-		<div class="hint">캔버스에서 문구를 클릭하면 선택되고, 드래그하면 위치가, 모서리 점을 드래그하면 크기가 바뀌어요.</div>
+		<div class="hint">캔버스에서 이미지나 문구를 클릭하면 선택되고, 드래그하면 위치가, 모서리 점을 드래그하면 크기가 바뀌어요.</div>
 
 		<h2 style="margin-top:18px">내보내기</h2>
 		<button class="primary" id="downloadBtn">카드 이미지 저장</button>
@@ -728,16 +728,26 @@
 
 	const state = {
 		image: null,
+		imageX: 0,
+		imageY: 0,
+		imageScale: 1,
+		imageMinScale: 0.1,
+		imageMaxScale: 10,
 		texts: [],
-		activeTextId: null,
+		activeTarget: null, // { type: 'text', id } | { type: 'image' } | null
 	};
 	state.texts.push(newTextLayer({ text: '여기에 문구 입력' }));
-	state.activeTextId = state.texts[0].id;
+	state.activeTarget = { type: 'text', id: state.texts[0].id };
 	syncControlsFromActiveText();
 	renderTextLayerList();
 
 	function getActiveText() {
-		return state.texts.find((t) => t.id === state.activeTextId) || null;
+		if (!state.activeTarget || state.activeTarget.type !== 'text') return null;
+		return state.texts.find((t) => t.id === state.activeTarget.id) || null;
+	}
+
+	function isImageActive() {
+		return !!(state.activeTarget && state.activeTarget.type === 'image');
 	}
 
 	function syncControlsFromActiveText() {
@@ -764,7 +774,7 @@
 	}
 
 	function selectTextLayer(id) {
-		state.activeTextId = id;
+		state.activeTarget = { type: 'text', id };
 		syncControlsFromActiveText();
 		renderTextLayerList();
 		render();
@@ -780,8 +790,9 @@
 			return;
 		}
 		state.texts.forEach((t) => {
+			const isActive = state.activeTarget && state.activeTarget.type === 'text' && state.activeTarget.id === t.id;
 			const item = document.createElement('div');
-			item.className = 'text-layer-item' + (t.id === state.activeTextId ? ' is-active' : '');
+			item.className = 'text-layer-item' + (isActive ? ' is-active' : '');
 			item.addEventListener('click', () => selectTextLayer(t.id));
 
 			const label = document.createElement('span');
@@ -820,7 +831,7 @@
 			y: Math.min(CH - 40, CH / 2 + offset),
 		}, base));
 		state.texts.push(layer);
-		state.activeTextId = layer.id;
+		state.activeTarget = { type: 'text', id: layer.id };
 		syncControlsFromActiveText();
 		renderTextLayerList();
 		render();
@@ -830,8 +841,10 @@
 
 	function removeTextLayer(id) {
 		state.texts = state.texts.filter((t) => t.id !== id);
-		if (state.activeTextId === id) {
-			state.activeTextId = state.texts.length ? state.texts[state.texts.length - 1].id : null;
+		if (state.activeTarget && state.activeTarget.type === 'text' && state.activeTarget.id === id) {
+			state.activeTarget = state.texts.length
+				? { type: 'text', id: state.texts[state.texts.length - 1].id }
+				: (state.image ? { type: 'image' } : null);
 		}
 		syncControlsFromActiveText();
 		renderTextLayerList();
@@ -840,8 +853,21 @@
 
 	addTextBtn.addEventListener('click', addTextLayer);
 
+	function setImageCoverDefaults(img) {
+		const baseScale = Math.max(CW / img.width, CH / img.height);
+		state.imageX = CW / 2;
+		state.imageY = CH / 2;
+		state.imageScale = baseScale;
+		state.imageMinScale = baseScale * 0.15;
+		state.imageMaxScale = baseScale * 6;
+	}
+
 	function setCanvasSize(newW, newH) {
 		const relPositions = state.texts.map((t) => ({ t, relX: t.x / CW, relY: t.y / CH }));
+		const imgRel = state.image
+			? { relX: state.imageX / CW, relY: state.imageY / CH, scale: state.imageScale, minScale: state.imageMinScale, maxScale: state.imageMaxScale }
+			: null;
+		const oldCW = CW;
 
 		canvas.width = newW;
 		canvas.height = newH;
@@ -852,6 +878,15 @@
 			t.x = relX * CW;
 			t.y = relY * CH;
 		});
+
+		if (imgRel) {
+			const factor = CW / oldCW;
+			state.imageX = imgRel.relX * CW;
+			state.imageY = imgRel.relY * CH;
+			state.imageScale = imgRel.scale * factor;
+			state.imageMinScale = imgRel.minScale * factor;
+			state.imageMaxScale = imgRel.maxScale * factor;
+		}
 	}
 
 	function computePresetSize(w, h) {
@@ -903,7 +938,12 @@
 		try {
 			localStorage.setItem(DRAFT_KEY, JSON.stringify({
 				texts: state.texts,
-				activeTextId: state.activeTextId,
+				activeTarget: state.activeTarget,
+				imageX: state.imageX,
+				imageY: state.imageY,
+				imageScale: state.imageScale,
+				imageMinScale: state.imageMinScale,
+				imageMaxScale: state.imageMaxScale,
 				canvasW: CW,
 				canvasH: CH,
 			}));
@@ -958,10 +998,15 @@
 					y: meta.y,
 				})];
 			}
-			state.activeTextId = state.texts.some((t) => t.id === meta.activeTextId)
-				? meta.activeTextId
-				: (state.texts[0] ? state.texts[0].id : null);
 			nextTextId = Math.max(nextTextId, ...state.texts.map((t) => t.id + 1));
+
+			if (meta.activeTarget && meta.activeTarget.type === 'text' && state.texts.some((t) => t.id === meta.activeTarget.id)) {
+				state.activeTarget = { type: 'text', id: meta.activeTarget.id };
+			} else if (meta.activeTarget && meta.activeTarget.type === 'image') {
+				state.activeTarget = { type: 'image' };
+			} else {
+				state.activeTarget = state.texts[0] ? { type: 'text', id: state.texts[0].id } : null;
+			}
 
 			syncControlsFromActiveText();
 			renderTextLayerList();
@@ -977,6 +1022,12 @@
 			const img = new Image();
 			img.onload = () => {
 				state.image = img;
+				setImageCoverDefaults(img);
+				if (meta && typeof meta.imageX === 'number') state.imageX = meta.imageX;
+				if (meta && typeof meta.imageY === 'number') state.imageY = meta.imageY;
+				if (meta && typeof meta.imageScale === 'number') state.imageScale = meta.imageScale;
+				if (meta && typeof meta.imageMinScale === 'number') state.imageMinScale = meta.imageMinScale;
+				if (meta && typeof meta.imageMaxScale === 'number') state.imageMaxScale = meta.imageMaxScale;
 				render();
 			};
 			img.onerror = () => {
@@ -1051,6 +1102,7 @@
 			const img = new Image();
 			img.onload = () => {
 				state.image = img;
+				setImageCoverDefaults(img);
 				try {
 					localStorage.setItem(DRAFT_IMAGE_KEY, e.target.result);
 					showUploadMsg('이미지를 불러왔어요.', 'success');
@@ -1176,6 +1228,18 @@
 		];
 	}
 
+	function drawHandles(corners) {
+		corners.forEach((corner) => {
+			ctx.beginPath();
+			ctx.arc(corner.x, corner.y, HANDLE_RADIUS, 0, Math.PI * 2);
+			ctx.fillStyle = '#7dc4ff';
+			ctx.fill();
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = '#10131a';
+			ctx.stroke();
+		});
+	}
+
 	function render() {
 		ctx.clearRect(0, 0, CW, CH);
 
@@ -1184,10 +1248,10 @@
 			// image (a transparent PNG) survives into the download instead
 			// of getting flattened onto an opaque background.
 			const img = state.image;
-			const scale = Math.max(CW / img.width, CH / img.height);
-			const dw = img.width * scale;
-			const dh = img.height * scale;
-			ctx.drawImage(img, (CW - dw) / 2, (CH - dh) / 2, dw, dh);
+			const dw = img.width * state.imageScale;
+			const dh = img.height * state.imageScale;
+			ctx.drawImage(img, state.imageX - dw / 2, state.imageY - dh / 2, dw, dh);
+			if (isImageActive()) drawHandles(imageCorners());
 		} else {
 			ctx.fillStyle = '#14151a';
 			ctx.fillRect(0, 0, CW, CH);
@@ -1198,6 +1262,7 @@
 			ctx.fillText('이미지를 업로드하세요', CW / 2, CH / 2);
 		}
 
+		const activeTextId = state.activeTarget && state.activeTarget.type === 'text' ? state.activeTarget.id : null;
 		state.texts.forEach((layer) => {
 			if (!layer.text.trim()) return;
 			const { lines, lineHeight, totalHeight, fontSize } = measureTextBlock(layer);
@@ -1216,17 +1281,7 @@
 				ctx.fillText(line, layer.x, ly);
 			});
 
-			if (layer.id === state.activeTextId) {
-				textCorners(layer).forEach((corner) => {
-					ctx.beginPath();
-					ctx.arc(corner.x, corner.y, HANDLE_RADIUS, 0, Math.PI * 2);
-					ctx.fillStyle = '#7dc4ff';
-					ctx.fill();
-					ctx.lineWidth = 2;
-					ctx.strokeStyle = '#10131a';
-					ctx.stroke();
-				});
-			}
+			if (layer.id === activeTextId) drawHandles(textCorners(layer));
 		});
 
 		scheduleDraftSave();
@@ -1237,7 +1292,7 @@
 	let dragMode = null; // 'move' | 'resize' | null
 	let dragLayer = null;
 	let dragOffset = { x: 0, y: 0 };
-	let resizeStart = { dist: 0, fontSize: 0 };
+	let resizeStart = { dist: 0, fontSize: 0, imageScale: 1 };
 
 	function toCanvasCoords(clientX, clientY) {
 		const rect = canvas.getBoundingClientRect();
@@ -1267,8 +1322,43 @@
 		return null;
 	}
 
+	function imageCorners() {
+		if (!state.image) return null;
+		const img = state.image;
+		const halfW = (img.width * state.imageScale) / 2;
+		const halfH = (img.height * state.imageScale) / 2;
+		return [
+			{ x: state.imageX - halfW, y: state.imageY - halfH },
+			{ x: state.imageX + halfW, y: state.imageY - halfH },
+			{ x: state.imageX - halfW, y: state.imageY + halfH },
+			{ x: state.imageX + halfW, y: state.imageY + halfH },
+		];
+	}
+
+	function hitTestImageBody(px, py) {
+		if (!state.image) return false;
+		const img = state.image;
+		const halfW = (img.width * state.imageScale) / 2;
+		const halfH = (img.height * state.imageScale) / 2;
+		return Math.abs(px - state.imageX) <= halfW && Math.abs(py - state.imageY) <= halfH;
+	}
+
+	function hitTestImageHandle(px, py) {
+		const corners = imageCorners();
+		if (!corners) return false;
+		return corners.some((c) => Math.hypot(px - c.x, py - c.y) <= HANDLE_RADIUS + 8);
+	}
+
 	function pointerDown(clientX, clientY) {
 		const p = toCanvasCoords(clientX, clientY);
+
+		if (isImageActive() && hitTestImageHandle(p.x, p.y)) {
+			dragMode = 'resize-image';
+			resizeStart.dist = Math.max(1, Math.hypot(p.x - state.imageX, p.y - state.imageY));
+			resizeStart.imageScale = state.imageScale;
+			canvas.classList.add('resizing');
+			return;
+		}
 		const active = getActiveText();
 		if (active && hitTestHandle(active, p.x, p.y)) {
 			dragMode = 'resize';
@@ -1278,17 +1368,32 @@
 			canvas.classList.add('resizing');
 			return;
 		}
-		const hit = findLayerBodyHitAt(p.x, p.y);
-		if (hit) {
-			if (hit.id !== state.activeTextId) {
-				state.activeTextId = hit.id;
+
+		const hitText = findLayerBodyHitAt(p.x, p.y);
+		if (hitText) {
+			if (!(state.activeTarget && state.activeTarget.type === 'text' && state.activeTarget.id === hitText.id)) {
+				state.activeTarget = { type: 'text', id: hitText.id };
 				syncControlsFromActiveText();
 				renderTextLayerList();
 			}
 			dragMode = 'move';
-			dragLayer = hit;
-			dragOffset.x = p.x - hit.x;
-			dragOffset.y = p.y - hit.y;
+			dragLayer = hitText;
+			dragOffset.x = p.x - hitText.x;
+			dragOffset.y = p.y - hitText.y;
+			canvas.classList.add('dragging');
+			render();
+			return;
+		}
+
+		if (hitTestImageBody(p.x, p.y)) {
+			if (!isImageActive()) {
+				state.activeTarget = { type: 'image' };
+				syncControlsFromActiveText();
+				renderTextLayerList();
+			}
+			dragMode = 'move-image';
+			dragOffset.x = p.x - state.imageX;
+			dragOffset.y = p.y - state.imageY;
 			canvas.classList.add('dragging');
 			render();
 		}
@@ -1304,16 +1409,30 @@
 			const scale = dist / resizeStart.dist;
 			const newSize = Math.round(Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, resizeStart.fontSize * scale)));
 			dragLayer.fontSize = newSize;
-			if (dragLayer.id === state.activeTextId) {
+			if (state.activeTarget && state.activeTarget.type === 'text' && state.activeTarget.id === dragLayer.id) {
 				sizeRange.value = newSize;
 				sizeVal.textContent = newSize;
 			}
 			render();
+		} else if (dragMode === 'move-image') {
+			state.imageX = Math.min(CW, Math.max(0, p.x - dragOffset.x));
+			state.imageY = Math.min(CH, Math.max(0, p.y - dragOffset.y));
+			render();
+		} else if (dragMode === 'resize-image') {
+			const dist = Math.hypot(p.x - state.imageX, p.y - state.imageY);
+			const scale = dist / resizeStart.dist;
+			state.imageScale = Math.min(state.imageMaxScale, Math.max(state.imageMinScale, resizeStart.imageScale * scale));
+			render();
 		} else {
-			const active = getActiveText();
 			let cursor = 'default';
-			if (active && hitTestHandle(active, p.x, p.y)) cursor = 'nwse-resize';
-			else if (findLayerBodyHitAt(p.x, p.y)) cursor = 'grab';
+			if (isImageActive() && hitTestImageHandle(p.x, p.y)) {
+				cursor = 'nwse-resize';
+			} else {
+				const active = getActiveText();
+				if (active && hitTestHandle(active, p.x, p.y)) cursor = 'nwse-resize';
+				else if (findLayerBodyHitAt(p.x, p.y)) cursor = 'grab';
+				else if (hitTestImageBody(p.x, p.y)) cursor = 'grab';
+			}
 			canvas.style.cursor = cursor;
 		}
 	}
@@ -1349,8 +1468,11 @@
 		setActiveRatioButton(1, 1);
 		setCanvasRatio(1, 1);
 		state.image = null;
+		state.imageX = CW / 2;
+		state.imageY = CH / 2;
+		state.imageScale = 1;
 		state.texts = [newTextLayer({ text: '여기에 문구 입력', x: CW / 2, y: CH - 90 })];
-		state.activeTextId = state.texts[0].id;
+		state.activeTarget = { type: 'text', id: state.texts[0].id };
 		syncControlsFromActiveText();
 		renderTextLayerList();
 		imageInput.value = '';
@@ -1487,7 +1609,7 @@
 		syncCustomSizeInputs();
 
 		state.texts = templateLayers(tpl).map((t) => Object.assign(newTextLayer({}), t, { id: nextTextId++ }));
-		state.activeTextId = state.texts.length ? state.texts[0].id : null;
+		state.activeTarget = state.texts.length ? { type: 'text', id: state.texts[0].id } : null;
 
 		syncControlsFromActiveText();
 		renderTextLayerList();
