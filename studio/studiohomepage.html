@@ -234,7 +234,7 @@
 	textarea {
 		width: 100%;
 		resize: vertical;
-		min-height: 70px;
+		min-height: 160px;
 		background: #181a21;
 		border: 1px solid #3c4152;
 		border-radius: 8px;
@@ -284,7 +284,17 @@
 		height: auto;
 		max-width: 100%;
 		max-height: 70vh;
-		background: #14151a;
+		/* Checkerboard shows through wherever the canvas itself is
+		   transparent (a loaded image's own alpha) so that's visibly
+		   distinct from the opaque #14151a placeholder background. */
+		background-color: #14151a;
+		background-image:
+			linear-gradient(45deg, #24272f 25%, transparent 25%),
+			linear-gradient(-45deg, #24272f 25%, transparent 25%),
+			linear-gradient(45deg, transparent 75%, #24272f 75%),
+			linear-gradient(-45deg, transparent 75%, #24272f 75%);
+		background-size: 20px 20px;
+		background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 		border-radius: 12px;
 		border: 1px solid #2c2f3a;
 		cursor: grab;
@@ -625,6 +635,101 @@
 		return Math.min(MAX_CANVAS_SIZE, Math.max(MIN_CANVAS_SIZE, Math.round(v)));
 	}
 
+	// --- autosave the in-progress card so a refresh doesn't lose it ---
+	const DRAFT_KEY = 'jjalCardStudio.draft';
+	const DRAFT_IMAGE_KEY = 'jjalCardStudio.draftImage';
+	let draftSaveTimer = null;
+
+	function saveDraftMeta() {
+		try {
+			localStorage.setItem(DRAFT_KEY, JSON.stringify({
+				text: state.text,
+				fontFamily: state.fontFamily,
+				fontSize: state.fontSize,
+				color: state.color,
+				strokeColor: state.strokeColor,
+				strokeWidth: state.strokeWidth,
+				x: state.x,
+				y: state.y,
+				canvasW: CW,
+				canvasH: CH,
+			}));
+		} catch {
+			// autosave is best-effort - don't interrupt the user over it
+		}
+	}
+
+	function scheduleDraftSave() {
+		clearTimeout(draftSaveTimer);
+		draftSaveTimer = setTimeout(saveDraftMeta, 300);
+	}
+
+	function clearDraft() {
+		clearTimeout(draftSaveTimer);
+		try {
+			localStorage.removeItem(DRAFT_KEY);
+			localStorage.removeItem(DRAFT_IMAGE_KEY);
+		} catch {
+			// ignore
+		}
+	}
+
+	function loadDraft() {
+		let meta = null;
+		try {
+			const raw = localStorage.getItem(DRAFT_KEY);
+			meta = raw ? JSON.parse(raw) : null;
+		} catch {
+			meta = null;
+		}
+
+		if (meta) {
+			setCanvasSize(meta.canvasW || CW, meta.canvasH || CH);
+			const match = findMatchingPreset(CW, CH);
+			if (match) setActiveRatioButton(match.w, match.h);
+			else clearActiveRatioButtons();
+			syncCustomSizeInputs();
+
+			state.text = meta.text ?? state.text;
+			state.fontFamily = meta.fontFamily ?? state.fontFamily;
+			state.fontSize = meta.fontSize ?? state.fontSize;
+			state.color = meta.color ?? state.color;
+			state.strokeColor = meta.strokeColor ?? state.strokeColor;
+			state.strokeWidth = meta.strokeWidth ?? state.strokeWidth;
+			state.x = meta.x ?? state.x;
+			state.y = meta.y ?? state.y;
+
+			captionInput.value = state.text;
+			fontSelect.value = state.fontFamily;
+			sizeRange.value = state.fontSize;
+			sizeVal.textContent = state.fontSize;
+			strokeWidthRange.value = state.strokeWidth;
+			strokeWidthVal.textContent = state.strokeWidth;
+			colorInput.value = state.color;
+			strokeColorInput.value = state.strokeColor;
+		}
+
+		let imageDataUrl = null;
+		try {
+			imageDataUrl = localStorage.getItem(DRAFT_IMAGE_KEY);
+		} catch {
+			imageDataUrl = null;
+		}
+		if (imageDataUrl) {
+			const img = new Image();
+			img.onload = () => {
+				state.image = img;
+				render();
+			};
+			img.onerror = () => {
+				try { localStorage.removeItem(DRAFT_IMAGE_KEY); } catch { /* ignore */ }
+			};
+			img.src = imageDataUrl;
+		}
+
+		render();
+	}
+
 	ratioToggleBtn.addEventListener('click', () => {
 		const collapsed = ratioPanel.classList.toggle('collapsed');
 		ratioToggleBtn.textContent = collapsed ? '▸' : '▾';
@@ -688,7 +793,12 @@
 			const img = new Image();
 			img.onload = () => {
 				state.image = img;
-				showUploadMsg('이미지를 불러왔어요.', 'success');
+				try {
+					localStorage.setItem(DRAFT_IMAGE_KEY, e.target.result);
+					showUploadMsg('이미지를 불러왔어요.', 'success');
+				} catch {
+					showUploadMsg('이미지를 불러왔어요. (용량이 커서 새로고침 시 자동으로 복원되진 않아요)', 'success');
+				}
 				render();
 			};
 			img.onerror = () => {
@@ -750,10 +860,12 @@
 		return text.split('\n');
 	}
 
-	function measureTextBlock() {
-		ctx.font = `bold ${state.fontSize}px ${state.fontFamily}`;
+	const FIT_MARGIN = 32; // keeps corner handles + their hit area on-canvas
+
+	function measureAt(fontSize) {
+		ctx.font = `bold ${fontSize}px ${state.fontFamily}`;
 		const lines = wrapLines(state.text);
-		const lineHeight = state.fontSize * 1.2;
+		const lineHeight = fontSize * 1.2;
 		let maxWidth = 0;
 		lines.forEach((line) => {
 			const w = ctx.measureText(line).width;
@@ -762,30 +874,52 @@
 		return { lines, lineHeight, maxWidth, totalHeight: lineHeight * lines.length };
 	}
 
+	// Text can't be dragged wider/taller than the canvas - shrink it to fit
+	// (without touching the user's chosen size) so it, and its corner
+	// handles, never end up rendered outside the visible canvas.
+	function measureTextBlock() {
+		let fontSize = state.fontSize;
+		let m = measureAt(fontSize);
+		const maxW = CW - FIT_MARGIN * 2;
+		const maxH = CH - FIT_MARGIN * 2;
+		while (fontSize > 8 && (m.maxWidth > maxW || m.totalHeight > maxH)) {
+			fontSize -= 1;
+			m = measureAt(fontSize);
+		}
+		return { ...m, fontSize };
+	}
+
 	function textBounds() {
 		const { maxWidth, totalHeight } = measureTextBlock();
 		return { halfW: maxWidth / 2 + 10, halfH: totalHeight / 2 + 10 };
 	}
 
-	function handlePos() {
+	function textCorners() {
 		if (!state.text.trim()) return null;
 		const { halfW, halfH } = textBounds();
-		return { x: state.x + halfW, y: state.y + halfH };
+		return [
+			{ x: state.x - halfW, y: state.y - halfH },
+			{ x: state.x + halfW, y: state.y - halfH },
+			{ x: state.x - halfW, y: state.y + halfH },
+			{ x: state.x + halfW, y: state.y + halfH },
+		];
 	}
 
 	function render() {
 		ctx.clearRect(0, 0, CW, CH);
 
-		ctx.fillStyle = '#14151a';
-		ctx.fillRect(0, 0, CW, CH);
-
 		if (state.image) {
+			// Leave the canvas transparent here so any alpha in the uploaded
+			// image (a transparent PNG) survives into the download instead
+			// of getting flattened onto an opaque background.
 			const img = state.image;
 			const scale = Math.max(CW / img.width, CH / img.height);
 			const dw = img.width * scale;
 			const dh = img.height * scale;
 			ctx.drawImage(img, (CW - dw) / 2, (CH - dh) / 2, dw, dh);
 		} else {
+			ctx.fillStyle = '#14151a';
+			ctx.fillRect(0, 0, CW, CH);
 			ctx.fillStyle = '#4b5160';
 			ctx.font = '20px sans-serif';
 			ctx.textAlign = 'center';
@@ -794,8 +928,8 @@
 		}
 
 		if (state.text.trim()) {
-			const { lines, lineHeight, totalHeight } = measureTextBlock();
-			ctx.font = `bold ${state.fontSize}px ${state.fontFamily}`;
+			const { lines, lineHeight, totalHeight, fontSize } = measureTextBlock();
+			ctx.font = `bold ${fontSize}px ${state.fontFamily}`;
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
 			ctx.lineJoin = 'round';
@@ -810,21 +944,18 @@
 				ctx.fillText(line, state.x, ly);
 			});
 
-			const handle = handlePos();
-			ctx.beginPath();
-			ctx.arc(handle.x, handle.y, HANDLE_RADIUS, 0, Math.PI * 2);
-			ctx.fillStyle = '#7dc4ff';
-			ctx.fill();
-			ctx.lineWidth = 2;
-			ctx.strokeStyle = '#10131a';
-			ctx.stroke();
-			ctx.beginPath();
-			ctx.moveTo(handle.x - 6, handle.y + 6);
-			ctx.lineTo(handle.x + 6, handle.y - 6);
-			ctx.strokeStyle = '#10131a';
-			ctx.lineWidth = 2;
-			ctx.stroke();
+			textCorners().forEach((corner) => {
+				ctx.beginPath();
+				ctx.arc(corner.x, corner.y, HANDLE_RADIUS, 0, Math.PI * 2);
+				ctx.fillStyle = '#7dc4ff';
+				ctx.fill();
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = '#10131a';
+				ctx.stroke();
+			});
 		}
+
+		scheduleDraftSave();
 	}
 
 	// --- drag text (move) and drag handle (resize) directly on canvas ---
@@ -848,9 +979,9 @@
 	}
 
 	function hitTestHandle(px, py) {
-		const handle = handlePos();
-		if (!handle) return false;
-		return Math.hypot(px - handle.x, py - handle.y) <= HANDLE_RADIUS + 8;
+		const corners = textCorners();
+		if (!corners) return false;
+		return corners.some((c) => Math.hypot(px - c.x, py - c.y) <= HANDLE_RADIUS + 8);
 	}
 
 	function pointerDown(clientX, clientY) {
@@ -934,11 +1065,13 @@
 		strokeWidthVal.textContent = state.strokeWidth;
 		imageInput.value = '';
 		syncCustomSizeInputs();
+		clearDraft();
 		render();
 	});
 
 	// --- templates: save/apply/delete text style presets in localStorage ---
 	const TEMPLATE_KEY = 'jjalCardStudio.templates';
+	const MAX_TEMPLATES = 30;
 
 	function loadTemplates() {
 		try {
@@ -1081,6 +1214,10 @@
 	}
 
 	saveTemplateBtn.addEventListener('click', () => {
+		if (templates.length >= MAX_TEMPLATES) {
+			showUploadMsg(`템플릿은 최대 ${MAX_TEMPLATES}개까지 저장할 수 있어요. 기존 템플릿을 삭제한 뒤 다시 저장해주세요.`, 'error');
+			return;
+		}
 		const name = templateNameInput.value.trim() || `템플릿 ${templates.length + 1}`;
 		templates.push({
 			id: Date.now(),
@@ -1107,7 +1244,7 @@
 
 	renderTemplateList();
 
-	render();
+	loadDraft();
 	if (document.fonts && document.fonts.ready) {
 		document.fonts.ready.then(render);
 	}
