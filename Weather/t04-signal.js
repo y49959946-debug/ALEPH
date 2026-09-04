@@ -240,23 +240,39 @@
   // 여기부터는 reference adapter에 없는, 이 사이트 전용 확장입니다.
   // ---------------------------------------------------------------------
 
-  // 라이브 소스: OpenWeatherMap "현재 날씨"(서울) 응답 -> normalized reading
-  function normalizeSeoulTemp(owmCurrent, fetchedAtIso) {
+  // 도시 한글명 + OWM 검색어("Seoul,KR" 형태) -> 이 도시 전용 signal_id
+  // 예) "Seoul,KR" -> "seoul-kr-temp-c". signal_id 정규식(^[a-z0-9][a-z0-9._-]*$)을
+  // 항상 만족하도록 영문/숫자가 아닌 문자는 전부 '-'로 바꿉니다.
+  function signalIdForCity(cityKr, cityQueryValue) {
+    const slug = String(cityQueryValue)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return `${slug || 'city'}-temp-c`;
+  }
+
+  // 라이브 소스: OpenWeatherMap "현재 날씨"(사용자가 고른 도시) 응답 -> normalized reading
+  function normalizeCityTemp(cityKr, cityQueryValue, owmCurrent, fetchedAtIso) {
     const fetchedAt = fetchedAtIso || new Date().toISOString();
     const sourceTime = (owmCurrent && Number.isFinite(owmCurrent.dt))
       ? new Date(owmCurrent.dt * 1000).toISOString()
       : null;
     return {
-      signal_id: SIGNAL_ID,
+      signal_id: signalIdForCity(cityKr, cityQueryValue),
       normalized_value: owmCurrent.main.temp,
       unit: 'C',
-      source_name: 'OpenWeatherMap',
-      source_url: 'https://openweathermap.org/city/1835848', // Seoul, KR
+      source_name: `OpenWeatherMap (${cityKr})`,
+      source_url: `https://openweathermap.org/find?q=${encodeURIComponent(cityQueryValue)}`,
       source_time: sourceTime,
       fetched_at: fetchedAt,
       record_timezone: 'Asia/Seoul',
       record_date: kstDate(fetchedAt)
     };
+  }
+
+  // 이전 버전과의 호환용 (서울 고정 버전) — 새 코드는 normalizeCityTemp를 씁니다.
+  function normalizeSeoulTemp(owmCurrent, fetchedAtIso) {
+    return normalizeCityTemp('서울', 'Seoul,KR', owmCurrent, fetchedAtIso);
   }
 
   // 사이트의 WeatherFetchError.type -> T04 5종 error_code
@@ -325,6 +341,8 @@
     applyError,
     comparisonFor,
     runFixture,
+    signalIdForCity,
+    normalizeCityTemp,
     normalizeSeoulTemp,
     classifyLiveError,
     loadState,

@@ -120,6 +120,11 @@
 		.t04-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 0 0 14px; flex-wrap: wrap; }
 		.t04-heading strong { font-size: 17px; font-weight: 800; }
 		.t04-heading span { color: var(--muted); font-size: 11px; }
+		.t04-track-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 16px; padding: 10px 12px; border: 1px dashed #e5c56e; border-radius: 6px; background: #fffaee; }
+		.t04-track-note { color: #6d5a35; font-family: Arial, sans-serif; font-size: 12px; }
+		.t04-track-note strong { color: var(--ink); }
+		.t04-track-btn { padding: 7px 14px; border: 1px solid #e5c56e; border-radius: 6px; color: #765822; background: #fff7dc; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+		.t04-track-btn:hover { background: #fff0bd; }
 		.t04-value-row { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; }
 		.t04-value { font-size: 32px; font-weight: 800; color: var(--ink); }
 		.t04-stale-badge { padding: 3px 9px; border-radius: 20px; background: #fdeee7; color: #9a3b22; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
@@ -136,6 +141,13 @@
 		.t04-retry { padding: 8px 16px; border: 1px solid #e5c56e; border-radius: 6px; color: #765822; background: #fff7dc; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
 		.t04-retry:hover { background: #fff0bd; }
 		.t04-retry[hidden] { display: none; }
+		.t04-history-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+		.t04-history-title { margin: 0 0 8px; color: var(--muted); font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; }
+		.t04-history { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+		.t04-history li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 7px 10px; border-radius: 6px; background: rgba(0,0,0,.03); font-family: Arial, sans-serif; font-size: 12px; }
+		.t04-history li.t04-history-empty { color: var(--muted); background: transparent; justify-content: flex-start; }
+		.t04-history .t04-history-date { color: var(--muted); font-weight: 700; }
+		.t04-history .t04-history-value { font-weight: 800; color: var(--ink); }
 
 		.footer { margin-top: 28px; color: #aaa99e; font-family: Arial, sans-serif; font-size: 11px; }
 
@@ -225,7 +237,11 @@
 		</section>
 
 		<section class="t04-panel" id="t04-panel" aria-label="오늘의 진짜 정보판" aria-live="polite">
-			<div class="t04-heading"><strong>오늘의 진짜 정보판</strong><span>서울 현재 기온 · Asia/Seoul 기준</span></div>
+			<div class="t04-heading"><strong>오늘의 진짜 정보판</strong><span id="t04-heading-sub">서울 현재 기온 · Asia/Seoul 기준</span></div>
+			<div class="t04-track-row">
+				<span class="t04-track-note">지금 대시보드에서 보고 있는 도시: <strong id="t04-current-browse-city">서울</strong></span>
+				<button class="t04-track-btn" id="t04-track-btn" type="button">이 도시로 저장</button>
+			</div>
 			<p class="t04-value-row">
 				<span class="t04-value" id="t04-value">--°C</span>
 				<span class="t04-stale-badge" id="t04-stale-badge" hidden>오래된 값</span>
@@ -238,6 +254,10 @@
 			</dl>
 			<p class="t04-status" id="t04-status">아직 조회된 값이 없어요.</p>
 			<button class="t04-retry" id="t04-retry" type="button" hidden>다시 시도</button>
+			<div class="t04-history-wrap">
+				<p class="t04-history-title">저장된 날짜별 기록</p>
+				<ul class="t04-history" id="t04-history"><li class="t04-history-empty">아직 저장된 기록이 없어요.</li></ul>
+			</div>
 		</section>
 
 		<p class="footer">맑은 하루를 기록해 보세요.</p>
@@ -532,6 +552,8 @@
 		}
 
 		async function selectCity(city) {
+			currentDashboardCity = city;
+			if (window.T04Signal) renderT04Panel();
 			document.querySelectorAll('.city-option').forEach((button) => button.classList.toggle('active', button.dataset.city === city));
 			updateMapSelection(city);
 			// 로딩/에러는 별도 배너로만 표시하고, 기존에 떠 있던 정상 데이터
@@ -624,10 +646,21 @@
 		});
 
 		// ------------------------------------------------------------------
-		// T04 "오늘의 진짜 정보판": 서울 현재 기온을 별도로 일별 저장하고,
-		// 실패해도 마지막 정상값을 지우지 않고 상태만 구분해서 보여줍니다.
-		// 대시보드에서 다른 도시를 보고 있어도 이 신호는 항상 서울 기준입니다.
+		// T04 "오늘의 진짜 정보판": 사용자가 "이 도시로 저장" 버튼을 누른 도시의
+		// 기온을 별도로 일별 저장합니다. 대시보드에서 다른 도시를 잠깐 둘러봐도
+		// 버튼을 누르기 전까지는 정보판이 바뀌지 않고, 실패해도 마지막 정상값을
+		// 지우지 않고 상태만 구분해서 보여줍니다.
 		// ------------------------------------------------------------------
+		const T04_SELECTED_CITY_KEY = 'aleph_t04_selected_city_v1';
+		let currentDashboardCity = '서울';
+		let t04TrackedCity = (function () {
+			try {
+				const saved = localStorage.getItem(T04_SELECTED_CITY_KEY);
+				return (saved && CITY_QUERY[saved]) ? saved : '서울';
+			} catch {
+				return '서울';
+			}
+		})();
 		let t04State = window.T04Signal ? T04Signal.loadState() : null;
 
 		function t04FormatKst(iso) {
@@ -664,10 +697,21 @@
 
 		function renderT04Panel() {
 			if (!t04State) return;
-			const lastRow = t04State.daily_readings[t04State.daily_readings.length - 1];
-			const shown = t04State.current_reading || (lastRow && lastRow.reading) || null;
-			const status = t04State.status;
+			const trackedSignalId = window.T04Signal ? T04Signal.signalIdForCity(t04TrackedCity, CITY_QUERY[t04TrackedCity]) : null;
+			const rows = t04State.daily_readings
+				.filter((row) => row.signal_id === trackedSignalId)
+				.slice()
+				.sort((a, b) => a.record_date.localeCompare(b.record_date));
+			const lastRow = rows[rows.length - 1];
+			const currentIsTracked = t04State.current_reading && t04State.current_reading.signal_id === trackedSignalId;
+			const shown = (currentIsTracked ? t04State.current_reading : null) || (lastRow && lastRow.reading) || null;
+			const status = currentIsTracked || (t04State.last_run && t04State.last_run.outcome === 'error') ? t04State.status : (shown ? { freshness: 'fresh', error_code: 'none' } : null);
 			const isStale = !!(status && status.freshness === 'stale' && shown);
+
+			$('t04-heading-sub').textContent = `${t04TrackedCity} 현재 기온 · Asia/Seoul 기준`;
+			$('t04-current-browse-city').textContent = currentDashboardCity;
+			$('t04-track-btn').disabled = currentDashboardCity === t04TrackedCity;
+			$('t04-track-btn').textContent = currentDashboardCity === t04TrackedCity ? '현재 추적 중인 도시예요' : '이 도시로 저장';
 
 			if (shown) {
 				$('t04-value').textContent = `${shown.normalized_value}°${shown.unit === 'C' ? 'C' : shown.unit}`;
@@ -683,8 +727,18 @@
 				$('t04-fetched-at').textContent = '-';
 			}
 
+			const comparison = (window.T04Signal && lastRow) ? T04Signal.comparisonFor(rows, lastRow) : { state: 'insufficient' };
 			$('t04-stale-badge').hidden = !isStale;
-			$('t04-delta').textContent = t04DeltaText(t04State.last_comparison);
+			$('t04-delta').textContent = t04DeltaText(comparison);
+
+			const historyEl = $('t04-history');
+			if (!rows.length) {
+				historyEl.innerHTML = '<li class="t04-history-empty">아직 저장된 기록이 없어요.</li>';
+			} else {
+				historyEl.innerHTML = rows.map((row) => `
+					<li><span class="t04-history-date">${row.record_date}</span><span class="t04-history-value">${row.normalized_value}°${row.unit === 'C' ? 'C' : row.unit}</span></li>
+				`).join('');
+			}
 
 			const statusEl = $('t04-status');
 			const retryBtn = $('t04-retry');
@@ -703,8 +757,8 @@
 			}
 		}
 
-		async function t04FetchSeoulCurrent() {
-			const q = encodeURIComponent(CITY_QUERY['서울']);
+		async function t04FetchCityCurrent(city) {
+			const q = encodeURIComponent(CITY_QUERY[city]);
 			const res = await fetchWithTimeout(`${WORKER_BASE}?endpoint=weather&q=${q}&lang=kr`);
 			assertOk(res);
 			const data = await res.json();
@@ -714,11 +768,11 @@
 			return data;
 		}
 
-		async function syncSeoulSignal() {
+		async function syncTrackedCitySignal() {
 			if (!window.T04Signal) return;
 			try {
-				const current = await t04FetchSeoulCurrent();
-				const reading = T04Signal.normalizeSeoulTemp(current, new Date().toISOString());
+				const current = await t04FetchCityCurrent(t04TrackedCity);
+				const reading = T04Signal.normalizeCityTemp(t04TrackedCity, CITY_QUERY[t04TrackedCity], current, new Date().toISOString());
 				t04State = T04Signal.applySuccessfulReading(t04State, reading, { virtual_now: reading.fetched_at });
 			} catch (err) {
 				const code = (err && err.type) ? T04Signal.classifyLiveError(err.type) : 'schema_error';
@@ -730,7 +784,13 @@
 		}
 
 		if (window.T04Signal) {
-			$('t04-retry').addEventListener('click', syncSeoulSignal);
+			$('t04-retry').addEventListener('click', syncTrackedCitySignal);
+			$('t04-track-btn').addEventListener('click', () => {
+				if (currentDashboardCity === t04TrackedCity) return;
+				t04TrackedCity = currentDashboardCity;
+				try { localStorage.setItem(T04_SELECTED_CITY_KEY, t04TrackedCity); } catch { /* localStorage 불가 환경은 조용히 무시 */ }
+				syncTrackedCitySignal();
+			});
 			renderT04Panel();
 
 			// 채점/디버깅용: 콘솔에서 window.applyT04Fixture(fixtureJson) 또는
@@ -752,8 +812,8 @@
 		}
 
 		renderCityList('전체');
-		selectCity('서울');
-		syncSeoulSignal();
+		selectCity(t04TrackedCity);
+		syncTrackedCitySignal();
 	</script>
 </body>
 </html>
