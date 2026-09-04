@@ -68,7 +68,8 @@
 		.dashboard-grid { display: grid; grid-template-columns: minmax(280px, .78fr) minmax(420px, 1.22fr); gap: 18px; align-items: stretch; }
 		.weather-panel { display: flex; flex-direction: column; min-height: 410px; overflow: hidden; border: 1px solid rgba(229, 197, 110, .45); border-radius: 8px; background: rgba(255,255,255,.72); box-shadow: var(--shadow); }
 		.current { display: flex; flex: 1; align-items: center; justify-content: center; gap: 26px; padding: 34px 24px; background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,246,216,.86)); }
-		.weather-icon { position: relative; display: grid; place-items: center; width: 132px; height: 132px; color: var(--icon); font-size: 104px; line-height: 1; filter: drop-shadow(0 8px 8px rgba(192, 140, 45, .2)); }
+		.weather-icon { position: relative; display: grid; place-items: center; width: 132px; height: 132px; line-height: 1; }
+		.weather-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 8px rgba(192, 140, 45, .25)); }
 		.weather-icon::after { content: ""; position: absolute; right: 2px; bottom: 12px; width: 62px; height: 12px; border-radius: 50%; background: rgba(192, 140, 45, .16); filter: blur(5px); }
 		.temperature { margin: 0; color: #353331; font-size: clamp(58px, 7vw, 82px); font-weight: 800; line-height: .9; letter-spacing: -.08em; }
 		.temperature sup { margin-left: 5px; color: var(--accent); font-size: .34em; vertical-align: top; letter-spacing: 0; }
@@ -95,7 +96,7 @@
 		.day:last-child { border-right: 0; }
 		.day-name { color: var(--muted); font-family: Arial, sans-serif; font-size: 11px; }
 		.day:hover, .day.selected { background: #fff8e5; box-shadow: inset 0 -3px 0 #e4bd61; }
-		.day-icon { display: block; height: 47px; margin: 14px 0 10px; color: var(--icon); font-size: 32px; filter: drop-shadow(0 4px 4px rgba(192, 140, 45, .16)); }
+		.day-icon { display: block; width: 47px; height: 47px; margin: 14px auto 10px; filter: drop-shadow(0 4px 4px rgba(192, 140, 45, .2)); }
 		.day-temp { font-size: 18px; font-weight: 700; }
 		.day-temp small { color: var(--muted); font-size: 13px; }
 		.rain { display: block; margin-top: 9px; color: #a47b2c; font-family: Arial, sans-serif; font-size: 10px; }
@@ -107,7 +108,7 @@
 		.hourly-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; overflow-x: auto; }
 		.hour { padding: 13px 8px; border: 1px solid #f0e9d9; border-radius: 6px; background: #fffdf9; text-align: center; }
 		.hour-time { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
-		.hour-icon { display: block; margin: 10px 0 7px; color: var(--icon); font-size: 23px; }
+		.hour-icon { display: block; width: 30px; height: 30px; margin: 10px auto 7px; }
 		.hour-temp { display: block; font-size: 16px; font-weight: 800; }
 		.hour-condition { display: block; min-height: 30px; margin-top: 6px; color: #6d5a35; font-size: 11px; font-weight: 700; line-height: 1.35; }
 		.hour-rain { display: block; margin-top: 6px; color: #a47b2c; font-size: 10px; }
@@ -120,7 +121,7 @@
 			.dashboard-grid { grid-template-columns: 1fr; }
 			.weather-panel { display: flex; min-height: 0; }
 			.current { min-height: 280px; gap: 22px; padding: 36px 24px; }
-			.weather-icon { width: 92px; height: 92px; font-size: 72px; }
+			.weather-icon { width: 92px; height: 92px; }
 			.details { padding: 12px 24px 20px; }
 			.map-panel { min-height: 360px; }
 			#map { min-height: 300px; }
@@ -168,7 +169,7 @@
 		<div class="dashboard-grid">
 			<section class="weather-panel" aria-label="현재 날씨">
 				<div class="current">
-					<div class="weather-icon" id="main-icon" aria-label="맑음">☀</div>
+					<div class="weather-icon" id="main-icon" aria-label="맑음"><img id="main-icon-img" src="" alt=""></div>
 					<div>
 						<p class="temperature" id="temperature">24<sup>°C</sup></p>
 						<p class="condition" id="condition">맑고 따뜻해요</p>
@@ -257,15 +258,20 @@
 			제주도: ['제주', '서귀포'],
 		};
 
-		function iconFor(owmIcon) {
+		// OpenWeatherMap 공식 아이콘 이미지 주소 (icon 코드에 낮/밤(d/n)까지 포함되어 있음)
+		function iconUrl(owmIcon, size) {
+			return `https://openweathermap.org/img/wn/${owmIcon}@${size || '2x'}.png`;
+		}
+
+		// API가 주는 상세 영어/한글 설명 대신, 우리가 정한 5가지 표현으로 단순화합니다.
+		function conditionLabel(owmIcon) {
 			const code = owmIcon.slice(0, 2);
-			if (code === '01') return '☀';
-			if (code === '02' || code === '03') return '◐';
-			if (code === '04') return '☁';
-			if (code === '09' || code === '10') return '☂';
-			if (code === '11') return '⛈';
-			if (code === '13') return '❄';
-			return '☀';
+			if (code === '01') return '맑음';
+			if (code === '02') return '약간 흐림';
+			if (code === '03' || code === '04' || code === '50') return '흐림';
+			if (code === '09' || code === '10' || code === '11') return '비';
+			if (code === '13') return '눈';
+			return '맑음';
 		}
 
 		function windDirection(deg) {
@@ -289,7 +295,7 @@
 				const high = Math.round(Math.max(...temps));
 				const low = Math.round(Math.min(...temps));
 				const noonEntry = entries.find((e) => e.dt_txt.includes('12:00:00')) || entries[Math.floor(entries.length / 2)];
-				const icon = iconFor(noonEntry.weather[0].icon);
+				const icon = noonEntry.weather[0].icon;
 				const rain = Math.round(Math.max(...entries.map((e) => (e.pop || 0) * 100)));
 				const label = date === today ? '오늘' : dayNames[new Date(date).getDay()];
 				return { date, label, icon, high, low, rain };
@@ -381,14 +387,14 @@
 		function renderHourly(date, entries, label) {
 			$('hourly-date').textContent = `${label} 시간대별 날씨`;
 			$('hourly-list').innerHTML = entries.map((entry) => `
-				<div class="hour"><span class="hour-time">${entry.dt_txt.slice(11, 16)}</span><span class="hour-icon">${iconFor(entry.weather[0].icon)}</span><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-condition">${entry.weather[0].description}</span><span class="hour-rain">강수 ${Math.round((entry.pop || 0) * 100)}%</span></div>
+				<div class="hour"><span class="hour-time">${entry.dt_txt.slice(11, 16)}</span><img class="hour-icon" src="${iconUrl(entry.weather[0].icon)}" alt=""><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-condition">${conditionLabel(entry.weather[0].icon)}</span><span class="hour-rain">강수 확률 ${Math.round((entry.pop || 0) * 100)}%</span></div>
 			`).join('');
 			$('hourly-panel').hidden = false;
 		}
 
 		function renderForecast(forecastData) {
 			$('forecast').innerHTML = forecastData.days.map((day, index) => `
-				<button class="day${index === 0 ? ' selected' : ''}" data-date="${day.date}" data-label="${day.label}" type="button"><span class="day-name">${day.label}</span><span class="day-icon">${day.icon}</span><span class="day-temp">${day.high}° <small>${day.low}°</small></span><span class="rain">물방울 ${day.rain}%</span></button>
+				<button class="day${index === 0 ? ' selected' : ''}" data-date="${day.date}" data-label="${day.label}" type="button"><span class="day-name">${day.label}</span><img class="day-icon" src="${iconUrl(day.icon)}" alt=""><span class="day-temp">${day.high}° <small>${day.low}°</small></span><span class="rain">강수 확률 ${day.rain}%</span></button>
 			`).join('');
 			document.querySelectorAll('.day').forEach((button) => button.addEventListener('click', () => {
 				document.querySelectorAll('.day').forEach((day) => day.classList.remove('selected'));
@@ -407,10 +413,10 @@
 				const { current, forecast } = await fetchWeather(city);
 				const now = new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
 				$('updated-location').textContent = `${city}, ${CITY_COUNTRY[city]} · 오늘 ${now} 기준`;
-				$('main-icon').textContent = iconFor(current.weather[0].icon);
-				$('main-icon').setAttribute('aria-label', current.weather[0].description);
+				$('main-icon-img').src = iconUrl(current.weather[0].icon, '4x');
+				$('main-icon').setAttribute('aria-label', conditionLabel(current.weather[0].icon));
 				$('temperature').innerHTML = `${Math.round(current.main.temp)}<sup>°C</sup>`;
-				$('condition').textContent = current.weather[0].description;
+				$('condition').textContent = conditionLabel(current.weather[0].icon);
 				$('feels').textContent = `체감 온도 ${Math.round(current.main.feels_like)}°C`;
 				$('high-low').textContent = `${Math.round(current.main.temp_max)}° / ${Math.round(current.main.temp_min)}°`;
 				$('rain-value').textContent = `${Math.round((forecast.list[0].pop || 0) * 100)}%`;
