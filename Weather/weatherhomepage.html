@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>오늘의 날씨</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 	<style>
 		:root {
 			--ink: #353331;
@@ -34,8 +35,11 @@
 		button { font: inherit; }
 		.page { width: min(1160px, calc(100% - 48px)); margin: 0 auto; padding: 36px 0 56px; }
 		.topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 34px; }
-		.brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 800; letter-spacing: .02em; }
+		.brand { display: flex; align-items: center; gap: 12px; }
 		.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #96702d; background: var(--yellow); font-size: 20px; }
+		.brand-copy { display: flex; flex-direction: column; gap: 3px; }
+		.brand-title { color: #3f392e; font-family: "Trebuchet MS", "Malgun Gothic", sans-serif; font-size: 21px; font-weight: 800; letter-spacing: .02em; line-height: 1; }
+		.brand-caption { color: #a0844d; font-family: Arial, sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .2em; line-height: 1; }
 		.date { color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; letter-spacing: .08em; }
 		.back-link { margin-left: auto; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; text-decoration: none; white-space: nowrap; }
 		.back-link:hover { color: var(--accent); }
@@ -68,18 +72,9 @@
 		.map-heading { position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 		.map-heading strong { font-size: 19px; font-weight: 800; }
 		.map-heading span { color: var(--muted); font-size: 11px; }
-		.map-surface { position: absolute; inset: 0; background-image: linear-gradient(rgba(198, 154, 57, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(198, 154, 57, .07) 1px, transparent 1px); background-size: 34px 34px; }
-		.map-surface::before, .map-surface::after { content: ""; position: absolute; border: 1px solid rgba(207, 169, 87, .22); background: rgba(255, 250, 231, .72); transform: rotate(-18deg); }
-		.map-surface::before { width: 41%; height: 48%; top: 27%; left: 19%; border-radius: 47% 53% 42% 58%; }
-		.map-surface::after { width: 28%; height: 37%; top: 18%; right: 16%; border-radius: 56% 44% 61% 39%; transform: rotate(25deg); }
-		.map-legend { position: absolute; z-index: 2; right: 24px; bottom: 20px; color: #a58a52; font-size: 10px; }
-		.map-pin { position: absolute; z-index: 3; display: flex; align-items: center; gap: 6px; border: 0; padding: 5px 7px; color: #755a26; background: rgba(255,255,255,.82); cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; transform: translate(-50%, -50%); transition: .2s ease; }
-		.map-pin::before { content: ""; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background: var(--icon); box-shadow: 0 0 0 2px rgba(192,140,45,.28); }
-		.map-pin:hover, .map-pin.active { color: #4d3b1e; background: #fff4c9; box-shadow: 0 5px 15px rgba(143,110,43,.14); }
-		.map-pin.active::before { background: #9f6f1f; }
-		.pin-seoul { top: 38%; left: 69%; }
-		.pin-busan { top: 58%; left: 72%; }
-		.pin-jeju { top: 78%; left: 64%; }
+		#map { position: absolute; inset: 58px 0 0; z-index: 1; min-height: 350px; }
+		.leaflet-container { color: var(--ink); font-family: inherit; }
+		.map-panel .leaflet-control-zoom a { color: #755a26; }
 
 		.forecast-heading { display: flex; align-items: baseline; justify-content: space-between; margin: 44px 0 17px; }
 		h2 { margin: 0; font-size: 24px; font-weight: 800; }
@@ -103,6 +98,7 @@
 		.hour-time { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
 		.hour-icon { display: block; margin: 10px 0 7px; color: var(--icon); font-size: 23px; }
 		.hour-temp { display: block; font-size: 16px; font-weight: 800; }
+		.hour-condition { display: block; min-height: 30px; margin-top: 6px; color: #6d5a35; font-size: 11px; font-weight: 700; line-height: 1.35; }
 		.hour-rain { display: block; margin-top: 6px; color: #a47b2c; font-size: 10px; }
 		.footer { margin-top: 28px; color: #aaa99e; font-family: Arial, sans-serif; font-size: 11px; }
 
@@ -116,6 +112,7 @@
 			.weather-icon { width: 92px; height: 92px; font-size: 72px; }
 			.details { padding: 12px 24px 20px; }
 			.map-panel { min-height: 360px; }
+			#map { min-height: 300px; }
 			.detail { padding: 15px 8px; }
 			.forecast { overflow-x: auto; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); }
 			.day { padding-left: 8px; padding-right: 8px; }
@@ -127,7 +124,7 @@
 <body>
 	<main class="page">
 		<header class="topbar">
-			<div class="brand"><span class="brand-mark">☼</span> weather note</div>
+			<div class="brand"><span class="brand-mark">☼</span><span class="brand-copy"><strong class="brand-title">weather note</strong><span class="brand-caption">LOCAL WEATHER JOURNAL</span></span></div>
 			<a class="back-link" href="../index.html">← 메인으로</a>
 			<time class="date" datetime="2026-09-04">FRIDAY, SEP 04, 2026</time>
 		</header>
@@ -142,6 +139,16 @@
 			<button class="location active" data-city="서울" type="button">서울</button>
 			<button class="location" data-city="부산" type="button">부산</button>
 			<button class="location" data-city="제주" type="button">제주</button>
+			<button class="location" data-city="인천" type="button">인천</button>
+			<button class="location" data-city="대전" type="button">대전</button>
+			<button class="location" data-city="대구" type="button">대구</button>
+			<button class="location" data-city="광주" type="button">광주</button>
+			<button class="location" data-city="울산" type="button">울산</button>
+			<button class="location" data-city="수원" type="button">수원</button>
+			<button class="location" data-city="강릉" type="button">강릉</button>
+			<button class="location" data-city="전주" type="button">전주</button>
+			<button class="location" data-city="청주" type="button">청주</button>
+			<button class="location" data-city="춘천" type="button">춘천</button>
 		</nav>
 
 		<div class="dashboard-grid">
@@ -164,12 +171,7 @@
 
 			<section class="map-panel" aria-label="지역 선택 지도">
 				<div class="map-heading"><strong>지역 선택</strong><span>지도의 핀을 눌러보세요</span></div>
-				<div class="map-surface">
-					<button class="map-pin pin-seoul active" data-city="서울" type="button">서울</button>
-					<button class="map-pin pin-busan" data-city="부산" type="button">부산</button>
-					<button class="map-pin pin-jeju" data-city="제주" type="button">제주</button>
-				</div>
-				<span class="map-legend">WEATHER NOTE / LIVE REGION</span>
+				<div id="map" aria-label="대한민국 지도"></div>
 			</section>
 		</div>
 
@@ -182,6 +184,7 @@
 		<p class="footer">맑은 하루를 기록해 보세요.</p>
 	</main>
 
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 	<script>
 		// API 키는 이 파일에 두지 않습니다 - Cloudflare Worker 프록시(owm-proxy-worker.js 참고)가
 		// 키를 서버 쪽에 숨겨서 대신 호출해줍니다. 아래 주소를 배포한 Worker 주소로 바꿔주세요.
@@ -192,8 +195,22 @@
 			서울: 'Seoul,KR',
 			부산: 'Busan,KR',
 			제주: 'Jeju,KR',
+			인천: 'Incheon,KR',
+			대전: 'Daejeon,KR',
+			대구: 'Daegu,KR',
+			광주: 'Gwangju,KR',
+			울산: 'Ulsan,KR',
+			수원: 'Suwon,KR',
+			강릉: 'Gangneung,KR',
+			전주: 'Jeonju,KR',
+			청주: 'Cheongju,KR',
+			춘천: 'Chuncheon,KR',
 		};
-		const CITY_COUNTRY = { 서울: '대한민국', 부산: '대한민국', 제주: '대한민국' };
+		const CITY_COUNTRY = {
+			서울: '대한민국', 부산: '대한민국', 제주: '대한민국', 인천: '대한민국', 대전: '대한민국',
+			대구: '대한민국', 광주: '대한민국', 울산: '대한민국', 수원: '대한민국', 강릉: '대한민국',
+			전주: '대한민국', 청주: '대한민국', 춘천: '대한민국',
+		};
 
 		function iconFor(owmIcon) {
 			const code = owmIcon.slice(0, 2);
@@ -246,10 +263,53 @@
 		}
 
 		const $ = (id) => document.getElementById(id);
+		const mapMarkers = new Map();
+		const mapLocations = {
+			서울: [37.5665, 126.978],
+			부산: [35.1796, 129.0756],
+			제주: [33.4996, 126.5312],
+			인천: [37.4563, 126.7052],
+			대전: [36.3504, 127.3845],
+			대구: [35.8714, 128.6014],
+			광주: [35.1595, 126.8526],
+			울산: [35.5384, 129.3114],
+			수원: [37.2636, 127.0286],
+			강릉: [37.7519, 128.8761],
+			전주: [35.8242, 127.148],
+			청주: [36.6424, 127.489],
+			춘천: [37.8813, 127.7298],
+		};
+		const weatherMap = window.L ? L.map('map', { zoomControl: false }).setView([36.2, 127.8], 6) : null;
+		if (weatherMap) {
+			L.control.zoom({ position: 'bottomright' }).addTo(weatherMap);
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 18,
+				attribution: '&copy; OpenStreetMap contributors',
+			}).addTo(weatherMap);
+			Object.entries(mapLocations).forEach(([city, coordinates]) => {
+				const marker = L.circleMarker(coordinates, {
+					radius: 8,
+					color: '#ffffff',
+					weight: 3,
+					fillColor: '#c08c2d',
+					fillOpacity: .95,
+				}).addTo(weatherMap).bindTooltip(city, { direction: 'top', offset: [0, -8] });
+				marker.on('click', () => selectCity(city));
+				mapMarkers.set(city, marker);
+			});
+		}
+
+		function updateMapSelection(city) {
+			mapMarkers.forEach((marker, markerCity) => marker.setStyle({
+				radius: markerCity === city ? 11 : 8,
+				fillColor: markerCity === city ? '#8f641b' : '#c08c2d',
+			}));
+		}
+
 		function renderHourly(date, entries, label) {
 			$('hourly-date').textContent = `${label} 시간대별 날씨`;
 			$('hourly-list').innerHTML = entries.map((entry) => `
-				<div class="hour"><span class="hour-time">${entry.dt_txt.slice(11, 16)}</span><span class="hour-icon">${iconFor(entry.weather[0].icon)}</span><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-rain">강수 ${Math.round((entry.pop || 0) * 100)}%</span></div>
+				<div class="hour"><span class="hour-time">${entry.dt_txt.slice(11, 16)}</span><span class="hour-icon">${iconFor(entry.weather[0].icon)}</span><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-condition">${entry.weather[0].description}</span><span class="hour-rain">강수 ${Math.round((entry.pop || 0) * 100)}%</span></div>
 			`).join('');
 			$('hourly-panel').hidden = false;
 		}
@@ -269,7 +329,7 @@
 
 		async function selectCity(city) {
 			document.querySelectorAll('.location').forEach((button) => button.classList.toggle('active', button.dataset.city === city));
-			document.querySelectorAll('.map-pin').forEach((button) => button.classList.toggle('active', button.dataset.city === city));
+			updateMapSelection(city);
 			$('condition').textContent = '불러오는 중...';
 			try {
 				const { current, forecast } = await fetchWeather(city);
@@ -292,7 +352,6 @@
 		}
 
 		document.querySelectorAll('.location').forEach((button) => button.addEventListener('click', () => selectCity(button.dataset.city)));
-		document.querySelectorAll('.map-pin').forEach((button) => button.addEventListener('click', () => selectCity(button.dataset.city)));
 		selectCity('서울');
 	</script>
 </body>
