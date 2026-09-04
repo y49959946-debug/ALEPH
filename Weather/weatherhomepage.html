@@ -6,13 +6,14 @@
 	<title>오늘의 날씨</title>
 	<style>
 		:root {
-			--ink: #3f4546;
-			--muted: #8b8e88;
+			--ink: #353331;
+			--muted: #77736b;
 			--paper: #fcfbf7;
 			--line: #ebe8df;
 			--yellow: #f3d889;
 			--yellow-soft: #fff6d9;
 			--accent: #c79542;
+			--icon: #c08c2d;
 			--shadow: 0 20px 55px rgba(114, 91, 45, 0.1);
 		}
 
@@ -21,14 +22,19 @@
 			margin: 0;
 			min-width: 320px;
 			color: var(--ink);
-			background: linear-gradient(135deg, #fffdf8 0%, #fff9e9 53%, #f8edc9 100%);
-			font-family: Georgia, "Times New Roman", serif;
+			background-color: #fffdf8;
+			background-image:
+				radial-gradient(circle at 4% 0%, rgba(255, 235, 166, .4) 0, rgba(255, 235, 166, 0) 28%),
+				radial-gradient(circle at 96% 100%, rgba(250, 220, 128, .28) 0, rgba(250, 220, 128, 0) 30%),
+				linear-gradient(135deg, #ffffff 0%, #fffdf8 58%, #fff5d5 100%);
+			font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+			font-weight: 500;
 		}
 
 		button { font: inherit; }
 		.page { width: min(1160px, calc(100% - 48px)); margin: 0 auto; padding: 36px 0 56px; }
 		.topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 34px; }
-		.brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700; letter-spacing: .02em; }
+		.brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 800; letter-spacing: .02em; }
 		.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #96702d; background: var(--yellow); font-size: 20px; }
 		.date { color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; letter-spacing: .08em; }
 		.back-link { margin-left: auto; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; text-decoration: none; white-space: nowrap; }
@@ -36,52 +42,85 @@
 
 		.intro { margin-bottom: 18px; }
 		.eyebrow { margin: 0 0 10px; color: var(--accent); font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
-		h1 { margin: 0; font-size: clamp(34px, 5vw, 58px); font-weight: 400; line-height: 1.05; letter-spacing: -.04em; }
+		h1 { margin: 0; font-size: clamp(34px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -.04em; }
 		.subtitle { margin: 12px 0 0; color: var(--muted); font-family: Arial, sans-serif; font-size: 14px; }
 
 		.locations { display: flex; gap: 8px; margin: 28px 0; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 		.locations::-webkit-scrollbar { display: none; }
-		.location { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 7px; padding: 10px 17px; color: var(--muted); background: rgba(255,255,255,.55); cursor: pointer; font-family: Arial, sans-serif; font-size: 13px; transition: .2s ease; }
+		.location { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 7px; padding: 10px 17px; color: var(--muted); background: rgba(255,255,255,.72); cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700; transition: .2s ease; }
 		.location:hover, .location.active { border-color: #e5c56e; color: #765822; background: #fff7dc; }
 
-		.weather-panel { display: grid; grid-template-columns: 1.1fr .9fr; min-height: 340px; overflow: hidden; border: 1px solid rgba(229, 197, 110, .45); border-radius: 8px; background: rgba(255,255,255,.63); box-shadow: var(--shadow); }
-		.current { display: flex; align-items: center; justify-content: center; gap: clamp(28px, 7vw, 80px); padding: 48px; background: linear-gradient(120deg, rgba(255,255,255,.8), rgba(255,245,209,.72)); }
-		.weather-icon { position: relative; display: grid; place-items: center; width: 132px; height: 132px; color: #d1a844; font-size: 104px; line-height: 1; }
-		.weather-icon::after { content: ""; position: absolute; right: 2px; bottom: 12px; width: 62px; height: 12px; border-radius: 50%; background: rgba(207, 167, 70, .15); filter: blur(5px); }
-		.temperature { margin: 0; color: #353b3b; font-size: clamp(66px, 9vw, 104px); font-weight: 400; line-height: .9; letter-spacing: -.08em; }
+		.dashboard-grid { display: grid; grid-template-columns: minmax(280px, .78fr) minmax(420px, 1.22fr); gap: 18px; align-items: stretch; }
+		.weather-panel { display: flex; flex-direction: column; min-height: 410px; overflow: hidden; border: 1px solid rgba(229, 197, 110, .45); border-radius: 8px; background: rgba(255,255,255,.72); box-shadow: var(--shadow); }
+		.current { display: flex; flex: 1; align-items: center; justify-content: center; gap: 26px; padding: 34px 24px; background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,246,216,.86)); }
+		.weather-icon { position: relative; display: grid; place-items: center; width: 132px; height: 132px; color: var(--icon); font-size: 104px; line-height: 1; filter: drop-shadow(0 8px 8px rgba(192, 140, 45, .2)); }
+		.weather-icon::after { content: ""; position: absolute; right: 2px; bottom: 12px; width: 62px; height: 12px; border-radius: 50%; background: rgba(192, 140, 45, .16); filter: blur(5px); }
+		.temperature { margin: 0; color: #353331; font-size: clamp(58px, 7vw, 82px); font-weight: 800; line-height: .9; letter-spacing: -.08em; }
 		.temperature sup { margin-left: 5px; color: var(--accent); font-size: .34em; vertical-align: top; letter-spacing: 0; }
-		.condition { margin: 16px 0 0; font-family: Arial, sans-serif; font-size: 13px; }
+		.condition { margin: 16px 0 0; color: #755a26; font-family: inherit; font-size: 15px; font-weight: 700; }
 		.feels { margin: 7px 0 0; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; }
-		.details { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 1px; padding: 38px; background: rgba(255,255,255,.4); }
+		.details { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 1px; padding: 14px 24px 20px; background: rgba(255,255,255,.48); }
 		.detail { padding: 18px 8px; border-bottom: 1px solid var(--line); }
 		.detail:nth-child(3), .detail:nth-child(4) { border-bottom: 0; }
 		.detail-label { display: block; margin-bottom: 8px; color: var(--muted); font-family: Arial, sans-serif; font-size: 11px; }
-		.detail-value { font-size: 18px; }
+		.detail-value { font-size: 18px; font-weight: 700; }
+		.map-panel { position: relative; min-height: 410px; overflow: hidden; padding: 24px; border: 1px solid rgba(229, 197, 110, .45); border-radius: 8px; background: linear-gradient(145deg, rgba(255,255,255,.9), rgba(255,247,218,.76)); box-shadow: var(--shadow); }
+		.map-heading { position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+		.map-heading strong { font-size: 19px; font-weight: 800; }
+		.map-heading span { color: var(--muted); font-size: 11px; }
+		.map-surface { position: absolute; inset: 0; background-image: linear-gradient(rgba(198, 154, 57, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(198, 154, 57, .07) 1px, transparent 1px); background-size: 34px 34px; }
+		.map-surface::before, .map-surface::after { content: ""; position: absolute; border: 1px solid rgba(207, 169, 87, .22); background: rgba(255, 250, 231, .72); transform: rotate(-18deg); }
+		.map-surface::before { width: 41%; height: 48%; top: 27%; left: 19%; border-radius: 47% 53% 42% 58%; }
+		.map-surface::after { width: 28%; height: 37%; top: 18%; right: 16%; border-radius: 56% 44% 61% 39%; transform: rotate(25deg); }
+		.map-legend { position: absolute; z-index: 2; right: 24px; bottom: 20px; color: #a58a52; font-size: 10px; }
+		.map-pin { position: absolute; z-index: 3; display: flex; align-items: center; gap: 6px; border: 0; padding: 5px 7px; color: #755a26; background: rgba(255,255,255,.82); cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; transform: translate(-50%, -50%); transition: .2s ease; }
+		.map-pin::before { content: ""; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background: var(--icon); box-shadow: 0 0 0 2px rgba(192,140,45,.28); }
+		.map-pin:hover, .map-pin.active { color: #4d3b1e; background: #fff4c9; box-shadow: 0 5px 15px rgba(143,110,43,.14); }
+		.map-pin.active::before { background: #9f6f1f; }
+		.pin-seoul { top: 38%; left: 69%; }
+		.pin-busan { top: 58%; left: 72%; }
+		.pin-jeju { top: 78%; left: 64%; }
 
 		.forecast-heading { display: flex; align-items: baseline; justify-content: space-between; margin: 44px 0 17px; }
-		h2 { margin: 0; font-size: 24px; font-weight: 400; }
+		h2 { margin: 0; font-size: 24px; font-weight: 800; }
 		.unit-note { color: var(--muted); font-family: Arial, sans-serif; font-size: 11px; }
 		.forecast { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-		.day { min-width: 0; padding: 22px 10px 20px; text-align: center; border-right: 1px solid var(--line); }
+		.day { min-width: 0; padding: 22px 10px 20px; border: 0; border-right: 1px solid var(--line); color: inherit; background: transparent; cursor: pointer; font: inherit; text-align: center; }
 		.day:last-child { border-right: 0; }
 		.day-name { color: var(--muted); font-family: Arial, sans-serif; font-size: 11px; }
-		.day-icon { display: block; height: 47px; margin: 14px 0 10px; color: #d0a647; font-size: 32px; }
-		.day-temp { font-size: 18px; }
+		.day:hover, .day.selected { background: #fff8e5; box-shadow: inset 0 -3px 0 #e4bd61; }
+		.day-icon { display: block; height: 47px; margin: 14px 0 10px; color: var(--icon); font-size: 32px; filter: drop-shadow(0 4px 4px rgba(192, 140, 45, .16)); }
+		.day-temp { font-size: 18px; font-weight: 700; }
 		.day-temp small { color: var(--muted); font-size: 13px; }
-		.rain { display: block; margin-top: 9px; color: #91aab0; font-family: Arial, sans-serif; font-size: 10px; }
+		.rain { display: block; margin-top: 9px; color: #a47b2c; font-family: Arial, sans-serif; font-size: 10px; }
+		.hourly-panel { margin-top: 20px; padding: 24px 26px 26px; border: 1px solid #eee3c9; border-radius: 8px; background: rgba(255, 255, 255, .78); box-shadow: 0 12px 30px rgba(143, 110, 43, .07); }
+		.hourly-panel[hidden] { display: none; }
+		.hourly-title { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 0 0 18px; }
+		.hourly-title strong { font-size: 17px; font-weight: 800; }
+		.hourly-title span { color: var(--muted); font-size: 11px; }
+		.hourly-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; overflow-x: auto; }
+		.hour { padding: 13px 8px; border: 1px solid #f0e9d9; border-radius: 6px; background: #fffdf9; text-align: center; }
+		.hour-time { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
+		.hour-icon { display: block; margin: 10px 0 7px; color: var(--icon); font-size: 23px; }
+		.hour-temp { display: block; font-size: 16px; font-weight: 800; }
+		.hour-rain { display: block; margin-top: 6px; color: #a47b2c; font-size: 10px; }
 		.footer { margin-top: 28px; color: #aaa99e; font-family: Arial, sans-serif; font-size: 11px; }
 
 		@media (max-width: 700px) {
 			.page { width: min(100% - 28px, 560px); padding-top: 24px; }
 			.topbar { margin-bottom: 28px; }
 			.date { display: none; }
-			.weather-panel { display: block; }
+			.dashboard-grid { grid-template-columns: 1fr; }
+			.weather-panel { display: flex; min-height: 0; }
 			.current { min-height: 280px; gap: 22px; padding: 36px 24px; }
 			.weather-icon { width: 92px; height: 92px; font-size: 72px; }
 			.details { padding: 12px 24px 20px; }
+			.map-panel { min-height: 360px; }
 			.detail { padding: 15px 8px; }
 			.forecast { overflow-x: auto; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); }
 			.day { padding-left: 8px; padding-right: 8px; }
+			.hourly-panel { padding: 20px 14px; }
+			.hourly-list { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
 		}
 	</style>
 </head>
@@ -103,29 +142,43 @@
 			<button class="location active" data-city="서울" type="button">서울</button>
 			<button class="location" data-city="부산" type="button">부산</button>
 			<button class="location" data-city="제주" type="button">제주</button>
-			<button class="location" data-city="도쿄" type="button">도쿄</button>
-			<button class="location" data-city="파리" type="button">파리</button>
 		</nav>
 
-		<section class="weather-panel" aria-label="현재 날씨">
-			<div class="current">
-				<div class="weather-icon" id="main-icon" aria-label="맑음">☀</div>
-				<div>
-					<p class="temperature" id="temperature">24<sup>°C</sup></p>
-					<p class="condition" id="condition">맑고 따뜻해요</p>
-					<p class="feels" id="feels">체감 온도 25°C</p>
+		<div class="dashboard-grid">
+			<section class="weather-panel" aria-label="현재 날씨">
+				<div class="current">
+					<div class="weather-icon" id="main-icon" aria-label="맑음">☀</div>
+					<div>
+						<p class="temperature" id="temperature">24<sup>°C</sup></p>
+						<p class="condition" id="condition">맑고 따뜻해요</p>
+						<p class="feels" id="feels">체감 온도 25°C</p>
+					</div>
 				</div>
-			</div>
-			<div class="details">
-				<div class="detail"><span class="detail-label">최고 / 최저</span><span class="detail-value" id="high-low">27° / 18°</span></div>
-				<div class="detail"><span class="detail-label">강수 확률</span><span class="detail-value" id="rain-value">10%</span></div>
-				<div class="detail"><span class="detail-label">습도</span><span class="detail-value" id="humidity">52%</span></div>
-				<div class="detail"><span class="detail-label">바람</span><span class="detail-value" id="wind">서 2.4 m/s</span></div>
-			</div>
-		</section>
+				<div class="details">
+					<div class="detail"><span class="detail-label">최고 / 최저</span><span class="detail-value" id="high-low">27° / 18°</span></div>
+					<div class="detail"><span class="detail-label">강수 확률</span><span class="detail-value" id="rain-value">10%</span></div>
+					<div class="detail"><span class="detail-label">습도</span><span class="detail-value" id="humidity">52%</span></div>
+					<div class="detail"><span class="detail-label">바람</span><span class="detail-value" id="wind">서 2.4 m/s</span></div>
+				</div>
+			</section>
+
+			<section class="map-panel" aria-label="지역 선택 지도">
+				<div class="map-heading"><strong>지역 선택</strong><span>지도의 핀을 눌러보세요</span></div>
+				<div class="map-surface">
+					<button class="map-pin pin-seoul active" data-city="서울" type="button">서울</button>
+					<button class="map-pin pin-busan" data-city="부산" type="button">부산</button>
+					<button class="map-pin pin-jeju" data-city="제주" type="button">제주</button>
+				</div>
+				<span class="map-legend">WEATHER NOTE / LIVE REGION</span>
+			</section>
+		</div>
 
 		<div class="forecast-heading"><h2>이번 주</h2><span class="unit-note">섭씨 · °C</span></div>
 		<section class="forecast" id="forecast" aria-label="이번 주 날씨 예보"></section>
+		<section class="hourly-panel" id="hourly-panel" aria-live="polite" hidden>
+			<div class="hourly-title"><strong id="hourly-date">시간대별 날씨</strong><span>3시간 간격 예보</span></div>
+			<div class="hourly-list" id="hourly-list"></div>
+		</section>
 		<p class="footer">맑은 하루를 기록해 보세요.</p>
 	</main>
 
@@ -139,10 +192,8 @@
 			서울: 'Seoul,KR',
 			부산: 'Busan,KR',
 			제주: 'Jeju,KR',
-			도쿄: 'Tokyo,JP',
-			파리: 'Paris,FR',
 		};
-		const CITY_COUNTRY = { 서울: '대한민국', 부산: '대한민국', 제주: '대한민국', 도쿄: '일본', 파리: '프랑스' };
+		const CITY_COUNTRY = { 서울: '대한민국', 부산: '대한민국', 제주: '대한민국' };
 
 		function iconFor(owmIcon) {
 			const code = owmIcon.slice(0, 2);
@@ -171,7 +222,7 @@
 			});
 			const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 			const today = new Date().toISOString().slice(0, 10);
-			return Array.from(byDate.entries()).map(([date, entries]) => {
+			const days = Array.from(byDate.entries()).map(([date, entries]) => {
 				const temps = entries.map((e) => e.main.temp);
 				const high = Math.round(Math.max(...temps));
 				const low = Math.round(Math.min(...temps));
@@ -179,8 +230,9 @@
 				const icon = iconFor(noonEntry.weather[0].icon);
 				const rain = Math.round(Math.max(...entries.map((e) => (e.pop || 0) * 100)));
 				const label = date === today ? '오늘' : dayNames[new Date(date).getDay()];
-				return [label, icon, high, low, rain];
+				return { date, label, icon, high, low, rain };
 			});
+			return { days, hourly: byDate };
 		}
 
 		async function fetchWeather(city) {
@@ -194,14 +246,30 @@
 		}
 
 		const $ = (id) => document.getElementById(id);
-		function renderForecast(days) {
-			$('forecast').innerHTML = days.map(([day, icon, high, low, rain]) => `
-				<article class="day"><span class="day-name">${day}</span><span class="day-icon">${icon}</span><span class="day-temp">${high}° <small>${low}°</small></span><span class="rain">물방울 ${rain}%</span></article>
+		function renderHourly(date, entries, label) {
+			$('hourly-date').textContent = `${label} 시간대별 날씨`;
+			$('hourly-list').innerHTML = entries.map((entry) => `
+				<div class="hour"><span class="hour-time">${entry.dt_txt.slice(11, 16)}</span><span class="hour-icon">${iconFor(entry.weather[0].icon)}</span><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-rain">강수 ${Math.round((entry.pop || 0) * 100)}%</span></div>
 			`).join('');
+			$('hourly-panel').hidden = false;
+		}
+
+		function renderForecast(forecastData) {
+			$('forecast').innerHTML = forecastData.days.map((day, index) => `
+				<button class="day${index === 0 ? ' selected' : ''}" data-date="${day.date}" data-label="${day.label}" type="button"><span class="day-name">${day.label}</span><span class="day-icon">${day.icon}</span><span class="day-temp">${day.high}° <small>${day.low}°</small></span><span class="rain">물방울 ${day.rain}%</span></button>
+			`).join('');
+			document.querySelectorAll('.day').forEach((button) => button.addEventListener('click', () => {
+				document.querySelectorAll('.day').forEach((day) => day.classList.remove('selected'));
+				button.classList.add('selected');
+				renderHourly(button.dataset.date, forecastData.hourly.get(button.dataset.date), button.dataset.label);
+			}));
+			const firstDay = forecastData.days[0];
+			if (firstDay) renderHourly(firstDay.date, forecastData.hourly.get(firstDay.date), firstDay.label);
 		}
 
 		async function selectCity(city) {
 			document.querySelectorAll('.location').forEach((button) => button.classList.toggle('active', button.dataset.city === city));
+			document.querySelectorAll('.map-pin').forEach((button) => button.classList.toggle('active', button.dataset.city === city));
 			$('condition').textContent = '불러오는 중...';
 			try {
 				const { current, forecast } = await fetchWeather(city);
@@ -224,6 +292,7 @@
 		}
 
 		document.querySelectorAll('.location').forEach((button) => button.addEventListener('click', () => selectCity(button.dataset.city)));
+		document.querySelectorAll('.map-pin').forEach((button) => button.addEventListener('click', () => selectCity(button.dataset.city)));
 		selectCity('서울');
 	</script>
 </body>
