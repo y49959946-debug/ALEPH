@@ -69,7 +69,7 @@
 		.weather-panel { display: flex; flex-direction: column; min-height: 410px; overflow: hidden; border: 1px solid rgba(229, 197, 110, .45); border-radius: 8px; background: rgba(255,255,255,.72); box-shadow: var(--shadow); }
 		.current { display: flex; flex: 1; align-items: center; justify-content: center; gap: 26px; padding: 34px 24px; background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,246,216,.86)); }
 		.weather-icon { position: relative; display: grid; place-items: center; width: 132px; height: 132px; line-height: 1; }
-		.weather-icon img { width: 100%; height: 100%; object-fit: contain; filter: sepia(.35) hue-rotate(170deg) saturate(2.2) brightness(1.02) drop-shadow(0 8px 8px rgba(192, 140, 45, .25)); }
+		.weather-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 8px rgba(192, 140, 45, .25)); }
 		.weather-icon::after { content: ""; position: absolute; right: 2px; bottom: 12px; width: 62px; height: 12px; border-radius: 50%; background: rgba(192, 140, 45, .16); filter: blur(5px); }
 		.temperature { margin: 0; color: #353331; font-size: clamp(58px, 7vw, 82px); font-weight: 800; line-height: .9; letter-spacing: -.08em; }
 		.temperature sup { margin-left: 5px; color: var(--accent); font-size: .34em; vertical-align: top; letter-spacing: 0; }
@@ -96,7 +96,7 @@
 		.day:last-child { border-right: 0; }
 		.day-name { color: var(--muted); font-family: Arial, sans-serif; font-size: 11px; }
 		.day:hover, .day.selected { background: #fff8e5; box-shadow: inset 0 -3px 0 #e4bd61; }
-		.day-icon { display: block; width: 47px; height: 47px; margin: 14px auto 10px; filter: sepia(.35) hue-rotate(170deg) saturate(2.2) brightness(1.02) drop-shadow(0 4px 4px rgba(192, 140, 45, .2)); }
+		.day-icon { display: block; width: 47px; height: 47px; margin: 14px auto 10px; filter: drop-shadow(0 4px 4px rgba(192, 140, 45, .2)); }
 		.day-temp { font-size: 18px; font-weight: 700; }
 		.day-temp small { color: var(--muted); font-size: 13px; }
 		.rain { display: block; margin-top: 9px; color: #a47b2c; font-family: Arial, sans-serif; font-size: 10px; }
@@ -108,7 +108,7 @@
 		.hourly-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; overflow-x: auto; }
 		.hour { padding: 13px 8px; border: 1px solid #f0e9d9; border-radius: 6px; background: #fffdf9; text-align: center; }
 		.hour-time { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
-		.hour-icon { display: block; width: 30px; height: 30px; margin: 10px auto 7px; filter: sepia(.35) hue-rotate(170deg) saturate(2.2) brightness(1.02); }
+		.hour-icon { display: block; width: 30px; height: 30px; margin: 10px auto 7px; }
 		.hour-temp { display: block; font-size: 16px; font-weight: 800; }
 		.hour-condition { display: block; min-height: 30px; margin-top: 6px; color: #6d5a35; font-size: 11px; font-weight: 700; line-height: 1.35; }
 		.hour-rain { display: block; margin-top: 6px; color: #a47b2c; font-size: 10px; }
