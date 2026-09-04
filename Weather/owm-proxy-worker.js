@@ -14,7 +14,7 @@
 // 6) 화면 상단에 뜨는 워커 주소(https://xxx.workers.dev)를
 //    weatherhomepage.html의 WORKER_BASE에 붙여넣기
 
-const ALLOWED_ORIGIN = 'https://y49959946-debug.github.io';
+const ALLOWED_ORIGIN = 'https://aleph-flame.vercel.app';
 
 export default {
 	async fetch(request, env) {

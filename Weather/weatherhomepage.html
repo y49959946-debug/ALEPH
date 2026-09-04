@@ -31,6 +31,8 @@
 		.brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700; letter-spacing: .02em; }
 		.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #96702d; background: var(--yellow); font-size: 20px; }
 		.date { color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; letter-spacing: .08em; }
+		.back-link { margin-left: auto; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; text-decoration: none; white-space: nowrap; }
+		.back-link:hover { color: var(--accent); }
 
 		.intro { margin-bottom: 18px; }
 		.eyebrow { margin: 0 0 10px; color: var(--accent); font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
@@ -87,6 +89,7 @@
 	<main class="page">
 		<header class="topbar">
 			<div class="brand"><span class="brand-mark">☼</span> weather note</div>
+			<a class="back-link" href="../index.html">← 메인으로</a>
 			<time class="date" datetime="2026-09-04">FRIDAY, SEP 04, 2026</time>
 		</header>
 
