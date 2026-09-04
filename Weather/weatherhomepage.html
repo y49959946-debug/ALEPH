@@ -316,7 +316,9 @@
 				const label = date === today ? '오늘' : dayNames[new Date(`${date}T00:00:00Z`).getUTCDay()];
 				return { date, label, icon, high, low, rain };
 			});
-			return { days, hourly: byDate };
+			// "오늘" 카드는 하루치가 아니라, 지금 시점부터 이어지는 10개 구간(대략 오늘~내일)을 보여줍니다.
+			const todayPlusTomorrow = list.slice(0, 10);
+			return { days, hourly: byDate, todayPlusTomorrow };
 		}
 
 		async function fetchWeather(city) {
@@ -412,13 +414,13 @@
 			$('forecast').innerHTML = forecastData.days.map((day, index) => `
 				<button class="day${index === 0 ? ' selected' : ''}" data-date="${day.date}" data-label="${day.label}" type="button"><span class="day-name">${day.label}</span><img class="day-icon" src="${iconUrl(day.icon)}" alt=""><span class="day-temp">${day.high}° <small>${day.low}°</small></span><span class="rain">강수 확률 ${day.rain}%</span></button>
 			`).join('');
-			document.querySelectorAll('.day').forEach((button) => button.addEventListener('click', () => {
+			document.querySelectorAll('.day').forEach((button, index) => button.addEventListener('click', () => {
 				document.querySelectorAll('.day').forEach((day) => day.classList.remove('selected'));
 				button.classList.add('selected');
-				renderHourly(forecastData.hourly.get(button.dataset.date), button.dataset.label, tzOffsetSec);
+				const entries = index === 0 ? forecastData.todayPlusTomorrow : forecastData.hourly.get(button.dataset.date);
+				renderHourly(entries, index === 0 ? '오늘·내일' : button.dataset.label, tzOffsetSec);
 			}));
-			const firstDay = forecastData.days[0];
-			if (firstDay) renderHourly(forecastData.hourly.get(firstDay.date), firstDay.label, tzOffsetSec);
+			if (forecastData.days[0]) renderHourly(forecastData.todayPlusTomorrow, '오늘·내일', tzOffsetSec);
 		}
 
 		async function selectCity(city) {
