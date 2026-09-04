@@ -259,8 +259,10 @@
 		};
 
 		// OpenWeatherMap 공식 아이콘 이미지 주소 (icon 코드에 낮/밤(d/n)까지 포함되어 있음)
+		// 밤 아이콘(끝이 n)은 안 쓰고 항상 낮 버전(d)으로 통일해서 보여줍니다.
 		function iconUrl(owmIcon, size) {
-			return `https://openweathermap.org/img/wn/${owmIcon}@${size || '2x'}.png`;
+			const dayIcon = owmIcon.replace(/n$/, 'd');
+			return `https://openweathermap.org/img/wn/${dayIcon}@${size || '2x'}.png`;
 		}
 
 		// API가 주는 상세 영어/한글 설명 대신, 우리가 정한 5가지 표현으로 단순화합니다.
@@ -279,25 +281,39 @@
 			return dirs[Math.round(deg / 45) % 8];
 		}
 
+		// entry.dt_txt는 UTC 기준이라 그대로 쓰면 한국(UTC+9) 등에서 시간이 밀려요
+		// (정오가 한국 밤 9시로 표시되는 식). API가 도시별로 알려주는 timezone
+		// 오프셋(초)을 더해서, 그 도시 기준 "현지 시각"으로 바꿔 씁니다.
+		const pad2 = (n) => String(n).padStart(2, '0');
+		function toLocalDate(entry, tzOffsetSec) {
+			return new Date((entry.dt + tzOffsetSec) * 1000);
+		}
+		function localDateKey(d) {
+			return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
+		}
+		function localTimeLabel(d) {
+			return `${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
+		}
+
 		// OpenWeatherMap 무료 키에서 바로 쓸 수 있는 "5일/3시간 간격" 예보를
-		// 날짜별로 묶어서 최고/최저/대표 아이콘을 계산합니다 (실질적으로 5일치).
-		function groupDailyForecast(list) {
+		// (현지 기준) 날짜별로 묶어서 최고/최저/대표 아이콘을 계산합니다 (실질적으로 5일치).
+		function groupDailyForecast(list, tzOffsetSec) {
 			const byDate = new Map();
 			list.forEach((entry) => {
-				const date = entry.dt_txt.slice(0, 10);
+				const date = localDateKey(toLocalDate(entry, tzOffsetSec));
 				if (!byDate.has(date)) byDate.set(date, []);
 				byDate.get(date).push(entry);
 			});
 			const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-			const today = new Date().toISOString().slice(0, 10);
+			const today = localDateKey(new Date(Date.now() + tzOffsetSec * 1000));
 			const days = Array.from(byDate.entries()).map(([date, entries]) => {
 				const temps = entries.map((e) => e.main.temp);
 				const high = Math.round(Math.max(...temps));
 				const low = Math.round(Math.min(...temps));
-				const noonEntry = entries.find((e) => e.dt_txt.includes('12:00:00')) || entries[Math.floor(entries.length / 2)];
+				const noonEntry = entries.find((e) => toLocalDate(e, tzOffsetSec).getUTCHours() === 12) || entries[Math.floor(entries.length / 2)];
 				const icon = noonEntry.weather[0].icon;
 				const rain = Math.round(Math.max(...entries.map((e) => (e.pop || 0) * 100)));
-				const label = date === today ? '오늘' : dayNames[new Date(date).getDay()];
+				const label = date === today ? '오늘' : dayNames[new Date(`${date}T00:00:00Z`).getUTCDay()];
 				return { date, label, icon, high, low, rain };
 			});
 			return { days, hourly: byDate };
@@ -384,25 +400,25 @@
 			}));
 		}
 
-		function renderHourly(date, entries, label) {
+		function renderHourly(entries, label, tzOffsetSec) {
 			$('hourly-date').textContent = `${label} 시간대별 날씨`;
 			$('hourly-list').innerHTML = entries.map((entry) => `
-				<div class="hour"><span class="hour-time">${entry.dt_txt.slice(11, 16)}</span><img class="hour-icon" src="${iconUrl(entry.weather[0].icon)}" alt=""><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-condition">${conditionLabel(entry.weather[0].icon)}</span><span class="hour-rain">강수 확률 ${Math.round((entry.pop || 0) * 100)}%</span></div>
+				<div class="hour"><span class="hour-time">${localTimeLabel(toLocalDate(entry, tzOffsetSec))}</span><img class="hour-icon" src="${iconUrl(entry.weather[0].icon)}" alt=""><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-condition">${conditionLabel(entry.weather[0].icon)}</span><span class="hour-rain">강수 확률 ${Math.round((entry.pop || 0) * 100)}%</span></div>
 			`).join('');
 			$('hourly-panel').hidden = false;
 		}
 
-		function renderForecast(forecastData) {
+		function renderForecast(forecastData, tzOffsetSec) {
 			$('forecast').innerHTML = forecastData.days.map((day, index) => `
 				<button class="day${index === 0 ? ' selected' : ''}" data-date="${day.date}" data-label="${day.label}" type="button"><span class="day-name">${day.label}</span><img class="day-icon" src="${iconUrl(day.icon)}" alt=""><span class="day-temp">${day.high}° <small>${day.low}°</small></span><span class="rain">강수 확률 ${day.rain}%</span></button>
 			`).join('');
 			document.querySelectorAll('.day').forEach((button) => button.addEventListener('click', () => {
 				document.querySelectorAll('.day').forEach((day) => day.classList.remove('selected'));
 				button.classList.add('selected');
-				renderHourly(button.dataset.date, forecastData.hourly.get(button.dataset.date), button.dataset.label);
+				renderHourly(forecastData.hourly.get(button.dataset.date), button.dataset.label, tzOffsetSec);
 			}));
 			const firstDay = forecastData.days[0];
-			if (firstDay) renderHourly(firstDay.date, forecastData.hourly.get(firstDay.date), firstDay.label);
+			if (firstDay) renderHourly(forecastData.hourly.get(firstDay.date), firstDay.label, tzOffsetSec);
 		}
 
 		async function selectCity(city) {
@@ -422,7 +438,8 @@
 				$('rain-value').textContent = `${Math.round((forecast.list[0].pop || 0) * 100)}%`;
 				$('humidity').textContent = `${current.main.humidity}%`;
 				$('wind').textContent = `${windDirection(current.wind.deg)} ${current.wind.speed.toFixed(1)} m/s`;
-				renderForecast(groupDailyForecast(forecast.list));
+				const tzOffsetSec = (forecast.city && forecast.city.timezone) || 0;
+				renderForecast(groupDailyForecast(forecast.list, tzOffsetSec), tzOffsetSec);
 			} catch (err) {
 				$('condition').textContent = '날씨 정보를 불러오지 못했어요.';
 				console.error(err);
