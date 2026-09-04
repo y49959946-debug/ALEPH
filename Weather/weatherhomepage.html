@@ -147,6 +147,7 @@
 		.t04-history li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 7px 10px; border-radius: 6px; background: rgba(0,0,0,.03); font-family: Arial, sans-serif; font-size: 12px; }
 		.t04-history li.t04-history-empty { color: var(--muted); background: transparent; justify-content: flex-start; }
 		.t04-history .t04-history-date { color: var(--muted); font-weight: 700; }
+		.t04-history .t04-history-time { color: #b4a888; font-weight: 500; }
 		.t04-history .t04-history-value { font-weight: 800; color: var(--ink); }
 
 		.footer { margin-top: 28px; color: #aaa99e; font-family: Arial, sans-serif; font-size: 11px; }
@@ -675,6 +676,17 @@
 			}
 		}
 
+		function t04FormatKstTime(iso) {
+			if (!iso) return '-';
+			try {
+				return new Intl.DateTimeFormat('ko-KR', {
+					timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false,
+				}).format(new Date(iso));
+			} catch {
+				return '-';
+			}
+		}
+
 		function t04MessageForError(code) {
 			const messages = {
 				timeout: '⏱ 서버 응답이 너무 늦어 시간 초과됐어요.',
@@ -736,7 +748,7 @@
 				historyEl.innerHTML = '<li class="t04-history-empty">아직 저장된 기록이 없어요.</li>';
 			} else {
 				historyEl.innerHTML = rows.map((row) => `
-					<li><span class="t04-history-date">${row.record_date}</span><span class="t04-history-value">${row.normalized_value}°${row.unit === 'C' ? 'C' : row.unit}</span></li>
+					<li><span class="t04-history-date">${row.record_date} <span class="t04-history-time">${t04FormatKstTime(row.last_fetched_at)} 기준</span></span><span class="t04-history-value">${row.normalized_value}°${row.unit === 'C' ? 'C' : row.unit}</span></li>
 				`).join('');
 			}
 
