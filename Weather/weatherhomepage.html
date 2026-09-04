@@ -48,6 +48,9 @@
 		.eyebrow { margin: 0 0 10px; color: var(--accent); font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 		h1 { margin: 0; font-size: clamp(34px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -.04em; }
 		.subtitle { margin: 12px 0 0; color: var(--muted); font-family: Arial, sans-serif; font-size: 14px; }
+		.status-banner { margin: 8px 0 0; padding: 8px 12px; border-radius: 6px; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; }
+		.status-banner.loading { color: var(--muted); background: transparent; padding: 0; }
+		.status-banner.error { color: #9a3b22; background: #fdeee7; border: 1px solid #f3cdb9; }
 
 		.search-wrap { position: relative; margin-top: 28px; }
 		.city-search { width: 100%; max-width: 360px; padding: 11px 16px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: rgba(255,255,255,.8); font-family: inherit; font-size: 13px; font-weight: 500; }
@@ -145,6 +148,7 @@
 			<p class="eyebrow">daily forecast</p>
 			<h1>오늘의 날씨</h1>
 			<p class="subtitle" id="updated-location">서울, 대한민국 · 오늘 오후 2:30 기준</p>
+			<p class="status-banner" id="status-banner" hidden></p>
 		</section>
 
 		<div class="search-wrap">
@@ -321,17 +325,80 @@
 			return { days, hourly: byDate, todayPlusTomorrow };
 		}
 
+		// 오류 종류를 구분해서 사용자에게 각각 다른 메시지를 보여주기 위한 타입 있는 에러
+		class WeatherFetchError extends Error {
+			constructor(type, message) {
+				super(message);
+				this.type = type;
+			}
+		}
+
+		const FETCH_TIMEOUT_MS = 8000;
+
+		async function fetchWithTimeout(url) {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+			try {
+				return await fetch(url, { signal: controller.signal });
+			} catch (err) {
+				if (err.name === 'AbortError') {
+					throw new WeatherFetchError('timeout', '응답이 너무 늦어져서 요청을 중단했어요. 잠시 후 다시 시도해주세요.');
+				}
+				throw new WeatherFetchError('network', '네트워크에 연결할 수 없어요. 인터넷 연결을 확인해주세요.');
+			} finally {
+				clearTimeout(timer);
+			}
+		}
+
+		function assertOk(res) {
+			if (res.ok) return;
+			if (res.status === 401 || res.status === 403) {
+				throw new WeatherFetchError('auth', `API 인증에 실패했어요. (${res.status})`);
+			}
+			if (res.status === 429) {
+				throw new WeatherFetchError('rate_limit', 'API 호출 한도를 초과했어요. 잠시 후 다시 시도해주세요.');
+			}
+			throw new WeatherFetchError('server', `서버에서 오류가 발생했어요. (${res.status})`);
+		}
+
+		function assertShape(current, forecast) {
+			const okCurrent = current && current.weather && current.weather[0] && current.main && current.wind;
+			const okForecast = forecast && Array.isArray(forecast.list) && forecast.list.length > 0 && forecast.city;
+			if (!okCurrent || !okForecast) {
+				throw new WeatherFetchError('format', '날씨 데이터 형식이 올바르지 않아요.');
+			}
+		}
+
 		async function fetchWeather(city) {
 			const q = encodeURIComponent(CITY_QUERY[city]);
 			const [currentRes, forecastRes] = await Promise.all([
-				fetch(`${WORKER_BASE}?endpoint=weather&q=${q}&lang=kr`),
-				fetch(`${WORKER_BASE}?endpoint=forecast&q=${q}&lang=kr`),
+				fetchWithTimeout(`${WORKER_BASE}?endpoint=weather&q=${q}&lang=kr`),
+				fetchWithTimeout(`${WORKER_BASE}?endpoint=forecast&q=${q}&lang=kr`),
 			]);
-			if (!currentRes.ok || !forecastRes.ok) throw new Error('날씨 정보를 불러오지 못했어요.');
-			return { current: await currentRes.json(), forecast: await forecastRes.json() };
+			assertOk(currentRes);
+			assertOk(forecastRes);
+			const current = await currentRes.json();
+			const forecast = await forecastRes.json();
+			assertShape(current, forecast);
+			return { current, forecast };
 		}
 
 		const $ = (id) => document.getElementById(id);
+
+		function showStatus(text, type) {
+			const el = $('status-banner');
+			el.textContent = text;
+			el.className = 'status-banner' + (type ? ' ' + type : '');
+			el.hidden = false;
+		}
+		function clearStatus() {
+			const el = $('status-banner');
+			el.hidden = true;
+			el.textContent = '';
+		}
+		function messageForError(err) {
+			return (err && err.type && err.message) || '날씨 정보를 불러오지 못했어요.';
+		}
 		function renderCityList(region) {
 			$('city-list').innerHTML = REGION_CITIES[region].map((city) => `
 				<button class="city-option" data-city="${city}" type="button">${city}</button>
@@ -426,9 +493,12 @@
 		async function selectCity(city) {
 			document.querySelectorAll('.city-option').forEach((button) => button.classList.toggle('active', button.dataset.city === city));
 			updateMapSelection(city);
-			$('condition').textContent = '불러오는 중...';
+			// 로딩/에러는 별도 배너로만 표시하고, 기존에 떠 있던 정상 데이터
+			// (온도·조건·예보 등)는 새 데이터가 실제로 도착하기 전까지 건드리지 않습니다.
+			showStatus('불러오는 중...', 'loading');
 			try {
 				const { current, forecast } = await fetchWeather(city);
+				clearStatus();
 				const now = new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
 				$('updated-location').textContent = `${city}, ${CITY_COUNTRY[city]} · 오늘 ${now} 기준`;
 				$('main-icon-img').src = iconUrl(current.weather[0].icon, '4x');
@@ -443,8 +513,8 @@
 				const tzOffsetSec = (forecast.city && forecast.city.timezone) || 0;
 				renderForecast(groupDailyForecast(forecast.list, tzOffsetSec), tzOffsetSec);
 			} catch (err) {
-				$('condition').textContent = '날씨 정보를 불러오지 못했어요.';
 				console.error(err);
+				showStatus(messageForError(err), 'error');
 			}
 		}
 
