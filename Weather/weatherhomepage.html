@@ -128,7 +128,6 @@
 		.t04-value-row { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; }
 		.t04-value { font-size: 32px; font-weight: 800; color: var(--ink); }
 		.t04-stale-badge { padding: 3px 9px; border-radius: 20px; background: #fdeee7; color: #9a3b22; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
-		.t04-tz-badge { padding: 2px 7px; border-radius: 20px; background: #eaf1fb; color: #2f5fa3; font-family: Arial, sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .03em; }
 		.t04-delta { margin: 0 0 14px; color: #6d5a35; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; }
 		.t04-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 18px; margin: 0 0 14px; padding: 0; }
 		.t04-meta div { margin: 0; }
@@ -250,7 +249,6 @@
 			</p>
 			<p class="t04-delta" id="t04-delta">전날 비교 데이터가 아직 없어요.</p>
 			<dl class="t04-meta">
-				<div><dt>현재 시각</dt><dd><span id="t04-now-kst">-</span> (KST) / <span id="t04-now-local">-</span> (대한민국) <span class="t04-tz-badge" id="t04-tz-badge" hidden>시간대 다름</span></dd></div>
 				<div><dt>출처</dt><dd><a id="t04-source-link" href="#" target="_blank" rel="noopener">-</a></dd></div>
 				<div><dt>출처 시각</dt><dd id="t04-source-time">-</dd></div>
 				<div><dt>조회 시각</dt><dd id="t04-fetched-at">-</dd></div>
@@ -689,37 +687,6 @@
 			}
 		}
 
-		function t04UpdateNowKst() {
-			const localEl = $('t04-now-local');
-			const kstEl = $('t04-now-kst');
-			const badgeEl = $('t04-tz-badge');
-			if (!localEl || !kstEl) return;
-			const now = new Date();
-			const localStr = new Intl.DateTimeFormat('ko-KR', {
-				hour: '2-digit', minute: '2-digit', hour12: false,
-			}).format(now);
-			const kstStr = new Intl.DateTimeFormat('ko-KR', {
-				timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false,
-			}).format(now);
-			localEl.textContent = localStr;
-			kstEl.textContent = kstStr;
-			if (badgeEl) {
-				const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-				badgeEl.hidden = deviceTz === 'Asia/Seoul';
-			}
-		}
-
-		function t04FormatLocalTime(iso) {
-			if (!iso) return '-';
-			try {
-				return new Intl.DateTimeFormat('ko-KR', {
-					hour: '2-digit', minute: '2-digit', hour12: false,
-				}).format(new Date(iso));
-			} catch {
-				return '-';
-			}
-		}
-
 		function t04MessageForError(code) {
 			const messages = {
 				timeout: '⏱ 서버 응답이 너무 늦어 시간 초과됐어요.',
@@ -781,7 +748,7 @@
 				historyEl.innerHTML = '<li class="t04-history-empty">아직 저장된 기록이 없어요.</li>';
 			} else {
 				historyEl.innerHTML = rows.map((row) => `
-					<li><span class="t04-history-date">${row.record_date} <span class="t04-history-time">${t04FormatKstTime(row.last_fetched_at)} (KST) / ${t04FormatLocalTime(row.last_fetched_at)} (대한민국)</span></span><span class="t04-history-value">${row.normalized_value}°${row.unit === 'C' ? 'C' : row.unit}</span></li>
+					<li><span class="t04-history-date">${row.record_date} <span class="t04-history-time">${t04FormatKstTime(row.last_fetched_at)} 기준</span></span><span class="t04-history-value">${row.normalized_value}°${row.unit === 'C' ? 'C' : row.unit}</span></li>
 				`).join('');
 			}
 
@@ -827,9 +794,6 @@
 			T04Signal.saveState(t04State);
 			renderT04Panel();
 		}
-
-		t04UpdateNowKst();
-		setInterval(t04UpdateNowKst, 30000);
 
 		if (window.T04Signal) {
 			$('t04-retry').addEventListener('click', syncTrackedCitySignal);
