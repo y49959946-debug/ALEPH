@@ -191,10 +191,10 @@
 		.chart-line__path { stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 		.chart-line__dot--empty { fill: var(--chart-empty); }
 		.chart-line--empty { padding: 18px 0; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; text-align: center; }
-		.chart-line__ticks { display: flex; justify-content: space-between; margin-top: 4px; padding: 0 2px; }
-		.chart-line__ticks span { flex: 1; color: var(--muted); font-family: Arial, sans-serif; font-size: 10px; text-align: center; }
-		.chart-line__ticks span:first-child { text-align: left; }
-		.chart-line__ticks span:last-child { text-align: right; }
+		.chart-line__ticks { position: relative; height: 14px; margin-top: 2px; }
+		.chart-line__ticks span { position: absolute; top: 0; transform: translateX(-50%); color: var(--muted); font-family: Arial, sans-serif; font-size: 10px; white-space: nowrap; }
+		.chart-line__ticks span:first-child { transform: translateX(0); }
+		.chart-line__ticks span:last-child { transform: translateX(-100%); }
 
 		.footer { margin-top: 28px; color: #aaa99e; font-family: Arial, sans-serif; font-size: 11px; }
 

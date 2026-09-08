@@ -183,8 +183,14 @@
 
 		// Time labels render as real HTML text below the SVG (not inside the
 		// viewBox) so their font-size stays a normal CSS px value instead of
-		// stretching with the chart's viewBox scale on wide screens.
-		const ticksHtml = list.map((p) => `<span>${esc(p.label || '')}</span>`).join('');
+		// stretching with the chart's viewBox scale on wide screens. Each
+		// label is positioned at the exact same x-percent as its dot (via
+		// `left`), so it lines up with its own point instead of being spread
+		// evenly across the row.
+		const ticksHtml = list.map((p, i) => {
+			const leftPercent = ((padX + stepX * i) / width) * 100;
+			return `<span style="left:${leftPercent}%">${esc(p.label || '')}</span>`;
+		}).join('');
 
 		const ariaLabel = `${label}: ` + list.map((p) => `${p.label || ''} ${isNum(p.value) ? Math.round(p.value) + unit : EMPTY_LABEL}`).join(', ');
 
