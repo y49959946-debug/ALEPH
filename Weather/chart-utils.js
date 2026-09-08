@@ -88,40 +88,51 @@
 	}
 
 	// ---------------------------------------------------------------
-	// Gauge: percent (0~100) drawn as a semicircle arc (speedometer style)
-	// Arc sweeps from -90deg (left) to +90deg (right) through the top.
+	// Gauge: percent (0~100) drawn as a semicircle arc (speedometer style).
+	// `angle` is the sweep in degrees from the arc's start (0 = empty,
+	// 180 = a full half-circle) - it is orientation-agnostic; renderGauge
+	// maps it onto the actual on-screen arc (left -> over the top -> right).
 	// ---------------------------------------------------------------
 	function valueToGaugeAngle(percent) {
-		if (!isNum(percent)) return { isEmpty: true, angle: -90, percent: 0 };
+		if (!isNum(percent)) return { isEmpty: true, angle: 0, percent: 0 };
 		const clamped = clamp(percent, 0, 100);
-		return { isEmpty: false, angle: -90 + (clamped / 100) * 180, percent: clamped };
+		return { isEmpty: false, angle: (clamped / 100) * 180, percent: clamped };
 	}
 
 	function polarToCartesian(cx, cy, r, angleDeg) {
 		const rad = (angleDeg * Math.PI) / 180;
 		return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
 	}
-	function describeArc(cx, cy, r, startDeg, endDeg) {
-		const start = polarToCartesian(cx, cy, r, startDeg);
-		const end = polarToCartesian(cx, cy, r, endDeg);
-		const largeArc = endDeg - startDeg <= 180 ? '0' : '1';
-		return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+	// Draws the arc as a sampled polyline instead of an SVG elliptical-arc
+	// command, so there's no large-arc/sweep-flag guesswork: it always goes
+	// from the left point (180deg), over the top, toward the right (360deg).
+	function arcPath(cx, cy, r, startDeg, sweepDeg, steps) {
+		const n = steps || 32;
+		const pts = [];
+		for (let i = 0; i <= n; i++) {
+			const angle = startDeg + (sweepDeg * i) / n;
+			const p = polarToCartesian(cx, cy, r, angle);
+			pts.push(`${p.x.toFixed(2)},${p.y.toFixed(2)}`);
+		}
+		return `M ${pts.join(' L ')}`;
 	}
+
+	const GAUGE_START_DEG = 180; // left point; sweeping +180deg over the top lands on 360deg (right point)
 
 	function renderGauge(percent, options) {
 		const opts = options || {};
 		const label = opts.label || '값';
 		const unit = opts.unit || '%';
 		const g = valueToGaugeAngle(percent);
-		const cx = 60, cy = 58, r = 46;
-		const trackPath = describeArc(cx, cy, r, -90, 90);
+		const cx = 60, cy = 54, r = 44;
+		const trackPath = arcPath(cx, cy, r, GAUGE_START_DEG, 180);
 		// valueText is what's shown/read out; percent still drives the arc angle,
 		// so callers with a non-percent unit (e.g. wind m/s) can pass their own text.
 		const valueText = g.isEmpty ? EMPTY_LABEL : (opts.valueText || `${Math.round(g.percent)}${unit}`);
 		const ariaLabel = `${label}: ${valueText}`;
-		const fillArc = g.isEmpty ? '' : `<path class="chart-gauge__fill" d="${describeArc(cx, cy, r, -90, g.angle)}" stroke="${opts.color || 'var(--chart-accent)'}" />`;
+		const fillArc = g.isEmpty ? '' : `<path class="chart-gauge__fill" d="${arcPath(cx, cy, r, GAUGE_START_DEG, g.angle)}" stroke="${opts.color || 'var(--chart-accent)'}" />`;
 		return `<div class="chart-gauge${g.isEmpty ? ' chart-gauge--empty' : ''}" role="img" aria-label="${esc(ariaLabel)}">
-			<svg viewBox="0 0 120 68" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+			<svg viewBox="0 0 120 64" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
 				<path class="chart-gauge__track" d="${trackPath}" />
 				${fillArc}
 			</svg>
