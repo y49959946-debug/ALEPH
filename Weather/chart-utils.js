@@ -67,6 +67,13 @@
 		return { isEmpty: false, bottomPercent, heightPercent, low: lo, high: hi };
 	}
 
+	// options.anchorBottom: fill always starts at the track's bottom (0%)
+	// instead of floating at the low value's position - height then reflects
+	// where the HIGH value falls on the shared scale. The aria-label still
+	// reports the real low/high regardless of the visual anchor.
+	// options.coldBelow + options.coldColor: if the day's low drops below
+	// this threshold (e.g. 0 for freezing), the fill uses coldColor instead
+	// of the normal accent - a simple "this day dips below freezing" cue.
 	function renderRangeBar(low, high, scaleMin, scaleMax, options) {
 		const opts = options || {};
 		const label = opts.label || '값';
@@ -79,9 +86,16 @@
 				<span class="chart-bar__label" aria-hidden="true">${esc(label)}</span>
 			</div>`;
 		}
+		const span = scaleMax - scaleMin;
+		const bottomPercent = opts.anchorBottom ? 0 : m.bottomPercent;
+		const heightPercent = opts.anchorBottom
+			? Math.max(((m.high - scaleMin) / span) * 100, 2)
+			: m.heightPercent;
+		const isCold = isNum(opts.coldBelow) && m.low < opts.coldBelow;
+		const fillColor = isCold ? (opts.coldColor || 'var(--chart-accent-2)') : (opts.color || 'var(--chart-accent)');
 		const ariaLabel = `${label}: 최저 ${Math.round(m.low)}${unit}, 최고 ${Math.round(m.high)}${unit}`;
 		return `<div class="chart-bar" role="img" aria-label="${esc(ariaLabel)}">
-			<div class="chart-bar__track"><div class="chart-bar__fill chart-bar__fill--range" style="bottom:${m.bottomPercent}%; height:${m.heightPercent}%; background:${opts.color || 'var(--chart-accent)'};"></div></div>
+			<div class="chart-bar__track"><div class="chart-bar__fill chart-bar__fill--range" style="bottom:${bottomPercent}%; height:${heightPercent}%; background:${fillColor};"></div></div>
 			<span class="chart-bar__value" aria-hidden="true">${Math.round(m.high)}° <small>${Math.round(m.low)}°</small></span>
 			<span class="chart-bar__label" aria-hidden="true">${esc(label)}</span>
 		</div>`;

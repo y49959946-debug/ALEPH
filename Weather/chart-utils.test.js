@@ -37,6 +37,22 @@ assert('7-day range bars render without throwing', (() => {
 	} catch { return false; }
 })());
 
+// Weekly forecast bar: anchorBottom always starts the fill at 0%, and
+// coldBelow swaps in the cold color once the day's low drops below it.
+assert('anchorBottom starts the fill at the track bottom', (() => {
+	const html = C.renderRangeBar(-3, 5, -10, 30, { anchorBottom: true, coldBelow: 0 });
+	return /bottom:0%/.test(html);
+})());
+assert('coldBelow uses the cold color when low < threshold', (() => {
+	const cold = C.renderRangeBar(-3, 5, -10, 30, { anchorBottom: true, coldBelow: 0 });
+	const warm = C.renderRangeBar(10, 20, -10, 30, { anchorBottom: true, coldBelow: 0 });
+	return cold.includes('var(--chart-accent-2)') && warm.includes('var(--chart-accent)') && !warm.includes('var(--chart-accent-2)');
+})());
+assert('anchorBottom still reports the real low/high in aria-label', (() => {
+	const html = C.renderRangeBar(-3, 5, -10, 30, { unit: '°', anchorBottom: true, coldBelow: 0 });
+	return html.includes('최저 -3°') && html.includes('최고 5°');
+})());
+
 // 5: gauge angle is proportional to percent (0 = empty sweep, 180 = full sweep)
 const g52 = C.valueToGaugeAngle(52);
 assert('gauge 52% -> angle 93.6 (52/100*180)', Math.abs(g52.angle - 93.6) < 1e-9);

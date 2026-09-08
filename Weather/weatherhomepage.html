@@ -630,7 +630,7 @@
 			const scaleMin = Math.min(...allTemps) - 2;
 			const scaleMax = Math.max(...allTemps) + 2;
 			$('forecast').innerHTML = forecastData.days.map((day, index) => `
-				<button class="day${index === 0 ? ' selected' : ''}" data-date="${day.date}" data-label="${day.label}" type="button"><span class="day-name">${day.label}</span><img class="day-icon" src="${iconUrl(day.icon)}" alt=""><span class="day-temp">${day.high}° <small>${day.low}°</small></span><span class="day-range-bar">${ChartUtils.renderRangeBar(day.low, day.high, scaleMin, scaleMax, { label: day.label, unit: '°' })}</span><span class="rain">강수 확률 ${day.rain}%</span></button>
+				<button class="day${index === 0 ? ' selected' : ''}" data-date="${day.date}" data-label="${day.label}" type="button"><span class="day-name">${day.label}</span><img class="day-icon" src="${iconUrl(day.icon)}" alt=""><span class="day-temp">${day.high}° <small>${day.low}°</small></span><span class="day-range-bar">${ChartUtils.renderRangeBar(day.low, day.high, scaleMin, scaleMax, { label: day.label, unit: '°', anchorBottom: true, coldBelow: 0 })}</span><span class="rain">강수 확률 ${day.rain}%</span></button>
 			`).join('');
 			document.querySelectorAll('.day').forEach((button, index) => button.addEventListener('click', () => {
 				document.querySelectorAll('.day').forEach((day) => day.classList.remove('selected'));
