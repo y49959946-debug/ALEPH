@@ -16,6 +16,21 @@
 			--accent: #6f9f3a;
 			--icon: #77a941;
 			--shadow: 0 20px 55px rgba(82, 112, 39, 0.1);
+			--chart-accent: var(--accent);
+			--chart-accent-2: #4c86c7;
+			--chart-track: rgba(0, 0, 0, .08);
+			--chart-empty: #d8d8d0;
+		}
+
+		/* The page itself has no dark background yet, so this only keeps chart
+		   contrast from breaking under a dark OS preference. If a real dark
+		   theme (dark page background) is added later, redefine --chart-track
+		   and --chart-empty to light-on-dark values inside that theme's rule. */
+		@media (prefers-color-scheme: dark) {
+			:root {
+				--chart-track: rgba(0, 0, 0, .16);
+				--chart-empty: #b9b6a9;
+			}
 		}
 
 		* { box-sizing: border-box; }
@@ -150,6 +165,34 @@
 		.t04-history .t04-history-time { color: #b4a888; font-weight: 500; }
 		.t04-history .t04-history-value { font-weight: 800; color: var(--ink); }
 
+		/* ---- Chart utility components (see chart-utils.js / CHART_GUIDE.md) ---- */
+		.detail--gauge { display: flex; flex-direction: column; }
+		.detail-gauge-slot { margin-top: 2px; }
+
+		.chart-bar { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; max-width: 64px; }
+		.chart-bar__track { position: relative; width: 22px; height: 64px; overflow: hidden; border-radius: 5px; background: var(--chart-track); }
+		.chart-bar__fill { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 5px 5px 0 0; transition: height .25s ease; }
+		.chart-bar--empty .chart-bar__track { background: repeating-linear-gradient(45deg, var(--chart-empty) 0 4px, transparent 4px 8px); opacity: .5; }
+		.chart-bar__value { font-size: 13px; font-weight: 800; color: var(--ink); }
+		.chart-bar__label { color: var(--muted); font-family: Arial, sans-serif; font-size: 10px; }
+
+		.chart-gauge { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; max-width: 130px; }
+		.chart-gauge svg { width: 100%; height: auto; }
+		.chart-gauge__track { fill: none; stroke: var(--chart-track); stroke-width: 10; stroke-linecap: round; }
+		.chart-gauge__fill { fill: none; stroke-width: 10; stroke-linecap: round; }
+		.chart-gauge--empty .chart-gauge__track { stroke: var(--chart-empty); }
+		.chart-gauge__readout { display: flex; flex-direction: column; margin-top: -14px; }
+		.chart-gauge__value { font-size: 15px; font-weight: 800; color: var(--ink); }
+		.chart-gauge__label { color: var(--muted); font-family: Arial, sans-serif; font-size: 10px; }
+
+		.hourly-chart { margin: 0 0 16px; padding: 10px 4px 0; border-bottom: 1px solid var(--line); }
+		.chart-line { width: 100%; }
+		.chart-line svg { display: block; width: 100%; height: auto; }
+		.chart-line__path { stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+		.chart-line__dot--empty { fill: var(--chart-empty); }
+		.chart-line__tick { fill: var(--muted); font-size: 9px; font-family: Arial, sans-serif; }
+		.chart-line--empty { padding: 18px 0; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; text-align: center; }
+
 		.footer { margin-top: 28px; color: #aaa99e; font-family: Arial, sans-serif; font-size: 11px; }
 
 		@media (max-width: 700px) {
@@ -169,6 +212,15 @@
 			.hourly-panel { padding: 20px 14px; }
 			.hourly-list { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
 			.t04-panel { padding: 18px 16px 20px; }
+			.chart-gauge { max-width: 104px; }
+		}
+
+		@media (max-width: 400px) {
+			.details { grid-template-columns: 1fr; }
+			.chart-bar__track { width: 18px; height: 52px; }
+			.chart-gauge { max-width: 92px; }
+			.chart-gauge__readout { margin-top: -10px; }
+			.chart-gauge__value { font-size: 13px; }
 		}
 	</style>
 </head>
@@ -219,8 +271,8 @@
 				<div class="details">
 					<div class="detail"><span class="detail-label">최고 / 최저</span><span class="detail-value" id="high-low">27° / 18°</span></div>
 					<div class="detail"><span class="detail-label">강수 확률</span><span class="detail-value" id="rain-value">10%</span></div>
-					<div class="detail"><span class="detail-label">습도</span><span class="detail-value" id="humidity">52%</span></div>
-					<div class="detail"><span class="detail-label">바람</span><span class="detail-value" id="wind">서 2.4 m/s</span></div>
+					<div class="detail detail--gauge"><span class="detail-label">습도</span><div class="detail-gauge-slot" id="humidity-gauge"></div></div>
+					<div class="detail detail--gauge"><span class="detail-label">바람</span><div class="detail-gauge-slot" id="wind-gauge"></div></div>
 				</div>
 			</section>
 
@@ -234,6 +286,7 @@
 		<section class="forecast" id="forecast" aria-label="이번 주 날씨 예보"></section>
 		<section class="hourly-panel" id="hourly-panel" aria-live="polite" hidden>
 			<div class="hourly-title"><strong id="hourly-date">시간대별 날씨</strong><span>3시간 간격 예보</span></div>
+			<div class="hourly-chart" id="hourly-chart"></div>
 			<div class="hourly-list" id="hourly-list"></div>
 		</section>
 
@@ -266,6 +319,7 @@
 
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 	<script src="t04-signal.js"></script>
+	<script src="chart-utils.js"></script>
 	<script>
 		// API 키는 이 파일에 두지 않습니다 - Cloudflare Worker 프록시(owm-proxy-worker.js 참고)가
 		// 키를 서버 쪽에 숨겨서 대신 호출해줍니다. 아래 주소를 배포한 Worker 주소로 바꿔주세요.
@@ -345,6 +399,26 @@
 		function windDirection(deg) {
 			const dirs = ['북', '북동', '동', '남동', '남', '남서', '서', '북서'];
 			return dirs[Math.round(deg / 45) % 8];
+		}
+
+		// 습도는 그 자체로 0~100% 게이지에 맞지만, 풍속(m/s)은 상한이 없어서
+		// WIND_SCALE_MAX를 "게이지가 꽉 차는 기준"으로 잡아 퍼센트로 환산합니다.
+		// 실제 표시 텍스트(valueText)는 방향+원래 단위(m/s)를 그대로 보여줍니다.
+		const WIND_SCALE_MAX = 15;
+
+		function renderHumidityGauge(humidity) {
+			const el = $('humidity-gauge');
+			if (!el || !window.ChartUtils) return;
+			el.innerHTML = ChartUtils.renderGauge(humidity, { label: '습도', unit: '%' });
+		}
+
+		function renderWindGauge(speed, deg) {
+			const el = $('wind-gauge');
+			if (!el || !window.ChartUtils) return;
+			const hasSpeed = typeof speed === 'number' && Number.isFinite(speed);
+			const percent = hasSpeed ? Math.min((speed / WIND_SCALE_MAX) * 100, 100) : null;
+			const valueText = hasSpeed ? `${windDirection(deg)} ${speed.toFixed(1)} m/s` : null;
+			el.innerHTML = ChartUtils.renderGauge(percent, { label: '바람', color: 'var(--chart-accent-2)', valueText });
 		}
 
 		// entry.dt_txt는 UTC 기준이라 그대로 쓰면 한국(UTC+9) 등에서 시간이 밀려요
@@ -536,6 +610,13 @@
 			$('hourly-list').innerHTML = entries.map((entry) => `
 				<div class="hour"><span class="hour-time">${localTimeLabel(toLocalDate(entry, tzOffsetSec))}</span><img class="hour-icon" src="${iconUrl(entry.weather[0].icon)}" alt=""><span class="hour-temp">${Math.round(entry.main.temp)}°C</span><span class="hour-condition">${conditionLabel(entry.weather[0].icon)}</span><span class="hour-rain">강수 확률 ${Math.round((entry.pop || 0) * 100)}%</span></div>
 			`).join('');
+			if (window.ChartUtils) {
+				const points = entries.map((entry) => ({
+					label: localTimeLabel(toLocalDate(entry, tzOffsetSec)),
+					value: entry && entry.main && typeof entry.main.temp === 'number' ? entry.main.temp : null,
+				}));
+				$('hourly-chart').innerHTML = ChartUtils.renderLineChart(points, { label: '시간별 기온', unit: '°C' });
+			}
 			$('hourly-panel').hidden = false;
 		}
 
@@ -572,8 +653,8 @@
 				$('feels').textContent = `체감 온도 ${Math.round(current.main.feels_like)}°C`;
 				$('high-low').textContent = `${Math.round(current.main.temp_max)}° / ${Math.round(current.main.temp_min)}°`;
 				$('rain-value').textContent = `${Math.round((forecast.list[0].pop || 0) * 100)}%`;
-				$('humidity').textContent = `${current.main.humidity}%`;
-				$('wind').textContent = `${windDirection(current.wind.deg)} ${current.wind.speed.toFixed(1)} m/s`;
+				renderHumidityGauge(current.main.humidity);
+				renderWindGauge(current.wind.speed, current.wind.deg);
 				const tzOffsetSec = (forecast.city && forecast.city.timezone) || 0;
 				renderForecast(groupDailyForecast(forecast.list, tzOffsetSec), tzOffsetSec);
 			} catch (err) {
