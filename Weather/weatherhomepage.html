@@ -4,6 +4,16 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>오늘의 날씨</title>
+	<script>
+		// 저장된 테마 선택을 CSS/JS가 실행되기 전에 최대한 빨리 반영해서,
+		// "기본 테마로 그렸다가 다크로 다시 칠하는" 깜빡임을 줄입니다.
+		(function () {
+			try {
+				var saved = localStorage.getItem('aleph_weather_theme');
+				if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+			} catch (e) { /* localStorage 불가 환경은 조용히 무시 */ }
+		})();
+	</script>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 	<style>
 		:root {
@@ -71,7 +81,7 @@
 		   are redefined as light-on-dark since the cards themselves are now
 		   dark surfaces, not white. */
 		@media (prefers-color-scheme: dark) {
-			:root {
+			:root:not([data-theme="light"]) {
 				--ink: #eae7dc;
 				--muted: #a29c8c;
 				--line: rgba(255, 255, 255, .1);
@@ -127,6 +137,66 @@
 			}
 		}
 
+		/* Same dark tokens, but applied unconditionally when the user has
+		   explicitly picked "dark" via the toggle button, regardless of the
+		   OS/browser preference (the media query above only takes over when
+		   there's no explicit choice - see the ":not([data-theme=light])"
+		   guard on it). Keep this block's values in sync with the one above. */
+		:root[data-theme="dark"] {
+			--ink: #eae7dc;
+			--muted: #a29c8c;
+			--line: rgba(255, 255, 255, .1);
+			--accent: #8fce55;
+			--icon: #8fce55;
+			--shadow: 0 20px 55px rgba(0, 0, 0, .5);
+
+			--page-bg-solid: #1b2016;
+			--page-bg-image:
+				radial-gradient(circle at 4% 0%, rgba(90, 130, 50, .28) 0, rgba(90, 130, 50, 0) 28%),
+				radial-gradient(circle at 96% 100%, rgba(70, 110, 40, .22) 0, rgba(70, 110, 40, 0) 30%),
+				linear-gradient(135deg, #20261a 0%, #1b2016 58%, #141810 100%);
+			--current-bg: linear-gradient(135deg, rgba(255,255,255,.05), rgba(143,206,85,.07));
+			--map-bg: linear-gradient(145deg, rgba(255,255,255,.06), rgba(143,206,85,.05));
+
+			--surface: rgba(255, 255, 255, .06);
+			--surface-strong: rgba(255, 255, 255, .1);
+			--surface-soft: rgba(255, 255, 255, .04);
+			--surface-tint: rgba(255, 255, 255, .06);
+			--card-border: rgba(255, 255, 255, .12);
+			--card-shadow-soft: 0 12px 30px rgba(0, 0, 0, .35);
+			--accent-border: rgba(143, 206, 85, .35);
+			--accent-border-solid: #6fae44;
+			--hover-bg: rgba(143, 206, 85, .16);
+			--hover-text: #bfe89a;
+			--hover-bg-strong: rgba(143, 206, 85, .24);
+			--input-bg: rgba(255, 255, 255, .06);
+			--input-bg-focus: rgba(255, 255, 255, .1);
+			--dropdown-bg: #23291c;
+
+			--brand-title-text: #eae7dc;
+			--brand-caption-text: #c9b98a;
+			--condition-text: #d7b96a;
+			--note-text: #c9b98a;
+			--rain-text: #d8a857;
+			--history-time-text: #8f8a78;
+			--footer-text: #75705f;
+
+			--hour-card-bg: rgba(255, 255, 255, .05);
+			--hour-card-border: rgba(255, 255, 255, .1);
+			--track-row-bg: rgba(143, 206, 85, .1);
+			--track-row-border: #6fae44;
+			--error-bg: rgba(226, 108, 74, .15);
+			--error-border: rgba(226, 108, 74, .4);
+			--error-text: #e2896f;
+			--success-bg: rgba(90, 180, 100, .15);
+			--success-text: #8fd39a;
+			--map-zoom-text: #cfe8a3;
+
+			--chart-accent-2: #6fa3e0;
+			--chart-track: rgba(255, 255, 255, .18);
+			--chart-empty: rgba(255, 255, 255, .14);
+		}
+
 		* { box-sizing: border-box; }
 		body {
 			margin: 0;
@@ -149,6 +219,8 @@
 		.date { color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; letter-spacing: .08em; }
 		.back-link { margin-left: auto; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; text-decoration: none; white-space: nowrap; }
 		.back-link:hover { color: var(--accent); }
+		.theme-toggle { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: var(--surface); font-size: 15px; line-height: 1; cursor: pointer; transition: .2s ease; }
+		.theme-toggle:hover { border-color: var(--accent-border-solid); color: var(--hover-text); background: var(--hover-bg); }
 
 		.intro { margin-bottom: 18px; }
 		.eyebrow { margin: 0 0 10px; color: var(--accent); font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
@@ -326,6 +398,7 @@
 			<div class="brand"><span class="brand-mark">☼</span><span class="brand-copy"><strong class="brand-title">weather note</strong><span class="brand-caption">LOCAL WEATHER JOURNAL</span></span></div>
 			<a class="back-link" href="../index.html">← 메인으로</a>
 			<time class="date" datetime="2026-09-04">FRIDAY, SEP 04, 2026</time>
+			<button class="theme-toggle" id="theme-toggle" type="button">🌙</button>
 		</header>
 
 		<section class="intro">
@@ -616,6 +689,43 @@
 		}
 
 		const $ = (id) => document.getElementById(id);
+
+		// ------------------------------------------------------------------
+		// 다크 모드 토글: data-theme="light"/"dark"를 <html>에 직접 지정해서
+		// OS 설정(prefers-color-scheme)보다 우선하게 만듭니다. 값을 아예
+		// 안 지정하면(선택 안 함) OS 설정을 그대로 따라갑니다. <head>의 인라인
+		// 스크립트가 페이지 렌더링 전에 저장된 값을 먼저 적용해서 깜빡임을
+		// 줄여주고, 여기서는 버튼 아이콘/라벨 동기화와 클릭 처리만 합니다.
+		// ------------------------------------------------------------------
+		const THEME_KEY = 'aleph_weather_theme';
+		function effectiveTheme() {
+			const explicit = document.documentElement.getAttribute('data-theme');
+			if (explicit === 'light' || explicit === 'dark') return explicit;
+			return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		}
+		function updateThemeToggleButton() {
+			const btn = $('theme-toggle');
+			if (!btn) return;
+			const isDark = effectiveTheme() === 'dark';
+			btn.textContent = isDark ? '☀️' : '🌙';
+			const label = isDark ? '라이트 모드로 전환' : '다크 모드로 전환';
+			btn.setAttribute('aria-label', label);
+			btn.title = label;
+		}
+		function setTheme(theme) {
+			document.documentElement.setAttribute('data-theme', theme);
+			try { localStorage.setItem(THEME_KEY, theme); } catch { /* localStorage 불가 환경은 조용히 무시 */ }
+			updateThemeToggleButton();
+		}
+		if ($('theme-toggle')) {
+			$('theme-toggle').addEventListener('click', () => setTheme(effectiveTheme() === 'dark' ? 'light' : 'dark'));
+			updateThemeToggleButton();
+			// 사용자가 명시적으로 고른 적 없으면, OS 설정이 바뀔 때 버튼
+			// 아이콘도 같이 갱신합니다(실제 색은 미디어쿼리가 알아서 바꿈).
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (!document.documentElement.getAttribute('data-theme')) updateThemeToggleButton();
+			});
+		}
 
 		function showStatus(text, type) {
 			const el = $('status-banner');
