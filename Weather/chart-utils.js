@@ -152,8 +152,8 @@
 		const opts = options || {};
 		const label = opts.label || '값';
 		const unit = opts.unit || '';
-		const width = 320, height = 96;
-		const padX = 14, padTop = 12, padBottom = 12;
+		const width = 320, height = 64;
+		const padX = 14, padTop = 10, padBottom = 10;
 		const list = Array.isArray(points) ? points : [];
 		const finiteValues = list.map((p) => p && p.value).filter(isNum);
 
