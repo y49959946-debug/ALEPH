@@ -18,7 +18,7 @@
 			--shadow: 0 20px 55px rgba(82, 112, 39, 0.1);
 			--chart-accent: var(--accent);
 			--chart-accent-2: #4c86c7;
-			--chart-track: rgba(0, 0, 0, .08);
+			--chart-track: #e3ddc9;
 			--chart-empty: #d8d8d0;
 		}
 
@@ -28,7 +28,7 @@
 		   and --chart-empty to light-on-dark values inside that theme's rule. */
 		@media (prefers-color-scheme: dark) {
 			:root {
-				--chart-track: rgba(0, 0, 0, .16);
+				--chart-track: #cec5a9;
 				--chart-empty: #b9b6a9;
 			}
 		}
@@ -185,13 +185,16 @@
 		.chart-gauge__value { font-size: 15px; font-weight: 800; color: var(--ink); }
 		.chart-gauge__label { color: var(--muted); font-family: Arial, sans-serif; font-size: 10px; }
 
-		.hourly-chart { margin: 0 0 16px; padding: 10px 4px 0; border-bottom: 1px solid var(--line); }
+		.hourly-chart { margin: 0 0 16px; padding: 10px 4px 8px; border-bottom: 1px solid var(--line); }
 		.chart-line { width: 100%; }
-		.chart-line svg { display: block; width: 100%; height: auto; }
-		.chart-line__path { stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+		.chart-line svg { display: block; width: 100%; height: auto; max-height: 90px; }
+		.chart-line__path { stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 		.chart-line__dot--empty { fill: var(--chart-empty); }
-		.chart-line__tick { fill: var(--muted); font-size: 9px; font-family: Arial, sans-serif; }
 		.chart-line--empty { padding: 18px 0; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; text-align: center; }
+		.chart-line__ticks { display: flex; justify-content: space-between; margin-top: 4px; padding: 0 2px; }
+		.chart-line__ticks span { flex: 1; color: var(--muted); font-family: Arial, sans-serif; font-size: 10px; text-align: center; }
+		.chart-line__ticks span:first-child { text-align: left; }
+		.chart-line__ticks span:last-child { text-align: right; }
 
 		.footer { margin-top: 28px; color: #aaa99e; font-family: Arial, sans-serif; font-size: 11px; }
 
@@ -221,6 +224,7 @@
 			.chart-gauge { max-width: 92px; }
 			.chart-gauge__readout { margin-top: -10px; }
 			.chart-gauge__value { font-size: 13px; }
+			.chart-line__ticks span { font-size: 8px; }
 		}
 	</style>
 </head>

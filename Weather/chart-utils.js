@@ -141,8 +141,8 @@
 		const opts = options || {};
 		const label = opts.label || '값';
 		const unit = opts.unit || '';
-		const width = 320, height = 120;
-		const padX = 16, padTop = 16, padBottom = 28;
+		const width = 320, height = 96;
+		const padX = 14, padTop = 12, padBottom = 12;
 		const list = Array.isArray(points) ? points : [];
 		const finiteValues = list.map((p) => p && p.value).filter(isNum);
 
@@ -177,11 +177,14 @@
 		const polylines = segments.map((seg) => `<polyline class="chart-line__path" points="${seg.join(' ')}" fill="none" stroke="${opts.color || 'var(--chart-accent)'}" />`).join('');
 
 		const dots = coords.map((c, i) => {
-			if (!c) return `<circle class="chart-line__dot chart-line__dot--empty" cx="${padX + stepX * i}" cy="${height - padBottom}" r="3" />`;
-			return `<circle class="chart-line__dot" cx="${c.x}" cy="${c.y}" r="3" fill="${opts.color || 'var(--chart-accent)'}" />`;
+			if (!c) return `<circle class="chart-line__dot chart-line__dot--empty" cx="${padX + stepX * i}" cy="${height - padBottom}" r="2.5" />`;
+			return `<circle class="chart-line__dot" cx="${c.x}" cy="${c.y}" r="2.5" fill="${opts.color || 'var(--chart-accent)'}" />`;
 		}).join('');
 
-		const xLabels = list.map((p, i) => `<text class="chart-line__tick" x="${padX + stepX * i}" y="${height - 8}" text-anchor="middle">${esc(p.label || '')}</text>`).join('');
+		// Time labels render as real HTML text below the SVG (not inside the
+		// viewBox) so their font-size stays a normal CSS px value instead of
+		// stretching with the chart's viewBox scale on wide screens.
+		const ticksHtml = list.map((p) => `<span>${esc(p.label || '')}</span>`).join('');
 
 		const ariaLabel = `${label}: ` + list.map((p) => `${p.label || ''} ${isNum(p.value) ? Math.round(p.value) + unit : EMPTY_LABEL}`).join(', ');
 
@@ -189,8 +192,8 @@
 			<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
 				${polylines}
 				${dots}
-				${xLabels}
 			</svg>
+			<div class="chart-line__ticks" aria-hidden="true">${ticksHtml}</div>
 		</div>`;
 	}
 
