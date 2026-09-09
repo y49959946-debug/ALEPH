@@ -60,14 +60,14 @@
 			.calendar-card-inner { position: relative; padding: 61px; }
 			.calendar { max-width: 828px; margin: 0 auto; }
 			.calendar-head { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; margin-bottom: 43px; }
-			.calendar-month { grid-column: 2; text-align: center; font-family: "Gowun Batang", serif; font-size: 35px; font-weight: 700; }
-			.calendar-arrow { display: grid; place-items: center; width: 54px; height: 54px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 29px; }
+			.calendar-month { grid-column: 2; text-align: center; font-family: "Gowun Batang", serif; font-size: 30px; font-weight: 700; }
+			.calendar-arrow { display: grid; place-items: center; width: 54px; height: 54px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 25px; }
 			.calendar-arrow:hover { color: var(--coral); border-color: var(--coral); }
-			.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 18px; color: var(--soft-ink); font-size: 22px; font-weight: 700; text-align: center; }
+			.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 18px; color: var(--soft-ink); font-size: 18px; font-weight: 700; text-align: center; }
 			.calendar-weekdays span:first-child { color: #c65b52; }
 			.calendar-weekdays span:last-child { color: #5d7e8d; }
 			.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-			.calendar-day { display: flex; align-items: flex-start; justify-content: flex-end; aspect-ratio: 1 / 1; padding: 6px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); background: transparent; font-size: 28px; }
+			.calendar-day { display: flex; align-items: flex-start; justify-content: flex-end; aspect-ratio: 1 / 1; padding: 6px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); background: transparent; font-size: 23px; }
 			.calendar-day:hover { background: var(--paper-deep); }
 			.calendar-day:nth-child(7n+1) { color: #c65b52; }
 			.calendar-day:nth-child(7n) { color: #5d7e8d; }
@@ -80,30 +80,34 @@
 			.section-label::before { width: 8px; height: 8px; content: ""; border-radius: 50%; background: var(--coral); }
 			.label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 			.label-row .section-label { margin-bottom: 0; }
+			.label-row-actions { display: flex; align-items: center; gap: 16px; }
 			.add-button { border: 0; padding: 0; color: var(--coral); background: transparent; font-family: "Nanum Pen Script", cursive; font-size: 19px; }
 			.add-button:hover { text-decoration: underline; }
-			.label-filter { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
-			.filter { border: 1px solid transparent; border-radius: 20px; padding: 6px 11px; color: #5c625a; background: var(--paper-deep); font-size: 11px; }
-			.filter.active, .filter:hover { border-color: currentColor; color: var(--ink); background: transparent; }
-			.filter[data-label="운동"] { color: #7d9c84; background: var(--sage-pale); }
-			.filter[data-label="공부"] { color: #6d8d9d; background: var(--blue-pale); }
-			.filter[data-label="업무"] { color: #c9806d; background: var(--coral-pale); }
+			.tag-creator-wrap { position: relative; }
+			.tag-creator { position: absolute; top: calc(100% + 10px); left: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow); }
+			.tag-name-input { width: 78px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; color: var(--ink); background: var(--paper); font-size: 12px; }
+			.tag-color-input { width: 28px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer; }
+			.tag-creator-add { border: 0; border-radius: 8px; padding: 7px 12px; color: var(--paper); background: var(--coral); font-size: 12px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+			.label-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 22px; }
+			.filter { display: inline-flex; align-items: center; gap: 5px; border: 1px solid transparent; border-radius: 20px; padding: 6px 11px; color: #5c625a; background: var(--paper-deep); font-size: 11px; }
+			.filter.active, .filter:hover { border-color: currentColor; background: transparent; }
+			.filter[data-filter="all"].active, .filter[data-filter="all"]:hover { color: var(--ink); }
+			.filter-delete { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; line-height: 1; }
+			.filter-delete:hover { background: rgba(0, 0, 0, .12); }
 
 			.plan-list { display: grid; gap: 12px; }
-			.plan-item { display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 14px; padding: 14px 15px; border-bottom: 1px dashed #ded7ca; transition: opacity .2s ease; }
+			.plan-item { display: grid; grid-template-columns: 40px 20px 1fr auto; align-items: center; gap: 8px; padding: 14px 15px; border-bottom: 1px dashed #ded7ca; transition: opacity .2s ease; }
 			.plan-item.is-done { opacity: .56; }
 			.plan-item.is-done .plan-title { text-decoration: line-through; }
 			.plan-time { align-self: start; padding-top: 3px; color: var(--soft-ink); font-size: 12px; }
-			.check { position: relative; width: 19px; height: 19px; appearance: none; border: 1.5px solid #b5b7a9; border-radius: 50%; background: transparent; }
+			.plan-text { display: grid; align-self: center; }
+			.check { justify-self: center; align-self: start; margin-top: 2px; position: relative; width: 19px; height: 19px; appearance: none; border: 1.5px solid #b5b7a9; border-radius: 50%; background: transparent; }
 			.check:checked { border-color: var(--sage); background: var(--sage); }
 			.check:checked::after { position: absolute; left: 5px; top: 2px; width: 5px; height: 9px; content: ""; border: solid white; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
 			.plan-title { margin-bottom: 6px; font-family: "Gowun Batang", serif; font-size: 17px; }
 			.plan-note { margin: 0; color: var(--soft-ink); font-size: 12px; line-height: 1.6; }
 			.tag { border: 0; border-radius: 4px; padding: 5px 8px; color: inherit; background: none; font-family: inherit; font-size: 10px; cursor: pointer; }
-			.tag.work { color: #aa624f; background: var(--coral-pale); }
-			.tag.study { color: #5d7e8d; background: var(--blue-pale); }
-			.tag.move { color: #69826b; background: var(--sage-pale); }
-			.tag.rest { color: #947745; background: #f6e8bc; }
+			.tag.is-empty { border: 1px dashed var(--line); color: var(--soft-ink); font-size: 13px; font-weight: 800; }
 			.plan-actions { display: flex; align-items: center; gap: 6px; }
 			.plan-delete { display: grid; place-items: center; width: 20px; height: 20px; border: 0; border-radius: 50%; padding: 0; color: var(--soft-ink); background: transparent; font-size: 14px; line-height: 1; }
 			.plan-delete:hover { color: var(--coral); background: var(--coral-pale); }
@@ -146,6 +150,7 @@
 			.records-heading p { margin: 0 0 5px; color: var(--soft-ink); font-size: 12px; }
 			.record-sheet { display: grid; grid-template-columns: 112px 1fr; gap: 30px; padding: 30px 0 35px; border-bottom: 1px solid var(--line); }
 			.record-date { color: var(--coral); font-size: 12px; font-weight: 700; line-height: 1.6; }
+			.record-date .record-month { display: block; }
 			.record-date strong { display: block; color: var(--ink); font-family: "Nanum Pen Script", cursive; font-size: 28px; font-weight: 400; }
 			.record-content { display: grid; gap: 25px; }
 			.record-block { position: relative; padding-left: 24px; border-left: 1px solid var(--line); }
@@ -175,8 +180,11 @@
 				.date-nav { width: 100%; justify-content: space-between; }
 				.day-grid { grid-template-columns: 1fr; gap: 35px; }
 				.side-column { gap: 28px; }
-				.plan-item { grid-template-columns: 43px 1fr; gap: 10px; padding-left: 0; padding-right: 0; }
-				.plan-item .plan-actions { grid-column: 2; width: fit-content; }
+				.plan-item { grid-template-columns: 30px 1fr; gap: 6px 10px; padding-left: 0; padding-right: 0; }
+				.plan-item .plan-time { grid-column: 1; grid-row: 1; }
+				.plan-item .check { grid-column: 1; grid-row: 2; margin-top: 0; }
+				.plan-item .plan-text { grid-column: 2; grid-row: 1 / 3; }
+				.plan-item .plan-actions { grid-column: 1 / -1; grid-row: 3; width: fit-content; }
 				.review-notes { grid-template-columns: 1fr; gap: 24px; }
 				.review-note { min-height: auto; padding: 0 10px 20px; border-right: 0; border-bottom: 1px solid var(--line); }
 				.review-note:last-child { border-bottom: 0; }
@@ -207,8 +215,8 @@
 						</div>
 						<div class="day-grid">
 							<section aria-labelledby="plan-heading">
-								<div class="label-row"><h2 class="section-label" id="plan-heading">오늘 하기로 한 일</h2><button class="add-button" type="button" id="add-plan">+ 한 줄 더</button></div>
-								<div class="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button><button class="filter" type="button" data-filter="업무" data-label="업무">업무</button><button class="filter" type="button" data-filter="공부" data-label="공부">공부</button><button class="filter" type="button" data-filter="운동" data-label="운동">운동</button></div>
+								<div class="label-row"><h2 class="section-label" id="plan-heading">오늘 하기로 한 일</h2><div class="label-row-actions"><div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div><button class="add-button" type="button" id="add-plan">+ 한 줄 더</button></div></div>
+								<div class="label-filter" id="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button></div>
 								<div class="plan-list" id="plan-list"></div>
 							</section>
 							<aside class="side-column">
@@ -239,8 +247,8 @@
 				<article class="paper review-paper"><div class="paper-inner">
 					<div class="review-intro"><p class="date-kicker">09. 07 — 09. 13 · SEPTEMBER, WEEK 2</p><h2>이번 주를 돌아보며</h2><p>다 해내지 못한 것보다, 어디까지 걸어왔는지를<br />잠시 들여다보는 시간이에요.</p></div>
 					<div class="week-nav"><button type="button" aria-label="지난 주">‹</button><span>9월 둘째 주</span><button type="button" aria-label="다음 주">›</button></div>
-					<p class="review-story">이번 주 <button type="button" data-toast="계획한 일 5개의 기록을 열었어요.">계획한 5개</button> 중 <button type="button" data-toast="완료한 일 3개의 기록을 열었어요.">3개를 끝냈고</button>,<br /><button type="button" data-toast="예상보다 오래 걸린 일 2개의 기록을 열었어요.">2개는 예상보다 오래 걸렸어요.</button></p>
-					<div class="review-notes"><article class="review-note"><span class="note-mark">03 / 05</span><p>계획한 일 가운데<br />끝까지 해낸 기록</p></article><article class="review-note"><span class="note-mark">+ 40분</span><p>예상보다 더 머문<br />두 번의 시간</p></article><article class="review-note"><span class="note-mark">☺</span><p>가장 자주 남긴<br />이번 주의 기분</p></article></div>
+					<p class="review-story" id="review-story"></p>
+					<div class="review-notes"><article class="review-note"><span class="note-mark" id="review-done-count">0 / 0</span><p>계획한 일 가운데<br />끝까지 해낸 기록</p></article><article class="review-note"><span class="note-mark" id="review-duration">0분</span><p>이 페이지에<br />머문 시간</p></article><article class="review-note"><span class="note-mark">☺</span><p>가장 자주 남긴<br />이번 주의 기분</p></article></div>
 					<p class="review-footer">“다음 주에는 조금 덜 채우고, 조금 더 오래 바라보기.”</p>
 				</div></article>
 			</section>
@@ -259,8 +267,8 @@
 			const toast = document.querySelector("#toast");
 			let toastTimer;
 			function showToast(message) { toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2400); }
-			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); if (target === "records") renderRecords(); }));
-			document.querySelectorAll("[data-toast]").forEach((item) => item.addEventListener("click", () => showToast(item.dataset.toast)));
+			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); if (target === "records") renderRecords(); if (target === "review") renderReview(); }));
+			document.addEventListener("click", (event) => { const toastTarget = event.target.closest("[data-toast]"); if (toastTarget) showToast(toastTarget.dataset.toast); });
 
 			// ---- 날짜 이동 + 달력 ----
 			const WEEKDAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
@@ -345,22 +353,32 @@
 
 			// ---- 오늘 하기로 한 일 / 오늘을 돌아보며 / 내일의 나에게 남기는 말: 편집 및 저장 ----
 			const STORAGE_KEY = "plandosee:today";
-			const CATEGORY_CLASS = { "업무": "work", "공부": "study", "운동": "move", "휴식": "rest" };
-			const CATEGORY_CYCLE = ["업무", "공부", "운동", "휴식"];
 
 			function makeId() { return (crypto.randomUUID ? crypto.randomUUID() : `plan-${Date.now()}-${Math.random().toString(16).slice(2)}`); }
+
+			function paleColor(hex, amount) {
+				amount = amount === undefined ? 0.82 : amount;
+				const value = (hex || "#db806c").replace("#", "");
+				const r = parseInt(value.substring(0, 2), 16);
+				const g = parseInt(value.substring(2, 4), 16);
+				const b = parseInt(value.substring(4, 6), 16);
+				const mix = (channel) => Math.round(channel + (255 - channel) * amount);
+				return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+			}
 
 			function defaultState() {
 				return {
 					plans: [
-						{ id: makeId(), time: "09:30", title: "팀 주간 회의", note: "이번 주에 끝낸 일 세 가지 먼저 나누기", category: "업무", done: false },
-						{ id: makeId(), time: "11:00", title: "자바스크립트 한 챕터 읽기", note: "마음에 남는 문장 하나를 노트에 적기", category: "공부", done: false },
-						{ id: makeId(), time: "18:30", title: "집 근처를 30분 걷기", note: "날씨가 좋으면 공원까지 조금 더", category: "운동", done: false },
-						{ id: makeId(), time: "21:00", title: "휴대폰 없이 차 한 잔", note: "오늘의 속도를 천천히 낮추기", category: "휴식", done: false },
+						{ id: makeId(), time: "09:30", title: "팀 주간 회의", note: "이번 주에 끝낸 일 세 가지 먼저 나누기", categoryId: null, done: false },
+						{ id: makeId(), time: "11:00", title: "자바스크립트 한 챕터 읽기", note: "마음에 남는 문장 하나를 노트에 적기", categoryId: null, done: false },
+						{ id: makeId(), time: "18:30", title: "집 근처를 30분 걷기", note: "날씨가 좋으면 공원까지 조금 더", categoryId: null, done: false },
+						{ id: makeId(), time: "21:00", title: "휴대폰 없이 차 한 잔", note: "오늘의 속도를 천천히 낮추기", categoryId: null, done: false },
 					],
+					tags: [],
 					mood: "",
 					reflection: "생각보다 천천히 해도 괜찮았다. 한 가지에 오래 머무는 날도 필요하니까.",
 					tomorrowNote: "",
+					totalTimeMs: 0,
 				};
 			}
 
@@ -377,8 +395,17 @@
 			}
 
 			const state = loadState();
+			if (typeof state.totalTimeMs !== "number") state.totalTimeMs = 0;
+			if (!Array.isArray(state.tags)) state.tags = [];
+			state.plans.forEach((plan) => { if (typeof plan.categoryId === "undefined") plan.categoryId = null; });
 			const planListEl = document.querySelector("#plan-list");
+			const labelFilterEl = document.querySelector("#label-filter");
 			const recordSheetEl = document.querySelector("#record-sheet");
+			const reviewStoryEl = document.querySelector("#review-story");
+			const reviewDoneCountEl = document.querySelector("#review-done-count");
+			const reviewDurationEl = document.querySelector("#review-duration");
+
+			function findTag(id) { return state.tags.find((tag) => tag.id === id) || null; }
 
 			function escapeHtml(value) {
 				return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
@@ -387,26 +414,71 @@
 			function applyFilterToItem(item) {
 				const activeFilter = document.querySelector(".filter.active");
 				const filterValue = activeFilter ? activeFilter.dataset.filter : "all";
-				item.hidden = filterValue !== "all" && item.dataset.category !== filterValue;
+				item.hidden = filterValue !== "all" && item.dataset.categoryId !== filterValue;
+			}
+
+			function tagButtonMarkup(plan) {
+				const tag = plan.categoryId ? findTag(plan.categoryId) : null;
+				const style = tag ? ` style="background:${paleColor(tag.color)};color:${tag.color};"` : "";
+				return `<button type="button" class="tag${tag ? "" : " is-empty"}" data-role="cycle-category"${style}>${tag ? escapeHtml(tag.label) : "+"}</button>`;
 			}
 
 			function createPlanItemEl(plan) {
 				const item = document.createElement("div");
 				item.className = "plan-item" + (plan.done ? " is-done" : "");
-				item.dataset.category = plan.category;
+				item.dataset.categoryId = plan.categoryId || "";
 				item.dataset.id = plan.id;
 				item.innerHTML = `
 					<span class="plan-time" contenteditable="true" data-field="time" data-placeholder="시간">${escapeHtml(plan.time)}</span>
-					<span class="plan-body"><input class="check" type="checkbox" aria-label="완료 표시" ${plan.done ? "checked" : ""} /><span class="plan-title" contenteditable="true" data-field="title" data-placeholder="할 일을 적어보세요">${escapeHtml(plan.title)}</span><span class="plan-note" contenteditable="true" data-field="note" data-placeholder="메모 (선택)">${escapeHtml(plan.note)}</span></span>
-					<span class="plan-actions"><button type="button" class="tag ${CATEGORY_CLASS[plan.category] || "work"}" data-role="cycle-category">${plan.category}</button><button type="button" class="plan-delete" aria-label="이 계획 삭제">×</button></span>
+					<input class="check" type="checkbox" aria-label="완료 표시" ${plan.done ? "checked" : ""} />
+					<span class="plan-text"><span class="plan-title" contenteditable="true" data-field="title" data-placeholder="할 일을 적어보세요">${escapeHtml(plan.title)}</span><span class="plan-note" contenteditable="true" data-field="note" data-placeholder="메모 (선택)">${escapeHtml(plan.note)}</span></span>
+					<span class="plan-actions">${tagButtonMarkup(plan)}<button type="button" class="plan-delete" aria-label="이 계획 삭제">×</button></span>
 				`;
 				applyFilterToItem(item);
 				return item;
 			}
 
+			function renderTagFilters() {
+				const activeFilterButton = document.querySelector(".filter.active");
+				const activeValue = activeFilterButton ? activeFilterButton.dataset.filter : "all";
+				labelFilterEl.querySelectorAll(".filter[data-filter]:not([data-filter='all'])").forEach((el) => el.remove());
+				state.tags.forEach((tag) => {
+					const button = document.createElement("button");
+					button.type = "button";
+					button.className = "filter" + (activeValue === tag.id ? " active" : "");
+					button.dataset.filter = tag.id;
+					button.style.background = paleColor(tag.color);
+					button.style.color = tag.color;
+					button.innerHTML = `${escapeHtml(tag.label)}<span class="filter-delete" data-role="delete-tag" data-tag-id="${tag.id}" aria-label="태그 삭제">×</span>`;
+					labelFilterEl.appendChild(button);
+				});
+				if (activeValue !== "all" && !state.tags.some((tag) => tag.id === activeValue)) {
+					document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item.dataset.filter === "all"));
+					document.querySelectorAll(".plan-item").forEach((item) => applyFilterToItem(item));
+				}
+			}
+
 			function renderPlans() {
 				planListEl.innerHTML = "";
 				state.plans.forEach((plan) => planListEl.appendChild(createPlanItemEl(plan)));
+			}
+
+			function formatDuration(ms) {
+				const totalMinutes = Math.floor(ms / 60000);
+				const hours = Math.floor(totalMinutes / 60);
+				const minutes = totalMinutes % 60;
+				if (hours > 0) return `${hours}시간 ${minutes}분`;
+				if (minutes > 0) return `${minutes}분`;
+				return `${Math.floor(ms / 1000)}초`;
+			}
+
+			function renderReview() {
+				const totalCount = state.plans.length;
+				const doneCount = state.plans.filter((plan) => plan.done).length;
+				const durationText = formatDuration(state.totalTimeMs);
+				reviewStoryEl.innerHTML = `이번 주 <button type="button" data-toast="지금까지 적어둔 계획 ${totalCount}개의 기록을 열었어요.">적어둔 ${totalCount}개</button> 중 <button type="button" data-toast="완료한 일 ${doneCount}개의 기록을 열었어요.">${doneCount}개를 끝냈고</button>,<br />이 페이지에서 <button type="button" data-toast="지금까지 이 페이지에 머문 시간이에요.">${durationText}</button>를 보냈어요.`;
+				reviewDoneCountEl.textContent = `${doneCount} / ${totalCount}`;
+				reviewDurationEl.textContent = durationText;
 			}
 
 			function renderRecords() {
@@ -416,7 +488,7 @@
 					: `<span class="record-empty">아직 적어둔 계획이 없어요.</span>`;
 				recordSheetEl.innerHTML = `
 					<div class="record-sheet">
-						<div class="record-date"><strong>${selectedDate.getDate()}일</strong>${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월</div>
+						<div class="record-date"><span class="record-month">${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월</span><strong>${selectedDate.getDate()}일</strong></div>
 						<div class="record-content">
 							<section class="record-block"><p class="record-label">오늘 하기로 한 일 · ${completedCount}/${state.plans.length} 완료</p>${planMarkup}</section>
 							<section class="record-block"><p class="record-label">오늘을 돌아보며</p><p class="record-line">${escapeHtml(state.reflection || "아직 오늘의 한 줄을 남기지 않았어요.")}</p></section>
@@ -465,20 +537,24 @@
 				}
 				const cycleButton = event.target.closest("[data-role='cycle-category']");
 				if (cycleButton) {
+					if (state.tags.length === 0) { showToast("먼저 태그를 만들어보세요."); return; }
 					const item = cycleButton.closest(".plan-item");
 					const plan = findPlan(item.dataset.id);
-					const nextCategory = CATEGORY_CYCLE[(CATEGORY_CYCLE.indexOf(plan.category) + 1) % CATEGORY_CYCLE.length];
-					plan.category = nextCategory;
-					item.dataset.category = nextCategory;
-					cycleButton.textContent = nextCategory;
-					cycleButton.className = `tag ${CATEGORY_CLASS[nextCategory]}`;
+					const ids = [null, ...state.tags.map((tag) => tag.id)];
+					const nextId = ids[(ids.indexOf(plan.categoryId || null) + 1) % ids.length];
+					plan.categoryId = nextId;
+					item.dataset.categoryId = nextId || "";
+					const nextTag = nextId ? findTag(nextId) : null;
+					cycleButton.className = "tag" + (nextTag ? "" : " is-empty");
+					cycleButton.style.cssText = nextTag ? `background:${paleColor(nextTag.color)};color:${nextTag.color};` : "";
+					cycleButton.textContent = nextTag ? nextTag.label : "+";
 					applyFilterToItem(item);
 					saveState();
 				}
 			});
 
 			document.querySelector("#add-plan").addEventListener("click", () => {
-				const plan = { id: makeId(), time: "", title: "", note: "", category: "업무", done: false };
+				const plan = { id: makeId(), time: "", title: "", note: "", categoryId: null, done: false };
 				state.plans.push(plan);
 				const item = createPlanItemEl(plan);
 				planListEl.appendChild(item);
@@ -486,10 +562,51 @@
 				item.querySelector('[data-field="title"]').focus();
 			});
 
-			document.querySelectorAll(".filter").forEach((filter) => filter.addEventListener("click", () => {
-				document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item === filter));
+			labelFilterEl.addEventListener("click", (event) => {
+				const deleteIcon = event.target.closest("[data-role='delete-tag']");
+				if (deleteIcon) {
+					const tagId = deleteIcon.dataset.tagId;
+					state.tags = state.tags.filter((tag) => tag.id !== tagId);
+					state.plans.forEach((plan) => { if (plan.categoryId === tagId) plan.categoryId = null; });
+					saveState();
+					renderTagFilters();
+					renderPlans();
+					return;
+				}
+				const filterButton = event.target.closest(".filter");
+				if (!filterButton) return;
+				document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item === filterButton));
 				document.querySelectorAll(".plan-item").forEach((item) => applyFilterToItem(item));
-			}));
+			});
+
+			const tagCreator = document.querySelector("#tag-creator");
+			const tagNameInput = document.querySelector("#tag-name-input");
+			const tagColorInput = document.querySelector("#tag-color-input");
+
+			document.querySelector("#add-tag").addEventListener("click", () => {
+				tagCreator.hidden = !tagCreator.hidden;
+				if (!tagCreator.hidden) {
+					tagNameInput.value = "";
+					tagColorInput.value = "#db806c";
+					tagNameInput.focus();
+				}
+			});
+
+			document.addEventListener("click", (event) => {
+				if (!tagCreator.hidden && !event.target.closest(".tag-creator-wrap")) tagCreator.hidden = true;
+			});
+
+			function submitNewTag() {
+				const label = tagNameInput.value.trim();
+				if (!label) { tagNameInput.focus(); return; }
+				state.tags.push({ id: makeId(), label, color: tagColorInput.value });
+				saveState();
+				renderTagFilters();
+				tagCreator.hidden = true;
+			}
+
+			document.querySelector("#tag-creator-add").addEventListener("click", submitNewTag);
+			tagNameInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); submitNewTag(); } });
 
 			const moodInput = document.querySelector("#mood-input");
 			moodInput.value = state.mood || "";
@@ -506,7 +623,22 @@
 			tomorrowNote.addEventListener("blur", () => { state.tomorrowNote = tomorrowNote.value; saveState(); });
 			document.querySelector("#save-note").addEventListener("click", () => { state.tomorrowNote = tomorrowNote.value; saveState(); renderRecords(); showToast("내일의 나에게 남긴 말을 기록했어요."); });
 
+			let lastTick = Date.now();
+			setInterval(() => {
+				const now = Date.now();
+				state.totalTimeMs += now - lastTick;
+				lastTick = now;
+				saveState();
+				if (views.review.classList.contains("active")) renderReview();
+			}, 1000);
+			window.addEventListener("beforeunload", () => {
+				state.totalTimeMs += Date.now() - lastTick;
+				saveState();
+			});
+
+			renderTagFilters();
 			renderPlans();
+			renderReview();
 			renderRecords();
 		</script>
 	</body>
