@@ -156,7 +156,7 @@
 			.todo-meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 12px; color: var(--soft-ink); }
 			.todo-meta-row label { display: flex; align-items: center; gap: 4px; }
 			.todo-meta-row input, .todo-meta-row select { border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; color: var(--ink); background: var(--paper); font-size: 12px; }
-			.todo-meta-row input[type="date"], .todo-meta-row input[type="time"] { width: 112px; }
+			.todo-meta-row input[type="date"] { width: 112px; }
 			.todo-meta-row input[type="number"] { width: 60px; }
 			.todo-exec-summary { margin: 0; color: #9f8d64; font-size: 12px; }
 			.todo-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
@@ -587,19 +587,7 @@
 			function execSummaryText(todoId) {
 				const logs = state.executionLogsByTodo[todoId] || [];
 				if (!logs.length) return "";
-				const latest = logs[0];
-				const parts = [`실행 ${logs.length}회`];
-				if (latest.actual_minutes != null) parts.push(`최근 ${latest.actual_minutes}분`);
-				return parts.join(" · ");
-			}
-
-			function combineTodayWithTime(timeStr) {
-				if (!timeStr) return null;
-				const [h, m] = timeStr.split(":").map(Number);
-				if (Number.isNaN(h) || Number.isNaN(m)) return null;
-				const d = new Date();
-				d.setHours(h, m, 0, 0);
-				return d.toISOString();
+				return `실행 ${logs.length}회`;
 			}
 
 			function createTodoItemEl(todo) {
@@ -624,7 +612,6 @@
 								<option value="low"${todo.priority === "low" ? " selected" : ""}>낮음</option>
 							</select></label>
 							<label>예상(분) <input type="number" min="0" class="todo-field-estimate" value="${todo.estimatedMinutes ?? ""}" /></label>
-							<label>시작 <input type="time" class="todo-field-started" /></label>
 						</div>
 						<p class="todo-exec-summary" data-role="exec-summary">${escapeHtml(execSummaryText(todo.id))}</p>
 					</div>
@@ -813,12 +800,7 @@
 				const failedCount = countDailyStatus("failed", start, end);
 				const overdueCount = state.todos.filter((todo) => isOverdue(todo) && (!hasRange || inRange(todo.deadline, start, end))).length;
 				const estimatedTotal = relevantTodos.reduce((sum, todo) => sum + (todo.estimatedMinutes || 0), 0);
-				const actualTotal = relevantTodos.reduce((sum, todo) => {
-					const logs = state.executionLogsByTodo[todo.id] || [];
-					return sum + logs.filter((log) => !hasRange || inRange((log.ended_at || "").slice(0, 10), start, end)).reduce((s, log) => s + (log.actual_minutes || 0), 0);
-				}, 0);
-				const diff = actualTotal - estimatedTotal;
-				return { hasRange, totalCount, doneCount, failedCount, overdueCount, estimatedTotal, actualTotal, diff };
+				return { hasRange, totalCount, doneCount, failedCount, overdueCount, estimatedTotal };
 			}
 
 			function renderReview() {
@@ -845,7 +827,7 @@
 
 				const periodPhrase = stats.hasRange ? "이 기간 동안" : "지금까지";
 				reviewStoryEl.innerHTML = state.activePlans.length
-					? `${periodPhrase} 적어둔 할 일 ${stats.totalCount}개를 날짜별로 총 ${stats.doneCount}번 완료했고, ${stats.failedCount}번 실패했고, ${stats.overdueCount}개는 마감을 넘겼어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
+					? `${periodPhrase} 적어둔 할 일 ${stats.totalCount}개를 날짜별로 총 ${stats.doneCount}번 완료했고, ${stats.failedCount}번 실패했고, ${stats.overdueCount}개는 마감을 넘겼어요.<br />예상 시간 합계는 ${stats.estimatedTotal}분이에요.`
 					: "아직 계획이 없어요. 계획을 세우면 여기에서 돌아볼 수 있어요.";
 
 				const statDefs = [
@@ -854,8 +836,6 @@
 					{ kind: "status", key: "failed", value: stats.failedCount, label: "실패 횟수" },
 					{ kind: "status", key: "overdue", value: stats.overdueCount, label: "지연" },
 					{ kind: "sort", key: "estimate", value: `${stats.estimatedTotal}분`, label: "예상 시간 합계" },
-					{ kind: "sort", key: "estimate", value: `${stats.actualTotal}분`, label: "실제 시간 합계" },
-					{ kind: "sort", key: "estimate", value: `${stats.diff >= 0 ? "+" : ""}${stats.diff}분`, label: "차이 (실제-예상)" },
 				];
 				reviewStatsEl.innerHTML = statDefs.map((def) => `<button type="button" class="review-stat" data-${def.kind}="${def.key}"><span class="stat-value">${escapeHtml(String(def.value))}</span><span class="stat-label">${escapeHtml(def.label)}</span></button>`).join("");
 				reviewDurationCaptionEl.textContent = `이 페이지에 ${durationText} 머물렀어요.`;
@@ -919,11 +899,7 @@
 			async function logCompletion(item, todo) {
 				if (todo._loggingCompletion) return;
 				todo._loggingCompletion = true;
-				const startedInput = item.querySelector(".todo-field-started");
-				const startedAt = combineTodayWithTime(startedInput ? startedInput.value : "");
-				const endedAt = new Date().toISOString();
-				const actualMinutes = startedAt ? Math.max(0, Math.round((new Date(endedAt) - new Date(startedAt)) / 60000)) : null;
-				const { data, error } = await supabaseClient.from(LOGS_TABLE).insert({ todo_id: todo.id, started_at: startedAt, ended_at: endedAt, actual_minutes: actualMinutes, blocked_reason: null }).select();
+				const { data, error } = await supabaseClient.from(LOGS_TABLE).insert({ todo_id: todo.id }).select();
 				todo._loggingCompletion = false;
 				if (error) { console.error("실행 기록 저장 실패", error); showToast("실행 기록 저장에 실패했어요."); return; }
 				if (data && data[0]) {
