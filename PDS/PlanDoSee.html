@@ -225,6 +225,10 @@
 			.record-mood { display: inline-block; margin-left: 8px; padding: 4px 10px; border-radius: 20px; color: #8a6f3d; background: #f6e8bc; font-family: "Nanum Pen Script", cursive; font-size: 19px; }
 			.record-footer { padding-top: 26px; color: var(--soft-ink); font-size: 13px; text-align: center; }
 			.records-action { border: 0; border-bottom: 1px solid var(--coral); padding: 3px 0; color: var(--coral); background: transparent; font-size: 13px; }
+			.record-pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 30px; }
+			.record-page-btn { display: grid; place-items: center; min-width: 34px; height: 34px; padding: 0 8px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 14px; font-weight: 700; }
+			.record-page-btn:hover { border-color: var(--coral); color: var(--coral); }
+			.record-page-btn.is-active { border-color: var(--coral); color: var(--paper); background: var(--coral); }
 
 			.toast { position: fixed; right: 24px; bottom: 24px; max-width: min(90vw, 480px); padding: 16px 22px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: var(--paper); box-shadow: var(--shadow); font-size: 20px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s ease; }
 			.toast.show { opacity: 1; transform: translateY(0); }
@@ -269,7 +273,7 @@
 						</div>
 
 						<div class="day-grid">
-							<div class="plans-column" id="plans-column" data-mode="read">
+							<div class="plans-column" id="plans-column" data-mode="edit">
 								<div class="label-row">
 									<h2 class="section-label" id="plan-panel-heading">이번 계획들</h2>
 									<div class="label-row-actions">
@@ -373,7 +377,7 @@
 			const toast = document.querySelector("#toast");
 			let toastTimer;
 			function showToast(message) { toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2400); }
-			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); if (target === "records") renderRecords(); if (target === "review") renderReview(); }));
+			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); if (target === "records") { recordsPage = 1; renderRecords(); } if (target === "review") renderReview(); }));
 			document.addEventListener("click", (event) => { const toastTarget = event.target.closest("[data-toast]"); if (toastTarget) showToast(toastTarget.dataset.toast); });
 
 			// ---- 날짜 이동 + 달력 ----
@@ -514,9 +518,9 @@
 				state.activePlans = planRows.filter((row) => row.is_active).map(mapPlanRow);
 				state.pastPlans = planRows.filter((row) => !row.is_active).map(mapPlanRow);
 
-				if (state.activePlans.length) {
-					const activeIds = state.activePlans.map((plan) => plan.id);
-					const { data: todoRows, error: todoError } = await supabaseClient.from(TODOS_TABLE).select("*").in("plan_id", activeIds).order("created_at", { ascending: true });
+				if (planRows.length) {
+					const allPlanIds = planRows.map((row) => row.id);
+					const { data: todoRows, error: todoError } = await supabaseClient.from(TODOS_TABLE).select("*").in("plan_id", allPlanIds).order("created_at", { ascending: true });
 					if (todoError) { console.error("할 일 불러오기 실패", todoError); showToast("할 일을 불러오지 못했어요."); }
 					state.todos = (todoRows || []).map(mapTodoRow);
 				} else {
@@ -543,7 +547,7 @@
 			// ---- 읽기 모드 / 편집 모드 토글 (가독성) ----
 			const plansColumnEl = document.querySelector("#plans-column");
 			const modeToggleButton = document.querySelector("#mode-toggle");
-			let uiMode = "read";
+			let uiMode = "edit";
 
 			function applyUiMode() {
 				plansColumnEl.dataset.mode = uiMode;
@@ -857,25 +861,60 @@
 				reviewDurationCaptionEl.textContent = `이 페이지에 ${durationText} 머물렀어요.`;
 			}
 
-			function renderRecords() {
-				const dateKey = selectedISODate();
-				const completedCount = state.todos.filter((todo) => statusOn(todo, dateKey) === "done").length;
-				const planLine = state.activePlans.length ? `<p class="record-label">이번 계획 · ${state.activePlans.map((plan) => escapeHtml(plan.title)).join(", ")}</p>` : "";
-				const todoMarkup = state.todos.length
-					? `<ul class="record-plan-list">${state.todos.map((todo) => `<li class="record-plan${statusOn(todo, dateKey) === "done" ? " is-done" : ""}${statusOn(todo, dateKey) === "failed" ? " is-failed" : ""}"><span class="record-plan-time">${escapeHtml(todo.time || "--:--")}</span><span>${escapeHtml(todo.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
-					: `<span class="record-empty">아직 적어둔 할 일이 없어요.</span>`;
-				recordSheetEl.innerHTML = `
-					<div class="record-sheet">
-						<div class="record-date"><span class="record-month">${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월</span><strong>${selectedDate.getDate()}일</strong></div>
-						<div class="record-content">
-							<section class="record-block">${planLine}<p class="record-label">오늘 하기로 한 일 · ${completedCount}/${state.todos.length} 완료</p>${todoMarkup}</section>
-							<section class="record-block"><p class="record-label">오늘을 돌아보며</p><p class="record-line">${escapeHtml(state.reflection || "아직 오늘의 한 줄을 남기지 않았어요.")}</p></section>
-							<section class="record-block"><p class="record-label">오늘의 기분</p><p class="record-line">${escapeHtml(state.mood || "아직 기분을 적지 않았어요.")}</p></section>
-							<section class="record-block"><p class="record-label">내일의 나에게</p><p class="record-line">${escapeHtml(state.tomorrowNote || "아직 남긴 말이 없어요.")}</p></section>
-						</div>
-					</div>
-					<p class="record-footer">오늘의 기록은 서버(Supabase)에 저장되고 있어요.</p>`;
+			const RECORDS_PER_PAGE = 3;
+			let recordsPage = 1;
+
+			function getRecordDates() {
+				const dateSet = new Set();
+				state.todos.forEach((todo) => { Object.keys(todo.dailyStatus || {}).forEach((date) => dateSet.add(date)); });
+				dateSet.add(todayISODate());
+				dateSet.add(selectedISODate());
+				return [...dateSet].sort().reverse();
 			}
+
+			function renderRecordCard(dateKey) {
+				const [year, month, day] = dateKey.split("-").map(Number);
+				const isToday = dateKey === todayISODate();
+				const todosForDay = state.todos.filter((todo) => statusOn(todo, dateKey) !== null);
+				const completedCount = todosForDay.filter((todo) => statusOn(todo, dateKey) === "done").length;
+				const planLine = state.activePlans.length ? `<p class="record-label">이번 계획 · ${state.activePlans.map((plan) => escapeHtml(plan.title)).join(", ")}</p>` : "";
+				const todoMarkup = todosForDay.length
+					? `<ul class="record-plan-list">${todosForDay.map((todo) => `<li class="record-plan${statusOn(todo, dateKey) === "done" ? " is-done" : ""}${statusOn(todo, dateKey) === "failed" ? " is-failed" : ""}"><span class="record-plan-time">${escapeHtml(todo.time || "--:--")}</span><span>${escapeHtml(todo.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
+					: `<span class="record-empty">이 날 완료·실패로 표시한 할 일이 없어요.</span>`;
+				const extraBlocks = isToday
+					? `<section class="record-block"><p class="record-label">오늘을 돌아보며</p><p class="record-line">${escapeHtml(state.reflection || "아직 오늘의 한 줄을 남기지 않았어요.")}</p></section>
+						<section class="record-block"><p class="record-label">오늘의 기분</p><p class="record-line">${escapeHtml(state.mood || "아직 기분을 적지 않았어요.")}</p></section>
+						<section class="record-block"><p class="record-label">내일의 나에게</p><p class="record-line">${escapeHtml(state.tomorrowNote || "아직 남긴 말이 없어요.")}</p></section>`
+					: "";
+				return `
+					<div class="record-sheet">
+						<div class="record-date"><span class="record-month">${year}년 ${month}월</span><strong>${day}일</strong></div>
+						<div class="record-content">
+							<section class="record-block">${planLine}<p class="record-label">${isToday ? "오늘" : "그날"} 완료한 할 일 · ${completedCount}/${todosForDay.length} 완료</p>${todoMarkup}</section>
+							${extraBlocks}
+						</div>
+					</div>`;
+			}
+
+			function renderRecords() {
+				const dates = getRecordDates();
+				const totalPages = Math.max(1, Math.ceil(dates.length / RECORDS_PER_PAGE));
+				recordsPage = Math.min(Math.max(recordsPage, 1), totalPages);
+				const start = (recordsPage - 1) * RECORDS_PER_PAGE;
+				const pageDates = dates.slice(start, start + RECORDS_PER_PAGE);
+				const cardsMarkup = pageDates.map(renderRecordCard).join("");
+				const paginationMarkup = totalPages > 1
+					? `<div class="record-pagination">${Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => `<button type="button" class="record-page-btn${p === recordsPage ? " is-active" : ""}" data-page="${p}">${p}</button>`).join("")}</div>`
+					: "";
+				recordSheetEl.innerHTML = `${cardsMarkup}${paginationMarkup}<p class="record-footer">오늘의 기록은 서버(Supabase)에 저장되고 있어요.</p>`;
+			}
+
+			recordSheetEl.addEventListener("click", (event) => {
+				const pageButton = event.target.closest("[data-page]");
+				if (!pageButton) return;
+				recordsPage = Number(pageButton.dataset.page);
+				renderRecords();
+			});
 
 			async function logCompletion(item, todo) {
 				if (todo._loggingCompletion) return;
@@ -998,7 +1037,6 @@
 					if (error) { console.error("계획 마무리 실패", error); showToast("저장에 실패했어요."); return; }
 					state.activePlans = state.activePlans.filter((p) => p.id !== planId);
 					state.pastPlans.unshift(plan);
-					state.todos = state.todos.filter((todo) => todo.planId !== planId);
 					renderTodos();
 					showToast("계획을 마무리했어요. 지난 계획에서 볼 수 있어요.");
 					return;
