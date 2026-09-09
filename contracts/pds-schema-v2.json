@@ -2,59 +2,108 @@
   "version": "v2",
   "database": "Supabase Postgres",
   "updated_at": "2026-09-09",
-  "note": "이번 수정은 '가장 큰 문제인 localStorage를 서버 DB로 바꾸는 것'만 범위로 합니다. 계획/할일/실행기록 3단 구조 분리(카드1~3)는 아직 이 스키마에 반영되지 않았고, known_gaps_vs_T6에 남겨둡니다.",
+  "note": "이번 수정 범위는 카드1~3(계획/할일/실행기록 3단 구조 분리)입니다. 카드4의 집계·근거 이동, 카드5의 데이터 내보내기·로그인 안내 문구는 다음 작업으로 남겨둡니다.",
   "tables": {
+    "pds_plans": {
+      "description": "계획. 한 번에 하나만 활성(is_active=true) 상태이며, 활성 계획에 오늘의 할 일들이 딸립니다.",
+      "columns": {
+        "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
+        "title": { "type": "text", "not_null": true },
+        "period_start": { "type": "date", "nullable": true, "note": "기간(카드1 T06-C04)" },
+        "period_end": { "type": "date", "nullable": true },
+        "priority": { "type": "text", "default": "medium", "enum": ["high", "medium", "low"], "note": "우선순위(T06-C05)" },
+        "success_criteria": { "type": "text", "nullable": true, "note": "성공 기준(T06-C06)" },
+        "estimated_minutes": { "type": "integer", "nullable": true, "note": "예상 시간(T06-C07), 분 단위" },
+        "is_active": { "type": "boolean", "default": true, "note": "동시에 하나만 true (부분 유니크 인덱스로 강제)" },
+        "created_at": { "type": "timestamptz", "default": "now()" },
+        "updated_at": { "type": "timestamptz", "default": "now()", "note": "트리거가 매 수정마다 갱신" }
+      }
+    },
+    "pds_plan_revisions": {
+      "description": "계획 수정 이력. pds_plans가 UPDATE될 때마다 트리거(pds_plans_snapshot)가 수정 직전 값을 자동으로 여기에 남깁니다(T06-C08). 클라이언트 코드가 아니라 DB 트리거가 보장하므로 누락될 수 없습니다.",
+      "columns": {
+        "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
+        "plan_id": { "type": "uuid", "references": "pds_plans.id", "on_delete": "cascade" },
+        "title": { "type": "text" },
+        "period_start": { "type": "date" },
+        "period_end": { "type": "date" },
+        "priority": { "type": "text" },
+        "success_criteria": { "type": "text" },
+        "estimated_minutes": { "type": "integer" },
+        "snapshot_at": { "type": "timestamptz", "default": "now()", "note": "이 스냅샷이 만들어진(=수정이 일어난) 시각" }
+      },
+      "write_policy": "anon은 select/insert만 가능, update/delete 정책 없음 → 이력은 지우거나 고칠 수 없음"
+    },
+    "pds_todos": {
+      "description": "할 일. 반드시 어떤 계획(plan_id)에 딸려 있습니다. 예전에는 이 테이블 이름이 pds_plans였는데, 실제로는 할 일 목록이었어서 이번에 이름을 바로잡았습니다.",
+      "columns": {
+        "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
+        "plan_id": { "type": "uuid", "nullable": true, "references": "pds_plans.id", "on_delete": "set null" },
+        "time": { "type": "text", "nullable": true, "note": "표시용 시간 문자열(예: 09:30). 마감일과 다름" },
+        "title": { "type": "text", "nullable": true },
+        "note": { "type": "text", "nullable": true },
+        "deadline": { "type": "date", "nullable": true, "note": "마감일(T06-C14)" },
+        "priority": { "type": "text", "default": "medium", "enum": ["high", "medium", "low"], "note": "우선순위(T06-C15)" },
+        "tag_id": { "type": "uuid", "nullable": true, "references": "pds_tags.id", "on_delete": "set null", "note": "태그(T06-C16)" },
+        "estimated_minutes": { "type": "integer", "nullable": true, "note": "예상 시간(T06-C17)" },
+        "done": { "type": "boolean", "default": false },
+        "created_at": { "type": "timestamptz", "default": "now()" },
+        "updated_at": { "type": "timestamptz", "default": "now()" }
+      }
+    },
+    "pds_execution_logs": {
+      "description": "실행 기록. 할 일을 '완료' 체크할 때 자동으로 한 건 생성되고(T06-C21/22/23/24/25), '막혔어요' 버튼으로도 별도 기록을 남길 수 있습니다(T06-C26). 계획/할일 값을 덮어쓰지 않는 별도 테이블입니다(T06-C27).",
+      "columns": {
+        "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
+        "todo_id": { "type": "uuid", "references": "pds_todos.id", "on_delete": "cascade" },
+        "started_at": { "type": "timestamptz", "nullable": true, "note": "선택 입력. 할 일 옆 '시작' 시간 입력칸에 값을 넣었을 때만 채워짐" },
+        "ended_at": { "type": "timestamptz", "default": "now()", "note": "완료 체크 또는 막힘 기록을 남긴 시각" },
+        "actual_minutes": { "type": "integer", "nullable": true, "note": "started_at이 있을 때만 (ended_at - started_at)으로 계산, 없으면 null" },
+        "blocked_reason": { "type": "text", "nullable": true, "note": "완료 시에는 null, '막혔어요'로 남긴 기록일 때만 값이 있음" },
+        "created_at": { "type": "timestamptz", "default": "now()" }
+      },
+      "write_policy": "anon은 select/insert만 가능, update/delete 정책 없음 → 실행 기록도 지우거나 고칠 수 없음",
+      "duplicate_guard": "체크박스는 done이 false→true로 바뀔 때만 기록을 만들고, 클라이언트에 진행중 플래그(_loggingCompletion)를 둬서 같은 완료 이벤트가 중복 저장되지 않게 막음"
+    },
     "pds_tags": {
-      "description": "할 일에 붙이는 카테고리 라벨(색상 포함).",
+      "description": "할 일에 붙이는 카테고리 라벨(색상 포함). 이전과 동일.",
       "columns": {
         "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
         "label": { "type": "text", "not_null": true },
-        "color": { "type": "text", "not_null": true, "format": "hex color, 예: #db806c" },
+        "color": { "type": "text", "not_null": true },
         "created_at": { "type": "timestamptz", "default": "now()" }
       }
     },
-    "pds_plans": {
-      "description": "'오늘 하기로 한 일' 한 건. 지금은 계획과 할 일이 구분되지 않은 단일 리스트입니다.",
-      "columns": {
-        "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
-        "time": { "type": "text", "nullable": true, "note": "표시용 시간 문자열(예: 09:30). 마감일이나 기간이 아님" },
-        "title": { "type": "text", "nullable": true },
-        "note": { "type": "text", "nullable": true },
-        "tag_id": { "type": "uuid", "nullable": true, "references": "pds_tags.id", "on_delete": "set null" },
-        "done": { "type": "boolean", "default": false },
-        "created_at": { "type": "timestamptz", "default": "now()" },
-        "updated_at": { "type": "timestamptz", "default": "now()", "note": "현재 클라이언트 코드에서 실제로 갱신하지는 않음 (컬럼만 준비됨)" }
-      }
-    },
     "pds_settings": {
-      "description": "오늘 하루에 대한 단일 설정 행. 기분/한줄 회고/내일에게 남기는 말/페이지 누적 체류시간을 담음.",
+      "description": "오늘 하루에 대한 단일 설정 행(기분/한줄회고/내일 메모/페이지 누적 체류시간). 이전과 동일, id='today' 고정 1행.",
       "columns": {
-        "id": { "type": "text", "primary_key": true, "default": "'today'", "note": "지금은 'today' 고정 1행만 사용. 날짜별 분리는 안 되어 있음" },
+        "id": { "type": "text", "primary_key": true, "default": "'today'" },
         "mood": { "type": "text", "nullable": true },
         "reflection": { "type": "text", "nullable": true },
         "tomorrow_note": { "type": "text", "nullable": true },
-        "total_time_ms": { "type": "bigint", "default": 0, "note": "특정 할 일의 실행 시간이 아니라 이 웹페이지를 열어둔 누적 시간" },
+        "total_time_ms": { "type": "bigint", "default": 0 },
         "updated_at": { "type": "timestamptz", "default": "now()" }
       }
     }
   },
   "relationships": [
-    { "from": "pds_plans.tag_id", "to": "pds_tags.id", "type": "many-to-one", "on_delete": "set null" }
+    { "from": "pds_todos.plan_id", "to": "pds_plans.id", "type": "many-to-one", "on_delete": "set null" },
+    { "from": "pds_todos.tag_id", "to": "pds_tags.id", "type": "many-to-one", "on_delete": "set null" },
+    { "from": "pds_plan_revisions.plan_id", "to": "pds_plans.id", "type": "many-to-one", "on_delete": "cascade" },
+    { "from": "pds_execution_logs.todo_id", "to": "pds_todos.id", "type": "many-to-one", "on_delete": "cascade" }
   ],
   "date_rules": {
-    "status": "미구현",
-    "detail": "pds_plans, pds_settings 모두 날짜 컬럼이 없어 화면의 달력·날짜 이동 UI와 무관하게 항상 같은 데이터(오늘 하나의 묶음)를 보여줍니다. 날짜별로 계획/할 일/기록을 분리하려면 각 테이블에 date 컬럼을 추가하고 조회 조건에 반영해야 합니다."
+    "status": "부분 구현",
+    "detail": "계획(pds_plans)에는 기간(period_start/period_end)이 생겼지만, 할 일(pds_todos)과 오늘의 설정(pds_settings)은 여전히 날짜 컬럼이 없어 화면의 달력·날짜 이동 UI와 무관하게 항상 활성 계획의 할 일 전체를 보여줍니다. 하루 단위로 완전히 쪼개려면 pds_todos/pds_settings에도 date 컬럼이 필요합니다."
   },
   "row_level_security": {
     "enabled": true,
-    "policy": "anon 역할에 대해 pds_tags/pds_plans/pds_settings 3개 테이블 모두 select/insert/update/delete를 전체 허용. 로그인이 없고 링크를 아는 사람은 누구나 접근할 수 있어야 하는 과제 조건에 맞춘 의도된 설정이며, 인증 대신 '링크 공개'로 접근을 제한함.",
+    "policy": "anon 역할에 대해 pds_plans/pds_todos/pds_tags는 select/insert/update/delete 전체 허용. pds_plan_revisions/pds_execution_logs는 select/insert만 허용(이력이라 수정·삭제 불가). 로그인이 없고 링크를 아는 사람은 누구나 접근하는 과제 조건에 맞춘 설정.",
     "keys_exposed_client_side": "SUPABASE_URL, SUPABASE_ANON_KEY(publishable key)만 클라이언트에 노출됨. service_role 키는 어디에도 포함되지 않음."
   },
   "known_gaps_vs_T6": [
-    "카드1(계획 세우기): 계획이라는 별도 엔티티가 없어 기간/우선순위/성공 기준/예상 시간 컬럼이 없음. 수정 이력 보존(T06-C08)도 없음.",
-    "카드2(할일 다루기): 마감일/우선순위/예상 시간 컬럼 없음. 검색(T06-C18) 기능 없음. 정렬 및 정렬 기준 표시(T06-C19, C20) 없음 — 태그 필터만 있음.",
-    "카드3(실제로 한 일 적기): 시작/종료 시각·실제 걸린 시간·막힌 이유를 담는 실행 기록 테이블이 없음. done 플래그만 존재.",
-    "카드4(돌아보기): 집계 숫자를 눌러 근거 기록으로 이동하는 기능이 실제 이동이 아니라 안내 문구(toast)로 대체되어 있음(T06-C83 미충족). 지연 수/막힘 수/예상-실제 시간 차이 계산 없음.",
-    "카드5: 데이터 내보내기(파일 하나로 내보내기) 기능 없음(T06-C36). 첫 화면에 로그인 없음 안내 문구 없음(T06-C82)."
+    "카드2: 정렬 기준은 화면에 문구로 표시되지만(T06-C20), 실제 사용자가 자주 쓰는 '중요도+마감일 복합 정렬' 같은 고급 정렬은 없음 — 단일 기준 정렬만 지원.",
+    "카드4(돌아보기): 아직 pds_todos 기준의 완료/전체 개수만 보여주고 있고, 지연 수·막힘 수·예상-실제 시간 차이 계산, 집계 숫자 클릭 시 근거 기록으로 이동(T06-C83)은 다음 작업으로 남아있음.",
+    "카드5: 데이터 내보내기(T06-C36) 기능 없음. 첫 화면 로그인 없음 안내 문구(T06-C82) 없음."
   ]
 }
