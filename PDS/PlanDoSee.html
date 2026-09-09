@@ -97,8 +97,10 @@
 			.filter-delete { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; line-height: 1; }
 			.filter-delete:hover { background: rgba(0, 0, 0, .12); }
 
-			/* 계획 + 할 일을 하나로 묶는 카드 */
+			/* 계획 + 할 일을 하나로 묶는 카드 (계획마다 하나씩) */
+			.plans-list { display: grid; gap: 22px; margin-bottom: 22px; }
 			.plan-todo-card { border: 1px solid var(--line); border-radius: 14px; padding: 24px 26px 26px; background: var(--paper-deep); }
+			.plan-card-actions { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
 			.plan-todo-link { display: flex; align-items: center; gap: 10px; margin: 24px 0 20px; color: var(--soft-ink); font-size: 11px; letter-spacing: .02em; }
 			.plan-todo-link::before, .plan-todo-link::after { flex: 1; height: 1px; content: ""; background: var(--line); }
 			.plan-progress { margin-top: 16px; display: grid; gap: 6px; }
@@ -218,7 +220,7 @@
 			.record-footer { padding-top: 26px; color: var(--soft-ink); font-size: 12px; text-align: center; }
 			.records-action { border: 0; border-bottom: 1px solid var(--coral); padding: 3px 0; color: var(--coral); background: transparent; font-size: 12px; }
 
-			.toast { position: fixed; right: 24px; bottom: 24px; max-width: min(90vw, 560px); padding: 22px 30px; border: 1px solid var(--line); border-radius: 16px; color: var(--ink); background: var(--paper); box-shadow: var(--shadow); font-size: 24px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s ease; }
+			.toast { position: fixed; right: 24px; bottom: 24px; max-width: min(90vw, 480px); padding: 16px 22px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: var(--paper); box-shadow: var(--shadow); font-size: 18px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s ease; }
 			.toast.show { opacity: 1; transform: translateY(0); }
 			@media (max-width: 760px) {
 				.app { width: min(100% - 22px, 600px); padding-top: 20px; }
@@ -258,60 +260,50 @@
 						</div>
 
 						<div class="day-grid">
-							<div class="plan-todo-card">
-								<section class="plan-panel" aria-labelledby="plan-panel-heading">
-									<div class="label-row">
-										<h2 class="section-label" id="plan-panel-heading">이번 계획</h2>
-										<div class="label-row-actions">
-											<button class="add-button" type="button" id="plan-edit-toggle" hidden>수정</button>
-											<button class="add-button" type="button" id="plan-new-toggle">계획 세우기</button>
-										</div>
+							<div class="plans-column">
+								<div class="label-row">
+									<h2 class="section-label" id="plan-panel-heading">이번 계획들</h2>
+									<div class="label-row-actions">
+										<div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><div class="tag-color-field"><span class="tag-color-label">배경</span><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /></div><div class="tag-color-field"><span class="tag-color-label">글자</span><input type="color" id="tag-text-color-input" class="tag-color-input" value="#db806c" /></div><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div>
+										<button class="add-button" type="button" id="plan-new-toggle">+ 새 계획</button>
 									</div>
-									<div id="plan-display"></div>
-									<div class="plan-progress" id="plan-progress" hidden>
-										<div class="plan-progress-track"><div class="plan-progress-fill" id="plan-progress-fill" style="width:0%"></div></div>
-										<p class="plan-progress-caption" id="plan-progress-caption"></p>
-									</div>
-									<form id="plan-form" class="plan-form" hidden>
-										<input type="text" id="plan-title-input" placeholder="계획 이름 (예: 이번 주 운동 루틴)" required />
-										<div class="plan-form-row">
-											<label>기간 <input type="date" id="plan-start-input" /> ~ <input type="date" id="plan-end-input" /></label>
-											<label>우선순위 <select id="plan-priority-input"><option value="high">높음</option><option value="medium" selected>보통</option><option value="low">낮음</option></select></label>
-											<label>예상 시간(분) <input type="number" id="plan-estimate-input" min="0" placeholder="예: 300" /></label>
-										</div>
-										<textarea id="plan-success-input" placeholder="성공 기준 — 이 계획이 끝났을 때 뭐가 달라져 있으면 성공인가요?"></textarea>
-										<p class="plan-form-note" id="plan-form-note"></p>
-										<div class="save-line">
-											<button type="button" class="add-button" id="plan-cancel-button">취소</button>
-											<button type="submit" class="tag-creator-add">저장</button>
-										</div>
-									</form>
-									<details class="plan-history" id="plan-history" hidden>
-										<summary>지난 계획 보기</summary>
-										<ul id="plan-history-list"></ul>
-									</details>
-								</section>
+								</div>
 
-								<p class="plan-todo-link">이 계획을 이루기 위한 오늘의 할 일</p>
+								<div class="todo-toolbar">
+									<input type="search" id="todo-search-input" class="todo-search-input" placeholder="할 일 검색" />
+									<label class="todo-sort-label">정렬
+										<select id="todo-sort-select">
+											<option value="created">만든 순서</option>
+											<option value="deadline">마감일 빠른 순</option>
+											<option value="priority">우선순위 높은 순</option>
+											<option value="estimate">예상 시간 긴 순</option>
+										</select>
+									</label>
+									<span class="todo-sort-caption" id="todo-sort-caption">지금은 만든 순서로 보고 있어요.</span>
+								</div>
+								<div class="label-filter" id="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button></div>
+								<div class="review-banner" id="todo-status-banner" hidden><span class="review-banner-text"></span><button type="button" id="todo-status-reset">전체 보기</button></div>
 
-								<section aria-labelledby="todo-heading">
-									<div class="label-row"><h2 class="section-label" id="todo-heading">오늘 하기로 한 일</h2><div class="label-row-actions"><div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><div class="tag-color-field"><span class="tag-color-label">배경</span><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /></div><div class="tag-color-field"><span class="tag-color-label">글자</span><input type="color" id="tag-text-color-input" class="tag-color-input" value="#db806c" /></div><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div><button class="add-button" type="button" id="add-todo">+ 한 줄 더</button></div></div>
-									<div class="todo-toolbar">
-										<input type="search" id="todo-search-input" class="todo-search-input" placeholder="할 일 검색" />
-										<label class="todo-sort-label">정렬
-											<select id="todo-sort-select">
-												<option value="created">만든 순서</option>
-												<option value="deadline">마감일 빠른 순</option>
-												<option value="priority">우선순위 높은 순</option>
-												<option value="estimate">예상 시간 긴 순</option>
-											</select>
-										</label>
-										<span class="todo-sort-caption" id="todo-sort-caption">지금은 만든 순서로 보고 있어요.</span>
+								<div class="plans-list" id="plans-list"></div>
+
+								<form id="plan-form" class="plan-form" hidden>
+									<input type="text" id="plan-title-input" placeholder="계획 이름 (예: 이번 주 운동 루틴)" required />
+									<div class="plan-form-row">
+										<label>기간 <input type="date" id="plan-start-input" /> ~ <input type="date" id="plan-end-input" /></label>
+										<label>우선순위 <select id="plan-priority-input"><option value="high">높음</option><option value="medium" selected>보통</option><option value="low">낮음</option></select></label>
+										<label>예상 시간(분) <input type="number" id="plan-estimate-input" min="0" placeholder="예: 300" /></label>
 									</div>
-									<div class="label-filter" id="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button></div>
-									<div class="review-banner" id="todo-status-banner" hidden><span class="review-banner-text"></span><button type="button" id="todo-status-reset">전체 보기</button></div>
-									<div class="todo-list" id="todo-list"></div>
-								</section>
+									<textarea id="plan-success-input" placeholder="성공 기준 — 이 계획이 끝났을 때 뭐가 달라져 있으면 성공인가요?"></textarea>
+									<p class="plan-form-note" id="plan-form-note"></p>
+									<div class="save-line">
+										<button type="button" class="add-button" id="plan-cancel-button">취소</button>
+										<button type="submit" class="tag-creator-add">저장</button>
+									</div>
+								</form>
+								<details class="plan-history" id="plan-history" hidden>
+									<summary>지난 계획 보기</summary>
+									<ul id="plan-history-list"></ul>
+								</details>
 							</div>
 							<aside class="side-column">
 								<section class="mood-box"><h2 class="section-label">지금 내 기분은</h2><input class="mood-input" id="mood-input" type="text" placeholder="오늘 기분을 적어보세요" /></section>
@@ -483,7 +475,7 @@
 				return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 			}
 
-			const state = { todos: [], tags: [], mood: "", reflection: "", tomorrowNote: "", nextPlanNote: "", totalTimeMs: 0, activePlan: null, pastPlans: [], executionLogsByTodo: {} };
+			const state = { todos: [], tags: [], mood: "", reflection: "", tomorrowNote: "", nextPlanNote: "", totalTimeMs: 0, activePlans: [], pastPlans: [], executionLogsByTodo: {} };
 			let todoStatusFilter = "all";
 
 			function mapPlanRow(row) {
@@ -491,7 +483,7 @@
 			}
 
 			function mapTodoRow(row) {
-				return { id: row.id, time: row.time || "", title: row.title || "", note: row.note || "", categoryId: row.tag_id, done: row.done, deadline: row.deadline || "", priority: row.priority || "medium", estimatedMinutes: row.estimated_minutes };
+				return { id: row.id, planId: row.plan_id, time: row.time || "", title: row.title || "", note: row.note || "", categoryId: row.tag_id, done: row.done, deadline: row.deadline || "", priority: row.priority || "medium", estimatedMinutes: row.estimated_minutes };
 			}
 
 			async function loadExecutionLogs(todoIds) {
@@ -516,12 +508,12 @@
 				state.tags = (tagsRes.data || []).map((row) => ({ id: row.id, label: row.label, color: row.color, text_color: row.text_color || row.color }));
 
 				const planRows = planRes.data || [];
-				const activeRow = planRows.find((row) => row.is_active);
-				state.activePlan = activeRow ? mapPlanRow(activeRow) : null;
+				state.activePlans = planRows.filter((row) => row.is_active).map(mapPlanRow);
 				state.pastPlans = planRows.filter((row) => !row.is_active).map(mapPlanRow);
 
-				if (state.activePlan) {
-					const { data: todoRows, error: todoError } = await supabaseClient.from(TODOS_TABLE).select("*").eq("plan_id", state.activePlan.id).order("created_at", { ascending: true });
+				if (state.activePlans.length) {
+					const activeIds = state.activePlans.map((plan) => plan.id);
+					const { data: todoRows, error: todoError } = await supabaseClient.from(TODOS_TABLE).select("*").in("plan_id", activeIds).order("created_at", { ascending: true });
 					if (todoError) { console.error("할 일 불러오기 실패", todoError); showToast("할 일을 불러오지 못했어요."); }
 					state.todos = (todoRows || []).map(mapTodoRow);
 				} else {
@@ -543,7 +535,7 @@
 				}
 			}
 
-			const todoListEl = document.querySelector("#todo-list");
+			const plansListEl = document.querySelector("#plans-list");
 			const labelFilterEl = document.querySelector("#label-filter");
 			const recordSheetEl = document.querySelector("#record-sheet");
 			const reviewStoryEl = document.querySelector("#review-story");
@@ -588,6 +580,7 @@
 				const item = document.createElement("div");
 				item.className = "todo-item" + (todo.done ? " is-done" : "");
 				item.dataset.id = todo.id;
+				item.dataset.planId = todo.planId || "";
 				item.dataset.categoryId = todo.categoryId || "";
 				const priorityLabel = PRIORITY_LABEL[todo.priority] || PRIORITY_LABEL.medium;
 				item.innerHTML = `
@@ -685,18 +678,89 @@
 				renderTodos();
 			});
 
+			function computePlanProgress(planId) {
+				const todos = state.todos.filter((todo) => todo.planId === planId);
+				const total = todos.length;
+				const done = todos.filter((todo) => todo.done).length;
+				const percent = total ? Math.round((done / total) * 100) : 0;
+				return { total, done, percent };
+			}
+
+			function planProgressMarkup(planId) {
+				const { total, done, percent } = computePlanProgress(planId);
+				const caption = total
+					? `할 일 ${total}개 중 ${done}개 완료 · 이 계획의 진행률 ${percent}%`
+					: "아직 이 계획에 할 일이 없어요. 아래 버튼으로 추가해보세요.";
+				return `<div class="plan-progress"><div class="plan-progress-track"><div class="plan-progress-fill" style="width:${percent}%"></div></div><p class="plan-progress-caption">${escapeHtml(caption)}</p></div>`;
+			}
+
+			function renderPlanProgress(planId) {
+				const card = plansListEl.querySelector(`.plan-todo-card[data-plan-id="${planId}"]`);
+				if (!card) return;
+				const fill = card.querySelector(".plan-progress-fill");
+				const caption = card.querySelector(".plan-progress-caption");
+				if (!fill || !caption) return;
+				const { total, done, percent } = computePlanProgress(planId);
+				fill.style.width = `${percent}%`;
+				caption.textContent = total ? `할 일 ${total}개 중 ${done}개 완료 · 이 계획의 진행률 ${percent}%` : "아직 이 계획에 할 일이 없어요. 아래 버튼으로 추가해보세요.";
+			}
+
+			function planCardHeaderMarkup(plan) {
+				const priorityLabel = PRIORITY_LABEL[plan.priority] || PRIORITY_LABEL.medium;
+				const periodText = (plan.periodStart || plan.periodEnd) ? `${plan.periodStart || "?"} ~ ${plan.periodEnd || "?"}` : "기간 없음";
+				const estimateText = plan.estimatedMinutes != null ? `예상 ${plan.estimatedMinutes}분` : "예상 시간 없음";
+				return `
+					<p class="plan-title-line">${escapeHtml(plan.title)}</p>
+					<p class="plan-meta-line"><span>${escapeHtml(periodText)}</span><span class="priority-pill priority-${plan.priority}">${priorityLabel}</span><span>${escapeHtml(estimateText)}</span></p>
+					${plan.successCriteria ? `<p class="plan-success-line">${escapeHtml(plan.successCriteria)}</p>` : ""}
+				`;
+			}
+
 			function renderTodos() {
-				todoListEl.innerHTML = "";
-				const list = getFilteredSortedTodos();
-				renderPlanProgress();
-				if (!list.length) {
-					const empty = document.createElement("p");
-					empty.className = "record-empty";
-					empty.textContent = !state.activePlan ? "먼저 계획을 세워야 할 일을 추가할 수 있어요." : (state.todos.length ? "검색·필터 조건에 맞는 할 일이 없어요." : "아직 할 일이 없어요. + 한 줄 더로 추가해보세요.");
-					todoListEl.appendChild(empty);
-					return;
+				plansListEl.innerHTML = "";
+
+				if (!state.activePlans.length) {
+					plansListEl.innerHTML = `<p class="plan-empty-text">지금 실제로 하고 있는 일 가운데 하나를 골라 계획을 세워보세요. 계획을 세워야 할 일을 추가할 수 있어요.</p>`;
+				} else {
+					const filteredSorted = getFilteredSortedTodos();
+					state.activePlans.forEach((plan) => {
+						const card = document.createElement("div");
+						card.className = "plan-todo-card";
+						card.dataset.planId = plan.id;
+						card.innerHTML = `
+							<section class="plan-panel" aria-label="계획: ${escapeHtml(plan.title)}">
+								${planCardHeaderMarkup(plan)}
+								${planProgressMarkup(plan.id)}
+								<div class="plan-card-actions">
+									<button class="add-button" type="button" data-role="plan-edit" data-plan-id="${plan.id}">수정</button>
+									<button class="add-button" type="button" data-role="plan-finish" data-plan-id="${plan.id}">이 계획 마무리하기</button>
+								</div>
+							</section>
+							<p class="plan-todo-link">이 계획을 이루기 위한 할 일</p>
+							<div class="todo-list" data-plan-id="${plan.id}"></div>
+							<button class="add-button" type="button" data-role="add-todo" data-plan-id="${plan.id}">+ 이 계획에 할 일 추가</button>
+						`;
+						const listEl = card.querySelector(".todo-list");
+						const planTodos = filteredSorted.filter((todo) => todo.planId === plan.id);
+						if (!planTodos.length) {
+							const empty = document.createElement("p");
+							empty.className = "record-empty";
+							const allForPlan = state.todos.filter((todo) => todo.planId === plan.id);
+							empty.textContent = allForPlan.length ? "검색·필터 조건에 맞는 할 일이 없어요." : "아직 할 일이 없어요. + 버튼으로 추가해보세요.";
+							listEl.appendChild(empty);
+						} else {
+							planTodos.forEach((todo) => listEl.appendChild(createTodoItemEl(todo)));
+						}
+						plansListEl.appendChild(card);
+					});
 				}
-				list.forEach((todo) => todoListEl.appendChild(createTodoItemEl(todo)));
+
+				if (state.pastPlans.length) {
+					planHistoryEl.hidden = false;
+					planHistoryListEl.innerHTML = state.pastPlans.map((plan) => `<li>${escapeHtml(plan.title)} (${escapeHtml(plan.periodStart || "?")} ~ ${escapeHtml(plan.periodEnd || "?")})</li>`).join("");
+				} else {
+					planHistoryEl.hidden = true;
+				}
 			}
 
 			function formatDuration(ms) {
@@ -726,12 +790,20 @@
 				const stats = computeReviewStats();
 				const durationText = formatDuration(state.totalTimeMs);
 
-				reviewHeadingEl.textContent = state.activePlan ? `"${state.activePlan.title}" 계획을 돌아보며` : "계획을 돌아보며";
-				reviewKickerEl.textContent = state.activePlan && (state.activePlan.periodStart || state.activePlan.periodEnd)
-					? `${state.activePlan.periodStart || "?"} ~ ${state.activePlan.periodEnd || "?"}`
-					: "REVIEW";
+				if (state.activePlans.length === 1) {
+					reviewHeadingEl.textContent = `"${state.activePlans[0].title}" 계획을 돌아보며`;
+					reviewKickerEl.textContent = (state.activePlans[0].periodStart || state.activePlans[0].periodEnd)
+						? `${state.activePlans[0].periodStart || "?"} ~ ${state.activePlans[0].periodEnd || "?"}`
+						: "REVIEW";
+				} else if (state.activePlans.length > 1) {
+					reviewHeadingEl.textContent = `계획 ${state.activePlans.length}개를 돌아보며`;
+					reviewKickerEl.textContent = "REVIEW";
+				} else {
+					reviewHeadingEl.textContent = "계획을 돌아보며";
+					reviewKickerEl.textContent = "REVIEW";
+				}
 
-				reviewStoryEl.innerHTML = state.activePlan
+				reviewStoryEl.innerHTML = state.activePlans.length
 					? `적어둔 할 일 ${stats.totalCount}개 중 ${stats.doneCount}개를 끝냈고, ${stats.overdueCount}개는 마감을 넘겼고, ${stats.blockedCount}개는 막힌 적이 있어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
 					: "아직 계획이 없어요. 계획을 세우면 여기에서 돌아볼 수 있어요.";
 
@@ -750,7 +822,7 @@
 
 			function renderRecords() {
 				const completedCount = state.todos.filter((todo) => todo.done).length;
-				const planLine = state.activePlan ? `<p class="record-label">이번 계획 · ${escapeHtml(state.activePlan.title)}</p>` : "";
+				const planLine = state.activePlans.length ? `<p class="record-label">이번 계획 · ${state.activePlans.map((plan) => escapeHtml(plan.title)).join(", ")}</p>` : "";
 				const todoMarkup = state.todos.length
 					? `<ul class="record-plan-list">${state.todos.map((todo) => `<li class="record-plan${todo.done ? " is-done" : ""}"><span class="record-plan-time">${escapeHtml(todo.time || "--:--")}</span><span>${escapeHtml(todo.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
 					: `<span class="record-empty">아직 적어둔 할 일이 없어요.</span>`;
@@ -785,7 +857,7 @@
 				}
 			}
 
-			todoListEl.addEventListener("change", async (event) => {
+			plansListEl.addEventListener("change", async (event) => {
 				const item = event.target.closest(".todo-item");
 				if (!item) return;
 				const todo = findTodo(item.dataset.id);
@@ -798,6 +870,7 @@
 					item.classList.toggle("is-done", nowDone);
 					const { error } = await supabaseClient.from(TODOS_TABLE).update({ done: nowDone }).eq("id", todo.id);
 					if (error) { console.error("완료 상태 저장 실패", error); showToast("저장에 실패했어요."); return; }
+					renderPlanProgress(todo.planId);
 					if (!wasDone && nowDone) await logCompletion(item, todo);
 					return;
 				}
@@ -827,7 +900,7 @@
 				}
 			});
 
-			todoListEl.addEventListener("focusout", async (event) => {
+			plansListEl.addEventListener("focusout", async (event) => {
 				const field = event.target.dataset ? event.target.dataset.field : null;
 				if (!field) return;
 				const item = event.target.closest(".todo-item");
@@ -838,14 +911,50 @@
 				if (error) { console.error("수정 저장 실패", error); showToast("저장에 실패했어요."); }
 			});
 
-			todoListEl.addEventListener("keydown", (event) => {
+			plansListEl.addEventListener("keydown", (event) => {
 				if (event.key === "Enter" && event.target.hasAttribute("contenteditable")) {
 					event.preventDefault();
 					event.target.blur();
 				}
 			});
 
-			todoListEl.addEventListener("click", async (event) => {
+			plansListEl.addEventListener("click", async (event) => {
+				const editPlanButton = event.target.closest("[data-role='plan-edit']");
+				if (editPlanButton) {
+					openPlanForm("edit", editPlanButton.dataset.planId);
+					return;
+				}
+
+				const finishPlanButton = event.target.closest("[data-role='plan-finish']");
+				if (finishPlanButton) {
+					const planId = finishPlanButton.dataset.planId;
+					const plan = state.activePlans.find((p) => p.id === planId);
+					if (!plan) return;
+					const { error } = await supabaseClient.from(PLANS_TABLE).update({ is_active: false }).eq("id", planId);
+					if (error) { console.error("계획 마무리 실패", error); showToast("저장에 실패했어요."); return; }
+					state.activePlans = state.activePlans.filter((p) => p.id !== planId);
+					state.pastPlans.unshift(plan);
+					state.todos = state.todos.filter((todo) => todo.planId !== planId);
+					renderTodos();
+					showToast("계획을 마무리했어요. 지난 계획에서 볼 수 있어요.");
+					return;
+				}
+
+				const addTodoButton = event.target.closest("[data-role='add-todo']");
+				if (addTodoButton) {
+					const planId = addTodoButton.dataset.planId;
+					const plan = state.activePlans.find((p) => p.id === planId);
+					if (!plan) return;
+					const todo = { id: makeId(), planId, time: "", title: "", note: "", categoryId: null, done: false, deadline: "", priority: "medium", estimatedMinutes: null };
+					state.todos.push(todo);
+					renderTodos();
+					const titleEl = plansListEl.querySelector(`.todo-list[data-plan-id="${planId}"] [data-id="${todo.id}"] [data-field="title"]`);
+					if (titleEl) titleEl.focus();
+					const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, plan_id: planId, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, done: todo.done, deadline: null, priority: todo.priority, estimated_minutes: null });
+					if (error) { console.error("추가 실패", error); showToast("저장에 실패했어요."); }
+					return;
+				}
+
 				const deleteButton = event.target.closest(".plan-delete");
 				if (deleteButton) {
 					const item = deleteButton.closest(".todo-item");
@@ -907,17 +1016,6 @@
 					input.closest(".blocked-popover").hidden = true;
 					showToast("막힌 이유를 기록했어요.");
 				}
-			});
-
-			document.querySelector("#add-todo").addEventListener("click", async () => {
-				if (!state.activePlan) { showToast("먼저 계획을 세워주세요."); return; }
-				const todo = { id: makeId(), time: "", title: "", note: "", categoryId: null, done: false, deadline: "", priority: "medium", estimatedMinutes: null };
-				state.todos.push(todo);
-				renderTodos();
-				const titleEl = todoListEl.querySelector(`[data-id="${todo.id}"] [data-field="title"]`);
-				if (titleEl) titleEl.focus();
-				const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, plan_id: state.activePlan.id, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, done: todo.done, deadline: null, priority: todo.priority, estimated_minutes: null });
-				if (error) { console.error("추가 실패", error); showToast("저장에 실패했어요."); }
 			});
 
 			todoSearchInput.addEventListener("input", renderTodos);
@@ -982,8 +1080,7 @@
 			document.querySelector("#tag-creator-add").addEventListener("click", submitNewTag);
 			tagNameInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); submitNewTag(); } });
 
-			// ---- 계획 패널 ----
-			const planDisplayEl = document.querySelector("#plan-display");
+			// ---- 계획 패널 (여러 개 동시 진행) ----
 			const planFormEl = document.querySelector("#plan-form");
 			const planTitleInput = document.querySelector("#plan-title-input");
 			const planStartInput = document.querySelector("#plan-start-input");
@@ -992,87 +1089,42 @@
 			const planEstimateInput = document.querySelector("#plan-estimate-input");
 			const planSuccessInput = document.querySelector("#plan-success-input");
 			const planFormNoteEl = document.querySelector("#plan-form-note");
-			const planEditButton = document.querySelector("#plan-edit-toggle");
 			const planNewButton = document.querySelector("#plan-new-toggle");
 			const planCancelButton = document.querySelector("#plan-cancel-button");
 			const planHistoryEl = document.querySelector("#plan-history");
 			const planHistoryListEl = document.querySelector("#plan-history-list");
-			const planProgressEl = document.querySelector("#plan-progress");
-			const planProgressFillEl = document.querySelector("#plan-progress-fill");
-			const planProgressCaptionEl = document.querySelector("#plan-progress-caption");
 			let planFormMode = "create";
+			let editingPlanId = null;
 
-			function renderPlanProgress() {
-				if (!state.activePlan) { planProgressEl.hidden = true; return; }
-				const total = state.todos.length;
-				if (!total) {
-					planProgressEl.hidden = false;
-					planProgressFillEl.style.width = "0%";
-					planProgressCaptionEl.textContent = "아직 오늘 할 일이 없어요. 아래에서 이 계획을 이룰 할 일을 추가해보세요.";
-					return;
-				}
-				const done = state.todos.filter((todo) => todo.done).length;
-				const percent = Math.round((done / total) * 100);
-				planProgressEl.hidden = false;
-				planProgressFillEl.style.width = `${percent}%`;
-				planProgressCaptionEl.textContent = `오늘 할 일 ${total}개 중 ${done}개 완료 · 이 계획의 진행률 ${percent}%`;
-			}
-
-			function renderPlanPanel() {
-				if (state.activePlan) {
-					const plan = state.activePlan;
-					const priorityLabel = PRIORITY_LABEL[plan.priority] || PRIORITY_LABEL.medium;
-					const periodText = (plan.periodStart || plan.periodEnd) ? `${plan.periodStart || "?"} ~ ${plan.periodEnd || "?"}` : "기간 없음";
-					const estimateText = plan.estimatedMinutes != null ? `예상 ${plan.estimatedMinutes}분` : "예상 시간 없음";
-					planDisplayEl.innerHTML = `
-						<div class="plan-display-card">
-							<p class="plan-title-line">${escapeHtml(plan.title)}</p>
-							<p class="plan-meta-line"><span>${escapeHtml(periodText)}</span><span class="priority-pill priority-${plan.priority}">${priorityLabel}</span><span>${escapeHtml(estimateText)}</span></p>
-							${plan.successCriteria ? `<p class="plan-success-line">${escapeHtml(plan.successCriteria)}</p>` : ""}
-						</div>`;
-					planEditButton.hidden = false;
-					planNewButton.textContent = "새 계획 시작하기";
-				} else {
-					planDisplayEl.innerHTML = `<p class="plan-empty-text">지금 실제로 하고 있는 일 가운데 하나를 골라 계획을 세워보세요. 계획을 세워야 할 일을 추가할 수 있어요.</p>`;
-					planEditButton.hidden = true;
-					planNewButton.textContent = "계획 세우기";
-				}
-
-				if (state.pastPlans.length) {
-					planHistoryEl.hidden = false;
-					planHistoryListEl.innerHTML = state.pastPlans.map((plan) => `<li>${escapeHtml(plan.title)} (${escapeHtml(plan.periodStart || "?")} ~ ${escapeHtml(plan.periodEnd || "?")})</li>`).join("");
-				} else {
-					planHistoryEl.hidden = true;
-				}
-				renderPlanProgress();
-			}
-
-			function openPlanForm(mode) {
+			function openPlanForm(mode, planId) {
 				planFormMode = mode;
-				if (mode === "edit" && state.activePlan) {
-					planTitleInput.value = state.activePlan.title || "";
-					planStartInput.value = state.activePlan.periodStart || "";
-					planEndInput.value = state.activePlan.periodEnd || "";
-					planPriorityInput.value = state.activePlan.priority || "medium";
-					planEstimateInput.value = state.activePlan.estimatedMinutes ?? "";
-					planSuccessInput.value = state.activePlan.successCriteria || "";
+				editingPlanId = mode === "edit" ? (planId || null) : null;
+				const editingPlan = editingPlanId ? state.activePlans.find((plan) => plan.id === editingPlanId) : null;
+				if (editingPlan) {
+					planTitleInput.value = editingPlan.title || "";
+					planStartInput.value = editingPlan.periodStart || "";
+					planEndInput.value = editingPlan.periodEnd || "";
+					planPriorityInput.value = editingPlan.priority || "medium";
+					planEstimateInput.value = editingPlan.estimatedMinutes ?? "";
+					planSuccessInput.value = editingPlan.successCriteria || "";
 					planFormNoteEl.textContent = "";
 				} else {
+					planFormMode = "create";
+					editingPlanId = null;
 					planTitleInput.value = "";
 					planStartInput.value = "";
 					planEndInput.value = "";
 					planPriorityInput.value = "medium";
 					planEstimateInput.value = "";
 					planSuccessInput.value = state.nextPlanNote ? `[지난 돌아보기에서 남긴 점] ${state.nextPlanNote}` : "";
-					planFormNoteEl.textContent = state.activePlan ? "저장하면 지금 계획은 지난 계획으로 남고, 새 계획이 시작돼요." : "";
+					planFormNoteEl.textContent = "";
 				}
 				planFormEl.hidden = false;
 				planTitleInput.focus();
 			}
 
-			planEditButton.addEventListener("click", () => openPlanForm("edit"));
-			planNewButton.addEventListener("click", () => openPlanForm(state.activePlan ? "replace" : "create"));
-			planCancelButton.addEventListener("click", () => { planFormEl.hidden = true; });
+			planNewButton.addEventListener("click", () => openPlanForm("create"));
+			planCancelButton.addEventListener("click", () => { planFormEl.hidden = true; editingPlanId = null; });
 
 			planFormEl.addEventListener("submit", async (event) => {
 				event.preventDefault();
@@ -1087,25 +1139,16 @@
 					success_criteria: planSuccessInput.value.trim() || null,
 				};
 
-				if (planFormMode === "edit" && state.activePlan) {
-					const { data, error } = await supabaseClient.from(PLANS_TABLE).update(payload).eq("id", state.activePlan.id).select();
+				if (planFormMode === "edit" && editingPlanId) {
+					const { data, error } = await supabaseClient.from(PLANS_TABLE).update(payload).eq("id", editingPlanId).select();
 					if (error) { console.error("계획 수정 실패", error); showToast("계획 저장에 실패했어요."); return; }
-					state.activePlan = mapPlanRow(data[0]);
+					const idx = state.activePlans.findIndex((plan) => plan.id === editingPlanId);
+					if (idx !== -1) state.activePlans[idx] = mapPlanRow(data[0]);
 					showToast("계획을 수정했어요. 이전 내용은 이력으로 남았어요.");
 				} else {
-					if (state.activePlan) {
-						const { error: retireError } = await supabaseClient.from(PLANS_TABLE).update({ is_active: false }).eq("id", state.activePlan.id);
-						if (retireError) { console.error("이전 계획 종료 실패", retireError); showToast("저장에 실패했어요."); return; }
-						state.pastPlans.unshift(state.activePlan);
-					}
 					const { data, error } = await supabaseClient.from(PLANS_TABLE).insert({ ...payload, is_active: true }).select();
 					if (error) { console.error("계획 생성 실패", error); showToast("계획 저장에 실패했어요."); return; }
-					state.activePlan = mapPlanRow(data[0]);
-					state.todos = [];
-					state.executionLogsByTodo = {};
-					todoStatusFilter = "all";
-					updateStatusBanner();
-					renderTodos();
+					state.activePlans.push(mapPlanRow(data[0]));
 					if (state.nextPlanNote) {
 						state.nextPlanNote = "";
 						reviewNextNoteInput.value = "";
@@ -1115,7 +1158,8 @@
 					showToast("새 계획을 시작했어요.");
 				}
 				planFormEl.hidden = true;
-				renderPlanPanel();
+				editingPlanId = null;
+				renderTodos();
 			});
 
 			// ---- 오늘을 돌아보며 / 내일의 나에게 남기는 말 / 기분 / 체류시간 ----
@@ -1156,7 +1200,7 @@
 				document.querySelectorAll(".view-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.viewTarget === "today"));
 				Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === "today"));
 				renderTodos();
-				const heading = document.querySelector("#todo-heading");
+				const heading = document.querySelector("#plan-panel-heading");
 				if (heading) heading.scrollIntoView({ behavior: "smooth", block: "start" });
 			});
 
@@ -1178,7 +1222,6 @@
 				reflectionText.textContent = state.reflection;
 				tomorrowNote.value = state.tomorrowNote;
 				reviewNextNoteInput.value = state.nextPlanNote || "";
-				renderPlanPanel();
 				updateSortCaption();
 				updateStatusBanner();
 				renderTagFilters();
