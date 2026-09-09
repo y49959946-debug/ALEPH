@@ -2,7 +2,7 @@
   "version": "v2",
   "database": "Supabase Postgres",
   "updated_at": "2026-09-09",
-  "note": "카드1~3(계획/할일/실행기록 3단 구조 분리)과 카드4(돌아보기 집계·근거 이동·다음 계획으로 개선점 넘기기)에 이어, 계획을 여러 개 동시에 세우고 각 계획에 딸린 할 일을 한눈에 보는 구조(가독성 개선)까지 반영했습니다. 카드5의 데이터 내보내기·로그인 안내 문구는 다음 작업으로 남겨둡니다.",
+  "note": "카드1~3(계획/할일/실행기록 3단 구조 분리)과 카드4(돌아보기 집계·근거 이동·다음 계획으로 개선점 넘기기)에 이어, 계획을 여러 개 동시에 세우고 각 계획에 딸린 할 일을 한눈에 보는 구조(가독성 개선), 할 일의 날짜별 완료/실패 체크, 돌아보기 화면의 기간 선택(review-range) 필터, 사람이 읽는 형태의 데이터 내보내기(T06-C36)까지 반영했습니다. 카드5의 로그인 없음 안내 문구는 다음 작업으로 남겨둡니다.",
   "tables": {
     "pds_plans": {
       "description": "계획. 5단계 마이그레이션부터는 여러 개를 동시에 활성(is_active=true) 상태로 둘 수 있고, 각 활성 계획마다 자기 할 일 목록을 갖습니다. 화면에서 '이 계획 마무리하기'를 누르면 is_active가 false로 바뀌며 지난 계획으로 넘어갑니다.",
@@ -35,7 +35,7 @@
       "write_policy": "anon은 select/insert만 가능, update/delete 정책 없음 → 이력은 지우거나 고칠 수 없음"
     },
     "pds_todos": {
-      "description": "할 일. 반드시 어떤 계획(plan_id)에 딸려 있습니다. 예전에는 이 테이블 이름이 pds_plans였는데, 실제로는 할 일 목록이었어서 이번에 이름을 바로잡았습니다.",
+      "description": "할 일. 반드시 어떤 계획(plan_id)에 딸려 있습니다. 예전에는 이 테이블 이름이 pds_plans였는데, 실제로는 할 일 목록이었어서 이번에 이름을 바로잡았습니다. 여러 날에 걸친 계획의 할 일은 날짜별로 따로 완료/실패를 표시할 수 있습니다(7단계 마이그레이션).",
       "columns": {
         "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
         "plan_id": { "type": "uuid", "nullable": true, "references": "pds_plans.id", "on_delete": "set null" },
@@ -46,7 +46,9 @@
         "priority": { "type": "text", "default": "medium", "enum": ["high", "medium", "low"], "note": "우선순위(T06-C15)" },
         "tag_id": { "type": "uuid", "nullable": true, "references": "pds_tags.id", "on_delete": "set null", "note": "태그(T06-C16)" },
         "estimated_minutes": { "type": "integer", "nullable": true, "note": "예상 시간(T06-C17)" },
-        "done": { "type": "boolean", "default": false },
+        "done": { "type": "boolean", "default": false, "note": "레거시 완료 플래그. 6~7단계 이후로는 daily_status를 기준으로 화면을 그리고, done/failed는 참고용으로 남겨둠." },
+        "failed": { "type": "boolean", "default": false, "note": "6단계 마이그레이션에서 추가. 레거시 실패 플래그(daily_status 도입 이전)." },
+        "daily_status": { "type": "jsonb", "default": "{}", "note": "7단계 마이그레이션에서 추가. { \"YYYY-MM-DD\": \"done\" | \"failed\" } 형태로 선택된 날짜별 완료/실패 상태를 저장. 화면의 달력·날짜 이동에서 선택한 날짜에 맞춰 '완료'/'실패' 버튼으로 이 값을 갱신함." },
         "created_at": { "type": "timestamptz", "default": "now()" },
         "updated_at": { "type": "timestamptz", "default": "now()" }
       }
@@ -66,16 +68,17 @@
       "duplicate_guard": "체크박스는 done이 false→true로 바뀔 때만 기록을 만들고, 클라이언트에 진행중 플래그(_loggingCompletion)를 둬서 같은 완료 이벤트가 중복 저장되지 않게 막음"
     },
     "pds_tags": {
-      "description": "할 일에 붙이는 카테고리 라벨(색상 포함). 이전과 동일.",
+      "description": "할 일에 붙이는 카테고리 라벨. 배경색(color)과 글자색(text_color)을 따로 지정할 수 있습니다(3단계 마이그레이션에서 text_color 추가, 밝은 배경색에 글자가 묻히지 않도록).",
       "columns": {
         "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
         "label": { "type": "text", "not_null": true },
-        "color": { "type": "text", "not_null": true },
+        "color": { "type": "text", "not_null": true, "note": "태그 배경색" },
+        "text_color": { "type": "text", "nullable": true, "note": "태그 글자색. 값이 없으면 화면에서 color를 그대로 글자색으로도 사용." },
         "created_at": { "type": "timestamptz", "default": "now()" }
       }
     },
     "pds_settings": {
-      "description": "오늘 하루에 대한 단일 설정 행(기분/한줄회고/내일 메모/페이지 누적 체류시간). 이전과 동일, id='today' 고정 1행.",
+      "description": "오늘 하루에 대한 단일 설정 행(기분/한줄회고/내일 메모/다음 계획 메모/페이지 누적 체류시간). id='today' 고정 1행.",
       "columns": {
         "id": { "type": "text", "primary_key": true, "default": "'today'" },
         "mood": { "type": "text", "nullable": true },
@@ -94,12 +97,16 @@
     { "from": "pds_execution_logs.todo_id", "to": "pds_todos.id", "type": "many-to-one", "on_delete": "cascade" }
   ],
   "date_rules": {
-    "status": "부분 구현",
-    "detail": "계획(pds_plans)에는 기간(period_start/period_end)이 생겼지만, 할 일(pds_todos)과 오늘의 설정(pds_settings)은 여전히 날짜 컬럼이 없어 화면의 달력·날짜 이동 UI와 무관하게 항상 모든 활성 계획의 할 일 전체를 보여줍니다. 하루 단위로 완전히 쪼개려면 pds_todos/pds_settings에도 date 컬럼이 필요합니다."
+    "status": "구현됨 (7단계 마이그레이션)",
+    "detail": "화면 상단의 달력·날짜 이동에서 날짜를 고르면, 그 날짜에 보이는 계획(period_start~period_end 범위에 포함)과 그 계획에 딸린 할 일만 보여줍니다. 각 할 일은 pds_todos.daily_status(jsonb, { \"YYYY-MM-DD\": \"done\"|\"failed\" })에 선택된 날짜별로 완료/실패를 따로 기록하므로, 같은 할 일이라도 날짜마다 다른 상태를 가질 수 있습니다."
   },
   "multiple_plans": {
     "status": "구현됨 (5단계 마이그레이션)",
     "detail": "화면에서 '+ 새 계획'을 누르면 기존 활성 계획을 종료하지 않고 새 계획이 추가로 시작됩니다. 각 활성 계획은 자기만의 카드(제목·기간·우선순위·성공기준·진행률)와 그 계획에 딸린 할 일 목록을 함께 보여줘서, 어떤 할 일이 어떤 계획을 위한 것인지 한눈에 드러납니다. 검색·정렬·태그 필터는 화면 상단 도구줄 하나로 모든 계획의 할 일에 공통 적용되고, 각 계획 카드 안에서는 그 계획에 속한 할 일만 걸러져 보입니다. 계획을 끝내고 싶으면 카드의 '이 계획 마무리하기'를 눌러 지난 계획으로 옮깁니다(할 일은 DB에 남지만 오늘 화면에서는 더 이상 보이지 않음)."
+  },
+  "read_edit_mode": {
+    "status": "구현됨",
+    "detail": "이번 계획들 패널에 읽기/편집 모드 토글이 있습니다. 기본은 읽기 모드로, 검색·정렬·태그 도구줄·태그 만들기·계획 수정/삭제 버튼 등 편집용 UI를 숨기고 계획→할 일→진행률만 보여줘 가독성을 높입니다. '편집하기'를 누르면 모든 편집 UI가 다시 나타납니다."
   },
   "row_level_security": {
     "enabled": true,
@@ -107,16 +114,22 @@
     "keys_exposed_client_side": "SUPABASE_URL, SUPABASE_ANON_KEY(publishable key)만 클라이언트에 노출됨. service_role 키는 어디에도 포함되지 않음."
   },
   "review_aggregation": {
-    "plan_count": "state.todos.length — 모든 활성 계획에 딸린, 지우지 않은 할 일 수를 합친 값 (T06-C28)",
-    "done_count": "todo.done이 true인 개수 (T06-C29)",
-    "overdue_count": "완료되지 않았고 deadline이 오늘(YYYY-MM-DD, 실제 오늘 날짜 기준)보다 이른 할 일 수. 완료된 할 일은 지연으로 세지 않음 (T06-C30)",
-    "blocked_count": "실행 기록 중 blocked_reason이 있는 로그를 하나라도 가진 할 일 수 (T06-C31)",
-    "estimated_total / actual_total / diff": "예상 시간 합계 = 할 일들의 estimated_minutes 합(없으면 0), 실제 시간 합계 = 그 할 일들의 모든 실행 기록 actual_minutes 합(없으면 0), 차이 = 실제-예상. 데이터가 전혀 없으면 전부 0 (T06-C32)",
-    "drill_down": "돌아보기 화면의 각 숫자는 버튼이며, 클릭하면 '오늘 하루' 화면으로 이동해 해당 조건(완료/지연/막힘)으로 실제 필터링된 할 일 목록을 보여줌. 예상/실제/차이는 예상 시간 정렬로 전환. 토스트 안내문이 아니라 실제 필터·이동임 (T06-C83)",
+    "plan_count": "state.todos.length(기간 선택이 없을 때) 또는 선택한 기간에 daily_status 기록이 있는 할 일 수(기간을 선택했을 때) — 모든 활성 계획에 딸린, 지우지 않은 할 일 수를 합친 값 (T06-C28)",
+    "done_count / failed_count": "돌아보기 화면의 daily_status 값 중 done/failed로 표시된 항목 수. 기간을 선택하면 그 기간에 속한 날짜만 셈 (T06-C29)",
+    "overdue_count": "선택한 날짜에 완료되지 않았고 deadline이 오늘(YYYY-MM-DD, 실제 오늘 날짜 기준)보다 이른 할 일 수. 완료된 할 일은 지연으로 세지 않음. 기간을 선택하면 그 기간 안의 마감일만 셈 (T06-C30)",
+    "blocked_count": "실행 기록 중 blocked_reason이 있는 로그를 하나라도 가진 할 일 수. 기간을 선택하면 로그의 ended_at이 그 기간 안에 있는 것만 셈 (T06-C31)",
+    "estimated_total / actual_total / diff": "예상 시간 합계 = 관련 할 일들의 estimated_minutes 합(없으면 0), 실제 시간 합계 = 그 할 일들의 실행 기록 중 기간 조건에 맞는 actual_minutes 합(없으면 0), 차이 = 실제-예상. 데이터가 전혀 없으면 전부 0 (T06-C32)",
+    "range_filter": "돌아보기 화면 상단의 시작일/종료일 입력으로 위 통계 전체를 특정 기간으로 좁혀볼 수 있음. '전체 기간 보기'를 누르면 두 입력을 비워 처음 상태(전체 기간)로 되돌아감.",
+    "drill_down": "돌아보기 화면의 각 숫자는 버튼이며, 클릭하면 '오늘 하루' 화면으로 이동해 해당 조건(완료/실패/지연/막힘)으로 실제 필터링된 할 일 목록을 보여줌. 예상/실제/차이는 예상 시간 정렬로 전환. 토스트 안내문이 아니라 실제 필터·이동임 (T06-C83)",
     "next_plan_handoff": "돌아보기 화면의 '다음 계획에 남길 한 가지'는 pds_settings.next_plan_note에 저장되고, 새 계획을 만드는 폼을 열 때 성공 기준란에 자동으로 미리 채워짐. 계획이 실제로 저장되면 next_plan_note는 비워짐(한 번만 인계) (T06-C33)"
+  },
+  "data_export": {
+    "status": "구현됨 (T06-C36)",
+    "format": "Markdown(.md) 텍스트 파일. 처음에는 JSON으로 만들었다가, '받은 파일을 사용자가 다시 어떻게 쓰냐'는 피드백을 반영해 사람이 그대로 읽을 수 있는 다이어리 형식으로 바꿨습니다.",
+    "detail": "상단 '전체 데이터 내보내기' 버튼을 누르면 pds_plans/pds_todos/pds_execution_logs/pds_tags/pds_settings를 Supabase에서 다시 불러와 계획별로 묶은 뒤, 진행 중인 계획 → 지난 계획 → 오늘을 돌아보며(기분/한줄회고/내일 메모/다음 계획 메모) 순서의 Markdown 문서를 만들어 브라우저에서 바로 내려받습니다(Blob + <a download>, 백엔드 없이 클라이언트에서만 처리). 각 할 일 아래에는 우선순위·마감·태그, 날짜별 완료/실패 기록, 막힘 기록(있는 경우)을 함께 적어 계획→할 일→실제 결과가 한 파일 안에서 이어져 읽히도록 했습니다."
   },
   "known_gaps_vs_T6": [
     "카드2: 정렬 기준은 화면에 문구로 표시되지만(T06-C20), '중요도+마감일 복합 정렬' 같은 다중 기준 정렬은 없음 — 단일 기준 정렬만 지원.",
-    "카드5: 데이터 내보내기(T06-C36) 기능 없음. 첫 화면 로그인 없음 안내 문구(T06-C82) 없음."
+    "카드5: 첫 화면 로그인 없음 안내 문구(T06-C82) 없음."
   ]
 }

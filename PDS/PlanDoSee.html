@@ -34,6 +34,8 @@
 			.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
 			.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
 			.brand-logo { display: block; height: 80px; width: auto; }
+			.export-button { border: 1px solid var(--line); border-radius: 20px; padding: 8px 16px; color: var(--soft-ink); background: var(--paper); font-size: 12px; }
+			.export-button:hover { color: var(--coral); border-color: var(--coral); }
 
 			.view-switcher { display: flex; justify-content: center; gap: 5px; width: fit-content; margin: 0 auto 28px; padding: 5px; border: 1px solid #ded5c6; border-radius: 12px; background: rgba(255, 253, 247, .72); }
 			.view-tab { border: 0; border-radius: 8px; padding: 9px 22px; color: var(--soft-ink); background: transparent; font-size: 15px; font-weight: 600; }
@@ -201,6 +203,9 @@
 			.review-intro .date-kicker { margin-bottom: 13px; }
 			.review-intro h2 { margin-bottom: 12px; font-family: "Gowun Batang", serif; font-size: clamp(31px, 4vw, 45px); letter-spacing: -.06em; }
 			.review-intro p { color: var(--soft-ink); font-size: 15px; line-height: 1.8; }
+			.review-range { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 20px 0 4px; color: var(--soft-ink); font-size: 13px; }
+			.review-range input[type="date"] { border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; color: var(--ink); background: var(--paper); font-size: 13px; }
+			.review-range button { border: 0; color: var(--coral); background: transparent; font-size: 12px; }
 			.review-story { max-width: 720px; margin: 0 auto; padding: 27px 0 30px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-family: "Gowun Batang", serif; font-size: 22px; line-height: 1.9; text-align: center; }
 			.review-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; max-width: 820px; margin: 30px auto 0; }
 			.review-stat { display: grid; gap: 6px; padding: 16px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-deep); text-align: center; }
@@ -262,6 +267,7 @@
 		<main class="app">
 			<header class="topbar">
 				<a class="brand" href="../index.html" aria-label="행로 홈"><img class="brand-logo" src="PlanDoSee_logo.png" alt="PlanDoSee" /></a>
+				<button class="export-button" type="button" id="export-data-button">전체 데이터 내보내기</button>
 			</header>
 
 			<nav class="view-switcher" aria-label="페이지 선택">
@@ -352,6 +358,11 @@
 			<section class="view" id="review-view">
 				<article class="paper review-paper"><div class="paper-inner">
 					<div class="review-intro"><p class="date-kicker" id="review-kicker">REVIEW</p><h2 id="review-heading">계획을 돌아보며</h2><p>다 해내지 못한 것보다, 어디까지 걸어왔는지를<br />잠시 들여다보는 시간이에요.</p></div>
+					<div class="review-range">
+						<label>시작 <input type="date" id="review-range-start" /></label>
+						<label>종료 <input type="date" id="review-range-end" /></label>
+						<button type="button" id="review-range-reset">전체 기간 보기</button>
+					</div>
 					<p class="review-story" id="review-story"></p>
 					<div class="review-stats" id="review-stats"></div>
 					<p class="review-duration-caption" id="review-duration-caption"></p>
@@ -585,6 +596,15 @@
 			const reviewStoryEl = document.querySelector("#review-story");
 			const reviewHeadingEl = document.querySelector("#review-heading");
 			const reviewKickerEl = document.querySelector("#review-kicker");
+			const reviewRangeStartInput = document.querySelector("#review-range-start");
+			const reviewRangeEndInput = document.querySelector("#review-range-end");
+			reviewRangeStartInput.addEventListener("change", renderReview);
+			reviewRangeEndInput.addEventListener("change", renderReview);
+			document.querySelector("#review-range-reset").addEventListener("click", () => {
+				reviewRangeStartInput.value = "";
+				reviewRangeEndInput.value = "";
+				renderReview();
+			});
 			const reviewStatsEl = document.querySelector("#review-stats");
 			const reviewDurationCaptionEl = document.querySelector("#review-duration-caption");
 			const todoSearchInput = document.querySelector("#todo-search-input");
@@ -712,6 +732,7 @@
 					return true;
 				});
 				if (todoStatusFilter === "done") list = list.filter((todo) => statusOn(todo, selectedISODate()) === "done");
+				else if (todoStatusFilter === "failed") list = list.filter((todo) => statusOn(todo, selectedISODate()) === "failed");
 				else if (todoStatusFilter === "overdue") list = list.filter(isOverdue);
 				else if (todoStatusFilter === "blocked") list = list.filter(isBlocked);
 				const sortKey = todoSortSelect.value;
@@ -724,7 +745,7 @@
 
 			function updateSortCaption() { todoSortCaptionEl.textContent = SORT_CAPTIONS[todoSortSelect.value] || ""; }
 
-			const STATUS_BANNER_TEXT = { done: "완료한 할 일만 보고 있어요.", overdue: "마감일이 지난(지연) 할 일만 보고 있어요.", blocked: "막힌 적 있는 할 일만 보고 있어요." };
+			const STATUS_BANNER_TEXT = { done: "완료한 할 일만 보고 있어요.", failed: "실패한 할 일만 보고 있어요.", overdue: "마감일이 지난(지연) 할 일만 보고 있어요.", blocked: "막힌 적 있는 할 일만 보고 있어요." };
 			const todoStatusBannerEl = document.querySelector("#todo-status-banner");
 
 			function updateStatusBanner() {
@@ -836,48 +857,78 @@
 				return `${Math.floor(ms / 1000)}초`;
 			}
 
-			function countDailyStatus(status) {
-				return state.todos.reduce((sum, todo) => sum + Object.values(todo.dailyStatus || {}).filter((s) => s === status).length, 0);
+			function inRange(isoDate, start, end) {
+				if (!isoDate) return false;
+				if (start && isoDate < start) return false;
+				if (end && isoDate > end) return false;
+				return true;
 			}
 
-			function computeReviewStats() {
-				const totalCount = state.todos.length;
-				const doneCount = countDailyStatus("done");
-				const overdueCount = state.todos.filter(isOverdue).length;
-				const blockedCount = state.todos.filter(isBlocked).length;
-				const estimatedTotal = state.todos.reduce((sum, todo) => sum + (todo.estimatedMinutes || 0), 0);
-				const actualTotal = state.todos.reduce((sum, todo) => {
+			function countDailyStatus(status, start, end) {
+				let count = 0;
+				state.todos.forEach((todo) => {
+					Object.entries(todo.dailyStatus || {}).forEach(([date, s]) => {
+						if (s === status && (!start && !end ? true : inRange(date, start, end))) count++;
+					});
+				});
+				return count;
+			}
+
+			function isBlockedInRange(todo, start, end) {
+				const logs = state.executionLogsByTodo[todo.id] || [];
+				return logs.some((log) => log.blocked_reason && (!start && !end ? true : inRange((log.ended_at || "").slice(0, 10), start, end)));
+			}
+
+			function computeReviewStats(start, end) {
+				const hasRange = !!(start || end);
+				const relevantTodos = hasRange
+					? state.todos.filter((todo) => Object.keys(todo.dailyStatus || {}).some((date) => inRange(date, start, end)))
+					: state.todos;
+				const totalCount = relevantTodos.length;
+				const doneCount = countDailyStatus("done", start, end);
+				const failedCount = countDailyStatus("failed", start, end);
+				const overdueCount = state.todos.filter((todo) => isOverdue(todo) && (!hasRange || inRange(todo.deadline, start, end))).length;
+				const blockedCount = state.todos.filter((todo) => isBlockedInRange(todo, start, end)).length;
+				const estimatedTotal = relevantTodos.reduce((sum, todo) => sum + (todo.estimatedMinutes || 0), 0);
+				const actualTotal = relevantTodos.reduce((sum, todo) => {
 					const logs = state.executionLogsByTodo[todo.id] || [];
-					return sum + logs.reduce((s, log) => s + (log.actual_minutes || 0), 0);
+					return sum + logs.filter((log) => !hasRange || inRange((log.ended_at || "").slice(0, 10), start, end)).reduce((s, log) => s + (log.actual_minutes || 0), 0);
 				}, 0);
 				const diff = actualTotal - estimatedTotal;
-				return { totalCount, doneCount, overdueCount, blockedCount, estimatedTotal, actualTotal, diff };
+				return { hasRange, totalCount, doneCount, failedCount, overdueCount, blockedCount, estimatedTotal, actualTotal, diff };
 			}
 
 			function renderReview() {
-				const stats = computeReviewStats();
+				const rangeStart = reviewRangeStartInput.value || "";
+				const rangeEnd = reviewRangeEndInput.value || "";
+				const stats = computeReviewStats(rangeStart, rangeEnd);
 				const durationText = formatDuration(state.totalTimeMs);
 
 				if (state.activePlans.length === 1) {
 					reviewHeadingEl.textContent = `"${state.activePlans[0].title}" 계획을 돌아보며`;
-					reviewKickerEl.textContent = (state.activePlans[0].periodStart || state.activePlans[0].periodEnd)
-						? `${state.activePlans[0].periodStart || "?"} ~ ${state.activePlans[0].periodEnd || "?"}`
-						: "REVIEW";
 				} else if (state.activePlans.length > 1) {
 					reviewHeadingEl.textContent = `계획 ${state.activePlans.length}개를 돌아보며`;
-					reviewKickerEl.textContent = "REVIEW";
 				} else {
 					reviewHeadingEl.textContent = "계획을 돌아보며";
+				}
+
+				if (stats.hasRange) {
+					reviewKickerEl.textContent = `${rangeStart || "처음"} ~ ${rangeEnd || "지금"}`;
+				} else if (state.activePlans.length === 1 && (state.activePlans[0].periodStart || state.activePlans[0].periodEnd)) {
+					reviewKickerEl.textContent = `${state.activePlans[0].periodStart || "?"} ~ ${state.activePlans[0].periodEnd || "?"}`;
+				} else {
 					reviewKickerEl.textContent = "REVIEW";
 				}
 
+				const periodPhrase = stats.hasRange ? "이 기간 동안" : "지금까지";
 				reviewStoryEl.innerHTML = state.activePlans.length
-					? `적어둔 할 일 ${stats.totalCount}개를 날짜별로 총 ${stats.doneCount}번 완료했고, ${stats.overdueCount}개는 마감을 넘겼고, ${stats.blockedCount}개는 막힌 적이 있어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
+					? `${periodPhrase} 적어둔 할 일 ${stats.totalCount}개를 날짜별로 총 ${stats.doneCount}번 완료했고, ${stats.failedCount}번 실패했고, ${stats.overdueCount}개는 마감을 넘겼고, ${stats.blockedCount}개는 막힌 적이 있어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
 					: "아직 계획이 없어요. 계획을 세우면 여기에서 돌아볼 수 있어요.";
 
 				const statDefs = [
-					{ kind: "status", key: "all", value: stats.totalCount, label: "계획에 딸린 할 일" },
+					{ kind: "status", key: "all", value: stats.totalCount, label: "이 기간의 할 일" },
 					{ kind: "status", key: "done", value: stats.doneCount, label: "완료 횟수" },
+					{ kind: "status", key: "failed", value: stats.failedCount, label: "실패 횟수" },
 					{ kind: "status", key: "overdue", value: stats.overdueCount, label: "지연" },
 					{ kind: "status", key: "blocked", value: stats.blockedCount, label: "막힘" },
 					{ kind: "sort", key: "estimate", value: `${stats.estimatedTotal}분`, label: "예상 시간 합계" },
@@ -1298,6 +1349,160 @@
 				const heading = document.querySelector("#plan-panel-heading");
 				if (heading) heading.scrollIntoView({ behavior: "smooth", block: "start" });
 			});
+
+			// ---- 전체 데이터 내보내기 (T06-C36) : 사람이 읽는 다이어리 형식(Markdown) ----
+			function exportPriorityLabel(priority) { return PRIORITY_LABEL[priority] || priority || "보통"; }
+
+			function exportDateRangeText(start, end) {
+				if (start && end) return `${start} ~ ${end}`;
+				if (start) return `${start}부터`;
+				if (end) return `${end}까지`;
+				return "기간 미정";
+			}
+
+			function exportTagLabel(tags, tagId) {
+				const tag = tags.find((t) => t.id === tagId);
+				return tag ? tag.label : "";
+			}
+
+			function exportDailyStatusLines(dailyStatus) {
+				const entries = Object.entries(dailyStatus || {}).sort(([a], [b]) => a.localeCompare(b));
+				if (!entries.length) return "    (아직 완료/실패 체크를 하지 않았어요)";
+				return entries
+					.map(([date, status]) => `    - ${date}: ${status === "done" ? "완료" : status === "failed" ? "실패" : status}`)
+					.join("\n");
+			}
+
+			function exportLogLines(logs) {
+				if (!logs || !logs.length) return "";
+				return logs
+					.map((log) => {
+						const parts = [];
+						if (log.actual_minutes != null) parts.push(`${log.actual_minutes}분 소요`);
+						if (log.blocked_reason) parts.push(`막힌 이유: ${log.blocked_reason}`);
+						const when = log.ended_at ? new Date(log.ended_at).toLocaleString("ko-KR") : "";
+						return `    - ${when}${when && parts.length ? " · " : ""}${parts.join(", ")}`.trim();
+					})
+					.join("\n");
+			}
+
+			function exportTodoBlock(todo, tags, logsByTodo) {
+				const tagLabel = exportTagLabel(tags, todo.tag_id);
+				const lines = [];
+				lines.push(`- [${exportPriorityLabel(todo.priority)}] ${todo.title || "(제목 없는 할 일)"}${tagLabel ? ` #${tagLabel}` : ""}`);
+				const meta = [];
+				if (todo.time) meta.push(`시간 ${todo.time}`);
+				if (todo.deadline) meta.push(`마감 ${todo.deadline}`);
+				if (todo.estimated_minutes) meta.push(`예상 ${todo.estimated_minutes}분`);
+				if (meta.length) lines.push(`  (${meta.join(" · ")})`);
+				if (todo.note) lines.push(`  메모: ${todo.note}`);
+				lines.push("  날짜별 진행:");
+				lines.push(exportDailyStatusLines(todo.daily_status));
+				const logLines = exportLogLines(logsByTodo[todo.id]);
+				if (logLines) {
+					lines.push("  기록:");
+					lines.push(logLines);
+				}
+				return lines.join("\n");
+			}
+
+			function exportPlanBlock(plan, todosForPlan, tags, logsByTodo) {
+				const lines = [];
+				lines.push(`### ${plan.title || "(제목 없는 계획)"}`);
+				lines.push(`- 기간: ${exportDateRangeText(plan.period_start, plan.period_end)}`);
+				lines.push(`- 우선순위: ${exportPriorityLabel(plan.priority)}`);
+				if (plan.success_criteria) lines.push(`- 성공 기준: ${plan.success_criteria}`);
+				if (plan.estimated_minutes) lines.push(`- 예상 소요 시간: ${plan.estimated_minutes}분`);
+				lines.push("");
+				lines.push("**할 일**");
+				if (!todosForPlan.length) {
+					lines.push("- (등록된 할 일이 없어요)");
+				} else {
+					todosForPlan.forEach((todo) => lines.push(exportTodoBlock(todo, tags, logsByTodo)));
+				}
+				return lines.join("\n");
+			}
+
+			async function exportAllData() {
+				const exportButton = document.querySelector("#export-data-button");
+				const originalText = exportButton.textContent;
+				exportButton.disabled = true;
+				exportButton.textContent = "내보내는 중...";
+				try {
+					const [plansRes, todosRes, logsRes, tagsRes, settingsRes] = await Promise.all([
+						supabaseClient.from(PLANS_TABLE).select("*").order("created_at", { ascending: true }),
+						supabaseClient.from(TODOS_TABLE).select("*").order("created_at", { ascending: true }),
+						supabaseClient.from(LOGS_TABLE).select("*").order("ended_at", { ascending: true }),
+						supabaseClient.from(TAGS_TABLE).select("*").order("created_at", { ascending: true }),
+						supabaseClient.from(SETTINGS_TABLE).select("*").eq("id", SETTINGS_ID),
+					]);
+					const firstError = plansRes.error || todosRes.error || logsRes.error || tagsRes.error || settingsRes.error;
+					if (firstError) {
+						console.error("데이터 내보내기 실패", firstError);
+						showToast("데이터를 불러오지 못해서 내보내기에 실패했어요.");
+						return;
+					}
+					const plans = plansRes.data || [];
+					const todos = todosRes.data || [];
+					const logs = logsRes.data || [];
+					const tags = tagsRes.data || [];
+					const settingsRow = (settingsRes.data && settingsRes.data[0]) || {};
+
+					const logsByTodo = {};
+					logs.forEach((log) => { (logsByTodo[log.todo_id] ||= []).push(log); });
+
+					const activePlans = plans.filter((plan) => plan.is_active);
+					const pastPlans = plans.filter((plan) => !plan.is_active);
+
+					const lines = [];
+					lines.push("# 플랜두씨 다이어리 내보내기");
+					lines.push(`내보낸 시각: ${new Date().toLocaleString("ko-KR")}`);
+					lines.push("");
+					lines.push("## 진행 중인 계획");
+					if (!activePlans.length) {
+						lines.push("(진행 중인 계획이 없어요)");
+					} else {
+						activePlans.forEach((plan) => {
+							lines.push("");
+							lines.push(exportPlanBlock(plan, todos.filter((todo) => todo.plan_id === plan.id), tags, logsByTodo));
+						});
+					}
+					lines.push("");
+					lines.push("## 지난 계획 (마무리됨)");
+					if (!pastPlans.length) {
+						lines.push("(아직 마무리된 계획이 없어요)");
+					} else {
+						pastPlans.forEach((plan) => {
+							lines.push("");
+							lines.push(exportPlanBlock(plan, todos.filter((todo) => todo.plan_id === plan.id), tags, logsByTodo));
+						});
+					}
+					lines.push("");
+					lines.push("## 오늘을 돌아보며");
+					lines.push(`- 기분: ${settingsRow.mood || "(적지 않음)"}`);
+					lines.push(`- 한 줄 회고: ${settingsRow.reflection || "(적지 않음)"}`);
+					lines.push(`- 내일의 나에게: ${settingsRow.tomorrow_note || "(적지 않음)"}`);
+					lines.push(`- 다음 계획에 남길 점: ${settingsRow.next_plan_note || "(적지 않음)"}`);
+					lines.push("");
+
+					const markdown = lines.join("\n");
+					const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+					const url = URL.createObjectURL(blob);
+					const a = document.createElement("a");
+					a.href = url;
+					a.download = `plandosee-내보내기-${todayISODate()}.md`;
+					document.body.appendChild(a);
+					a.click();
+					a.remove();
+					URL.revokeObjectURL(url);
+					showToast("계획·할 일·기록을 사람이 읽기 쉬운 파일로 내보냈어요.");
+				} finally {
+					exportButton.disabled = false;
+					exportButton.textContent = originalText;
+				}
+			}
+
+			document.querySelector("#export-data-button").addEventListener("click", exportAllData);
 
 			let lastTick = Date.now();
 			function persistTotalTime() { updateSettings({ total_time_ms: state.totalTimeMs }); }
