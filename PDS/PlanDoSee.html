@@ -91,14 +91,22 @@
 			.tag-color-input { width: 28px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer; }
 			.tag-creator-add { border: 0; border-radius: 8px; padding: 7px 12px; color: var(--paper); background: var(--coral); font-size: 12px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 			.label-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 22px; }
-			.filter { display: inline-flex; align-items: center; gap: 5px; border: 1px solid transparent; border-radius: 20px; padding: 6px 11px; color: #5c625a; background: var(--paper-deep); font-size: 11px; }
+			.filter { display: inline-flex; align-items: center; gap: 5px; border: 1px solid transparent; border-radius: 20px; padding: 6px 11px; color: #5c625a; background: var(--paper); font-size: 11px; }
 			.filter.active, .filter:hover { border-color: currentColor; background: transparent; }
 			.filter[data-filter="all"].active, .filter[data-filter="all"]:hover { color: var(--ink); }
 			.filter-delete { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; line-height: 1; }
 			.filter-delete:hover { background: rgba(0, 0, 0, .12); }
 
+			/* 계획 + 할 일을 하나로 묶는 카드 */
+			.plan-todo-card { border: 1px solid var(--line); border-radius: 14px; padding: 24px 26px 26px; background: var(--paper-deep); }
+			.plan-todo-link { display: flex; align-items: center; gap: 10px; margin: 24px 0 20px; color: var(--soft-ink); font-size: 11px; letter-spacing: .02em; }
+			.plan-todo-link::before, .plan-todo-link::after { flex: 1; height: 1px; content: ""; background: var(--line); }
+			.plan-progress { margin-top: 16px; display: grid; gap: 6px; }
+			.plan-progress-track { height: 8px; border-radius: 20px; background: var(--paper); overflow: hidden; }
+			.plan-progress-fill { height: 100%; border-radius: 20px; background: var(--sage); transition: width .3s ease; }
+			.plan-progress-caption { margin: 0; color: var(--soft-ink); font-size: 11px; }
+
 			/* 계획 패널 */
-			.plan-panel { margin-bottom: 32px; padding-bottom: 30px; border-bottom: 1px solid var(--line); }
 			.plan-display-card { display: grid; gap: 8px; }
 			.plan-empty-text { margin: 0; color: var(--soft-ink); font-size: 13px; line-height: 1.7; }
 			.plan-title-line { margin: 0; font-family: "Gowun Batang", serif; font-size: 20px; }
@@ -108,7 +116,7 @@
 			.priority-pill.priority-high { color: #a4432f; background: var(--coral-pale); }
 			.priority-pill.priority-medium { color: #8a6f22; background: #f6e8bc; }
 			.priority-pill.priority-low { color: #4f5c50; background: var(--sage-pale); }
-			.plan-form { display: grid; gap: 12px; margin-top: 14px; padding: 16px; border: 1px dashed var(--line); border-radius: 10px; }
+			.plan-form { display: grid; gap: 12px; margin-top: 14px; padding: 16px; border: 1px dashed var(--line); border-radius: 10px; background: var(--paper); }
 			.plan-form input[type="text"], .plan-form textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; color: var(--ink); background: var(--paper); font-size: 13px; }
 			.plan-form textarea { min-height: 60px; resize: vertical; }
 			.plan-form-row { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--soft-ink); }
@@ -249,54 +257,62 @@
 							<div class="date-nav"><button class="date-arrow" type="button" data-day="-1" aria-label="어제">‹</button><span class="date-caption" id="date-caption">오늘, 목요일</span><button class="date-arrow" type="button" data-day="1" aria-label="내일">›</button><button class="today-button" type="button" data-day="0">오늘로</button></div>
 						</div>
 
-						<section class="plan-panel" aria-labelledby="plan-panel-heading">
-							<div class="label-row">
-								<h2 class="section-label" id="plan-panel-heading">이번 계획</h2>
-								<div class="label-row-actions">
-									<button class="add-button" type="button" id="plan-edit-toggle" hidden>수정</button>
-									<button class="add-button" type="button" id="plan-new-toggle">계획 세우기</button>
-								</div>
-							</div>
-							<div id="plan-display"></div>
-							<form id="plan-form" class="plan-form" hidden>
-								<input type="text" id="plan-title-input" placeholder="계획 이름 (예: 이번 주 운동 루틴)" required />
-								<div class="plan-form-row">
-									<label>기간 <input type="date" id="plan-start-input" /> ~ <input type="date" id="plan-end-input" /></label>
-									<label>우선순위 <select id="plan-priority-input"><option value="high">높음</option><option value="medium" selected>보통</option><option value="low">낮음</option></select></label>
-									<label>예상 시간(분) <input type="number" id="plan-estimate-input" min="0" placeholder="예: 300" /></label>
-								</div>
-								<textarea id="plan-success-input" placeholder="성공 기준 — 이 계획이 끝났을 때 뭐가 달라져 있으면 성공인가요?"></textarea>
-								<p class="plan-form-note" id="plan-form-note"></p>
-								<div class="save-line">
-									<button type="button" class="add-button" id="plan-cancel-button">취소</button>
-									<button type="submit" class="tag-creator-add">저장</button>
-								</div>
-							</form>
-							<details class="plan-history" id="plan-history" hidden>
-								<summary>지난 계획 보기</summary>
-								<ul id="plan-history-list"></ul>
-							</details>
-						</section>
-
 						<div class="day-grid">
-							<section aria-labelledby="todo-heading">
-								<div class="label-row"><h2 class="section-label" id="todo-heading">오늘 하기로 한 일</h2><div class="label-row-actions"><div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><div class="tag-color-field"><span class="tag-color-label">배경</span><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /></div><div class="tag-color-field"><span class="tag-color-label">글자</span><input type="color" id="tag-text-color-input" class="tag-color-input" value="#db806c" /></div><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div><button class="add-button" type="button" id="add-todo">+ 한 줄 더</button></div></div>
-								<div class="todo-toolbar">
-									<input type="search" id="todo-search-input" class="todo-search-input" placeholder="할 일 검색" />
-									<label class="todo-sort-label">정렬
-										<select id="todo-sort-select">
-											<option value="created">만든 순서</option>
-											<option value="deadline">마감일 빠른 순</option>
-											<option value="priority">우선순위 높은 순</option>
-											<option value="estimate">예상 시간 긴 순</option>
-										</select>
-									</label>
-									<span class="todo-sort-caption" id="todo-sort-caption">지금은 만든 순서로 보고 있어요.</span>
-								</div>
-								<div class="label-filter" id="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button></div>
-								<div class="review-banner" id="todo-status-banner" hidden><span class="review-banner-text"></span><button type="button" id="todo-status-reset">전체 보기</button></div>
-								<div class="todo-list" id="todo-list"></div>
-							</section>
+							<div class="plan-todo-card">
+								<section class="plan-panel" aria-labelledby="plan-panel-heading">
+									<div class="label-row">
+										<h2 class="section-label" id="plan-panel-heading">이번 계획</h2>
+										<div class="label-row-actions">
+											<button class="add-button" type="button" id="plan-edit-toggle" hidden>수정</button>
+											<button class="add-button" type="button" id="plan-new-toggle">계획 세우기</button>
+										</div>
+									</div>
+									<div id="plan-display"></div>
+									<div class="plan-progress" id="plan-progress" hidden>
+										<div class="plan-progress-track"><div class="plan-progress-fill" id="plan-progress-fill" style="width:0%"></div></div>
+										<p class="plan-progress-caption" id="plan-progress-caption"></p>
+									</div>
+									<form id="plan-form" class="plan-form" hidden>
+										<input type="text" id="plan-title-input" placeholder="계획 이름 (예: 이번 주 운동 루틴)" required />
+										<div class="plan-form-row">
+											<label>기간 <input type="date" id="plan-start-input" /> ~ <input type="date" id="plan-end-input" /></label>
+											<label>우선순위 <select id="plan-priority-input"><option value="high">높음</option><option value="medium" selected>보통</option><option value="low">낮음</option></select></label>
+											<label>예상 시간(분) <input type="number" id="plan-estimate-input" min="0" placeholder="예: 300" /></label>
+										</div>
+										<textarea id="plan-success-input" placeholder="성공 기준 — 이 계획이 끝났을 때 뭐가 달라져 있으면 성공인가요?"></textarea>
+										<p class="plan-form-note" id="plan-form-note"></p>
+										<div class="save-line">
+											<button type="button" class="add-button" id="plan-cancel-button">취소</button>
+											<button type="submit" class="tag-creator-add">저장</button>
+										</div>
+									</form>
+									<details class="plan-history" id="plan-history" hidden>
+										<summary>지난 계획 보기</summary>
+										<ul id="plan-history-list"></ul>
+									</details>
+								</section>
+
+								<p class="plan-todo-link">이 계획을 이루기 위한 오늘의 할 일</p>
+
+								<section aria-labelledby="todo-heading">
+									<div class="label-row"><h2 class="section-label" id="todo-heading">오늘 하기로 한 일</h2><div class="label-row-actions"><div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><div class="tag-color-field"><span class="tag-color-label">배경</span><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /></div><div class="tag-color-field"><span class="tag-color-label">글자</span><input type="color" id="tag-text-color-input" class="tag-color-input" value="#db806c" /></div><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div><button class="add-button" type="button" id="add-todo">+ 한 줄 더</button></div></div>
+									<div class="todo-toolbar">
+										<input type="search" id="todo-search-input" class="todo-search-input" placeholder="할 일 검색" />
+										<label class="todo-sort-label">정렬
+											<select id="todo-sort-select">
+												<option value="created">만든 순서</option>
+												<option value="deadline">마감일 빠른 순</option>
+												<option value="priority">우선순위 높은 순</option>
+												<option value="estimate">예상 시간 긴 순</option>
+											</select>
+										</label>
+										<span class="todo-sort-caption" id="todo-sort-caption">지금은 만든 순서로 보고 있어요.</span>
+									</div>
+									<div class="label-filter" id="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button></div>
+									<div class="review-banner" id="todo-status-banner" hidden><span class="review-banner-text"></span><button type="button" id="todo-status-reset">전체 보기</button></div>
+									<div class="todo-list" id="todo-list"></div>
+								</section>
+							</div>
 							<aside class="side-column">
 								<section class="mood-box"><h2 class="section-label">지금 내 기분은</h2><input class="mood-input" id="mood-input" type="text" placeholder="오늘 기분을 적어보세요" /></section>
 								<section><h2 class="section-label">오늘을 돌아보며</h2><p class="reflection"><span class="reflection-text" id="reflection-text" contenteditable="true" data-placeholder="오늘 하루를 한 줄로 남겨보세요"></span><span class="reflection-caption">오늘 적어둔 한 줄</span></p></section>
@@ -672,6 +688,7 @@
 			function renderTodos() {
 				todoListEl.innerHTML = "";
 				const list = getFilteredSortedTodos();
+				renderPlanProgress();
 				if (!list.length) {
 					const empty = document.createElement("p");
 					empty.className = "record-empty";
@@ -980,7 +997,26 @@
 			const planCancelButton = document.querySelector("#plan-cancel-button");
 			const planHistoryEl = document.querySelector("#plan-history");
 			const planHistoryListEl = document.querySelector("#plan-history-list");
+			const planProgressEl = document.querySelector("#plan-progress");
+			const planProgressFillEl = document.querySelector("#plan-progress-fill");
+			const planProgressCaptionEl = document.querySelector("#plan-progress-caption");
 			let planFormMode = "create";
+
+			function renderPlanProgress() {
+				if (!state.activePlan) { planProgressEl.hidden = true; return; }
+				const total = state.todos.length;
+				if (!total) {
+					planProgressEl.hidden = false;
+					planProgressFillEl.style.width = "0%";
+					planProgressCaptionEl.textContent = "아직 오늘 할 일이 없어요. 아래에서 이 계획을 이룰 할 일을 추가해보세요.";
+					return;
+				}
+				const done = state.todos.filter((todo) => todo.done).length;
+				const percent = Math.round((done / total) * 100);
+				planProgressEl.hidden = false;
+				planProgressFillEl.style.width = `${percent}%`;
+				planProgressCaptionEl.textContent = `오늘 할 일 ${total}개 중 ${done}개 완료 · 이 계획의 진행률 ${percent}%`;
+			}
 
 			function renderPlanPanel() {
 				if (state.activePlan) {
@@ -1008,6 +1044,7 @@
 				} else {
 					planHistoryEl.hidden = true;
 				}
+				renderPlanProgress();
 			}
 
 			function openPlanForm(mode) {
