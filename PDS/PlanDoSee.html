@@ -97,6 +97,19 @@
 			.filter-delete { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; line-height: 1; }
 			.filter-delete:hover { background: rgba(0, 0, 0, .12); }
 
+			/* 읽기 모드 / 편집 모드 — 평소엔 조작 UI를 숨기고 다이어리처럼 깔끔하게, 편집 모드에서만 전부 노출 */
+			.mode-toggle-button { border: 1px solid var(--coral); border-radius: 20px; padding: 5px 13px; font-family: "Gowun Dodum", sans-serif; }
+			.plans-column[data-mode="read"] .todo-toolbar,
+			.plans-column[data-mode="read"] .label-filter,
+			.plans-column[data-mode="read"] .tag-creator-wrap,
+			.plans-column[data-mode="read"] #plan-new-toggle,
+			.plans-column[data-mode="read"] .plan-card-actions,
+			.plans-column[data-mode="read"] .todo-meta-row,
+			.plans-column[data-mode="read"] .todo-actions,
+			.plans-column[data-mode="read"] #todo-status-banner { display: none; }
+			.plans-column[data-mode="read"] [contenteditable]:hover { background: none; }
+			.plans-column[data-mode="read"] .todo-item { grid-template-columns: 22px 1fr; padding: 10px 15px; }
+
 			/* 계획 + 할 일을 하나로 묶는 카드 (계획마다 하나씩) */
 			.plans-list { display: grid; gap: 22px; margin-bottom: 22px; }
 			.plan-todo-card { border: 1px solid var(--line); border-radius: 14px; padding: 24px 26px 26px; background: var(--paper-deep); }
@@ -260,10 +273,11 @@
 						</div>
 
 						<div class="day-grid">
-							<div class="plans-column">
+							<div class="plans-column" id="plans-column" data-mode="read">
 								<div class="label-row">
 									<h2 class="section-label" id="plan-panel-heading">이번 계획들</h2>
 									<div class="label-row-actions">
+										<button class="add-button mode-toggle-button" type="button" id="mode-toggle">편집하기</button>
 										<div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><div class="tag-color-field"><span class="tag-color-label">배경</span><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /></div><div class="tag-color-field"><span class="tag-color-label">글자</span><input type="color" id="tag-text-color-input" class="tag-color-input" value="#db806c" /></div><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div>
 										<button class="add-button" type="button" id="plan-new-toggle">+ 새 계획</button>
 									</div>
@@ -537,6 +551,26 @@
 
 			const plansListEl = document.querySelector("#plans-list");
 			const labelFilterEl = document.querySelector("#label-filter");
+
+			// ---- 읽기 모드 / 편집 모드 토글 (가독성) ----
+			const plansColumnEl = document.querySelector("#plans-column");
+			const modeToggleButton = document.querySelector("#mode-toggle");
+			let uiMode = "read";
+
+			function applyUiMode() {
+				plansColumnEl.dataset.mode = uiMode;
+				modeToggleButton.textContent = uiMode === "read" ? "편집하기" : "다 봤어요, 읽기 모드로";
+			}
+
+			modeToggleButton.addEventListener("click", () => {
+				uiMode = uiMode === "read" ? "edit" : "read";
+				if (uiMode === "read" && todoStatusFilter !== "all") {
+					todoStatusFilter = "all";
+					updateStatusBanner();
+					renderTodos();
+				}
+				applyUiMode();
+			});
 			const recordSheetEl = document.querySelector("#record-sheet");
 			const reviewStoryEl = document.querySelector("#review-story");
 			const reviewHeadingEl = document.querySelector("#review-heading");
@@ -1222,6 +1256,7 @@
 				reflectionText.textContent = state.reflection;
 				tomorrowNote.value = state.tomorrowNote;
 				reviewNextNoteInput.value = state.nextPlanNote || "";
+				applyUiMode();
 				updateSortCaption();
 				updateStatusBanner();
 				renderTagFilters();
