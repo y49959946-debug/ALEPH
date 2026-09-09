@@ -60,14 +60,14 @@
 			.calendar-card-inner { position: relative; padding: 61px; }
 			.calendar { max-width: 828px; margin: 0 auto; }
 			.calendar-head { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; margin-bottom: 43px; }
-			.calendar-month { grid-column: 2; text-align: center; font-family: "Gowun Batang", serif; font-size: 34px; font-weight: 700; }
-			.calendar-arrow { display: grid; place-items: center; width: 54px; height: 54px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 28px; }
+			.calendar-month { grid-column: 2; text-align: center; font-family: "Gowun Batang", serif; font-size: 30px; font-weight: 700; }
+			.calendar-arrow { display: grid; place-items: center; width: 54px; height: 54px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 25px; }
 			.calendar-arrow:hover { color: var(--coral); border-color: var(--coral); }
-			.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 18px; color: var(--soft-ink); font-size: 20px; font-weight: 700; text-align: center; }
+			.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 18px; color: var(--soft-ink); font-size: 18px; font-weight: 700; text-align: center; }
 			.calendar-weekdays span:first-child { color: #c65b52; }
 			.calendar-weekdays span:last-child { color: #5d7e8d; }
 			.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-			.calendar-day { display: flex; align-items: flex-start; justify-content: flex-end; aspect-ratio: 1 / 1; padding: 6px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); background: transparent; font-size: 26px; }
+			.calendar-day { display: flex; align-items: flex-start; justify-content: flex-end; aspect-ratio: 1 / 1; padding: 6px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); background: transparent; font-size: 23px; }
 			.calendar-day:hover { background: var(--paper-deep); }
 			.calendar-day:nth-child(7n+1) { color: #c65b52; }
 			.calendar-day:nth-child(7n) { color: #5d7e8d; }
@@ -108,7 +108,7 @@
 			.plans-column[data-mode="read"] .todo-actions,
 			.plans-column[data-mode="read"] #todo-status-banner { display: none; }
 			.plans-column[data-mode="read"] [contenteditable]:hover { background: none; }
-			.plans-column[data-mode="read"] .todo-item { grid-template-columns: 22px 1fr; padding: 10px 15px; }
+			.plans-column[data-mode="read"] .todo-item { grid-template-columns: 1fr; padding: 10px 15px; }
 
 			/* 계획 + 할 일을 하나로 묶는 카드 (계획마다 하나씩) */
 			.plans-list { display: grid; gap: 22px; margin-bottom: 22px; }
@@ -150,12 +150,15 @@
 			.todo-sort-caption { flex-basis: 100%; color: var(--soft-ink); font-size: 12px; }
 
 			.todo-list { display: grid; gap: 4px; }
-			.todo-item { display: grid; grid-template-columns: 22px 1fr; gap: 6px 10px; padding: 14px 15px; border-bottom: 1px dashed #ded7ca; }
+			.todo-item { display: grid; grid-template-columns: 1fr; gap: 6px 10px; padding: 14px 15px; border-bottom: 1px dashed #ded7ca; }
 			.todo-item.is-done { opacity: .56; }
 			.todo-item.is-done .todo-title { text-decoration: line-through; }
-			.check { justify-self: center; align-self: start; margin-top: 3px; position: relative; width: 19px; height: 19px; appearance: none; border: 1.5px solid #b5b7a9; border-radius: 50%; background: transparent; }
-			.check:checked { border-color: var(--sage); background: var(--sage); }
-			.check:checked::after { position: absolute; left: 5px; top: 2px; width: 5px; height: 9px; content: ""; border: solid white; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+			.todo-item.is-failed { opacity: .7; }
+			.todo-item.is-failed .todo-title { color: #a4432f; text-decoration: line-through; }
+			.status-btn { border: 1px solid var(--line); border-radius: 20px; padding: 5px 11px; color: var(--soft-ink); background: transparent; font-size: 12px; font-weight: 700; }
+			.status-btn.status-done.is-active { border-color: var(--sage); color: #4f5c50; background: var(--sage-pale); }
+			.status-btn.status-failed.is-active { border-color: #a4432f; color: #a4432f; background: var(--coral-pale); }
+			.todo-status-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 			.todo-main { display: grid; gap: 6px; }
 			.todo-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 			.todo-title { font-family: "Gowun Batang", serif; font-size: 19px; }
@@ -166,7 +169,7 @@
 			.todo-meta-row input[type="date"], .todo-meta-row input[type="time"] { width: 112px; }
 			.todo-meta-row input[type="number"] { width: 60px; }
 			.todo-exec-summary { margin: 0; color: #9f8d64; font-size: 12px; }
-			.todo-actions { grid-column: 2; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+			.todo-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
 			.tag { border: 0; border-radius: 4px; padding: 5px 8px; color: inherit; background: none; font-family: inherit; font-size: 11px; cursor: pointer; }
 			.tag.is-empty { border: 1px dashed var(--line); color: var(--soft-ink); font-size: 15px; font-weight: 800; }
 			.plan-delete { display: grid; place-items: center; width: 20px; height: 20px; border: 0; border-radius: 50%; padding: 0; color: var(--soft-ink); background: transparent; font-size: 16px; line-height: 1; }
@@ -226,7 +229,9 @@
 			.record-plan { display: flex; align-items: baseline; gap: 10px; color: var(--soft-ink); font-size: 15px; }
 			.record-plan.is-done { color: var(--ink); }
 			.record-plan.is-done::before { color: var(--sage); content: "✓"; font-weight: 700; }
-			.record-plan:not(.is-done)::before { color: #c2b8a8; content: "○"; }
+			.record-plan.is-failed { color: #a4432f; }
+			.record-plan.is-failed::before { color: #a4432f; content: "✕"; font-weight: 700; }
+			.record-plan:not(.is-done):not(.is-failed)::before { color: #c2b8a8; content: "○"; }
 			.record-plan-time { min-width: 42px; color: #a39b8e; font-size: 12px; }
 			.record-empty { color: #aaa294; font-family: "Nanum Pen Script", cursive; font-size: 20px; }
 			.record-mood { display: inline-block; margin-left: 8px; padding: 4px 10px; border-radius: 20px; color: #8a6f3d; background: #f6e8bc; font-family: "Nanum Pen Script", cursive; font-size: 19px; }
@@ -441,6 +446,7 @@
 						selectedDate = cell.date;
 						if (cell.outside) calendarMonth = new Date(cell.date.getFullYear(), cell.date.getMonth(), 1);
 						updateDateDisplay();
+						renderTodos();
 					});
 					calendarGridEl.appendChild(button);
 				});
@@ -454,6 +460,7 @@
 				selectedDate = day === 0 ? new Date(today) : new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + day);
 				calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
 				updateDateDisplay();
+				renderTodos();
 			}));
 
 			updateDateDisplay();
@@ -497,7 +504,7 @@
 			}
 
 			function mapTodoRow(row) {
-				return { id: row.id, planId: row.plan_id, time: row.time || "", title: row.title || "", note: row.note || "", categoryId: row.tag_id, done: row.done, deadline: row.deadline || "", priority: row.priority || "medium", estimatedMinutes: row.estimated_minutes };
+				return { id: row.id, planId: row.plan_id, time: row.time || "", title: row.title || "", note: row.note || "", categoryId: row.tag_id, done: row.done, failed: !!row.failed, deadline: row.deadline || "", priority: row.priority || "medium", estimatedMinutes: row.estimated_minutes };
 			}
 
 			async function loadExecutionLogs(todoIds) {
@@ -612,13 +619,12 @@
 
 			function createTodoItemEl(todo) {
 				const item = document.createElement("div");
-				item.className = "todo-item" + (todo.done ? " is-done" : "");
+				item.className = "todo-item" + (todo.done ? " is-done" : "") + (todo.failed ? " is-failed" : "");
 				item.dataset.id = todo.id;
 				item.dataset.planId = todo.planId || "";
 				item.dataset.categoryId = todo.categoryId || "";
 				const priorityLabel = PRIORITY_LABEL[todo.priority] || PRIORITY_LABEL.medium;
 				item.innerHTML = `
-					<input class="check" type="checkbox" aria-label="완료 표시" ${todo.done ? "checked" : ""} />
 					<div class="todo-main">
 						<div class="todo-title-row">
 							<span class="todo-title" contenteditable="true" data-field="title" data-placeholder="할 일을 적어보세요">${escapeHtml(todo.title)}</span>
@@ -636,6 +642,10 @@
 							<label>시작 <input type="time" class="todo-field-started" /></label>
 						</div>
 						<p class="todo-exec-summary" data-role="exec-summary">${escapeHtml(execSummaryText(todo.id))}</p>
+					</div>
+					<div class="todo-status-actions">
+						<button type="button" class="status-btn status-done${todo.done ? " is-active" : ""}" data-role="mark-done">완료</button>
+						<button type="button" class="status-btn status-failed${todo.failed ? " is-active" : ""}" data-role="mark-failed">실패</button>
 					</div>
 					<div class="todo-actions">
 						${tagButtonMarkup(todo)}
@@ -675,11 +685,23 @@
 			function isOverdue(todo) { return !todo.done && !!todo.deadline && todo.deadline < todayISODate(); }
 			function isBlocked(todo) { return (state.executionLogsByTodo[todo.id] || []).some((log) => log.blocked_reason); }
 
+			function selectedISODate() { return `${selectedDate.getFullYear()}-${pad2(selectedDate.getMonth() + 1)}-${pad2(selectedDate.getDate())}`; }
+			function isPlanVisibleOnSelectedDate(plan) {
+				const selISO = selectedISODate();
+				if (plan.periodStart && selISO < plan.periodStart) return false;
+				if (plan.periodEnd && selISO > plan.periodEnd) return false;
+				return true;
+			}
+			function isTodoVisibleOnSelectedDate(todo) {
+				return !todo.deadline || selectedISODate() <= todo.deadline;
+			}
+
 			function getFilteredSortedTodos() {
 				const activeFilterButton = document.querySelector(".filter.active");
 				const filterValue = activeFilterButton ? activeFilterButton.dataset.filter : "all";
 				const searchTerm = todoSearchInput.value.trim().toLowerCase();
 				let list = state.todos.filter((todo) => {
+					if (!isTodoVisibleOnSelectedDate(todo)) return false;
 					if (filterValue !== "all" && (todo.categoryId || "") !== filterValue) return false;
 					if (searchTerm && !`${todo.title} ${todo.note}`.toLowerCase().includes(searchTerm)) return false;
 					return true;
@@ -753,11 +775,14 @@
 			function renderTodos() {
 				plansListEl.innerHTML = "";
 
-				if (!state.activePlans.length) {
-					plansListEl.innerHTML = `<p class="plan-empty-text">지금 실제로 하고 있는 일 가운데 하나를 골라 계획을 세워보세요. 계획을 세워야 할 일을 추가할 수 있어요.</p>`;
+				const visiblePlans = state.activePlans.filter(isPlanVisibleOnSelectedDate);
+				if (!visiblePlans.length) {
+					plansListEl.innerHTML = state.activePlans.length
+						? `<p class="plan-empty-text">이 날짜에 해당하는 계획이 없어요.</p>`
+						: `<p class="plan-empty-text">지금 실제로 하고 있는 일 가운데 하나를 골라 계획을 세워보세요. 계획을 세워야 할 일을 추가할 수 있어요.</p>`;
 				} else {
 					const filteredSorted = getFilteredSortedTodos();
-					state.activePlans.forEach((plan) => {
+					visiblePlans.forEach((plan) => {
 						const card = document.createElement("div");
 						card.className = "plan-todo-card";
 						card.dataset.planId = plan.id;
@@ -858,7 +883,7 @@
 				const completedCount = state.todos.filter((todo) => todo.done).length;
 				const planLine = state.activePlans.length ? `<p class="record-label">이번 계획 · ${state.activePlans.map((plan) => escapeHtml(plan.title)).join(", ")}</p>` : "";
 				const todoMarkup = state.todos.length
-					? `<ul class="record-plan-list">${state.todos.map((todo) => `<li class="record-plan${todo.done ? " is-done" : ""}"><span class="record-plan-time">${escapeHtml(todo.time || "--:--")}</span><span>${escapeHtml(todo.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
+					? `<ul class="record-plan-list">${state.todos.map((todo) => `<li class="record-plan${todo.done ? " is-done" : ""}${todo.failed ? " is-failed" : ""}"><span class="record-plan-time">${escapeHtml(todo.time || "--:--")}</span><span>${escapeHtml(todo.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
 					: `<span class="record-empty">아직 적어둔 할 일이 없어요.</span>`;
 				recordSheetEl.innerHTML = `
 					<div class="record-sheet">
@@ -897,22 +922,11 @@
 				const todo = findTodo(item.dataset.id);
 				if (!todo) return;
 
-				if (event.target.classList.contains("check")) {
-					const wasDone = todo.done;
-					const nowDone = event.target.checked;
-					todo.done = nowDone;
-					item.classList.toggle("is-done", nowDone);
-					const { error } = await supabaseClient.from(TODOS_TABLE).update({ done: nowDone }).eq("id", todo.id);
-					if (error) { console.error("완료 상태 저장 실패", error); showToast("저장에 실패했어요."); return; }
-					renderPlanProgress(todo.planId);
-					if (!wasDone && nowDone) await logCompletion(item, todo);
-					return;
-				}
-
 				if (event.target.classList.contains("todo-field-deadline")) {
 					todo.deadline = event.target.value || null;
 					const { error } = await supabaseClient.from(TODOS_TABLE).update({ deadline: todo.deadline }).eq("id", todo.id);
-					if (error) { console.error("마감일 저장 실패", error); showToast("저장에 실패했어요."); }
+					if (error) { console.error("마감일 저장 실패", error); showToast("저장에 실패했어요."); return; }
+					renderTodos();
 					return;
 				}
 
@@ -953,6 +967,41 @@
 			});
 
 			plansListEl.addEventListener("click", async (event) => {
+				const markDoneButton = event.target.closest("[data-role='mark-done']");
+				if (markDoneButton) {
+					const item = markDoneButton.closest(".todo-item");
+					const todo = findTodo(item.dataset.id);
+					const wasDone = todo.done;
+					const nowDone = !todo.done;
+					todo.done = nowDone;
+					if (nowDone) todo.failed = false;
+					item.classList.toggle("is-done", todo.done);
+					item.classList.toggle("is-failed", todo.failed);
+					markDoneButton.classList.toggle("is-active", todo.done);
+					item.querySelector("[data-role='mark-failed']").classList.toggle("is-active", todo.failed);
+					const { error } = await supabaseClient.from(TODOS_TABLE).update({ done: todo.done, failed: todo.failed }).eq("id", todo.id);
+					if (error) { console.error("완료 상태 저장 실패", error); showToast("저장에 실패했어요."); return; }
+					renderPlanProgress(todo.planId);
+					if (!wasDone && nowDone) await logCompletion(item, todo);
+					return;
+				}
+
+				const markFailedButton = event.target.closest("[data-role='mark-failed']");
+				if (markFailedButton) {
+					const item = markFailedButton.closest(".todo-item");
+					const todo = findTodo(item.dataset.id);
+					todo.failed = !todo.failed;
+					if (todo.failed) todo.done = false;
+					item.classList.toggle("is-done", todo.done);
+					item.classList.toggle("is-failed", todo.failed);
+					markFailedButton.classList.toggle("is-active", todo.failed);
+					item.querySelector("[data-role='mark-done']").classList.toggle("is-active", todo.done);
+					const { error } = await supabaseClient.from(TODOS_TABLE).update({ done: todo.done, failed: todo.failed }).eq("id", todo.id);
+					if (error) { console.error("실패 상태 저장 실패", error); showToast("저장에 실패했어요."); return; }
+					renderPlanProgress(todo.planId);
+					return;
+				}
+
 				const editPlanButton = event.target.closest("[data-role='plan-edit']");
 				if (editPlanButton) {
 					openPlanForm("edit", editPlanButton.dataset.planId);
@@ -979,12 +1028,12 @@
 					const planId = addTodoButton.dataset.planId;
 					const plan = state.activePlans.find((p) => p.id === planId);
 					if (!plan) return;
-					const todo = { id: makeId(), planId, time: "", title: "", note: "", categoryId: null, done: false, deadline: "", priority: "medium", estimatedMinutes: null };
+					const todo = { id: makeId(), planId, time: "", title: "", note: "", categoryId: null, done: false, failed: false, deadline: "", priority: "medium", estimatedMinutes: null };
 					state.todos.push(todo);
 					renderTodos();
 					const titleEl = plansListEl.querySelector(`.todo-list[data-plan-id="${planId}"] [data-id="${todo.id}"] [data-field="title"]`);
 					if (titleEl) titleEl.focus();
-					const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, plan_id: planId, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, done: todo.done, deadline: null, priority: todo.priority, estimated_minutes: null });
+					const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, plan_id: planId, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, done: todo.done, failed: todo.failed, deadline: null, priority: todo.priority, estimated_minutes: null });
 					if (error) { console.error("추가 실패", error); showToast("저장에 실패했어요."); }
 					return;
 				}
