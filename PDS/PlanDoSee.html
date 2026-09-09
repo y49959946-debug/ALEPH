@@ -34,10 +34,6 @@
 			.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
 			.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
 			.brand-logo { display: block; height: 80px; width: auto; }
-			.top-actions { display: flex; align-items: center; gap: 18px; color: var(--soft-ink); font-size: 13px; }
-			.quiet-button { border: 0; padding: 5px 0; color: inherit; background: transparent; }
-			.quiet-button:hover { color: var(--coral); }
-			.avatar { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #cfc6b4; border-radius: 50%; background: #e6d5b9; color: #765e42; font-family: "Nanum Pen Script", cursive; font-size: 20px; }
 
 			.view-switcher { display: flex; justify-content: center; gap: 5px; width: fit-content; margin: 0 auto 28px; padding: 5px; border: 1px solid #ded5c6; border-radius: 12px; background: rgba(255, 253, 247, .72); }
 			.view-tab { border: 0; border-radius: 8px; padding: 9px 22px; color: var(--soft-ink); background: transparent; font-size: 13px; font-weight: 600; }
@@ -59,6 +55,25 @@
 			.date-arrow:hover { color: var(--coral); border-color: var(--coral); }
 			.date-caption { min-width: 96px; color: var(--soft-ink); font-size: 12px; text-align: center; }
 			.today-button { border: 0; border-bottom: 1px solid var(--coral); padding: 3px 0; color: var(--coral); background: transparent; font-size: 12px; }
+
+			.calendar-card { margin-top: 24px; }
+			.calendar-card-inner { position: relative; padding: 61px; }
+			.calendar { max-width: 828px; margin: 0 auto; }
+			.calendar-head { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; margin-bottom: 43px; }
+			.calendar-month { grid-column: 2; text-align: center; font-family: "Gowun Batang", serif; font-size: 35px; font-weight: 700; }
+			.calendar-arrow { display: grid; place-items: center; width: 54px; height: 54px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 29px; }
+			.calendar-arrow:hover { color: var(--coral); border-color: var(--coral); }
+			.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 18px; color: var(--soft-ink); font-size: 22px; font-weight: 700; text-align: center; }
+			.calendar-weekdays span:first-child { color: #c65b52; }
+			.calendar-weekdays span:last-child { color: #5d7e8d; }
+			.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+			.calendar-day { display: flex; align-items: flex-start; justify-content: flex-end; aspect-ratio: 1 / 1; padding: 6px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); background: transparent; font-size: 28px; }
+			.calendar-day:hover { background: var(--paper-deep); }
+			.calendar-day:nth-child(7n+1) { color: #c65b52; }
+			.calendar-day:nth-child(7n) { color: #5d7e8d; }
+			.calendar-day.is-outside { color: #cbc3b2; }
+			.calendar-day.is-today { color: var(--coral); font-weight: 700; }
+			.calendar-day.is-selected { color: var(--ink); background: rgba(219, 128, 108, .45); font-weight: 700; }
 
 			.day-grid { display: grid; grid-template-columns: minmax(0, 1.42fr) minmax(260px, .8fr); gap: 48px; padding-top: 34px; }
 			.section-label { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 13px; font-weight: 700; letter-spacing: .06em; }
@@ -95,9 +110,8 @@
 
 			.side-column { display: grid; align-content: start; gap: 32px; }
 			.mood-box { padding-bottom: 28px; border-bottom: 1px solid var(--line); }
-			.mood-row { display: flex; gap: 9px; }
-			.mood { display: grid; place-items: center; width: 39px; height: 39px; border: 1px solid transparent; border-radius: 50%; background: #faf4e8; font-size: 19px; filter: grayscale(.25); }
-			.mood:hover, .mood.selected { border-color: var(--coral); background: var(--coral-pale); filter: none; transform: rotate(-5deg); }
+			.mood-input { width: 100%; border: 0; border-bottom: 1px solid #cfc6b7; outline: 0; padding: 6px 0; color: var(--ink); background: transparent; font-family: "Nanum Pen Script", cursive; font-size: 20px; }
+			.mood-input::placeholder { color: #b7b0a2; }
 			.reflection { margin: 0; padding: 17px 18px; border-left: 2px solid var(--yellow); color: #625f53; background: #fff9e8; font-family: "Nanum Pen Script", cursive; font-size: 20px; line-height: 1.55; }
 			.reflection .reflection-caption { display: block; margin-top: 8px; color: #9f8d64; font-family: "Gowun Dodum", sans-serif; font-size: 10px; letter-spacing: .08em; }
 			[contenteditable] { border-radius: 4px; outline: 0; }
@@ -132,9 +146,9 @@
 			@media (max-width: 760px) {
 				.app { width: min(100% - 22px, 600px); padding-top: 20px; }
 				.topbar { margin-bottom: 23px; }
-				.top-actions .quiet-button { display: none; }
 				.paper-inner { padding: 28px 24px 36px 42px; }
 				.paper-inner::before { left: 24px; }
+				.calendar-card-inner { padding: 24px 20px; }
 				.page-heading { align-items: start; flex-direction: column; gap: 20px; }
 				.date-nav { width: 100%; justify-content: space-between; }
 				.day-grid { grid-template-columns: 1fr; gap: 35px; }
@@ -152,7 +166,6 @@
 		<main class="app">
 			<header class="topbar">
 				<a class="brand" href="../index.html" aria-label="행로 홈"><img class="brand-logo" src="PlanDoSee_logo.png" alt="PlanDoSee" /></a>
-				<div class="top-actions"><button class="quiet-button" type="button" data-view-target="review">이번 주 돌아보기</button><span class="avatar">나</span></div>
 			</header>
 
 			<nav class="view-switcher" aria-label="페이지 선택">
@@ -164,7 +177,7 @@
 				<article class="paper">
 					<div class="paper-inner">
 						<div class="page-heading">
-							<div><p class="date-kicker">THURSDAY · 09. 09. 2026</p><h1 id="day-title">오늘의 페이지</h1></div>
+							<div><p class="date-kicker" id="date-kicker">THURSDAY · 09. 09. 2026</p><h1 id="day-title">오늘의 페이지</h1></div>
 							<div class="date-nav"><button class="date-arrow" type="button" data-day="-1" aria-label="어제">‹</button><span class="date-caption" id="date-caption">오늘, 목요일</span><button class="date-arrow" type="button" data-day="1" aria-label="내일">›</button><button class="today-button" type="button" data-day="0">오늘로</button></div>
 						</div>
 						<div class="day-grid">
@@ -174,11 +187,25 @@
 								<div class="plan-list" id="plan-list"></div>
 							</section>
 							<aside class="side-column">
-								<section class="mood-box"><h2 class="section-label">지금 내 기분은</h2><div class="mood-row"><button class="mood" type="button" aria-label="아주 좋아요">☀</button><button class="mood" type="button" aria-label="좋아요">☺</button><button class="mood" type="button" aria-label="그저 그래요">·</button><button class="mood" type="button" aria-label="조금 지쳐요">◡</button><button class="mood" type="button" aria-label="힘들어요">☂</button></div></section>
+								<section class="mood-box"><h2 class="section-label">지금 내 기분은</h2><input class="mood-input" id="mood-input" type="text" placeholder="오늘 기분을 적어보세요" /></section>
 								<section><h2 class="section-label">오늘을 돌아보며</h2><p class="reflection"><span class="reflection-text" id="reflection-text" contenteditable="true" data-placeholder="오늘 하루를 한 줄로 남겨보세요"></span><span class="reflection-caption">오늘 적어둔 한 줄</span></p></section>
 								<section class="tomorrow"><h2 class="section-label">내일의 나에게 남기는 말</h2><textarea id="tomorrow-note" placeholder="내일의 나에게, "></textarea><div class="save-line"><button class="save-button" type="button" id="save-note">기록 남기기 →</button></div></section>
 							</aside>
 						</div>
+					</div>
+				</article>
+
+				<article class="paper calendar-card">
+					<div class="calendar-card-inner">
+						<section class="calendar" aria-label="달력">
+							<div class="calendar-head">
+								<button class="calendar-arrow" type="button" id="calendar-prev" aria-label="이전 달">‹</button>
+								<span class="calendar-month" id="calendar-month">2026년 9월</span>
+								<button class="calendar-arrow" type="button" id="calendar-next" aria-label="다음 달">›</button>
+							</div>
+							<div class="calendar-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+							<div class="calendar-grid" id="calendar-grid"></div>
+						</section>
 					</div>
 				</article>
 			</section>
@@ -201,9 +228,88 @@
 			let toastTimer;
 			function showToast(message) { toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2400); }
 			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); }));
-			document.querySelectorAll(".mood").forEach((mood) => mood.addEventListener("click", () => { document.querySelectorAll(".mood").forEach((item) => item.classList.remove("selected")); mood.classList.add("selected"); }));
 			document.querySelectorAll("[data-toast]").forEach((item) => item.addEventListener("click", () => showToast(item.dataset.toast)));
-			document.querySelectorAll("[data-day]").forEach((button) => button.addEventListener("click", () => { const day = Number(button.dataset.day); document.querySelector("#date-caption").textContent = day === -1 ? "어제, 수요일" : day === 1 ? "내일, 금요일" : "오늘, 목요일"; document.querySelector("#day-title").textContent = day === 0 ? "오늘의 페이지" : day === -1 ? "어제의 페이지" : "내일의 페이지"; }));
+
+			// ---- 날짜 이동 + 달력 ----
+			const WEEKDAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
+			const DAY_EN = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
+			function sameDay(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+			function pad2(n) { return String(n).padStart(2, "0"); }
+
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			let selectedDate = new Date(today);
+			let calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+			const dateKickerEl = document.querySelector("#date-kicker");
+			const dayTitleEl = document.querySelector("#day-title");
+			const dateCaptionEl = document.querySelector("#date-caption");
+			const calendarMonthEl = document.querySelector("#calendar-month");
+			const calendarGridEl = document.querySelector("#calendar-grid");
+
+			function formatTitle(date) {
+				const diffDays = Math.round((date - today) / 86400000);
+				if (diffDays === 0) return "오늘의 페이지";
+				if (diffDays === -1) return "어제의 페이지";
+				if (diffDays === 1) return "내일의 페이지";
+				return `${date.getMonth() + 1}월 ${date.getDate()}일의 페이지`;
+			}
+
+			function formatCaption(date) {
+				const diffDays = Math.round((date - today) / 86400000);
+				const weekday = `${WEEKDAY_KO[date.getDay()]}요일`;
+				if (diffDays === 0) return `오늘, ${weekday}`;
+				if (diffDays === -1) return `어제, ${weekday}`;
+				if (diffDays === 1) return `내일, ${weekday}`;
+				return `${date.getMonth() + 1}월 ${date.getDate()}일, ${weekday}`;
+			}
+
+			function updateDateDisplay() {
+				dateKickerEl.textContent = `${DAY_EN[selectedDate.getDay()]} · ${pad2(selectedDate.getMonth() + 1)}. ${pad2(selectedDate.getDate())}. ${selectedDate.getFullYear()}`;
+				dayTitleEl.textContent = formatTitle(selectedDate);
+				dateCaptionEl.textContent = formatCaption(selectedDate);
+				renderCalendar();
+			}
+
+			function renderCalendar() {
+				calendarMonthEl.textContent = `${calendarMonth.getFullYear()}년 ${calendarMonth.getMonth() + 1}월`;
+				calendarGridEl.innerHTML = "";
+				const firstWeekday = calendarMonth.getDay();
+				const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+				const daysInPrevMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 0).getDate();
+				const cells = [];
+				for (let i = firstWeekday - 1; i >= 0; i--) cells.push({ date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, daysInPrevMonth - i), outside: true });
+				for (let d = 1; d <= daysInMonth; d++) cells.push({ date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), d), outside: false });
+				while (cells.length % 7 !== 0) { const last = cells[cells.length - 1].date; cells.push({ date: new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1), outside: true }); }
+				cells.forEach((cell) => {
+					const button = document.createElement("button");
+					button.type = "button";
+					button.className = "calendar-day";
+					if (cell.outside) button.classList.add("is-outside");
+					if (sameDay(cell.date, today)) button.classList.add("is-today");
+					if (sameDay(cell.date, selectedDate)) button.classList.add("is-selected");
+					button.textContent = cell.date.getDate();
+					button.addEventListener("click", () => {
+						selectedDate = cell.date;
+						if (cell.outside) calendarMonth = new Date(cell.date.getFullYear(), cell.date.getMonth(), 1);
+						updateDateDisplay();
+					});
+					calendarGridEl.appendChild(button);
+				});
+			}
+
+			document.querySelector("#calendar-prev").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1); renderCalendar(); });
+			document.querySelector("#calendar-next").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1); renderCalendar(); });
+
+			document.querySelectorAll("[data-day]").forEach((button) => button.addEventListener("click", () => {
+				const day = Number(button.dataset.day);
+				selectedDate = day === 0 ? new Date(today) : new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + day);
+				calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+				updateDateDisplay();
+			}));
+
+			updateDateDisplay();
 
 			// ---- 오늘 하기로 한 일 / 오늘을 돌아보며 / 내일의 나에게 남기는 말: 편집 및 저장 ----
 			const STORAGE_KEY = "plandosee:today";
@@ -220,6 +326,7 @@
 						{ id: makeId(), time: "18:30", title: "집 근처를 30분 걷기", note: "날씨가 좋으면 공원까지 조금 더", category: "운동", done: false },
 						{ id: makeId(), time: "21:00", title: "휴대폰 없이 차 한 잔", note: "오늘의 속도를 천천히 낮추기", category: "휴식", done: false },
 					],
+					mood: "",
 					reflection: "생각보다 천천히 해도 괜찮았다. 한 가지에 오래 머무는 날도 필요하니까.",
 					tomorrowNote: "",
 				};
@@ -332,6 +439,11 @@
 				document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item === filter));
 				document.querySelectorAll(".plan-item").forEach((item) => applyFilterToItem(item));
 			}));
+
+			const moodInput = document.querySelector("#mood-input");
+			moodInput.value = state.mood || "";
+			moodInput.addEventListener("blur", () => { state.mood = moodInput.value; saveState(); });
+			moodInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); moodInput.blur(); } });
 
 			const reflectionText = document.querySelector("#reflection-text");
 			reflectionText.textContent = state.reflection;
