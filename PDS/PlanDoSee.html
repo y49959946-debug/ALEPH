@@ -86,6 +86,8 @@
 			.tag-creator-wrap { position: relative; }
 			.tag-creator { position: absolute; top: calc(100% + 10px); left: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow); }
 			.tag-name-input { width: 78px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; color: var(--ink); background: var(--paper); font-size: 12px; }
+			.tag-color-field { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+			.tag-color-label { color: var(--soft-ink); font-size: 9px; }
 			.tag-color-input { width: 28px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer; }
 			.tag-creator-add { border: 0; border-radius: 8px; padding: 7px 12px; color: var(--paper); background: var(--coral); font-size: 12px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 			.label-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 22px; }
@@ -172,17 +174,18 @@
 			.review-intro .date-kicker { margin-bottom: 13px; }
 			.review-intro h2 { margin-bottom: 12px; font-family: "Gowun Batang", serif; font-size: clamp(28px, 4vw, 40px); letter-spacing: -.06em; }
 			.review-intro p { color: var(--soft-ink); font-size: 13px; line-height: 1.8; }
-			.week-nav { display: flex; justify-content: center; align-items: center; gap: 22px; margin: 24px 0 34px; color: var(--soft-ink); font-size: 12px; }
-			.week-nav button { border: 0; color: inherit; background: transparent; font-size: 18px; }
 			.review-story { max-width: 720px; margin: 0 auto; padding: 27px 0 30px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-family: "Gowun Batang", serif; font-size: 20px; line-height: 1.9; text-align: center; }
-			.review-story button { border: 0; border-bottom: 1px dashed var(--coral); padding: 0 2px; color: var(--coral); background: transparent; font-family: inherit; font-size: inherit; }
-			.review-story button:hover { background: var(--coral-pale); }
-			.review-notes { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 760px; margin: 35px auto 0; }
-			.review-note { min-height: 100px; padding: 0 24px; border-right: 1px solid var(--line); text-align: center; }
-			.review-note:last-child { border-right: 0; }
-			.review-note .note-mark { display: block; margin-bottom: 7px; color: var(--coral); font-family: "Kalam", cursive; font-size: 26px; }
-			.review-note p { margin: 0; color: var(--soft-ink); font-size: 12px; line-height: 1.7; }
-			.review-footer { max-width: 720px; margin: 34px auto 0; color: #989082; font-family: "Nanum Pen Script", cursive; font-size: 20px; text-align: center; }
+			.review-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; max-width: 820px; margin: 30px auto 0; }
+			.review-stat { display: grid; gap: 6px; padding: 16px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-deep); text-align: center; }
+			.review-stat:hover { border-color: var(--coral); background: var(--coral-pale); }
+			.review-stat .stat-value { font-family: "Kalam", cursive; font-size: 22px; color: var(--coral); }
+			.review-stat .stat-label { font-size: 11px; color: var(--soft-ink); line-height: 1.5; }
+			.review-duration-caption { max-width: 820px; margin: 14px auto 0; color: var(--soft-ink); font-size: 12px; text-align: center; }
+			.review-next { max-width: 620px; margin: 34px auto 0; padding-top: 26px; border-top: 1px solid var(--line); }
+			.review-next textarea { width: 100%; min-height: 70px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; padding: 10px; color: var(--ink); background: var(--paper); font-size: 13px; }
+			.review-next-status { margin: 8px 0 0; color: var(--coral); font-size: 11px; text-align: right; }
+			.review-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; padding: 8px 14px; border-radius: 20px; background: var(--coral-pale); color: #a4432f; font-size: 12px; }
+			.review-banner button { border: 0; background: transparent; color: inherit; font-weight: 700; text-decoration: underline; padding: 0; }
 			.records-paper { min-height: 640px; }
 			.records-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
 			.records-heading h2 { margin: 0; font-family: "Nanum Pen Script", cursive; font-size: clamp(38px, 4.5vw, 50px); font-weight: 400; line-height: 1.2; }
@@ -219,9 +222,7 @@
 				.date-nav { width: 100%; justify-content: space-between; }
 				.day-grid { grid-template-columns: 1fr; gap: 35px; }
 				.side-column { gap: 28px; }
-				.review-notes { grid-template-columns: 1fr; gap: 24px; }
-				.review-note { min-height: auto; padding: 0 10px 20px; border-right: 0; border-bottom: 1px solid var(--line); }
-				.review-note:last-child { border-bottom: 0; }
+				.review-stats { grid-template-columns: repeat(2, 1fr); }
 				.review-story { font-size: 17px; }
 				.records-heading { align-items: start; flex-direction: column; gap: 12px; }
 				.record-sheet { grid-template-columns: 1fr; gap: 18px; }
@@ -279,7 +280,7 @@
 
 						<div class="day-grid">
 							<section aria-labelledby="todo-heading">
-								<div class="label-row"><h2 class="section-label" id="todo-heading">오늘 하기로 한 일</h2><div class="label-row-actions"><div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div><button class="add-button" type="button" id="add-todo">+ 한 줄 더</button></div></div>
+								<div class="label-row"><h2 class="section-label" id="todo-heading">오늘 하기로 한 일</h2><div class="label-row-actions"><div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><div class="tag-color-field"><span class="tag-color-label">배경</span><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /></div><div class="tag-color-field"><span class="tag-color-label">글자</span><input type="color" id="tag-text-color-input" class="tag-color-input" value="#db806c" /></div><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div><button class="add-button" type="button" id="add-todo">+ 한 줄 더</button></div></div>
 								<div class="todo-toolbar">
 									<input type="search" id="todo-search-input" class="todo-search-input" placeholder="할 일 검색" />
 									<label class="todo-sort-label">정렬
@@ -293,6 +294,7 @@
 									<span class="todo-sort-caption" id="todo-sort-caption">지금은 만든 순서로 보고 있어요.</span>
 								</div>
 								<div class="label-filter" id="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button></div>
+								<div class="review-banner" id="todo-status-banner" hidden><span class="review-banner-text"></span><button type="button" id="todo-status-reset">전체 보기</button></div>
 								<div class="todo-list" id="todo-list"></div>
 							</section>
 							<aside class="side-column">
@@ -321,11 +323,16 @@
 
 			<section class="view" id="review-view">
 				<article class="paper review-paper"><div class="paper-inner">
-					<div class="review-intro"><p class="date-kicker">09. 07 — 09. 13 · SEPTEMBER, WEEK 2</p><h2>이번 주를 돌아보며</h2><p>다 해내지 못한 것보다, 어디까지 걸어왔는지를<br />잠시 들여다보는 시간이에요.</p></div>
-					<div class="week-nav"><button type="button" aria-label="지난 주">‹</button><span>9월 둘째 주</span><button type="button" aria-label="다음 주">›</button></div>
+					<div class="review-intro"><p class="date-kicker" id="review-kicker">REVIEW</p><h2 id="review-heading">계획을 돌아보며</h2><p>다 해내지 못한 것보다, 어디까지 걸어왔는지를<br />잠시 들여다보는 시간이에요.</p></div>
 					<p class="review-story" id="review-story"></p>
-					<div class="review-notes"><article class="review-note"><span class="note-mark" id="review-done-count">0 / 0</span><p>계획한 일 가운데<br />끝까지 해낸 기록</p></article><article class="review-note"><span class="note-mark" id="review-duration">0분</span><p>이 페이지에<br />머문 시간</p></article><article class="review-note"><span class="note-mark">☺</span><p>가장 자주 남긴<br />이번 주의 기분</p></article></div>
-					<p class="review-footer">“다음 주에는 조금 덜 채우고, 조금 더 오래 바라보기.”</p>
+					<div class="review-stats" id="review-stats"></div>
+					<p class="review-duration-caption" id="review-duration-caption"></p>
+					<div class="review-next">
+						<h2 class="section-label">다음 계획에 남길 한 가지</h2>
+						<textarea id="review-next-note" placeholder="이번 계획을 보면서, 다음엔 이렇게 해보자 하는 것 한 가지를 적어보세요."></textarea>
+						<div class="save-line"><button type="button" class="save-button" id="review-next-save">다음 계획으로 남기기 →</button></div>
+						<p class="review-next-status" id="review-next-status"></p>
+					</div>
 				</div></article>
 			</section>
 
@@ -460,7 +467,8 @@
 				return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 			}
 
-			const state = { todos: [], tags: [], mood: "", reflection: "", tomorrowNote: "", totalTimeMs: 0, activePlan: null, pastPlans: [], executionLogsByTodo: {} };
+			const state = { todos: [], tags: [], mood: "", reflection: "", tomorrowNote: "", nextPlanNote: "", totalTimeMs: 0, activePlan: null, pastPlans: [], executionLogsByTodo: {} };
+			let todoStatusFilter = "all";
 
 			function mapPlanRow(row) {
 				return { id: row.id, title: row.title, periodStart: row.period_start, periodEnd: row.period_end, priority: row.priority || "medium", successCriteria: row.success_criteria, estimatedMinutes: row.estimated_minutes };
@@ -489,7 +497,7 @@
 				if (planRes.error) { console.error("계획 불러오기 실패", planRes.error); showToast("계획을 불러오지 못했어요."); }
 				if (settingsRes.error) console.error("설정 불러오기 실패", settingsRes.error);
 
-				state.tags = (tagsRes.data || []).map((row) => ({ id: row.id, label: row.label, color: row.color }));
+				state.tags = (tagsRes.data || []).map((row) => ({ id: row.id, label: row.label, color: row.color, text_color: row.text_color || row.color }));
 
 				const planRows = planRes.data || [];
 				const activeRow = planRows.find((row) => row.is_active);
@@ -511,6 +519,7 @@
 					state.mood = settingsRow.mood || "";
 					state.reflection = settingsRow.reflection || "";
 					state.tomorrowNote = settingsRow.tomorrow_note || "";
+					state.nextPlanNote = settingsRow.next_plan_note || "";
 					state.totalTimeMs = settingsRow.total_time_ms || 0;
 				} else {
 					const { error } = await supabaseClient.from(SETTINGS_TABLE).insert({ id: SETTINGS_ID });
@@ -522,8 +531,10 @@
 			const labelFilterEl = document.querySelector("#label-filter");
 			const recordSheetEl = document.querySelector("#record-sheet");
 			const reviewStoryEl = document.querySelector("#review-story");
-			const reviewDoneCountEl = document.querySelector("#review-done-count");
-			const reviewDurationEl = document.querySelector("#review-duration");
+			const reviewHeadingEl = document.querySelector("#review-heading");
+			const reviewKickerEl = document.querySelector("#review-kicker");
+			const reviewStatsEl = document.querySelector("#review-stats");
+			const reviewDurationCaptionEl = document.querySelector("#review-duration-caption");
 			const todoSearchInput = document.querySelector("#todo-search-input");
 			const todoSortSelect = document.querySelector("#todo-sort-select");
 			const todoSortCaptionEl = document.querySelector("#todo-sort-caption");
@@ -553,7 +564,7 @@
 
 			function tagButtonMarkup(todo) {
 				const tag = todo.categoryId ? findTag(todo.categoryId) : null;
-				const style = tag ? ` style="background:${paleColor(tag.color)};color:${tag.color};"` : "";
+				const style = tag ? ` style="background:${paleColor(tag.color)};color:${tag.text_color};"` : "";
 				return `<button type="button" class="tag${tag ? "" : " is-empty"}" data-role="cycle-category"${style}>${tag ? escapeHtml(tag.label) : "+"}</button>`;
 			}
 
@@ -608,7 +619,7 @@
 					button.className = "filter" + (activeValue === tag.id ? " active" : "");
 					button.dataset.filter = tag.id;
 					button.style.background = paleColor(tag.color);
-					button.style.color = tag.color;
+					button.style.color = tag.text_color;
 					button.innerHTML = `${escapeHtml(tag.label)}<span class="filter-delete" data-role="delete-tag" data-tag-id="${tag.id}" aria-label="태그 삭제">×</span>`;
 					labelFilterEl.appendChild(button);
 				});
@@ -616,6 +627,10 @@
 					document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item.dataset.filter === "all"));
 				}
 			}
+
+			function todayISODate() { return new Date().toISOString().slice(0, 10); }
+			function isOverdue(todo) { return !todo.done && !!todo.deadline && todo.deadline < todayISODate(); }
+			function isBlocked(todo) { return (state.executionLogsByTodo[todo.id] || []).some((log) => log.blocked_reason); }
 
 			function getFilteredSortedTodos() {
 				const activeFilterButton = document.querySelector(".filter.active");
@@ -626,6 +641,9 @@
 					if (searchTerm && !`${todo.title} ${todo.note}`.toLowerCase().includes(searchTerm)) return false;
 					return true;
 				});
+				if (todoStatusFilter === "done") list = list.filter((todo) => todo.done);
+				else if (todoStatusFilter === "overdue") list = list.filter(isOverdue);
+				else if (todoStatusFilter === "blocked") list = list.filter(isBlocked);
 				const sortKey = todoSortSelect.value;
 				const priorityRank = { high: 0, medium: 1, low: 2 };
 				if (sortKey === "deadline") list = [...list].sort((a, b) => (a.deadline || "9999-99-99").localeCompare(b.deadline || "9999-99-99"));
@@ -635,6 +653,21 @@
 			}
 
 			function updateSortCaption() { todoSortCaptionEl.textContent = SORT_CAPTIONS[todoSortSelect.value] || ""; }
+
+			const STATUS_BANNER_TEXT = { done: "완료한 할 일만 보고 있어요.", overdue: "마감일이 지난(지연) 할 일만 보고 있어요.", blocked: "막힌 적 있는 할 일만 보고 있어요." };
+			const todoStatusBannerEl = document.querySelector("#todo-status-banner");
+
+			function updateStatusBanner() {
+				if (todoStatusFilter === "all") { todoStatusBannerEl.hidden = true; return; }
+				todoStatusBannerEl.hidden = false;
+				todoStatusBannerEl.querySelector(".review-banner-text").textContent = STATUS_BANNER_TEXT[todoStatusFilter] || "";
+			}
+
+			document.querySelector("#todo-status-reset").addEventListener("click", () => {
+				todoStatusFilter = "all";
+				updateStatusBanner();
+				renderTodos();
+			});
 
 			function renderTodos() {
 				todoListEl.innerHTML = "";
@@ -658,13 +691,44 @@
 				return `${Math.floor(ms / 1000)}초`;
 			}
 
-			function renderReview() {
+			function computeReviewStats() {
 				const totalCount = state.todos.length;
 				const doneCount = state.todos.filter((todo) => todo.done).length;
+				const overdueCount = state.todos.filter(isOverdue).length;
+				const blockedCount = state.todos.filter(isBlocked).length;
+				const estimatedTotal = state.todos.reduce((sum, todo) => sum + (todo.estimatedMinutes || 0), 0);
+				const actualTotal = state.todos.reduce((sum, todo) => {
+					const logs = state.executionLogsByTodo[todo.id] || [];
+					return sum + logs.reduce((s, log) => s + (log.actual_minutes || 0), 0);
+				}, 0);
+				const diff = actualTotal - estimatedTotal;
+				return { totalCount, doneCount, overdueCount, blockedCount, estimatedTotal, actualTotal, diff };
+			}
+
+			function renderReview() {
+				const stats = computeReviewStats();
 				const durationText = formatDuration(state.totalTimeMs);
-				reviewStoryEl.innerHTML = `이번 계획에 <button type="button" data-toast="지금까지 적어둔 할 일 ${totalCount}개의 기록을 열었어요.">적어둔 할 일 ${totalCount}개</button> 중 <button type="button" data-toast="완료한 일 ${doneCount}개의 기록을 열었어요.">${doneCount}개를 끝냈고</button>,<br />이 페이지에서 <button type="button" data-toast="지금까지 이 페이지에 머문 시간이에요.">${durationText}</button>를 보냈어요.`;
-				reviewDoneCountEl.textContent = `${doneCount} / ${totalCount}`;
-				reviewDurationEl.textContent = durationText;
+
+				reviewHeadingEl.textContent = state.activePlan ? `"${state.activePlan.title}" 계획을 돌아보며` : "계획을 돌아보며";
+				reviewKickerEl.textContent = state.activePlan && (state.activePlan.periodStart || state.activePlan.periodEnd)
+					? `${state.activePlan.periodStart || "?"} ~ ${state.activePlan.periodEnd || "?"}`
+					: "REVIEW";
+
+				reviewStoryEl.innerHTML = state.activePlan
+					? `적어둔 할 일 ${stats.totalCount}개 중 ${stats.doneCount}개를 끝냈고, ${stats.overdueCount}개는 마감을 넘겼고, ${stats.blockedCount}개는 막힌 적이 있어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
+					: "아직 계획이 없어요. 계획을 세우면 여기에서 돌아볼 수 있어요.";
+
+				const statDefs = [
+					{ kind: "status", key: "all", value: stats.totalCount, label: "계획에 딸린 할 일" },
+					{ kind: "status", key: "done", value: stats.doneCount, label: "완료" },
+					{ kind: "status", key: "overdue", value: stats.overdueCount, label: "지연" },
+					{ kind: "status", key: "blocked", value: stats.blockedCount, label: "막힘" },
+					{ kind: "sort", key: "estimate", value: `${stats.estimatedTotal}분`, label: "예상 시간 합계" },
+					{ kind: "sort", key: "estimate", value: `${stats.actualTotal}분`, label: "실제 시간 합계" },
+					{ kind: "sort", key: "estimate", value: `${stats.diff >= 0 ? "+" : ""}${stats.diff}분`, label: "차이 (실제-예상)" },
+				];
+				reviewStatsEl.innerHTML = statDefs.map((def) => `<button type="button" class="review-stat" data-${def.kind}="${def.key}"><span class="stat-value">${escapeHtml(String(def.value))}</span><span class="stat-label">${escapeHtml(def.label)}</span></button>`).join("");
+				reviewDurationCaptionEl.textContent = `이 페이지에 ${durationText} 머물렀어요.`;
 			}
 
 			function renderRecords() {
@@ -788,7 +852,7 @@
 					item.dataset.categoryId = nextId || "";
 					const nextTag = nextId ? findTag(nextId) : null;
 					cycleButton.className = "tag" + (nextTag ? "" : " is-empty");
-					cycleButton.style.cssText = nextTag ? `background:${paleColor(nextTag.color)};color:${nextTag.color};` : "";
+					cycleButton.style.cssText = nextTag ? `background:${paleColor(nextTag.color)};color:${nextTag.text_color};` : "";
 					cycleButton.textContent = nextTag ? nextTag.label : "+";
 					const { error } = await supabaseClient.from(TODOS_TABLE).update({ tag_id: nextId }).eq("id", todo.id);
 					if (error) { console.error("태그 저장 실패", error); showToast("저장에 실패했어요."); }
@@ -863,12 +927,19 @@
 			const tagCreator = document.querySelector("#tag-creator");
 			const tagNameInput = document.querySelector("#tag-name-input");
 			const tagColorInput = document.querySelector("#tag-color-input");
+			const tagTextColorInput = document.querySelector("#tag-text-color-input");
+			let tagTextColorTouched = false;
+
+			tagColorInput.addEventListener("input", () => { if (!tagTextColorTouched) tagTextColorInput.value = tagColorInput.value; });
+			tagTextColorInput.addEventListener("input", () => { tagTextColorTouched = true; });
 
 			document.querySelector("#add-tag").addEventListener("click", () => {
 				tagCreator.hidden = !tagCreator.hidden;
 				if (!tagCreator.hidden) {
 					tagNameInput.value = "";
 					tagColorInput.value = "#db806c";
+					tagTextColorInput.value = "#db806c";
+					tagTextColorTouched = false;
 					tagNameInput.focus();
 				}
 			});
@@ -883,7 +954,7 @@
 			async function submitNewTag() {
 				const label = tagNameInput.value.trim();
 				if (!label) { tagNameInput.focus(); return; }
-				const tag = { id: makeId(), label, color: tagColorInput.value };
+				const tag = { id: makeId(), label, color: tagColorInput.value, text_color: tagTextColorInput.value };
 				state.tags.push(tag);
 				renderTagFilters();
 				tagCreator.hidden = true;
@@ -955,7 +1026,7 @@
 					planEndInput.value = "";
 					planPriorityInput.value = "medium";
 					planEstimateInput.value = "";
-					planSuccessInput.value = "";
+					planSuccessInput.value = state.nextPlanNote ? `[지난 돌아보기에서 남긴 점] ${state.nextPlanNote}` : "";
 					planFormNoteEl.textContent = state.activePlan ? "저장하면 지금 계획은 지난 계획으로 남고, 새 계획이 시작돼요." : "";
 				}
 				planFormEl.hidden = false;
@@ -995,7 +1066,15 @@
 					state.activePlan = mapPlanRow(data[0]);
 					state.todos = [];
 					state.executionLogsByTodo = {};
+					todoStatusFilter = "all";
+					updateStatusBanner();
 					renderTodos();
+					if (state.nextPlanNote) {
+						state.nextPlanNote = "";
+						reviewNextNoteInput.value = "";
+						reviewNextStatusEl.textContent = "";
+						updateSettings({ next_plan_note: null });
+					}
 					showToast("새 계획을 시작했어요.");
 				}
 				planFormEl.hidden = true;
@@ -1020,6 +1099,30 @@
 			tomorrowNote.addEventListener("blur", () => { state.tomorrowNote = tomorrowNote.value; updateSettings({ tomorrow_note: state.tomorrowNote }); });
 			document.querySelector("#save-note").addEventListener("click", () => { state.tomorrowNote = tomorrowNote.value; renderRecords(); showToast("내일의 나에게 남긴 말을 기록했어요."); updateSettings({ tomorrow_note: state.tomorrowNote }); });
 
+			// ---- 돌아보기: 집계 숫자 → 근거 기록 이동 (T06-C83), 다음 계획으로 넘길 한 가지 (T06-C33) ----
+			const reviewNextNoteInput = document.querySelector("#review-next-note");
+			const reviewNextStatusEl = document.querySelector("#review-next-status");
+
+			reviewNextNoteInput.addEventListener("blur", () => { state.nextPlanNote = reviewNextNoteInput.value; updateSettings({ next_plan_note: state.nextPlanNote }); });
+			document.querySelector("#review-next-save").addEventListener("click", () => {
+				state.nextPlanNote = reviewNextNoteInput.value;
+				updateSettings({ next_plan_note: state.nextPlanNote });
+				reviewNextStatusEl.textContent = state.nextPlanNote ? "다음에 계획을 새로 세우면 이 내용이 자동으로 채워져요." : "";
+				showToast("다음 계획으로 남길 점을 저장했어요.");
+			});
+
+			reviewStatsEl.addEventListener("click", (event) => {
+				const statButton = event.target.closest(".review-stat");
+				if (!statButton) return;
+				if (statButton.dataset.status) { todoStatusFilter = statButton.dataset.status; updateStatusBanner(); }
+				if (statButton.dataset.sort) { todoSortSelect.value = statButton.dataset.sort; updateSortCaption(); }
+				document.querySelectorAll(".view-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.viewTarget === "today"));
+				Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === "today"));
+				renderTodos();
+				const heading = document.querySelector("#todo-heading");
+				if (heading) heading.scrollIntoView({ behavior: "smooth", block: "start" });
+			});
+
 			let lastTick = Date.now();
 			function persistTotalTime() { updateSettings({ total_time_ms: state.totalTimeMs }); }
 			setInterval(() => {
@@ -1037,8 +1140,10 @@
 				moodInput.value = state.mood || "";
 				reflectionText.textContent = state.reflection;
 				tomorrowNote.value = state.tomorrowNote;
+				reviewNextNoteInput.value = state.nextPlanNote || "";
 				renderPlanPanel();
 				updateSortCaption();
+				updateStatusBanner();
 				renderTagFilters();
 				renderTodos();
 				renderReview();

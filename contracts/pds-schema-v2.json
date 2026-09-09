@@ -2,7 +2,7 @@
   "version": "v2",
   "database": "Supabase Postgres",
   "updated_at": "2026-09-09",
-  "note": "이번 수정 범위는 카드1~3(계획/할일/실행기록 3단 구조 분리)입니다. 카드4의 집계·근거 이동, 카드5의 데이터 내보내기·로그인 안내 문구는 다음 작업으로 남겨둡니다.",
+  "note": "카드1~3(계획/할일/실행기록 3단 구조 분리)에 이어 카드4(돌아보기 집계·근거 이동·다음 계획으로 개선점 넘기기)까지 반영했습니다. 카드5의 데이터 내보내기·로그인 안내 문구는 다음 작업으로 남겨둡니다.",
   "tables": {
     "pds_plans": {
       "description": "계획. 한 번에 하나만 활성(is_active=true) 상태이며, 활성 계획에 오늘의 할 일들이 딸립니다.",
@@ -81,6 +81,7 @@
         "mood": { "type": "text", "nullable": true },
         "reflection": { "type": "text", "nullable": true },
         "tomorrow_note": { "type": "text", "nullable": true },
+        "next_plan_note": { "type": "text", "nullable": true, "note": "돌아보기에서 적은 '다음 계획에 남길 한 가지'(T06-C33). 새 계획을 만들 때 성공 기준란에 자동으로 채워지고 나면 다시 비워짐(일회성 인계)." },
         "total_time_ms": { "type": "bigint", "default": 0 },
         "updated_at": { "type": "timestamptz", "default": "now()" }
       }
@@ -101,9 +102,17 @@
     "policy": "anon 역할에 대해 pds_plans/pds_todos/pds_tags는 select/insert/update/delete 전체 허용. pds_plan_revisions/pds_execution_logs는 select/insert만 허용(이력이라 수정·삭제 불가). 로그인이 없고 링크를 아는 사람은 누구나 접근하는 과제 조건에 맞춘 설정.",
     "keys_exposed_client_side": "SUPABASE_URL, SUPABASE_ANON_KEY(publishable key)만 클라이언트에 노출됨. service_role 키는 어디에도 포함되지 않음."
   },
+  "review_aggregation": {
+    "plan_count": "state.todos.length — 활성 계획에 딸린, 지우지 않은 할 일 수 (T06-C28)",
+    "done_count": "todo.done이 true인 개수 (T06-C29)",
+    "overdue_count": "완료되지 않았고 deadline이 오늘(YYYY-MM-DD, 실제 오늘 날짜 기준)보다 이른 할 일 수. 완료된 할 일은 지연으로 세지 않음 (T06-C30)",
+    "blocked_count": "실행 기록 중 blocked_reason이 있는 로그를 하나라도 가진 할 일 수 (T06-C31)",
+    "estimated_total / actual_total / diff": "예상 시간 합계 = 할 일들의 estimated_minutes 합(없으면 0), 실제 시간 합계 = 그 할 일들의 모든 실행 기록 actual_minutes 합(없으면 0), 차이 = 실제-예상. 데이터가 전혀 없으면 전부 0 (T06-C32)",
+    "drill_down": "돌아보기 화면의 각 숫자는 버튼이며, 클릭하면 '오늘 하루' 화면으로 이동해 해당 조건(완료/지연/막힘)으로 실제 필터링된 할 일 목록을 보여줌. 예상/실제/차이는 예상 시간 정렬로 전환. 토스트 안내문이 아니라 실제 필터·이동임 (T06-C83)",
+    "next_plan_handoff": "돌아보기 화면의 '다음 계획에 남길 한 가지'는 pds_settings.next_plan_note에 저장되고, 새 계획을 만드는 폼을 열 때 성공 기준란에 자동으로 미리 채워짐. 계획이 실제로 저장되면 next_plan_note는 비워짐(한 번만 인계) (T06-C33)"
+  },
   "known_gaps_vs_T6": [
-    "카드2: 정렬 기준은 화면에 문구로 표시되지만(T06-C20), 실제 사용자가 자주 쓰는 '중요도+마감일 복합 정렬' 같은 고급 정렬은 없음 — 단일 기준 정렬만 지원.",
-    "카드4(돌아보기): 아직 pds_todos 기준의 완료/전체 개수만 보여주고 있고, 지연 수·막힘 수·예상-실제 시간 차이 계산, 집계 숫자 클릭 시 근거 기록으로 이동(T06-C83)은 다음 작업으로 남아있음.",
+    "카드2: 정렬 기준은 화면에 문구로 표시되지만(T06-C20), '중요도+마감일 복합 정렬' 같은 다중 기준 정렬은 없음 — 단일 기준 정렬만 지원.",
     "카드5: 데이터 내보내기(T06-C36) 기능 없음. 첫 화면 로그인 없음 안내 문구(T06-C82) 없음."
   ]
 }
