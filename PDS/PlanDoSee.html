@@ -809,18 +809,10 @@
 				const stats = computeReviewStats(rangeStart, rangeEnd);
 				const durationText = formatDuration(state.totalTimeMs);
 
-				if (state.activePlans.length === 1) {
-					reviewHeadingEl.textContent = `"${state.activePlans[0].title}" 계획을 돌아보며`;
-				} else if (state.activePlans.length > 1) {
-					reviewHeadingEl.textContent = `계획 ${state.activePlans.length}개를 돌아보며`;
-				} else {
-					reviewHeadingEl.textContent = "계획을 돌아보며";
-				}
+				reviewHeadingEl.textContent = "계획을 돌아보며";
 
 				if (stats.hasRange) {
 					reviewKickerEl.textContent = `${rangeStart || "처음"} ~ ${rangeEnd || "지금"}`;
-				} else if (state.activePlans.length === 1 && (state.activePlans[0].periodStart || state.activePlans[0].periodEnd)) {
-					reviewKickerEl.textContent = `${state.activePlans[0].periodStart || "?"} ~ ${state.activePlans[0].periodEnd || "?"}`;
 				} else {
 					reviewKickerEl.textContent = "REVIEW";
 				}
