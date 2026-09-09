@@ -85,25 +85,11 @@
 			.label-row-actions { display: flex; align-items: center; gap: 16px; }
 			.add-button { border: 0; padding: 0; color: var(--coral); background: transparent; font-family: "Nanum Pen Script", cursive; font-size: 21px; }
 			.add-button:hover { text-decoration: underline; }
-			.tag-creator-wrap { position: relative; }
-			.tag-creator { position: absolute; top: calc(100% + 10px); left: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow); }
-			.tag-name-input { width: 78px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; color: var(--ink); background: var(--paper); font-size: 13px; }
-			.tag-color-field { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-			.tag-color-label { color: var(--soft-ink); font-size: 10px; }
-			.tag-color-input { width: 28px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer; }
 			.tag-creator-add { border: 0; border-radius: 8px; padding: 7px 12px; color: var(--paper); background: var(--coral); font-size: 13px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
-			.label-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 22px; }
-			.filter { display: inline-flex; align-items: center; gap: 5px; border: 1px solid transparent; border-radius: 20px; padding: 6px 11px; color: #5c625a; background: var(--paper); font-size: 12px; }
-			.filter.active, .filter:hover { border-color: currentColor; background: transparent; }
-			.filter[data-filter="all"].active, .filter[data-filter="all"]:hover { color: var(--ink); }
-			.filter-delete { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; font-size: 11px; line-height: 1; }
-			.filter-delete:hover { background: rgba(0, 0, 0, .12); }
 
 			/* 읽기 모드 / 편집 모드 — 평소엔 조작 UI를 숨기고 다이어리처럼 깔끔하게, 편집 모드에서만 전부 노출 */
 			.mode-toggle-button { border: 1px solid var(--coral); border-radius: 20px; padding: 5px 13px; font-family: "Gowun Dodum", sans-serif; }
 			.plans-column[data-mode="read"] .todo-toolbar,
-			.plans-column[data-mode="read"] .label-filter,
-			.plans-column[data-mode="read"] .tag-creator-wrap,
 			.plans-column[data-mode="read"] #plan-new-toggle,
 			.plans-column[data-mode="read"] .plan-card-actions,
 			.plans-column[data-mode="read"] .todo-meta-row,
@@ -111,6 +97,7 @@
 			.plans-column[data-mode="read"] #todo-status-banner { display: none; }
 			.plans-column[data-mode="read"] [contenteditable]:hover { background: none; }
 			.plans-column[data-mode="read"] .todo-item { grid-template-columns: 1fr; padding: 10px 15px; }
+			.plans-column[data-mode="edit"] .todo-status-actions { display: none; }
 
 			/* 계획 + 할 일을 하나로 묶는 카드 (계획마다 하나씩) */
 			.plans-list { display: grid; gap: 22px; margin-bottom: 22px; }
@@ -173,14 +160,8 @@
 			.todo-meta-row input[type="number"] { width: 60px; }
 			.todo-exec-summary { margin: 0; color: #9f8d64; font-size: 12px; }
 			.todo-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-			.tag { border: 0; border-radius: 4px; padding: 5px 8px; color: inherit; background: none; font-family: inherit; font-size: 11px; cursor: pointer; }
-			.tag.is-empty { border: 1px dashed var(--line); color: var(--soft-ink); font-size: 15px; font-weight: 800; }
 			.plan-delete { display: grid; place-items: center; width: 20px; height: 20px; border: 0; border-radius: 50%; padding: 0; color: var(--soft-ink); background: transparent; font-size: 16px; line-height: 1; }
 			.plan-delete:hover { color: var(--coral); background: var(--coral-pale); }
-			.blocked-wrap { position: relative; }
-			.blocked-btn { border: 0; padding: 4px 9px; border-radius: 20px; color: #a4432f; background: var(--coral-pale); font-size: 11px; font-weight: 700; }
-			.blocked-popover { position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); box-shadow: var(--shadow); }
-			.blocked-reason-input { width: 150px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 13px; }
 
 			.side-column { display: grid; align-content: start; gap: 32px; }
 			.mood-box { padding-bottom: 28px; border-bottom: 1px solid var(--line); }
@@ -293,7 +274,6 @@
 									<h2 class="section-label" id="plan-panel-heading">이번 계획들</h2>
 									<div class="label-row-actions">
 										<button class="add-button mode-toggle-button" type="button" id="mode-toggle">편집하기</button>
-										<div class="tag-creator-wrap"><button class="add-button" type="button" id="add-tag">+ 태그</button><div class="tag-creator" id="tag-creator" hidden><input type="text" id="tag-name-input" class="tag-name-input" placeholder="태그 이름" maxlength="6" /><div class="tag-color-field"><span class="tag-color-label">배경</span><input type="color" id="tag-color-input" class="tag-color-input" value="#db806c" /></div><div class="tag-color-field"><span class="tag-color-label">글자</span><input type="color" id="tag-text-color-input" class="tag-color-input" value="#db806c" /></div><button type="button" class="tag-creator-add" id="tag-creator-add">추가</button></div></div>
 										<button class="add-button" type="button" id="plan-new-toggle">+ 새 계획</button>
 									</div>
 								</div>
@@ -310,7 +290,6 @@
 									</label>
 									<span class="todo-sort-caption" id="todo-sort-caption">지금은 만든 순서로 보고 있어요.</span>
 								</div>
-								<div class="label-filter" id="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button></div>
 								<div class="review-banner" id="todo-status-banner" hidden><span class="review-banner-text"></span><button type="button" id="todo-status-reset">전체 보기</button></div>
 
 								<div class="plans-list" id="plans-list"></div>
@@ -497,21 +476,11 @@
 
 			function makeId() { return (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`); }
 
-			function paleColor(hex, amount) {
-				amount = amount === undefined ? 0.82 : amount;
-				const value = (hex || "#db806c").replace("#", "");
-				const r = parseInt(value.substring(0, 2), 16);
-				const g = parseInt(value.substring(2, 4), 16);
-				const b = parseInt(value.substring(4, 6), 16);
-				const mix = (channel) => Math.round(channel + (255 - channel) * amount);
-				return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
-			}
-
 			function escapeHtml(value) {
 				return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 			}
 
-			const state = { todos: [], tags: [], mood: "", reflection: "", tomorrowNote: "", nextPlanNote: "", totalTimeMs: 0, activePlans: [], pastPlans: [], executionLogsByTodo: {} };
+			const state = { todos: [], mood: "", reflection: "", tomorrowNote: "", nextPlanNote: "", totalTimeMs: 0, activePlans: [], pastPlans: [], executionLogsByTodo: {} };
 			let todoStatusFilter = "all";
 
 			function mapPlanRow(row) {
@@ -533,17 +502,13 @@
 			}
 
 			async function loadState() {
-				const [tagsRes, planRes, settingsRes] = await Promise.all([
-					supabaseClient.from(TAGS_TABLE).select("*").order("created_at", { ascending: true }),
+				const [planRes, settingsRes] = await Promise.all([
 					supabaseClient.from(PLANS_TABLE).select("*").order("created_at", { ascending: false }),
 					supabaseClient.from(SETTINGS_TABLE).select("*").eq("id", SETTINGS_ID),
 				]);
 
-				if (tagsRes.error) { console.error("태그 불러오기 실패", tagsRes.error); showToast("태그를 불러오지 못했어요."); }
 				if (planRes.error) { console.error("계획 불러오기 실패", planRes.error); showToast("계획을 불러오지 못했어요."); }
 				if (settingsRes.error) console.error("설정 불러오기 실패", settingsRes.error);
-
-				state.tags = (tagsRes.data || []).map((row) => ({ id: row.id, label: row.label, color: row.color, text_color: row.text_color || row.color }));
 
 				const planRows = planRes.data || [];
 				state.activePlans = planRows.filter((row) => row.is_active).map(mapPlanRow);
@@ -574,7 +539,6 @@
 			}
 
 			const plansListEl = document.querySelector("#plans-list");
-			const labelFilterEl = document.querySelector("#label-filter");
 
 			// ---- 읽기 모드 / 편집 모드 토글 (가독성) ----
 			const plansColumnEl = document.querySelector("#plans-column");
@@ -614,17 +578,14 @@
 			const todoSortSelect = document.querySelector("#todo-sort-select");
 			const todoSortCaptionEl = document.querySelector("#todo-sort-caption");
 
-			function findTag(id) { return state.tags.find((tag) => tag.id === id) || null; }
 			function findTodo(id) { return state.todos.find((todo) => todo.id === id); }
 
 			function execSummaryText(todoId) {
 				const logs = state.executionLogsByTodo[todoId] || [];
 				if (!logs.length) return "";
-				const blockedLogs = logs.filter((log) => log.blocked_reason);
 				const latest = logs[0];
 				const parts = [`실행 ${logs.length}회`];
 				if (latest.actual_minutes != null) parts.push(`최근 ${latest.actual_minutes}분`);
-				if (blockedLogs.length) parts.push(`막힘 ${blockedLogs.length}회 · 최근 사유: ${blockedLogs[0].blocked_reason}`);
 				return parts.join(" · ");
 			}
 
@@ -637,19 +598,12 @@
 				return d.toISOString();
 			}
 
-			function tagButtonMarkup(todo) {
-				const tag = todo.categoryId ? findTag(todo.categoryId) : null;
-				const style = tag ? ` style="background:${paleColor(tag.color)};color:${tag.text_color};"` : "";
-				return `<button type="button" class="tag${tag ? "" : " is-empty"}" data-role="cycle-category"${style}>${tag ? escapeHtml(tag.label) : "+"}</button>`;
-			}
-
 			function createTodoItemEl(todo) {
 				const item = document.createElement("div");
 				const status = statusOn(todo, selectedISODate());
 				item.className = "todo-item" + (status === "done" ? " is-done" : "") + (status === "failed" ? " is-failed" : "");
 				item.dataset.id = todo.id;
 				item.dataset.planId = todo.planId || "";
-				item.dataset.categoryId = todo.categoryId || "";
 				const priorityLabel = PRIORITY_LABEL[todo.priority] || PRIORITY_LABEL.medium;
 				item.innerHTML = `
 					<div class="todo-main">
@@ -676,42 +630,14 @@
 						<button type="button" class="status-btn status-failed${status === "failed" ? " is-active" : ""}" data-role="mark-failed">실패</button>
 					</div>
 					<div class="todo-actions">
-						${tagButtonMarkup(todo)}
-						<div class="blocked-wrap">
-							<button type="button" class="blocked-btn" data-role="toggle-blocked">막혔어요</button>
-							<div class="blocked-popover" hidden>
-								<input type="text" class="blocked-reason-input" placeholder="막힌 이유" maxlength="60" />
-								<button type="button" class="tag-creator-add" data-role="submit-blocked">기록</button>
-							</div>
-						</div>
 						<button type="button" class="plan-delete" aria-label="이 할 일 삭제">×</button>
 					</div>
 				`;
 				return item;
 			}
 
-			function renderTagFilters() {
-				const activeFilterButton = document.querySelector(".filter.active");
-				const activeValue = activeFilterButton ? activeFilterButton.dataset.filter : "all";
-				labelFilterEl.querySelectorAll(".filter[data-filter]:not([data-filter='all'])").forEach((el) => el.remove());
-				state.tags.forEach((tag) => {
-					const button = document.createElement("button");
-					button.type = "button";
-					button.className = "filter" + (activeValue === tag.id ? " active" : "");
-					button.dataset.filter = tag.id;
-					button.style.background = paleColor(tag.color);
-					button.style.color = tag.text_color;
-					button.innerHTML = `${escapeHtml(tag.label)}<span class="filter-delete" data-role="delete-tag" data-tag-id="${tag.id}" aria-label="태그 삭제">×</span>`;
-					labelFilterEl.appendChild(button);
-				});
-				if (activeValue !== "all" && !state.tags.some((tag) => tag.id === activeValue)) {
-					document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item.dataset.filter === "all"));
-				}
-			}
-
 			function todayISODate() { return new Date().toISOString().slice(0, 10); }
 			function isOverdue(todo) { return statusOn(todo, todo.deadline) !== "done" && !!todo.deadline && todo.deadline < todayISODate(); }
-			function isBlocked(todo) { return (state.executionLogsByTodo[todo.id] || []).some((log) => log.blocked_reason); }
 
 			function selectedISODate() { return `${selectedDate.getFullYear()}-${pad2(selectedDate.getMonth() + 1)}-${pad2(selectedDate.getDate())}`; }
 			function isPlanVisibleOnSelectedDate(plan) {
@@ -725,19 +651,15 @@
 			}
 
 			function getFilteredSortedTodos() {
-				const activeFilterButton = document.querySelector(".filter.active");
-				const filterValue = activeFilterButton ? activeFilterButton.dataset.filter : "all";
 				const searchTerm = todoSearchInput.value.trim().toLowerCase();
 				let list = state.todos.filter((todo) => {
 					if (!isTodoVisibleOnSelectedDate(todo)) return false;
-					if (filterValue !== "all" && (todo.categoryId || "") !== filterValue) return false;
 					if (searchTerm && !`${todo.title} ${todo.note}`.toLowerCase().includes(searchTerm)) return false;
 					return true;
 				});
 				if (todoStatusFilter === "done") list = list.filter((todo) => statusOn(todo, selectedISODate()) === "done");
 				else if (todoStatusFilter === "failed") list = list.filter((todo) => statusOn(todo, selectedISODate()) === "failed");
 				else if (todoStatusFilter === "overdue") list = list.filter(isOverdue);
-				else if (todoStatusFilter === "blocked") list = list.filter(isBlocked);
 				const sortKey = todoSortSelect.value;
 				const priorityRank = { high: 0, medium: 1, low: 2 };
 				if (sortKey === "deadline") list = [...list].sort((a, b) => (a.deadline || "9999-99-99").localeCompare(b.deadline || "9999-99-99"));
@@ -748,7 +670,7 @@
 
 			function updateSortCaption() { todoSortCaptionEl.textContent = SORT_CAPTIONS[todoSortSelect.value] || ""; }
 
-			const STATUS_BANNER_TEXT = { done: "완료한 할 일만 보고 있어요.", failed: "실패한 할 일만 보고 있어요.", overdue: "마감일이 지난(지연) 할 일만 보고 있어요.", blocked: "막힌 적 있는 할 일만 보고 있어요." };
+			const STATUS_BANNER_TEXT = { done: "완료한 할 일만 보고 있어요.", failed: "실패한 할 일만 보고 있어요.", overdue: "마감일이 지난(지연) 할 일만 보고 있어요." };
 			const todoStatusBannerEl = document.querySelector("#todo-status-banner");
 
 			function updateStatusBanner() {
@@ -877,11 +799,6 @@
 				return count;
 			}
 
-			function isBlockedInRange(todo, start, end) {
-				const logs = state.executionLogsByTodo[todo.id] || [];
-				return logs.some((log) => log.blocked_reason && (!start && !end ? true : inRange((log.ended_at || "").slice(0, 10), start, end)));
-			}
-
 			function computeReviewStats(start, end) {
 				const hasRange = !!(start || end);
 				const relevantTodos = hasRange
@@ -891,14 +808,13 @@
 				const doneCount = countDailyStatus("done", start, end);
 				const failedCount = countDailyStatus("failed", start, end);
 				const overdueCount = state.todos.filter((todo) => isOverdue(todo) && (!hasRange || inRange(todo.deadline, start, end))).length;
-				const blockedCount = state.todos.filter((todo) => isBlockedInRange(todo, start, end)).length;
 				const estimatedTotal = relevantTodos.reduce((sum, todo) => sum + (todo.estimatedMinutes || 0), 0);
 				const actualTotal = relevantTodos.reduce((sum, todo) => {
 					const logs = state.executionLogsByTodo[todo.id] || [];
 					return sum + logs.filter((log) => !hasRange || inRange((log.ended_at || "").slice(0, 10), start, end)).reduce((s, log) => s + (log.actual_minutes || 0), 0);
 				}, 0);
 				const diff = actualTotal - estimatedTotal;
-				return { hasRange, totalCount, doneCount, failedCount, overdueCount, blockedCount, estimatedTotal, actualTotal, diff };
+				return { hasRange, totalCount, doneCount, failedCount, overdueCount, estimatedTotal, actualTotal, diff };
 			}
 
 			function renderReview() {
@@ -925,7 +841,7 @@
 
 				const periodPhrase = stats.hasRange ? "이 기간 동안" : "지금까지";
 				reviewStoryEl.innerHTML = state.activePlans.length
-					? `${periodPhrase} 적어둔 할 일 ${stats.totalCount}개를 날짜별로 총 ${stats.doneCount}번 완료했고, ${stats.failedCount}번 실패했고, ${stats.overdueCount}개는 마감을 넘겼고, ${stats.blockedCount}개는 막힌 적이 있어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
+					? `${periodPhrase} 적어둔 할 일 ${stats.totalCount}개를 날짜별로 총 ${stats.doneCount}번 완료했고, ${stats.failedCount}번 실패했고, ${stats.overdueCount}개는 마감을 넘겼어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
 					: "아직 계획이 없어요. 계획을 세우면 여기에서 돌아볼 수 있어요.";
 
 				const statDefs = [
@@ -933,7 +849,6 @@
 					{ kind: "status", key: "done", value: stats.doneCount, label: "완료 횟수" },
 					{ kind: "status", key: "failed", value: stats.failedCount, label: "실패 횟수" },
 					{ kind: "status", key: "overdue", value: stats.overdueCount, label: "지연" },
-					{ kind: "status", key: "blocked", value: stats.blockedCount, label: "막힘" },
 					{ kind: "sort", key: "estimate", value: `${stats.estimatedTotal}분`, label: "예상 시간 합계" },
 					{ kind: "sort", key: "estimate", value: `${stats.actualTotal}분`, label: "실제 시간 합계" },
 					{ kind: "sort", key: "estimate", value: `${stats.diff >= 0 ? "+" : ""}${stats.diff}분`, label: "차이 (실제-예상)" },
@@ -1116,118 +1031,10 @@
 					return;
 				}
 
-				const cycleButton = event.target.closest("[data-role='cycle-category']");
-				if (cycleButton) {
-					if (state.tags.length === 0) { showToast("먼저 태그를 만들어보세요."); return; }
-					const item = cycleButton.closest(".todo-item");
-					const todo = findTodo(item.dataset.id);
-					const ids = [null, ...state.tags.map((tag) => tag.id)];
-					const nextId = ids[(ids.indexOf(todo.categoryId || null) + 1) % ids.length];
-					todo.categoryId = nextId;
-					item.dataset.categoryId = nextId || "";
-					const nextTag = nextId ? findTag(nextId) : null;
-					cycleButton.className = "tag" + (nextTag ? "" : " is-empty");
-					cycleButton.style.cssText = nextTag ? `background:${paleColor(nextTag.color)};color:${nextTag.text_color};` : "";
-					cycleButton.textContent = nextTag ? nextTag.label : "+";
-					const { error } = await supabaseClient.from(TODOS_TABLE).update({ tag_id: nextId }).eq("id", todo.id);
-					if (error) { console.error("태그 저장 실패", error); showToast("저장에 실패했어요."); }
-					return;
-				}
-
-				const blockedToggle = event.target.closest("[data-role='toggle-blocked']");
-				if (blockedToggle) {
-					const popover = blockedToggle.parentElement.querySelector(".blocked-popover");
-					document.querySelectorAll(".blocked-popover").forEach((el) => { if (el !== popover) el.hidden = true; });
-					popover.hidden = !popover.hidden;
-					if (!popover.hidden) popover.querySelector(".blocked-reason-input").focus();
-					return;
-				}
-
-				const blockedSubmit = event.target.closest("[data-role='submit-blocked']");
-				if (blockedSubmit) {
-					const item = blockedSubmit.closest(".todo-item");
-					const todo = findTodo(item.dataset.id);
-					const input = blockedSubmit.parentElement.querySelector(".blocked-reason-input");
-					const reason = input.value.trim();
-					if (!reason) { input.focus(); return; }
-					const startedInput = item.querySelector(".todo-field-started");
-					const startedAt = combineTodayWithTime(startedInput ? startedInput.value : "");
-					const endedAt = new Date().toISOString();
-					const actualMinutes = startedAt ? Math.max(0, Math.round((new Date(endedAt) - new Date(startedAt)) / 60000)) : null;
-					const { data, error } = await supabaseClient.from(LOGS_TABLE).insert({ todo_id: todo.id, started_at: startedAt, ended_at: endedAt, actual_minutes: actualMinutes, blocked_reason: reason }).select();
-					if (error) { console.error("막힘 기록 저장 실패", error); showToast("기록에 실패했어요."); return; }
-					if (data && data[0]) {
-						(state.executionLogsByTodo[todo.id] ||= []).unshift(data[0]);
-						const summaryEl = item.querySelector('[data-role="exec-summary"]');
-						if (summaryEl) summaryEl.textContent = execSummaryText(todo.id);
-					}
-					input.value = "";
-					input.closest(".blocked-popover").hidden = true;
-					showToast("막힌 이유를 기록했어요.");
-				}
 			});
 
 			todoSearchInput.addEventListener("input", renderTodos);
 			todoSortSelect.addEventListener("change", () => { updateSortCaption(); renderTodos(); });
-
-			labelFilterEl.addEventListener("click", async (event) => {
-				const deleteIcon = event.target.closest("[data-role='delete-tag']");
-				if (deleteIcon) {
-					const tagId = deleteIcon.dataset.tagId;
-					state.tags = state.tags.filter((tag) => tag.id !== tagId);
-					state.todos.forEach((todo) => { if (todo.categoryId === tagId) todo.categoryId = null; });
-					renderTagFilters();
-					renderTodos();
-					const { error } = await supabaseClient.from(TAGS_TABLE).delete().eq("id", tagId);
-					if (error) { console.error("태그 삭제 실패", error); showToast("태그 삭제에 실패했어요."); }
-					return;
-				}
-				const filterButton = event.target.closest(".filter");
-				if (!filterButton) return;
-				document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item === filterButton));
-				renderTodos();
-			});
-
-			const tagCreator = document.querySelector("#tag-creator");
-			const tagNameInput = document.querySelector("#tag-name-input");
-			const tagColorInput = document.querySelector("#tag-color-input");
-			const tagTextColorInput = document.querySelector("#tag-text-color-input");
-			let tagTextColorTouched = false;
-
-			tagColorInput.addEventListener("input", () => { if (!tagTextColorTouched) tagTextColorInput.value = tagColorInput.value; });
-			tagTextColorInput.addEventListener("input", () => { tagTextColorTouched = true; });
-
-			document.querySelector("#add-tag").addEventListener("click", () => {
-				tagCreator.hidden = !tagCreator.hidden;
-				if (!tagCreator.hidden) {
-					tagNameInput.value = "";
-					tagColorInput.value = "#db806c";
-					tagTextColorInput.value = "#db806c";
-					tagTextColorTouched = false;
-					tagNameInput.focus();
-				}
-			});
-
-			document.addEventListener("click", (event) => {
-				if (!tagCreator.hidden && !event.target.closest(".tag-creator-wrap")) tagCreator.hidden = true;
-				document.querySelectorAll(".blocked-popover").forEach((popover) => {
-					if (!popover.hidden && !popover.closest(".blocked-wrap").contains(event.target)) popover.hidden = true;
-				});
-			});
-
-			async function submitNewTag() {
-				const label = tagNameInput.value.trim();
-				if (!label) { tagNameInput.focus(); return; }
-				const tag = { id: makeId(), label, color: tagColorInput.value, text_color: tagTextColorInput.value };
-				state.tags.push(tag);
-				renderTagFilters();
-				tagCreator.hidden = true;
-				const { error } = await supabaseClient.from(TAGS_TABLE).insert(tag);
-				if (error) { console.error("태그 추가 실패", error); showToast("태그 저장에 실패했어요."); }
-			}
-
-			document.querySelector("#tag-creator-add").addEventListener("click", submitNewTag);
-			tagNameInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); submitNewTag(); } });
 
 			// ---- 계획 패널 (여러 개 동시 진행) ----
 			const planFormEl = document.querySelector("#plan-form");
@@ -1528,7 +1335,6 @@
 				applyUiMode();
 				updateSortCaption();
 				updateStatusBanner();
-				renderTagFilters();
 				renderTodos();
 				renderReview();
 				renderRecords();
