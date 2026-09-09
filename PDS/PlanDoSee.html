@@ -6,7 +6,7 @@
 		<title>오늘의 기록 | 행로</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
+			<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Kalam:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
 		<style>
 			:root {
 				--ink: #292d29;
@@ -26,19 +26,18 @@
 			* { box-sizing: border-box; }
 			[hidden] { display: none !important; }
 			html { background: #ede8dc; }
-			body { margin: 0; color: var(--ink); background: radial-gradient(circle at 15% 5%, #f7f2e8 0, transparent 31rem), #ede8dc; font-family: "DM Sans", "Noto Sans KR", sans-serif; }
+			body { margin: 0; color: var(--ink); background: radial-gradient(circle at 15% 5%, #f7f2e8 0, transparent 31rem), #ede8dc; font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
 			button, input, textarea { font: inherit; }
 			button { cursor: pointer; }
 
 			.app { width: min(1160px, calc(100% - 36px)); margin: 0 auto; padding: 34px 0 72px; }
 			.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
 			.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
-			.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; color: var(--paper); background: var(--coral); border-radius: 50% 50% 48% 45%; font-family: "Kalam", cursive; font-size: 20px; transform: rotate(-8deg); }
-			.brand-name { font-family: "Gowun Batang", serif; font-weight: 700; font-size: 19px; letter-spacing: .08em; }
+			.brand-logo { display: block; height: 80px; width: auto; }
 			.top-actions { display: flex; align-items: center; gap: 18px; color: var(--soft-ink); font-size: 13px; }
 			.quiet-button { border: 0; padding: 5px 0; color: inherit; background: transparent; }
 			.quiet-button:hover { color: var(--coral); }
-			.avatar { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #cfc6b4; border-radius: 50%; background: #e6d5b9; color: #765e42; font-family: "Kalam", cursive; font-size: 18px; }
+			.avatar { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #cfc6b4; border-radius: 50%; background: #e6d5b9; color: #765e42; font-family: "Nanum Pen Script", cursive; font-size: 20px; }
 
 			.view-switcher { display: flex; justify-content: center; gap: 5px; width: fit-content; margin: 0 auto 28px; padding: 5px; border: 1px solid #ded5c6; border-radius: 12px; background: rgba(255, 253, 247, .72); }
 			.view-tab { border: 0; border-radius: 8px; padding: 9px 22px; color: var(--soft-ink); background: transparent; font-size: 13px; font-weight: 600; }
@@ -54,7 +53,7 @@
 			.page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
 			.date-kicker { margin: 0 0 7px; color: var(--coral); font-size: 12px; font-weight: 700; letter-spacing: .16em; }
 			h1, h2, h3, p { margin-top: 0; }
-			h1 { margin-bottom: 0; font-family: "Gowun Batang", serif; font-size: clamp(29px, 4vw, 43px); line-height: 1.2; letter-spacing: -.05em; }
+			h1 { margin-bottom: 0; font-family: "Nanum Pen Script", cursive; font-size: clamp(36px, 4.5vw, 50px); font-weight: 400; line-height: 1.2; letter-spacing: 0; }
 			.date-nav { display: flex; align-items: center; gap: 10px; }
 			.date-arrow { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 18px; }
 			.date-arrow:hover { color: var(--coral); border-color: var(--coral); }
@@ -66,7 +65,7 @@
 			.section-label::before { width: 8px; height: 8px; content: ""; border-radius: 50%; background: var(--coral); }
 			.label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 			.label-row .section-label { margin-bottom: 0; }
-			.add-button { border: 0; padding: 0; color: var(--coral); background: transparent; font-family: "Kalam", cursive; font-size: 16px; }
+			.add-button { border: 0; padding: 0; color: var(--coral); background: transparent; font-family: "Nanum Pen Script", cursive; font-size: 19px; }
 			.add-button:hover { text-decoration: underline; }
 			.label-filter { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
 			.filter { border: 1px solid transparent; border-radius: 20px; padding: 6px 11px; color: #5c625a; background: var(--paper-deep); font-size: 11px; }
@@ -96,10 +95,10 @@
 			.mood-row { display: flex; gap: 9px; }
 			.mood { display: grid; place-items: center; width: 39px; height: 39px; border: 1px solid transparent; border-radius: 50%; background: #faf4e8; font-size: 19px; filter: grayscale(.25); }
 			.mood:hover, .mood.selected { border-color: var(--coral); background: var(--coral-pale); filter: none; transform: rotate(-5deg); }
-			.reflection { margin: 0; padding: 17px 18px; border-left: 2px solid var(--yellow); color: #625f53; background: #fff9e8; font-family: "Kalam", cursive; font-size: 16px; line-height: 1.7; }
-			.reflection span { display: block; margin-top: 8px; color: #9f8d64; font-family: "DM Sans", sans-serif; font-size: 10px; letter-spacing: .08em; }
+			.reflection { margin: 0; padding: 17px 18px; border-left: 2px solid var(--yellow); color: #625f53; background: #fff9e8; font-family: "Nanum Pen Script", cursive; font-size: 20px; line-height: 1.55; }
+			.reflection span { display: block; margin-top: 8px; color: #9f8d64; font-family: "Gowun Dodum", sans-serif; font-size: 10px; letter-spacing: .08em; }
 			.tomorrow { padding-top: 2px; }
-			.tomorrow textarea { width: 100%; min-height: 96px; resize: vertical; border: 0; border-bottom: 1px solid #cfc6b7; outline: 0; color: var(--ink); background: repeating-linear-gradient(to bottom, transparent 0, transparent 28px, #e8e0d3 29px); font-family: "Kalam", cursive; font-size: 16px; line-height: 29px; }
+			.tomorrow textarea { width: 100%; min-height: 96px; resize: vertical; border: 0; border-bottom: 1px solid #cfc6b7; outline: 0; color: var(--ink); background: repeating-linear-gradient(to bottom, transparent 0, transparent 30px, #e8e0d3 31px); font-family: "Nanum Pen Script", cursive; font-size: 20px; line-height: 31px; }
 			.tomorrow textarea::placeholder { color: #b7b0a2; }
 			.save-line { display: flex; justify-content: flex-end; margin-top: 10px; }
 			.save-button { border: 0; color: var(--coral); background: transparent; font-size: 12px; }
@@ -119,7 +118,7 @@
 			.review-note:last-child { border-right: 0; }
 			.review-note .note-mark { display: block; margin-bottom: 7px; color: var(--coral); font-family: "Kalam", cursive; font-size: 26px; }
 			.review-note p { margin: 0; color: var(--soft-ink); font-size: 12px; line-height: 1.7; }
-			.review-footer { max-width: 720px; margin: 34px auto 0; color: #989082; font-family: "Kalam", cursive; font-size: 16px; text-align: center; }
+			.review-footer { max-width: 720px; margin: 34px auto 0; color: #989082; font-family: "Nanum Pen Script", cursive; font-size: 20px; text-align: center; }
 
 			.toast { position: fixed; right: 24px; bottom: 24px; padding: 11px 15px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--paper); box-shadow: var(--shadow); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s ease; }
 			.toast.show { opacity: 1; transform: translateY(0); }
@@ -145,7 +144,7 @@
 	<body>
 		<main class="app">
 			<header class="topbar">
-				<a class="brand" href="../index.html" aria-label="행로 홈"><span class="brand-mark">ㅎ</span><span class="brand-name">행로</span></a>
+				<a class="brand" href="../index.html" aria-label="행로 홈"><img class="brand-logo" src="PlanDoSee_logo.png" alt="PlanDoSee" /></a>
 				<div class="top-actions"><button class="quiet-button" type="button" data-view-target="review">이번 주 돌아보기</button><span class="avatar">나</span></div>
 			</header>
 
