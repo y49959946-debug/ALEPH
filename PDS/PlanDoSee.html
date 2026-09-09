@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>오늘의 기록 | 행로</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
+		<style>
+			:root {
+				--ink: #292d29;
+				--soft-ink: #747972;
+				--paper: #fffdf7;
+				--paper-deep: #f6f0e4;
+				--line: #e6dfd1;
+				--coral: #db806c;
+				--coral-pale: #f8dfd5;
+				--sage: #8da38e;
+				--sage-pale: #e3ebe0;
+				--yellow: #e6bd5c;
+				--blue-pale: #dde8ed;
+				--shadow: 0 24px 60px rgba(82, 66, 45, 0.12);
+			}
+
+			* { box-sizing: border-box; }
+			[hidden] { display: none !important; }
+			html { background: #ede8dc; }
+			body { margin: 0; color: var(--ink); background: radial-gradient(circle at 15% 5%, #f7f2e8 0, transparent 31rem), #ede8dc; font-family: "DM Sans", "Noto Sans KR", sans-serif; }
+			button, input, textarea { font: inherit; }
+			button { cursor: pointer; }
+
+			.app { width: min(1160px, calc(100% - 36px)); margin: 0 auto; padding: 34px 0 72px; }
+			.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+			.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+			.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; color: var(--paper); background: var(--coral); border-radius: 50% 50% 48% 45%; font-family: "Kalam", cursive; font-size: 20px; transform: rotate(-8deg); }
+			.brand-name { font-family: "Gowun Batang", serif; font-weight: 700; font-size: 19px; letter-spacing: .08em; }
+			.top-actions { display: flex; align-items: center; gap: 18px; color: var(--soft-ink); font-size: 13px; }
+			.quiet-button { border: 0; padding: 5px 0; color: inherit; background: transparent; }
+			.quiet-button:hover { color: var(--coral); }
+			.avatar { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #cfc6b4; border-radius: 50%; background: #e6d5b9; color: #765e42; font-family: "Kalam", cursive; font-size: 18px; }
+
+			.view-switcher { display: flex; justify-content: center; gap: 5px; width: fit-content; margin: 0 auto 28px; padding: 5px; border: 1px solid #ded5c6; border-radius: 12px; background: rgba(255, 253, 247, .72); }
+			.view-tab { border: 0; border-radius: 8px; padding: 9px 22px; color: var(--soft-ink); background: transparent; font-size: 13px; font-weight: 600; }
+			.view-tab.active { color: var(--ink); background: var(--paper); box-shadow: 0 3px 10px rgba(69, 55, 38, .08); }
+			.view { display: none; animation: appear .35s ease both; }
+			.view.active { display: block; }
+			@keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+			.paper { position: relative; overflow: hidden; border: 1px solid #e0d8c8; border-radius: 4px 4px 12px 4px; background: var(--paper); box-shadow: var(--shadow); }
+			.paper::before { position: absolute; inset: 0; pointer-events: none; opacity: .36; content: ""; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E"); }
+			.paper-inner { position: relative; padding: 40px 56px 50px; }
+			.paper-inner::before { position: absolute; top: 0; bottom: 0; left: 34px; width: 1px; content: ""; background: #f0b3a0; opacity: .5; }
+			.page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+			.date-kicker { margin: 0 0 7px; color: var(--coral); font-size: 12px; font-weight: 700; letter-spacing: .16em; }
+			h1, h2, h3, p { margin-top: 0; }
+			h1 { margin-bottom: 0; font-family: "Gowun Batang", serif; font-size: clamp(29px, 4vw, 43px); line-height: 1.2; letter-spacing: -.05em; }
+			.date-nav { display: flex; align-items: center; gap: 10px; }
+			.date-arrow { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--soft-ink); background: transparent; font-size: 18px; }
+			.date-arrow:hover { color: var(--coral); border-color: var(--coral); }
+			.date-caption { min-width: 96px; color: var(--soft-ink); font-size: 12px; text-align: center; }
+			.today-button { border: 0; border-bottom: 1px solid var(--coral); padding: 3px 0; color: var(--coral); background: transparent; font-size: 12px; }
+
+			.day-grid { display: grid; grid-template-columns: minmax(0, 1.42fr) minmax(260px, .8fr); gap: 48px; padding-top: 34px; }
+			.section-label { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 13px; font-weight: 700; letter-spacing: .06em; }
+			.section-label::before { width: 8px; height: 8px; content: ""; border-radius: 50%; background: var(--coral); }
+			.label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+			.label-row .section-label { margin-bottom: 0; }
+			.add-button { border: 0; padding: 0; color: var(--coral); background: transparent; font-family: "Kalam", cursive; font-size: 16px; }
+			.add-button:hover { text-decoration: underline; }
+			.label-filter { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+			.filter { border: 1px solid transparent; border-radius: 20px; padding: 6px 11px; color: #5c625a; background: var(--paper-deep); font-size: 11px; }
+			.filter.active, .filter:hover { border-color: currentColor; color: var(--ink); background: transparent; }
+			.filter[data-label="운동"] { color: #7d9c84; background: var(--sage-pale); }
+			.filter[data-label="공부"] { color: #6d8d9d; background: var(--blue-pale); }
+			.filter[data-label="업무"] { color: #c9806d; background: var(--coral-pale); }
+
+			.plan-list { display: grid; gap: 12px; }
+			.plan-item { display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 14px; padding: 14px 15px; border-bottom: 1px dashed #ded7ca; transition: opacity .2s ease; }
+			.plan-item.is-done { opacity: .56; }
+			.plan-item.is-done .plan-title { text-decoration: line-through; }
+			.plan-time { align-self: start; padding-top: 3px; color: var(--soft-ink); font-size: 12px; }
+			.check { position: relative; width: 19px; height: 19px; appearance: none; border: 1.5px solid #b5b7a9; border-radius: 50%; background: transparent; }
+			.check:checked { border-color: var(--sage); background: var(--sage); }
+			.check:checked::after { position: absolute; left: 5px; top: 2px; width: 5px; height: 9px; content: ""; border: solid white; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+			.plan-title { margin-bottom: 6px; font-family: "Gowun Batang", serif; font-size: 17px; }
+			.plan-note { margin: 0; color: var(--soft-ink); font-size: 12px; line-height: 1.6; }
+			.tag { border-radius: 4px; padding: 5px 8px; font-size: 10px; }
+			.tag.work { color: #aa624f; background: var(--coral-pale); }
+			.tag.study { color: #5d7e8d; background: var(--blue-pale); }
+			.tag.move { color: #69826b; background: var(--sage-pale); }
+			.tag.rest { color: #947745; background: #f6e8bc; }
+
+			.side-column { display: grid; align-content: start; gap: 32px; }
+			.mood-box { padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+			.mood-row { display: flex; gap: 9px; }
+			.mood { display: grid; place-items: center; width: 39px; height: 39px; border: 1px solid transparent; border-radius: 50%; background: #faf4e8; font-size: 19px; filter: grayscale(.25); }
+			.mood:hover, .mood.selected { border-color: var(--coral); background: var(--coral-pale); filter: none; transform: rotate(-5deg); }
+			.reflection { margin: 0; padding: 17px 18px; border-left: 2px solid var(--yellow); color: #625f53; background: #fff9e8; font-family: "Kalam", cursive; font-size: 16px; line-height: 1.7; }
+			.reflection span { display: block; margin-top: 8px; color: #9f8d64; font-family: "DM Sans", sans-serif; font-size: 10px; letter-spacing: .08em; }
+			.tomorrow { padding-top: 2px; }
+			.tomorrow textarea { width: 100%; min-height: 96px; resize: vertical; border: 0; border-bottom: 1px solid #cfc6b7; outline: 0; color: var(--ink); background: repeating-linear-gradient(to bottom, transparent 0, transparent 28px, #e8e0d3 29px); font-family: "Kalam", cursive; font-size: 16px; line-height: 29px; }
+			.tomorrow textarea::placeholder { color: #b7b0a2; }
+			.save-line { display: flex; justify-content: flex-end; margin-top: 10px; }
+			.save-button { border: 0; color: var(--coral); background: transparent; font-size: 12px; }
+
+			.review-paper { min-height: 640px; }
+			.review-intro { max-width: 620px; margin: 0 auto; text-align: center; }
+			.review-intro .date-kicker { margin-bottom: 13px; }
+			.review-intro h2 { margin-bottom: 12px; font-family: "Gowun Batang", serif; font-size: clamp(28px, 4vw, 40px); letter-spacing: -.06em; }
+			.review-intro p { color: var(--soft-ink); font-size: 13px; line-height: 1.8; }
+			.week-nav { display: flex; justify-content: center; align-items: center; gap: 22px; margin: 24px 0 34px; color: var(--soft-ink); font-size: 12px; }
+			.week-nav button { border: 0; color: inherit; background: transparent; font-size: 18px; }
+			.review-story { max-width: 720px; margin: 0 auto; padding: 27px 0 30px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-family: "Gowun Batang", serif; font-size: 20px; line-height: 1.9; text-align: center; }
+			.review-story button { border: 0; border-bottom: 1px dashed var(--coral); padding: 0 2px; color: var(--coral); background: transparent; font-family: inherit; font-size: inherit; }
+			.review-story button:hover { background: var(--coral-pale); }
+			.review-notes { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 760px; margin: 35px auto 0; }
+			.review-note { min-height: 100px; padding: 0 24px; border-right: 1px solid var(--line); text-align: center; }
+			.review-note:last-child { border-right: 0; }
+			.review-note .note-mark { display: block; margin-bottom: 7px; color: var(--coral); font-family: "Kalam", cursive; font-size: 26px; }
+			.review-note p { margin: 0; color: var(--soft-ink); font-size: 12px; line-height: 1.7; }
+			.review-footer { max-width: 720px; margin: 34px auto 0; color: #989082; font-family: "Kalam", cursive; font-size: 16px; text-align: center; }
+
+			.toast { position: fixed; right: 24px; bottom: 24px; padding: 11px 15px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--paper); box-shadow: var(--shadow); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s ease; }
+			.toast.show { opacity: 1; transform: translateY(0); }
+			@media (max-width: 760px) {
+				.app { width: min(100% - 22px, 600px); padding-top: 20px; }
+				.topbar { margin-bottom: 23px; }
+				.top-actions .quiet-button { display: none; }
+				.paper-inner { padding: 28px 24px 36px 42px; }
+				.paper-inner::before { left: 24px; }
+				.page-heading { align-items: start; flex-direction: column; gap: 20px; }
+				.date-nav { width: 100%; justify-content: space-between; }
+				.day-grid { grid-template-columns: 1fr; gap: 35px; }
+				.side-column { gap: 28px; }
+				.plan-item { grid-template-columns: 43px 1fr; gap: 10px; padding-left: 0; padding-right: 0; }
+				.plan-item .tag { grid-column: 2; width: fit-content; }
+				.review-notes { grid-template-columns: 1fr; gap: 24px; }
+				.review-note { min-height: auto; padding: 0 10px 20px; border-right: 0; border-bottom: 1px solid var(--line); }
+				.review-note:last-child { border-bottom: 0; }
+				.review-story { font-size: 17px; }
+			}
+		</style>
+	</head>
+	<body>
+		<main class="app">
+			<header class="topbar">
+				<a class="brand" href="#" aria-label="행로 홈"><span class="brand-mark">ㅎ</span><span class="brand-name">행로</span></a>
+				<div class="top-actions"><button class="quiet-button" type="button" data-view-target="review">이번 주 돌아보기</button><span class="avatar">나</span></div>
+			</header>
+
+			<nav class="view-switcher" aria-label="페이지 선택">
+				<button class="view-tab active" type="button" data-view-target="today">오늘 하루</button>
+				<button class="view-tab" type="button" data-view-target="review">돌아보기</button>
+			</nav>
+
+			<section class="view active" id="today-view">
+				<article class="paper">
+					<div class="paper-inner">
+						<div class="page-heading">
+							<div><p class="date-kicker">THURSDAY · 09. 09. 2026</p><h1 id="day-title">오늘의 페이지</h1></div>
+							<div class="date-nav"><button class="date-arrow" type="button" data-day="-1" aria-label="어제">‹</button><span class="date-caption" id="date-caption">오늘, 목요일</span><button class="date-arrow" type="button" data-day="1" aria-label="내일">›</button><button class="today-button" type="button" data-day="0">오늘로</button></div>
+						</div>
+						<div class="day-grid">
+							<section aria-labelledby="plan-heading">
+								<div class="label-row"><h2 class="section-label" id="plan-heading">오늘 하기로 한 일</h2><button class="add-button" type="button" id="add-plan">+ 한 줄 더</button></div>
+								<div class="label-filter" aria-label="카테고리 필터"><button class="filter active" type="button" data-filter="all">전체</button><button class="filter" type="button" data-filter="업무" data-label="업무">업무</button><button class="filter" type="button" data-filter="공부" data-label="공부">공부</button><button class="filter" type="button" data-filter="운동" data-label="운동">운동</button></div>
+								<div class="plan-list" id="plan-list">
+									<label class="plan-item" data-category="업무"><span class="plan-time">09:30</span><span><input class="check" type="checkbox" /><span class="plan-title">팀 주간 회의</span><span class="plan-note">이번 주에 끝낸 일 세 가지 먼저 나누기</span></span><span class="tag work">업무</span></label>
+									<label class="plan-item" data-category="공부"><span class="plan-time">11:00</span><span><input class="check" type="checkbox" /><span class="plan-title">자바스크립트 한 챕터 읽기</span><span class="plan-note">마음에 남는 문장 하나를 노트에 적기</span></span><span class="tag study">공부</span></label>
+									<label class="plan-item" data-category="운동"><span class="plan-time">18:30</span><span><input class="check" type="checkbox" /><span class="plan-title">집 근처를 30분 걷기</span><span class="plan-note">날씨가 좋으면 공원까지 조금 더</span></span><span class="tag move">운동</span></label>
+									<label class="plan-item" data-category="휴식"><span class="plan-time">21:00</span><span><input class="check" type="checkbox" /><span class="plan-title">휴대폰 없이 차 한 잔</span><span class="plan-note">오늘의 속도를 천천히 낮추기</span></span><span class="tag rest">휴식</span></label>
+								</div>
+							</section>
+							<aside class="side-column">
+								<section class="mood-box"><h2 class="section-label">지금 내 기분은</h2><div class="mood-row"><button class="mood" type="button" aria-label="아주 좋아요">☀</button><button class="mood" type="button" aria-label="좋아요">☺</button><button class="mood" type="button" aria-label="그저 그래요">·</button><button class="mood" type="button" aria-label="조금 지쳐요">◡</button><button class="mood" type="button" aria-label="힘들어요">☂</button></div></section>
+								<section><h2 class="section-label">오늘을 돌아보며</h2><p class="reflection">“생각보다 천천히 해도 괜찮았다. 한 가지에 오래 머무는 날도 필요하니까.”<span>오늘 적어둔 한 줄</span></p></section>
+								<section class="tomorrow"><h2 class="section-label">내일의 나에게 남기는 말</h2><textarea placeholder="내일의 나에게, "></textarea><div class="save-line"><button class="save-button" type="button" id="save-note">기록 남기기 →</button></div></section>
+							</aside>
+						</div>
+					</div>
+				</article>
+			</section>
+
+			<section class="view" id="review-view">
+				<article class="paper review-paper"><div class="paper-inner">
+					<div class="review-intro"><p class="date-kicker">09. 07 — 09. 13 · SEPTEMBER, WEEK 2</p><h2>이번 주를 돌아보며</h2><p>다 해내지 못한 것보다, 어디까지 걸어왔는지를<br />잠시 들여다보는 시간이에요.</p></div>
+					<div class="week-nav"><button type="button" aria-label="지난 주">‹</button><span>9월 둘째 주</span><button type="button" aria-label="다음 주">›</button></div>
+					<p class="review-story">이번 주 <button type="button" data-toast="계획한 일 5개의 기록을 열었어요.">계획한 5개</button> 중 <button type="button" data-toast="완료한 일 3개의 기록을 열었어요.">3개를 끝냈고</button>,<br /><button type="button" data-toast="예상보다 오래 걸린 일 2개의 기록을 열었어요.">2개는 예상보다 오래 걸렸어요.</button></p>
+					<div class="review-notes"><article class="review-note"><span class="note-mark">03 / 05</span><p>계획한 일 가운데<br />끝까지 해낸 기록</p></article><article class="review-note"><span class="note-mark">+ 40분</span><p>예상보다 더 머문<br />두 번의 시간</p></article><article class="review-note"><span class="note-mark">☺</span><p>가장 자주 남긴<br />이번 주의 기분</p></article></div>
+					<p class="review-footer">“다음 주에는 조금 덜 채우고, 조금 더 오래 바라보기.”</p>
+				</div></article>
+			</section>
+		</main>
+		<div class="toast" id="toast" role="status"></div>
+		<script>
+			const tabs = document.querySelectorAll("[data-view-target]");
+			const views = { today: document.querySelector("#today-view"), review: document.querySelector("#review-view") };
+			const toast = document.querySelector("#toast");
+			let toastTimer;
+			function showToast(message) { toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2400); }
+			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); }));
+			document.querySelectorAll(".check").forEach((check) => check.addEventListener("change", (event) => event.target.closest(".plan-item").classList.toggle("is-done", event.target.checked)));
+			document.querySelectorAll(".filter").forEach((filter) => filter.addEventListener("click", () => { document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item === filter)); document.querySelectorAll(".plan-item").forEach((item) => { item.hidden = filter.dataset.filter !== "all" && item.dataset.category !== filter.dataset.filter; }); }));
+			document.querySelectorAll(".mood").forEach((mood) => mood.addEventListener("click", () => { document.querySelectorAll(".mood").forEach((item) => item.classList.remove("selected")); mood.classList.add("selected"); }));
+			document.querySelector("#save-note").addEventListener("click", () => showToast("내일의 나에게 남긴 말을 기록했어요."));
+			document.querySelector("#add-plan").addEventListener("click", () => showToast("새로운 계획을 적을 자리가 준비됐어요."));
+			document.querySelectorAll("[data-toast]").forEach((item) => item.addEventListener("click", () => showToast(item.dataset.toast)));
+			document.querySelectorAll("[data-day]").forEach((button) => button.addEventListener("click", () => { const day = Number(button.dataset.day); document.querySelector("#date-caption").textContent = day === -1 ? "어제, 수요일" : day === 1 ? "내일, 금요일" : "오늘, 목요일"; document.querySelector("#day-title").textContent = day === 0 ? "오늘의 페이지" : day === -1 ? "어제의 페이지" : "내일의 페이지"; }));
+		</script>
+	</body>
+</html>
