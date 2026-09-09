@@ -159,6 +159,7 @@
 			.status-btn.status-done.is-active { border-color: var(--sage); color: #4f5c50; background: var(--sage-pale); }
 			.status-btn.status-failed.is-active { border-color: #a4432f; color: #a4432f; background: var(--coral-pale); }
 			.todo-status-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+			.status-day-caption { margin-right: auto; color: #b7b0a2; font-size: 11px; }
 			.todo-main { display: grid; gap: 6px; }
 			.todo-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 			.todo-title { font-family: "Gowun Batang", serif; font-size: 19px; }
@@ -504,8 +505,10 @@
 			}
 
 			function mapTodoRow(row) {
-				return { id: row.id, planId: row.plan_id, time: row.time || "", title: row.title || "", note: row.note || "", categoryId: row.tag_id, done: row.done, failed: !!row.failed, deadline: row.deadline || "", priority: row.priority || "medium", estimatedMinutes: row.estimated_minutes };
+				return { id: row.id, planId: row.plan_id, time: row.time || "", title: row.title || "", note: row.note || "", categoryId: row.tag_id, dailyStatus: row.daily_status || {}, deadline: row.deadline || "", priority: row.priority || "medium", estimatedMinutes: row.estimated_minutes };
 			}
+
+			function statusOn(todo, isoDate) { return (todo.dailyStatus && todo.dailyStatus[isoDate]) || null; }
 
 			async function loadExecutionLogs(todoIds) {
 				state.executionLogsByTodo = {};
@@ -619,7 +622,8 @@
 
 			function createTodoItemEl(todo) {
 				const item = document.createElement("div");
-				item.className = "todo-item" + (todo.done ? " is-done" : "") + (todo.failed ? " is-failed" : "");
+				const status = statusOn(todo, selectedISODate());
+				item.className = "todo-item" + (status === "done" ? " is-done" : "") + (status === "failed" ? " is-failed" : "");
 				item.dataset.id = todo.id;
 				item.dataset.planId = todo.planId || "";
 				item.dataset.categoryId = todo.categoryId || "";
@@ -644,8 +648,9 @@
 						<p class="todo-exec-summary" data-role="exec-summary">${escapeHtml(execSummaryText(todo.id))}</p>
 					</div>
 					<div class="todo-status-actions">
-						<button type="button" class="status-btn status-done${todo.done ? " is-active" : ""}" data-role="mark-done">완료</button>
-						<button type="button" class="status-btn status-failed${todo.failed ? " is-active" : ""}" data-role="mark-failed">실패</button>
+						<span class="status-day-caption">${pad2(selectedDate.getMonth() + 1)}.${pad2(selectedDate.getDate())} 기준</span>
+						<button type="button" class="status-btn status-done${status === "done" ? " is-active" : ""}" data-role="mark-done">완료</button>
+						<button type="button" class="status-btn status-failed${status === "failed" ? " is-active" : ""}" data-role="mark-failed">실패</button>
 					</div>
 					<div class="todo-actions">
 						${tagButtonMarkup(todo)}
@@ -682,7 +687,7 @@
 			}
 
 			function todayISODate() { return new Date().toISOString().slice(0, 10); }
-			function isOverdue(todo) { return !todo.done && !!todo.deadline && todo.deadline < todayISODate(); }
+			function isOverdue(todo) { return statusOn(todo, todo.deadline) !== "done" && !!todo.deadline && todo.deadline < todayISODate(); }
 			function isBlocked(todo) { return (state.executionLogsByTodo[todo.id] || []).some((log) => log.blocked_reason); }
 
 			function selectedISODate() { return `${selectedDate.getFullYear()}-${pad2(selectedDate.getMonth() + 1)}-${pad2(selectedDate.getDate())}`; }
@@ -706,7 +711,7 @@
 					if (searchTerm && !`${todo.title} ${todo.note}`.toLowerCase().includes(searchTerm)) return false;
 					return true;
 				});
-				if (todoStatusFilter === "done") list = list.filter((todo) => todo.done);
+				if (todoStatusFilter === "done") list = list.filter((todo) => statusOn(todo, selectedISODate()) === "done");
 				else if (todoStatusFilter === "overdue") list = list.filter(isOverdue);
 				else if (todoStatusFilter === "blocked") list = list.filter(isBlocked);
 				const sortKey = todoSortSelect.value;
@@ -737,7 +742,7 @@
 			function computePlanProgress(planId) {
 				const todos = state.todos.filter((todo) => todo.planId === planId);
 				const total = todos.length;
-				const done = todos.filter((todo) => todo.done).length;
+				const done = todos.filter((todo) => statusOn(todo, selectedISODate()) === "done").length;
 				const percent = total ? Math.round((done / total) * 100) : 0;
 				return { total, done, percent };
 			}
@@ -745,7 +750,7 @@
 			function planProgressMarkup(planId) {
 				const { total, done, percent } = computePlanProgress(planId);
 				const caption = total
-					? `할 일 ${total}개 중 ${done}개 완료 · 이 계획의 진행률 ${percent}%`
+					? `이 날짜 기준 할 일 ${total}개 중 ${done}개 완료 · 진행률 ${percent}%`
 					: "아직 이 계획에 할 일이 없어요. 아래 버튼으로 추가해보세요.";
 				return `<div class="plan-progress"><div class="plan-progress-track"><div class="plan-progress-fill" style="width:${percent}%"></div></div><p class="plan-progress-caption">${escapeHtml(caption)}</p></div>`;
 			}
@@ -758,7 +763,7 @@
 				if (!fill || !caption) return;
 				const { total, done, percent } = computePlanProgress(planId);
 				fill.style.width = `${percent}%`;
-				caption.textContent = total ? `할 일 ${total}개 중 ${done}개 완료 · 이 계획의 진행률 ${percent}%` : "아직 이 계획에 할 일이 없어요. 아래 버튼으로 추가해보세요.";
+				caption.textContent = total ? `이 날짜 기준 할 일 ${total}개 중 ${done}개 완료 · 진행률 ${percent}%` : "아직 이 계획에 할 일이 없어요. 아래 버튼으로 추가해보세요.";
 			}
 
 			function planCardHeaderMarkup(plan) {
@@ -831,9 +836,13 @@
 				return `${Math.floor(ms / 1000)}초`;
 			}
 
+			function countDailyStatus(status) {
+				return state.todos.reduce((sum, todo) => sum + Object.values(todo.dailyStatus || {}).filter((s) => s === status).length, 0);
+			}
+
 			function computeReviewStats() {
 				const totalCount = state.todos.length;
-				const doneCount = state.todos.filter((todo) => todo.done).length;
+				const doneCount = countDailyStatus("done");
 				const overdueCount = state.todos.filter(isOverdue).length;
 				const blockedCount = state.todos.filter(isBlocked).length;
 				const estimatedTotal = state.todos.reduce((sum, todo) => sum + (todo.estimatedMinutes || 0), 0);
@@ -863,12 +872,12 @@
 				}
 
 				reviewStoryEl.innerHTML = state.activePlans.length
-					? `적어둔 할 일 ${stats.totalCount}개 중 ${stats.doneCount}개를 끝냈고, ${stats.overdueCount}개는 마감을 넘겼고, ${stats.blockedCount}개는 막힌 적이 있어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
+					? `적어둔 할 일 ${stats.totalCount}개를 날짜별로 총 ${stats.doneCount}번 완료했고, ${stats.overdueCount}개는 마감을 넘겼고, ${stats.blockedCount}개는 막힌 적이 있어요.<br />예상한 ${stats.estimatedTotal}분보다 실제로 ${stats.diff >= 0 ? `${stats.diff}분 더` : `${Math.abs(stats.diff)}분 덜`} 걸렸어요.`
 					: "아직 계획이 없어요. 계획을 세우면 여기에서 돌아볼 수 있어요.";
 
 				const statDefs = [
 					{ kind: "status", key: "all", value: stats.totalCount, label: "계획에 딸린 할 일" },
-					{ kind: "status", key: "done", value: stats.doneCount, label: "완료" },
+					{ kind: "status", key: "done", value: stats.doneCount, label: "완료 횟수" },
 					{ kind: "status", key: "overdue", value: stats.overdueCount, label: "지연" },
 					{ kind: "status", key: "blocked", value: stats.blockedCount, label: "막힘" },
 					{ kind: "sort", key: "estimate", value: `${stats.estimatedTotal}분`, label: "예상 시간 합계" },
@@ -880,10 +889,11 @@
 			}
 
 			function renderRecords() {
-				const completedCount = state.todos.filter((todo) => todo.done).length;
+				const dateKey = selectedISODate();
+				const completedCount = state.todos.filter((todo) => statusOn(todo, dateKey) === "done").length;
 				const planLine = state.activePlans.length ? `<p class="record-label">이번 계획 · ${state.activePlans.map((plan) => escapeHtml(plan.title)).join(", ")}</p>` : "";
 				const todoMarkup = state.todos.length
-					? `<ul class="record-plan-list">${state.todos.map((todo) => `<li class="record-plan${todo.done ? " is-done" : ""}${todo.failed ? " is-failed" : ""}"><span class="record-plan-time">${escapeHtml(todo.time || "--:--")}</span><span>${escapeHtml(todo.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
+					? `<ul class="record-plan-list">${state.todos.map((todo) => `<li class="record-plan${statusOn(todo, dateKey) === "done" ? " is-done" : ""}${statusOn(todo, dateKey) === "failed" ? " is-failed" : ""}"><span class="record-plan-time">${escapeHtml(todo.time || "--:--")}</span><span>${escapeHtml(todo.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
 					: `<span class="record-empty">아직 적어둔 할 일이 없어요.</span>`;
 				recordSheetEl.innerHTML = `
 					<div class="record-sheet">
@@ -971,18 +981,18 @@
 				if (markDoneButton) {
 					const item = markDoneButton.closest(".todo-item");
 					const todo = findTodo(item.dataset.id);
-					const wasDone = todo.done;
-					const nowDone = !todo.done;
-					todo.done = nowDone;
-					if (nowDone) todo.failed = false;
-					item.classList.toggle("is-done", todo.done);
-					item.classList.toggle("is-failed", todo.failed);
-					markDoneButton.classList.toggle("is-active", todo.done);
-					item.querySelector("[data-role='mark-failed']").classList.toggle("is-active", todo.failed);
-					const { error } = await supabaseClient.from(TODOS_TABLE).update({ done: todo.done, failed: todo.failed }).eq("id", todo.id);
+					const dateKey = selectedISODate();
+					const wasDone = statusOn(todo, dateKey) === "done";
+					const nextStatus = wasDone ? null : "done";
+					if (nextStatus) todo.dailyStatus[dateKey] = nextStatus; else delete todo.dailyStatus[dateKey];
+					item.classList.toggle("is-done", nextStatus === "done");
+					item.classList.toggle("is-failed", false);
+					markDoneButton.classList.toggle("is-active", nextStatus === "done");
+					item.querySelector("[data-role='mark-failed']").classList.toggle("is-active", false);
+					const { error } = await supabaseClient.from(TODOS_TABLE).update({ daily_status: todo.dailyStatus }).eq("id", todo.id);
 					if (error) { console.error("완료 상태 저장 실패", error); showToast("저장에 실패했어요."); return; }
 					renderPlanProgress(todo.planId);
-					if (!wasDone && nowDone) await logCompletion(item, todo);
+					if (!wasDone && nextStatus === "done") await logCompletion(item, todo);
 					return;
 				}
 
@@ -990,13 +1000,15 @@
 				if (markFailedButton) {
 					const item = markFailedButton.closest(".todo-item");
 					const todo = findTodo(item.dataset.id);
-					todo.failed = !todo.failed;
-					if (todo.failed) todo.done = false;
-					item.classList.toggle("is-done", todo.done);
-					item.classList.toggle("is-failed", todo.failed);
-					markFailedButton.classList.toggle("is-active", todo.failed);
-					item.querySelector("[data-role='mark-done']").classList.toggle("is-active", todo.done);
-					const { error } = await supabaseClient.from(TODOS_TABLE).update({ done: todo.done, failed: todo.failed }).eq("id", todo.id);
+					const dateKey = selectedISODate();
+					const wasFailed = statusOn(todo, dateKey) === "failed";
+					const nextStatus = wasFailed ? null : "failed";
+					if (nextStatus) todo.dailyStatus[dateKey] = nextStatus; else delete todo.dailyStatus[dateKey];
+					item.classList.toggle("is-done", false);
+					item.classList.toggle("is-failed", nextStatus === "failed");
+					markFailedButton.classList.toggle("is-active", nextStatus === "failed");
+					item.querySelector("[data-role='mark-done']").classList.toggle("is-active", false);
+					const { error } = await supabaseClient.from(TODOS_TABLE).update({ daily_status: todo.dailyStatus }).eq("id", todo.id);
 					if (error) { console.error("실패 상태 저장 실패", error); showToast("저장에 실패했어요."); return; }
 					renderPlanProgress(todo.planId);
 					return;
@@ -1028,12 +1040,12 @@
 					const planId = addTodoButton.dataset.planId;
 					const plan = state.activePlans.find((p) => p.id === planId);
 					if (!plan) return;
-					const todo = { id: makeId(), planId, time: "", title: "", note: "", categoryId: null, done: false, failed: false, deadline: "", priority: "medium", estimatedMinutes: null };
+					const todo = { id: makeId(), planId, time: "", title: "", note: "", categoryId: null, dailyStatus: {}, deadline: "", priority: "medium", estimatedMinutes: null };
 					state.todos.push(todo);
 					renderTodos();
 					const titleEl = plansListEl.querySelector(`.todo-list[data-plan-id="${planId}"] [data-id="${todo.id}"] [data-field="title"]`);
 					if (titleEl) titleEl.focus();
-					const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, plan_id: planId, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, done: todo.done, failed: todo.failed, deadline: null, priority: todo.priority, estimated_minutes: null });
+					const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, plan_id: planId, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, daily_status: todo.dailyStatus, deadline: null, priority: todo.priority, estimated_minutes: null });
 					if (error) { console.error("추가 실패", error); showToast("저장에 실패했어요."); }
 					return;
 				}
