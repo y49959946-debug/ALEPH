@@ -261,6 +261,8 @@
 			</section>
 		</main>
 		<div class="toast" id="toast" role="status"></div>
+		<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+		<script src="../supabase-client.js"></script>
 		<script>
 			const tabs = document.querySelectorAll("[data-view-target]");
 			const views = { today: document.querySelector("#today-view"), review: document.querySelector("#review-view"), records: document.querySelector("#records-view") };
@@ -351,8 +353,11 @@
 
 			updateDateDisplay();
 
-			// ---- 오늘 하기로 한 일 / 오늘을 돌아보며 / 내일의 나에게 남기는 말: 편집 및 저장 ----
-			const STORAGE_KEY = "plandosee:today";
+			// ---- 오늘 하기로 한 일 / 오늘을 돌아보며 / 내일의 나에게 남기는 말: Supabase 서버 DB 연동 ----
+			const TAGS_TABLE = "pds_tags";
+			const PLANS_TABLE = "pds_plans";
+			const SETTINGS_TABLE = "pds_settings";
+			const SETTINGS_ID = "today";
 
 			function makeId() { return (crypto.randomUUID ? crypto.randomUUID() : `plan-${Date.now()}-${Math.random().toString(16).slice(2)}`); }
 
@@ -366,38 +371,34 @@
 				return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 			}
 
-			function defaultState() {
-				return {
-					plans: [
-						{ id: makeId(), time: "09:30", title: "팀 주간 회의", note: "이번 주에 끝낸 일 세 가지 먼저 나누기", categoryId: null, done: false },
-						{ id: makeId(), time: "11:00", title: "자바스크립트 한 챕터 읽기", note: "마음에 남는 문장 하나를 노트에 적기", categoryId: null, done: false },
-						{ id: makeId(), time: "18:30", title: "집 근처를 30분 걷기", note: "날씨가 좋으면 공원까지 조금 더", categoryId: null, done: false },
-						{ id: makeId(), time: "21:00", title: "휴대폰 없이 차 한 잔", note: "오늘의 속도를 천천히 낮추기", categoryId: null, done: false },
-					],
-					tags: [],
-					mood: "",
-					reflection: "생각보다 천천히 해도 괜찮았다. 한 가지에 오래 머무는 날도 필요하니까.",
-					tomorrowNote: "",
-					totalTimeMs: 0,
-				};
+			const state = { plans: [], tags: [], mood: "", reflection: "", tomorrowNote: "", totalTimeMs: 0 };
+
+			async function loadState() {
+				const [tagsRes, plansRes, settingsRes] = await Promise.all([
+					supabaseClient.from(TAGS_TABLE).select("*").order("created_at", { ascending: true }),
+					supabaseClient.from(PLANS_TABLE).select("*").order("created_at", { ascending: true }),
+					supabaseClient.from(SETTINGS_TABLE).select("*").eq("id", SETTINGS_ID),
+				]);
+
+				if (tagsRes.error) { console.error("태그 불러오기 실패", tagsRes.error); showToast("태그를 불러오지 못했어요."); }
+				if (plansRes.error) { console.error("할 일 불러오기 실패", plansRes.error); showToast("할 일을 불러오지 못했어요."); }
+				if (settingsRes.error) { console.error("설정 불러오기 실패", settingsRes.error); }
+
+				state.tags = (tagsRes.data || []).map((row) => ({ id: row.id, label: row.label, color: row.color }));
+				state.plans = (plansRes.data || []).map((row) => ({ id: row.id, time: row.time || "", title: row.title || "", note: row.note || "", categoryId: row.tag_id, done: row.done }));
+
+				const settingsRow = settingsRes.data && settingsRes.data[0];
+				if (settingsRow) {
+					state.mood = settingsRow.mood || "";
+					state.reflection = settingsRow.reflection || "";
+					state.tomorrowNote = settingsRow.tomorrow_note || "";
+					state.totalTimeMs = settingsRow.total_time_ms || 0;
+				} else {
+					const { error } = await supabaseClient.from(SETTINGS_TABLE).insert({ id: SETTINGS_ID });
+					if (error) console.error("설정 초기 생성 실패", error);
+				}
 			}
 
-			function loadState() {
-				try {
-					const raw = localStorage.getItem(STORAGE_KEY);
-					if (raw) return JSON.parse(raw);
-				} catch (error) {}
-				return defaultState();
-			}
-
-			function saveState() {
-				try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (error) {}
-			}
-
-			const state = loadState();
-			if (typeof state.totalTimeMs !== "number") state.totalTimeMs = 0;
-			if (!Array.isArray(state.tags)) state.tags = [];
-			state.plans.forEach((plan) => { if (typeof plan.categoryId === "undefined") plan.categoryId = null; });
 			const planListEl = document.querySelector("#plan-list");
 			const labelFilterEl = document.querySelector("#label-filter");
 			const recordSheetEl = document.querySelector("#record-sheet");
@@ -501,22 +502,25 @@
 
 			function findPlan(id) { return state.plans.find((plan) => plan.id === id); }
 
-			planListEl.addEventListener("change", (event) => {
+			planListEl.addEventListener("change", async (event) => {
 				if (!event.target.classList.contains("check")) return;
 				const item = event.target.closest(".plan-item");
 				const plan = findPlan(item.dataset.id);
 				plan.done = event.target.checked;
 				item.classList.toggle("is-done", plan.done);
-				saveState();
+				const { error } = await supabaseClient.from(PLANS_TABLE).update({ done: plan.done }).eq("id", plan.id);
+				if (error) { console.error("완료 상태 저장 실패", error); showToast("저장에 실패했어요."); }
 			});
 
-			planListEl.addEventListener("focusout", (event) => {
+			planListEl.addEventListener("focusout", async (event) => {
 				const field = event.target.dataset ? event.target.dataset.field : null;
 				if (!field) return;
 				const item = event.target.closest(".plan-item");
 				const plan = findPlan(item.dataset.id);
-				plan[field] = event.target.textContent.trim();
-				saveState();
+				const value = event.target.textContent.trim();
+				plan[field] = value;
+				const { error } = await supabaseClient.from(PLANS_TABLE).update({ [field]: value }).eq("id", plan.id);
+				if (error) { console.error("수정 저장 실패", error); showToast("저장에 실패했어요."); }
 			});
 
 			planListEl.addEventListener("keydown", (event) => {
@@ -526,13 +530,15 @@
 				}
 			});
 
-			planListEl.addEventListener("click", (event) => {
+			planListEl.addEventListener("click", async (event) => {
 				const deleteButton = event.target.closest(".plan-delete");
 				if (deleteButton) {
 					const item = deleteButton.closest(".plan-item");
-					state.plans = state.plans.filter((plan) => plan.id !== item.dataset.id);
+					const id = item.dataset.id;
+					state.plans = state.plans.filter((plan) => plan.id !== id);
 					item.remove();
-					saveState();
+					const { error } = await supabaseClient.from(PLANS_TABLE).delete().eq("id", id);
+					if (error) { console.error("삭제 실패", error); showToast("삭제에 실패했어요."); }
 					return;
 				}
 				const cycleButton = event.target.closest("[data-role='cycle-category']");
@@ -549,28 +555,31 @@
 					cycleButton.style.cssText = nextTag ? `background:${paleColor(nextTag.color)};color:${nextTag.color};` : "";
 					cycleButton.textContent = nextTag ? nextTag.label : "+";
 					applyFilterToItem(item);
-					saveState();
+					const { error } = await supabaseClient.from(PLANS_TABLE).update({ tag_id: nextId }).eq("id", plan.id);
+					if (error) { console.error("태그 저장 실패", error); showToast("저장에 실패했어요."); }
 				}
 			});
 
-			document.querySelector("#add-plan").addEventListener("click", () => {
+			document.querySelector("#add-plan").addEventListener("click", async () => {
 				const plan = { id: makeId(), time: "", title: "", note: "", categoryId: null, done: false };
 				state.plans.push(plan);
 				const item = createPlanItemEl(plan);
 				planListEl.appendChild(item);
-				saveState();
 				item.querySelector('[data-field="title"]').focus();
+				const { error } = await supabaseClient.from(PLANS_TABLE).insert({ id: plan.id, time: plan.time, title: plan.title, note: plan.note, tag_id: plan.categoryId, done: plan.done });
+				if (error) { console.error("추가 실패", error); showToast("저장에 실패했어요."); }
 			});
 
-			labelFilterEl.addEventListener("click", (event) => {
+			labelFilterEl.addEventListener("click", async (event) => {
 				const deleteIcon = event.target.closest("[data-role='delete-tag']");
 				if (deleteIcon) {
 					const tagId = deleteIcon.dataset.tagId;
 					state.tags = state.tags.filter((tag) => tag.id !== tagId);
 					state.plans.forEach((plan) => { if (plan.categoryId === tagId) plan.categoryId = null; });
-					saveState();
 					renderTagFilters();
 					renderPlans();
+					const { error } = await supabaseClient.from(TAGS_TABLE).delete().eq("id", tagId);
+					if (error) { console.error("태그 삭제 실패", error); showToast("태그 삭제에 실패했어요."); }
 					return;
 				}
 				const filterButton = event.target.closest(".filter");
@@ -596,50 +605,60 @@
 				if (!tagCreator.hidden && !event.target.closest(".tag-creator-wrap")) tagCreator.hidden = true;
 			});
 
-			function submitNewTag() {
+			async function submitNewTag() {
 				const label = tagNameInput.value.trim();
 				if (!label) { tagNameInput.focus(); return; }
-				state.tags.push({ id: makeId(), label, color: tagColorInput.value });
-				saveState();
+				const tag = { id: makeId(), label, color: tagColorInput.value };
+				state.tags.push(tag);
 				renderTagFilters();
 				tagCreator.hidden = true;
+				const { error } = await supabaseClient.from(TAGS_TABLE).insert(tag);
+				if (error) { console.error("태그 추가 실패", error); showToast("태그 저장에 실패했어요."); }
 			}
 
 			document.querySelector("#tag-creator-add").addEventListener("click", submitNewTag);
 			tagNameInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); submitNewTag(); } });
 
+			async function updateSettings(patch) {
+				const { error } = await supabaseClient.from(SETTINGS_TABLE).update(patch).eq("id", SETTINGS_ID);
+				if (error) { console.error("설정 저장 실패", error); showToast("저장에 실패했어요."); }
+			}
+
 			const moodInput = document.querySelector("#mood-input");
-			moodInput.value = state.mood || "";
-			moodInput.addEventListener("blur", () => { state.mood = moodInput.value; saveState(); });
+			moodInput.addEventListener("blur", () => { state.mood = moodInput.value; updateSettings({ mood: state.mood }); });
 			moodInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); moodInput.blur(); } });
 
 			const reflectionText = document.querySelector("#reflection-text");
-			reflectionText.textContent = state.reflection;
-			reflectionText.addEventListener("focusout", () => { state.reflection = reflectionText.textContent.trim(); saveState(); });
+			reflectionText.addEventListener("focusout", () => { state.reflection = reflectionText.textContent.trim(); updateSettings({ reflection: state.reflection }); });
 			reflectionText.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); reflectionText.blur(); } });
 
 			const tomorrowNote = document.querySelector("#tomorrow-note");
-			tomorrowNote.value = state.tomorrowNote;
-			tomorrowNote.addEventListener("blur", () => { state.tomorrowNote = tomorrowNote.value; saveState(); });
-			document.querySelector("#save-note").addEventListener("click", () => { state.tomorrowNote = tomorrowNote.value; saveState(); renderRecords(); showToast("내일의 나에게 남긴 말을 기록했어요."); });
+			tomorrowNote.addEventListener("blur", () => { state.tomorrowNote = tomorrowNote.value; updateSettings({ tomorrow_note: state.tomorrowNote }); });
+			document.querySelector("#save-note").addEventListener("click", () => { state.tomorrowNote = tomorrowNote.value; renderRecords(); showToast("내일의 나에게 남긴 말을 기록했어요."); updateSettings({ tomorrow_note: state.tomorrowNote }); });
 
 			let lastTick = Date.now();
+			function persistTotalTime() { updateSettings({ total_time_ms: state.totalTimeMs }); }
 			setInterval(() => {
 				const now = Date.now();
 				state.totalTimeMs += now - lastTick;
 				lastTick = now;
-				saveState();
 				if (views.review.classList.contains("active")) renderReview();
 			}, 1000);
-			window.addEventListener("beforeunload", () => {
-				state.totalTimeMs += Date.now() - lastTick;
-				saveState();
-			});
+			setInterval(persistTotalTime, 15000);
+			document.addEventListener("visibilitychange", () => { if (document.hidden) persistTotalTime(); });
+			window.addEventListener("beforeunload", persistTotalTime);
 
-			renderTagFilters();
-			renderPlans();
-			renderReview();
-			renderRecords();
+			async function init() {
+				await loadState();
+				moodInput.value = state.mood || "";
+				reflectionText.textContent = state.reflection;
+				tomorrowNote.value = state.tomorrowNote;
+				renderTagFilters();
+				renderPlans();
+				renderReview();
+				renderRecords();
+			}
+			init();
 		</script>
 	</body>
 </html>
