@@ -140,6 +140,28 @@
 			.review-note .note-mark { display: block; margin-bottom: 7px; color: var(--coral); font-family: "Kalam", cursive; font-size: 26px; }
 			.review-note p { margin: 0; color: var(--soft-ink); font-size: 12px; line-height: 1.7; }
 			.review-footer { max-width: 720px; margin: 34px auto 0; color: #989082; font-family: "Nanum Pen Script", cursive; font-size: 20px; text-align: center; }
+			.records-paper { min-height: 640px; }
+			.records-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+			.records-heading h2 { margin: 0; font-family: "Nanum Pen Script", cursive; font-size: clamp(38px, 4.5vw, 50px); font-weight: 400; line-height: 1.2; }
+			.records-heading p { margin: 0 0 5px; color: var(--soft-ink); font-size: 12px; }
+			.record-sheet { display: grid; grid-template-columns: 112px 1fr; gap: 30px; padding: 30px 0 35px; border-bottom: 1px solid var(--line); }
+			.record-date { color: var(--coral); font-size: 12px; font-weight: 700; line-height: 1.6; }
+			.record-date strong { display: block; color: var(--ink); font-family: "Nanum Pen Script", cursive; font-size: 28px; font-weight: 400; }
+			.record-content { display: grid; gap: 25px; }
+			.record-block { position: relative; padding-left: 24px; border-left: 1px solid var(--line); }
+			.record-block::before { position: absolute; top: 5px; left: -4px; width: 7px; height: 7px; content: ""; border-radius: 50%; background: var(--coral); }
+			.record-label { margin: 0 0 8px; color: var(--soft-ink); font-size: 11px; letter-spacing: .08em; }
+			.record-line { margin: 0; font-family: "Nanum Pen Script", cursive; font-size: 21px; line-height: 1.5; }
+			.record-plan-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+			.record-plan { display: flex; align-items: baseline; gap: 10px; color: var(--soft-ink); font-size: 13px; }
+			.record-plan.is-done { color: var(--ink); }
+			.record-plan.is-done::before { color: var(--sage); content: "✓"; font-weight: 700; }
+			.record-plan:not(.is-done)::before { color: #c2b8a8; content: "○"; }
+			.record-plan-time { min-width: 42px; color: #a39b8e; font-size: 11px; }
+			.record-empty { color: #aaa294; font-family: "Nanum Pen Script", cursive; font-size: 18px; }
+			.record-mood { display: inline-block; margin-left: 8px; padding: 4px 10px; border-radius: 20px; color: #8a6f3d; background: #f6e8bc; font-family: "Nanum Pen Script", cursive; font-size: 17px; }
+			.record-footer { padding-top: 26px; color: var(--soft-ink); font-size: 12px; text-align: center; }
+			.records-action { border: 0; border-bottom: 1px solid var(--coral); padding: 3px 0; color: var(--coral); background: transparent; font-size: 12px; }
 
 			.toast { position: fixed; right: 24px; bottom: 24px; padding: 11px 15px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--paper); box-shadow: var(--shadow); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s ease; }
 			.toast.show { opacity: 1; transform: translateY(0); }
@@ -159,6 +181,8 @@
 				.review-note { min-height: auto; padding: 0 10px 20px; border-right: 0; border-bottom: 1px solid var(--line); }
 				.review-note:last-child { border-bottom: 0; }
 				.review-story { font-size: 17px; }
+				.records-heading { align-items: start; flex-direction: column; gap: 12px; }
+				.record-sheet { grid-template-columns: 1fr; gap: 18px; }
 			}
 		</style>
 	</head>
@@ -171,6 +195,7 @@
 			<nav class="view-switcher" aria-label="페이지 선택">
 				<button class="view-tab active" type="button" data-view-target="today">오늘 하루</button>
 				<button class="view-tab" type="button" data-view-target="review">돌아보기</button>
+				<button class="view-tab" type="button" data-view-target="records">기록 모아보기</button>
 			</nav>
 
 			<section class="view active" id="today-view">
@@ -219,15 +244,22 @@
 					<p class="review-footer">“다음 주에는 조금 덜 채우고, 조금 더 오래 바라보기.”</p>
 				</div></article>
 			</section>
+
+			<section class="view" id="records-view">
+				<article class="paper records-paper"><div class="paper-inner">
+					<div class="records-heading"><div><p class="date-kicker">MY LITTLE ARCHIVE</p><h2>기록 모아보기</h2></div><button class="records-action" type="button" data-view-target="today">오늘 기록으로 돌아가기</button></div>
+					<div id="record-sheet"></div>
+				</div></article>
+			</section>
 		</main>
 		<div class="toast" id="toast" role="status"></div>
 		<script>
 			const tabs = document.querySelectorAll("[data-view-target]");
-			const views = { today: document.querySelector("#today-view"), review: document.querySelector("#review-view") };
+			const views = { today: document.querySelector("#today-view"), review: document.querySelector("#review-view"), records: document.querySelector("#records-view") };
 			const toast = document.querySelector("#toast");
 			let toastTimer;
 			function showToast(message) { toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2400); }
-			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); }));
+			tabs.forEach((tab) => tab.addEventListener("click", () => { const target = tab.dataset.viewTarget; Object.entries(views).forEach(([name, view]) => view.classList.toggle("active", name === target)); document.querySelectorAll(".view-tab").forEach((item) => item.classList.toggle("active", item.dataset.viewTarget === target)); if (target === "records") renderRecords(); }));
 			document.querySelectorAll("[data-toast]").forEach((item) => item.addEventListener("click", () => showToast(item.dataset.toast)));
 
 			// ---- 날짜 이동 + 달력 ----
@@ -346,6 +378,7 @@
 
 			const state = loadState();
 			const planListEl = document.querySelector("#plan-list");
+			const recordSheetEl = document.querySelector("#record-sheet");
 
 			function escapeHtml(value) {
 				return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
@@ -374,6 +407,24 @@
 			function renderPlans() {
 				planListEl.innerHTML = "";
 				state.plans.forEach((plan) => planListEl.appendChild(createPlanItemEl(plan)));
+			}
+
+			function renderRecords() {
+				const completedCount = state.plans.filter((plan) => plan.done).length;
+				const planMarkup = state.plans.length
+					? `<ul class="record-plan-list">${state.plans.map((plan) => `<li class="record-plan${plan.done ? " is-done" : ""}"><span class="record-plan-time">${escapeHtml(plan.time || "--:--")}</span><span>${escapeHtml(plan.title || "제목 없는 기록")}</span></li>`).join("")}</ul>`
+					: `<span class="record-empty">아직 적어둔 계획이 없어요.</span>`;
+				recordSheetEl.innerHTML = `
+					<div class="record-sheet">
+						<div class="record-date"><strong>${selectedDate.getDate()}일</strong>${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월</div>
+						<div class="record-content">
+							<section class="record-block"><p class="record-label">오늘 하기로 한 일 · ${completedCount}/${state.plans.length} 완료</p>${planMarkup}</section>
+							<section class="record-block"><p class="record-label">오늘을 돌아보며</p><p class="record-line">${escapeHtml(state.reflection || "아직 오늘의 한 줄을 남기지 않았어요.")}</p></section>
+							<section class="record-block"><p class="record-label">오늘의 기분</p><p class="record-line">${escapeHtml(state.mood || "아직 기분을 적지 않았어요.")}${state.mood ? "" : ""}</p></section>
+							<section class="record-block"><p class="record-label">내일의 나에게</p><p class="record-line">${escapeHtml(state.tomorrowNote || "아직 남긴 말이 없어요.")}</p></section>
+						</div>
+					</div>
+					<p class="record-footer">오늘의 기록은 이 브라우저에 조용히 보관되고 있어요.</p>`;
 			}
 
 			function findPlan(id) { return state.plans.find((plan) => plan.id === id); }
@@ -453,9 +504,10 @@
 			const tomorrowNote = document.querySelector("#tomorrow-note");
 			tomorrowNote.value = state.tomorrowNote;
 			tomorrowNote.addEventListener("blur", () => { state.tomorrowNote = tomorrowNote.value; saveState(); });
-			document.querySelector("#save-note").addEventListener("click", () => { state.tomorrowNote = tomorrowNote.value; saveState(); showToast("내일의 나에게 남긴 말을 기록했어요."); });
+			document.querySelector("#save-note").addEventListener("click", () => { state.tomorrowNote = tomorrowNote.value; saveState(); renderRecords(); showToast("내일의 나에게 남긴 말을 기록했어요."); });
 
 			renderPlans();
+			renderRecords();
 		</script>
 	</body>
 </html>
