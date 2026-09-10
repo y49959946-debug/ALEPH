@@ -1,13 +1,25 @@
 {
   "version": "v2",
   "database": "Supabase Postgres",
-  "updated_at": "2026-09-09",
-  "note": "카드1~3(계획/할일/실행기록 3단 구조 분리)과 카드4(돌아보기 집계·근거 이동·다음 계획으로 개선점 넘기기)에 이어, 계획을 여러 개 동시에 세우고 각 계획에 딸린 할 일을 한눈에 보는 구조(가독성 개선), 할 일의 날짜별 완료/실패 체크, 돌아보기 화면의 기간 선택(review-range) 필터, 사람이 읽는 형태의 데이터 내보내기(T06-C36)까지 반영했습니다. 카드5의 로그인 없음 안내 문구는 다음 작업으로 남겨둡니다.",
+  "updated_at": "2026-09-10",
+  "note": "카드1~3(계획/할일/실행기록 3단 구조 분리)과 카드4(돌아보기 집계·근거 이동·다음 계획으로 개선점 넘기기)에 이어, 계획을 여러 개 동시에 세우고 각 계획에 딸린 할 일을 한눈에 보는 구조(가독성 개선), 할 일의 날짜별 완료/실패 체크, 돌아보기 화면의 기간 선택(review-range) 필터, 사람이 읽는 형태의 데이터 내보내기(T06-C36)까지 반영했습니다. 과제7 카드1에서 Supabase Auth(이메일/비밀번호) 로그인을 붙여, 8단계 마이그레이션부터는 로그인한 계정 소유의 자료만 보이는 구조로 바뀌었습니다.",
+  "authentication": {
+    "status": "구현됨 (8단계 마이그레이션, 과제7 카드1)",
+    "method": "Supabase Auth 이메일/비밀번호(signUp / signInWithPassword)",
+    "why_this_choice": "이미 Supabase를 DB로 쓰고 있어서 RLS의 auth.uid()와 그대로 맞물리고, 비밀번호 해시·세션 토큰 발급/검증을 직접 구현하지 않아도 되어 카드1 범위(가입/로그인/로그아웃 뼈대 + 소유권 기반 DB 구조)를 안전하게 빨리 만들 수 있음. 소셜 로그인이나 매직링크보다 이메일/비밀번호가 과제 설명 흐름(가입→로그인→로그아웃)을 보여주기에 가장 단순함.",
+    "pages": {
+      "PDS/PlanDoSee_login.html": "로그인/회원가입 화면. 이미 세션이 있으면 즉시 PlanDoSee.html로 이동. 로그인 성공 시 PlanDoSee.html로 이동.",
+      "PDS/PlanDoSee.html": "시작 시 supabaseClient.auth.getSession()으로 세션을 확인해 없으면 PlanDoSee_login.html로 이동하고, 있으면 다이어리 화면을 보여줌(#app-root는 확인 전까지 hidden). 우측 상단 '로그아웃' 버튼과 auth.onAuthStateChange(SIGNED_OUT) 리스너로 로그아웃/세션 만료 시 로그인 화면으로 돌려보냄."
+    },
+    "error_messages": "signInWithPassword는 '계정 없음'과 '비밀번호 틀림'에 대해 Supabase 기본 동작상 동일한 오류(invalid_credentials / 'Invalid login credentials')를 반환해 화면에서도 같은 문구('이메일 또는 비밀번호가 올바르지 않아요.')로 안내함(사용자 열거 공격 방지). signUp도 이미 가입 완료된 이메일로 재가입을 시도하면 에러 대신 identities가 빈 배열인 사용자 객체를 반환하는 Supabase 기본 동작을 이용해 '이미 가입된 이메일이에요' 문구로 안내함.",
+    "known_limits_for_next_card": "비밀번호 해시 방식/세션·토큰 만료 동작에 대한 상세 증명과, 다른 계정 자료 접근 차단(RLS)에 대한 실제 테스트는 다음 카드에서 다룸. 지금은 구조(로그인 게이트 + user_id 소유권 + RLS 정책)만 잡아둔 상태."
+  },
   "tables": {
     "pds_plans": {
       "description": "계획. 5단계 마이그레이션부터는 여러 개를 동시에 활성(is_active=true) 상태로 둘 수 있고, 각 활성 계획마다 자기 할 일 목록을 갖습니다. 화면에서 '이 계획 마무리하기'를 누르면 is_active가 false로 바뀌며 지난 계획으로 넘어갑니다.",
       "columns": {
         "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
+        "user_id": { "type": "uuid", "references": "auth.users.id", "on_delete": "cascade", "default": "auth.uid()", "note": "8단계 마이그레이션에서 추가. 이 계획의 소유자. 클라이언트가 계획을 만들 때 로그인한 사용자 id를 함께 저장하고, RLS가 auth.uid() = user_id인 행만 보여줌." },
         "title": { "type": "text", "not_null": true },
         "period_start": { "type": "date", "nullable": true, "note": "기간(카드1 T06-C04)" },
         "period_end": { "type": "date", "nullable": true },
@@ -38,6 +50,7 @@
       "description": "할 일. 반드시 어떤 계획(plan_id)에 딸려 있습니다. 예전에는 이 테이블 이름이 pds_plans였는데, 실제로는 할 일 목록이었어서 이번에 이름을 바로잡았습니다. 여러 날에 걸친 계획의 할 일은 날짜별로 따로 완료/실패를 표시할 수 있습니다(7단계 마이그레이션).",
       "columns": {
         "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
+        "user_id": { "type": "uuid", "references": "auth.users.id", "on_delete": "cascade", "default": "auth.uid()", "note": "8단계 마이그레이션에서 추가. plan_id를 타고 올라가지 않고 todos에 직접 소유자를 저장(RLS 정책을 단순하게 유지하기 위한 선택)." },
         "plan_id": { "type": "uuid", "nullable": true, "references": "pds_plans.id", "on_delete": "set null" },
         "time": { "type": "text", "nullable": true, "note": "표시용 시간 문자열(예: 09:30). 마감일과 다름" },
         "title": { "type": "text", "nullable": true },
@@ -71,6 +84,7 @@
       "description": "할 일에 붙이는 카테고리 라벨. 배경색(color)과 글자색(text_color)을 따로 지정할 수 있습니다(3단계 마이그레이션에서 text_color 추가, 밝은 배경색에 글자가 묻히지 않도록).",
       "columns": {
         "id": { "type": "uuid", "primary_key": true, "default": "gen_random_uuid()" },
+        "user_id": { "type": "uuid", "references": "auth.users.id", "on_delete": "cascade", "default": "auth.uid()", "note": "8단계 마이그레이션에서 추가." },
         "label": { "type": "text", "not_null": true },
         "color": { "type": "text", "not_null": true, "note": "태그 배경색" },
         "text_color": { "type": "text", "nullable": true, "note": "태그 글자색. 값이 없으면 화면에서 color를 그대로 글자색으로도 사용." },
@@ -78,9 +92,10 @@
       }
     },
     "pds_settings": {
-      "description": "오늘 하루에 대한 단일 설정 행(기분/한줄회고/내일 메모/다음 계획 메모/페이지 누적 체류시간). id='today' 고정 1행.",
+      "description": "오늘 하루에 대한 설정 행(기분/한줄회고/내일 메모/다음 계획 메모/페이지 누적 체류시간). 8단계 마이그레이션 전에는 id='today' 고정 1행이었지만, 이제 로그인한 사용자마다 자기 설정 행을 하나씩 가짐(user_id에 unique 인덱스로 사용자당 1행을 보장). 레거시 id 컬럼은 남아있지만 앱에서 더는 쓰지 않음.",
       "columns": {
-        "id": { "type": "text", "primary_key": true, "default": "'today'" },
+        "id": { "type": "text", "primary_key": true, "default": "'today'", "note": "8단계 마이그레이션 이전의 레거시 컬럼. 더 이상 앱 코드에서 참조하지 않음." },
+        "user_id": { "type": "uuid", "references": "auth.users.id", "on_delete": "cascade", "default": "auth.uid()", "unique": true, "note": "8단계 마이그레이션에서 추가. 사용자당 설정 행 최대 1개를 unique 인덱스(pds_settings_user_id_key)로 보장." },
         "mood": { "type": "text", "nullable": true },
         "reflection": { "type": "text", "nullable": true },
         "tomorrow_note": { "type": "text", "nullable": true },
@@ -110,7 +125,8 @@
   },
   "row_level_security": {
     "enabled": true,
-    "policy": "anon 역할에 대해 pds_plans/pds_todos/pds_tags는 select/insert/update/delete 전체 허용. pds_plan_revisions/pds_execution_logs는 select/insert만 허용(이력이라 수정·삭제 불가). 로그인이 없고 링크를 아는 사람은 누구나 접근하는 과제 조건에 맞춘 설정.",
+    "policy": "8단계 마이그레이션부터 anon 전체공개 정책을 모두 제거하고, pds_plans/pds_todos/pds_tags/pds_settings는 select/insert/update/delete 전부 auth.uid() = user_id 조건으로 제한. pds_plan_revisions/pds_execution_logs는 user_id 컬럼이 없어 plan_id→pds_plans.user_id, todo_id→pds_todos.user_id를 EXISTS 서브쿼리로 타고 올라가 주인을 확인하며, 기존처럼 select/insert만 허용(이력이라 수정·삭제 불가). 로그인하지 않은 요청(anon 역할)은 어떤 정책과도 매치되지 않아 모든 테이블에서 빈 결과만 받음.",
+    "legacy_data": "8단계 마이그레이션 시점에 이미 있던 행들은 user_id가 비어있는 채로 남아 아무도 조회할 수 없게 됨. supabase-claim-legacy-data.sql로 회원가입한 계정의 uuid를 채워 넣어야 다시 보임(과제7 카드1 4번 항목).",
     "keys_exposed_client_side": "SUPABASE_URL, SUPABASE_ANON_KEY(publishable key)만 클라이언트에 노출됨. service_role 키는 어디에도 포함되지 않음."
   },
   "review_aggregation": {
@@ -130,6 +146,7 @@
   },
   "known_gaps_vs_T6": [
     "카드2: 정렬 기준은 화면에 문구로 표시되지만(T06-C20), '중요도+마감일 복합 정렬' 같은 다중 기준 정렬은 없음 — 단일 기준 정렬만 지원.",
-    "카드5: 첫 화면 로그인 없음 안내 문구(T06-C82) 없음."
+    "카드5: '링크를 아는 사람은 누구나 볼 수 있어요' 문구는 로그인 도입으로 제거됨. T06-C82(첫 화면 안내 문구) 자체는 로그인 없이 접근 가능하던 시절 기준이라 더 이상 해당 사항 없음.",
+    "과제7 카드1 범위 밖: 비밀번호 해시 방식 증명, 세션/토큰 만료 증명, 다른 계정 자료 접근 차단 테스트는 다음 카드에서 진행."
   ]
 }

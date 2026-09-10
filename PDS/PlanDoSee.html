@@ -32,6 +32,7 @@
 
 			.app { width: min(1160px, calc(100% - 36px)); margin: 0 auto; padding: 34px 0 72px; }
 			.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+			.topbar-actions { display: flex; align-items: center; gap: 10px; }
 			.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
 			.brand-logo { display: block; height: 80px; width: auto; }
 			.export-button { border: 1px solid var(--line); border-radius: 20px; padding: 8px 16px; color: var(--soft-ink); background: var(--paper); font-size: 12px; }
@@ -250,13 +251,16 @@
 		</style>
 	</head>
 	<body>
-		<main class="app">
+		<main class="app" id="app-root" hidden>
 			<header class="topbar">
 				<a class="brand" href="../index.html" aria-label="행로 홈"><img class="brand-logo" src="PlanDoSee_logo.png" alt="PlanDoSee" /></a>
-				<button class="export-button" type="button" id="export-data-button">전체 데이터 내보내기</button>
+				<div class="topbar-actions">
+					<button class="export-button" type="button" id="export-data-button">전체 데이터 내보내기</button>
+					<button class="export-button" type="button" id="logout-button">로그아웃</button>
+				</div>
 			</header>
 
-			<p class="review-visibility-note">링크를 아는 사람은 누구나 볼 수 있어요</p>
+			<p class="review-visibility-note">로그인한 내 계정에만 보이는 기록이에요</p>
 
 			<nav class="view-switcher" aria-label="페이지 선택">
 				<button class="view-tab active" type="button" data-view-target="today">오늘 하루</button>
@@ -469,7 +473,7 @@
 			const TODOS_TABLE = "pds_todos";
 			const LOGS_TABLE = "pds_execution_logs";
 			const SETTINGS_TABLE = "pds_settings";
-			const SETTINGS_ID = "today";
+			let currentUser = null;
 			const PRIORITY_LABEL = { high: "높음", medium: "보통", low: "낮음" };
 			const SORT_CAPTIONS = {
 				created: "지금은 만든 순서로 보고 있어요.",
@@ -508,7 +512,7 @@
 			async function loadState() {
 				const [planRes, settingsRes] = await Promise.all([
 					supabaseClient.from(PLANS_TABLE).select("*").order("created_at", { ascending: false }),
-					supabaseClient.from(SETTINGS_TABLE).select("*").eq("id", SETTINGS_ID),
+					supabaseClient.from(SETTINGS_TABLE).select("*").eq("user_id", currentUser.id),
 				]);
 
 				if (planRes.error) { console.error("계획 불러오기 실패", planRes.error); showToast("계획을 불러오지 못했어요."); }
@@ -537,7 +541,7 @@
 					state.nextPlanNote = settingsRow.next_plan_note || "";
 					state.totalTimeMs = settingsRow.total_time_ms || 0;
 				} else {
-					const { error } = await supabaseClient.from(SETTINGS_TABLE).insert({ id: SETTINGS_ID });
+					const { error } = await supabaseClient.from(SETTINGS_TABLE).insert({ user_id: currentUser.id });
 					if (error) console.error("설정 초기 생성 실패", error);
 				}
 			}
@@ -1020,7 +1024,7 @@
 					renderTodos();
 					const titleEl = plansListEl.querySelector(`.todo-list[data-plan-id="${planId}"] [data-id="${todo.id}"] [data-field="title"]`);
 					if (titleEl) titleEl.focus();
-					const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, plan_id: planId, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, daily_status: todo.dailyStatus, deadline: null, priority: todo.priority, estimated_minutes: null });
+					const { error } = await supabaseClient.from(TODOS_TABLE).insert({ id: todo.id, user_id: currentUser.id, plan_id: planId, time: todo.time, title: todo.title, note: todo.note, tag_id: todo.categoryId, daily_status: todo.dailyStatus, deadline: null, priority: todo.priority, estimated_minutes: null });
 					if (error) { console.error("추가 실패", error); showToast("저장에 실패했어요."); }
 					return;
 				}
@@ -1108,7 +1112,7 @@
 					if (idx !== -1) state.activePlans[idx] = mapPlanRow(data[0]);
 					showToast("계획을 수정했어요. 이전 내용은 이력으로 남았어요.");
 				} else {
-					const { data, error } = await supabaseClient.from(PLANS_TABLE).insert({ ...payload, is_active: true }).select();
+					const { data, error } = await supabaseClient.from(PLANS_TABLE).insert({ ...payload, user_id: currentUser.id, is_active: true }).select();
 					if (error) { console.error("계획 생성 실패", error); showToast("계획 저장에 실패했어요."); return; }
 					state.activePlans.push(mapPlanRow(data[0]));
 					if (state.nextPlanNote) {
@@ -1126,7 +1130,7 @@
 
 			// ---- 오늘을 돌아보며 / 내일의 나에게 남기는 말 / 기분 / 체류시간 ----
 			async function updateSettings(patch) {
-				const { error } = await supabaseClient.from(SETTINGS_TABLE).update(patch).eq("id", SETTINGS_ID);
+				const { error } = await supabaseClient.from(SETTINGS_TABLE).update(patch).eq("user_id", currentUser.id);
 				if (error) { console.error("설정 저장 실패", error); showToast("저장에 실패했어요."); }
 			}
 
@@ -1250,7 +1254,7 @@
 						supabaseClient.from(TODOS_TABLE).select("*").order("created_at", { ascending: true }),
 						supabaseClient.from(LOGS_TABLE).select("*").order("ended_at", { ascending: true }),
 						supabaseClient.from(TAGS_TABLE).select("*").order("created_at", { ascending: true }),
-						supabaseClient.from(SETTINGS_TABLE).select("*").eq("id", SETTINGS_ID),
+						supabaseClient.from(SETTINGS_TABLE).select("*").eq("user_id", currentUser.id),
 					]);
 					const firstError = plansRes.error || todosRes.error || logsRes.error || tagsRes.error || settingsRes.error;
 					if (firstError) {
@@ -1332,7 +1336,23 @@
 			document.addEventListener("visibilitychange", () => { if (document.hidden) persistTotalTime(); });
 			window.addEventListener("beforeunload", persistTotalTime);
 
+			// ---- 로그인 게이트: 세션이 없으면 다이어리 대신 로그인 화면으로 보냄 ----
+			const appRootEl = document.querySelector("#app-root");
+
+			document.querySelector("#logout-button").addEventListener("click", async () => {
+				await supabaseClient.auth.signOut();
+				location.href = "PlanDoSee_login.html";
+			});
+
+			supabaseClient.auth.onAuthStateChange((event) => {
+				if (event === "SIGNED_OUT") location.href = "PlanDoSee_login.html";
+			});
+
 			async function init() {
+				const { data: { session } } = await supabaseClient.auth.getSession();
+				if (!session) { location.href = "PlanDoSee_login.html"; return; }
+				currentUser = session.user;
+
 				await loadState();
 				moodInput.value = state.mood || "";
 				reflectionText.textContent = state.reflection;
@@ -1344,6 +1364,7 @@
 				renderTodos();
 				renderReview();
 				renderRecords();
+				appRootEl.hidden = false;
 			}
 			init();
 		</script>

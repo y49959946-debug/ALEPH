@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>로그인 | 행로</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
+		<style>
+			:root {
+				--ink: #292d29;
+				--soft-ink: #747972;
+				--paper: #fffdf7;
+				--paper-deep: #f6f0e4;
+				--line: #e6dfd1;
+				--coral: #db806c;
+				--coral-pale: #f8dfd5;
+				--sage: #8da38e;
+				--shadow: 0 24px 60px rgba(82, 66, 45, 0.12);
+			}
+			* { box-sizing: border-box; }
+			[hidden] { display: none !important; }
+			html { background: #ede8dc; }
+			body { margin: 0; min-height: 100vh; display: grid; place-items: center; color: var(--ink); background: radial-gradient(circle at 15% 5%, #f7f2e8 0, transparent 31rem), #ede8dc; font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
+			button, input { font: inherit; }
+			button { cursor: pointer; }
+
+			.auth-card { position: relative; overflow: hidden; width: min(400px, calc(100% - 36px)); margin: 24px; border: 1px solid #e0d8c8; border-radius: 4px 4px 12px 4px; background: var(--paper); box-shadow: var(--shadow); }
+			.auth-card-inner { position: relative; padding: 40px 34px 36px; }
+			.auth-logo { display: block; height: 64px; width: auto; margin: 0 auto 18px; }
+			h1 { margin: 0 0 6px; font-family: "Nanum Pen Script", cursive; font-size: 34px; font-weight: 400; text-align: center; }
+			.auth-subtitle { margin: 0 0 26px; color: var(--soft-ink); font-size: 13px; text-align: center; line-height: 1.6; }
+
+			.auth-tabs { display: flex; gap: 5px; width: fit-content; margin: 0 auto 22px; padding: 5px; border: 1px solid #ded5c6; border-radius: 12px; background: rgba(255, 253, 247, .72); }
+			.auth-tab { border: 0; border-radius: 8px; padding: 8px 20px; color: var(--soft-ink); background: transparent; font-size: 14px; font-weight: 600; }
+			.auth-tab.active { color: var(--ink); background: var(--paper); box-shadow: 0 3px 10px rgba(69, 55, 38, .08); }
+
+			.auth-form { display: grid; gap: 14px; }
+			.auth-field { display: grid; gap: 6px; }
+			.auth-field label { font-size: 13px; color: var(--soft-ink); }
+			.auth-field input { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; color: var(--ink); background: var(--paper); font-size: 15px; }
+			.auth-field input:focus { outline: 0; border-color: var(--coral); box-shadow: 0 0 0 2px rgba(219, 128, 108, .18); }
+
+			.auth-submit { border: 0; border-radius: 20px; padding: 11px; margin-top: 4px; color: var(--paper); background: var(--coral); font-size: 15px; font-weight: 700; }
+			.auth-submit:hover { background: #c96e5a; }
+			.auth-submit:disabled { opacity: .6; cursor: default; }
+
+			.auth-message { min-height: 18px; margin: 2px 0 0; font-size: 13px; line-height: 1.6; text-align: center; }
+			.auth-message.is-error { color: #a4432f; }
+			.auth-message.is-info { color: #4f5c50; }
+
+			.auth-loading { display: grid; place-items: center; padding: 60px 0; color: var(--soft-ink); font-size: 14px; }
+		</style>
+	</head>
+	<body>
+		<main class="auth-card">
+			<div class="auth-card-inner">
+				<div id="auth-loading" class="auth-loading">확인 중...</div>
+
+				<div id="auth-content" hidden>
+					<img class="auth-logo" src="PlanDoSee_logo.png" alt="PlanDoSee" />
+					<h1>플랜두씨 다이어리</h1>
+					<p class="auth-subtitle">로그인하면 내가 쓴 계획과 할 일이<br />내 계정에만 안전하게 보여요.</p>
+
+					<nav class="auth-tabs" aria-label="로그인/회원가입 선택">
+						<button type="button" class="auth-tab active" data-mode="signin">로그인</button>
+						<button type="button" class="auth-tab" data-mode="signup">회원가입</button>
+					</nav>
+
+					<form id="auth-form" class="auth-form">
+						<div class="auth-field">
+							<label for="auth-email">이메일</label>
+							<input type="email" id="auth-email" autocomplete="email" required />
+						</div>
+						<div class="auth-field">
+							<label for="auth-password">비밀번호</label>
+							<input type="password" id="auth-password" autocomplete="current-password" minlength="6" required />
+						</div>
+						<div class="auth-field" id="auth-password-confirm-field" hidden>
+							<label for="auth-password-confirm">비밀번호 확인</label>
+							<input type="password" id="auth-password-confirm" autocomplete="new-password" minlength="6" />
+						</div>
+						<button type="submit" class="auth-submit" id="auth-submit">로그인</button>
+						<p class="auth-message" id="auth-message"></p>
+					</form>
+				</div>
+			</div>
+		</main>
+
+		<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+		<script src="../supabase-client.js"></script>
+		<script>
+			const loadingEl = document.querySelector("#auth-loading");
+			const contentEl = document.querySelector("#auth-content");
+			const tabButtons = document.querySelectorAll(".auth-tab");
+			const formEl = document.querySelector("#auth-form");
+			const emailInput = document.querySelector("#auth-email");
+			const passwordInput = document.querySelector("#auth-password");
+			const passwordConfirmField = document.querySelector("#auth-password-confirm-field");
+			const passwordConfirmInput = document.querySelector("#auth-password-confirm");
+			const submitButton = document.querySelector("#auth-submit");
+			const messageEl = document.querySelector("#auth-message");
+
+			let mode = "signin";
+
+			function setMode(nextMode) {
+				mode = nextMode;
+				tabButtons.forEach((tab) => tab.classList.toggle("active", tab.dataset.mode === mode));
+				passwordConfirmField.hidden = mode !== "signup";
+				passwordConfirmInput.required = mode === "signup";
+				passwordInput.autocomplete = mode === "signup" ? "new-password" : "current-password";
+				submitButton.textContent = mode === "signup" ? "회원가입" : "로그인";
+				messageEl.textContent = "";
+				messageEl.className = "auth-message";
+			}
+
+			tabButtons.forEach((tab) => tab.addEventListener("click", () => setMode(tab.dataset.mode)));
+
+			function showMessage(text, kind) {
+				messageEl.textContent = text;
+				messageEl.className = `auth-message${kind ? ` is-${kind}` : ""}`;
+			}
+
+			// 로그인/비번틀림 오류 문구를 하나로 통일 — "계정 없음"과 "비번 틀림"을 구분해서 보여주면
+			// 공격자가 어떤 이메일이 가입되어 있는지 알아낼 수 있어서(사용자 열거 공격), 일부러 같은 문구로 안내합니다.
+			function mapAuthError(error) {
+				const code = error && error.code;
+				const msg = (error && error.message) || "";
+				if (code === "email_not_confirmed" || /email not confirmed/i.test(msg)) {
+					return "가입 확인 메일을 아직 확인하지 않았어요. 메일함을 확인해주세요.";
+				}
+				if (code === "invalid_credentials" || /invalid login credentials/i.test(msg)) {
+					return "이메일 또는 비밀번호가 올바르지 않아요.";
+				}
+				if (code === "user_already_exists" || /already registered/i.test(msg)) {
+					return "이미 가입된 이메일이에요. 로그인해주세요.";
+				}
+				if (code === "weak_password" || /password/i.test(msg)) {
+					return "비밀번호는 6자 이상으로 입력해주세요.";
+				}
+				return msg || "요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.";
+			}
+
+			async function handleSignIn(email, password) {
+				const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+				if (error) { showMessage(mapAuthError(error), "error"); return; }
+				location.href = "PlanDoSee.html";
+			}
+
+			async function handleSignUp(email, password) {
+				const { data, error } = await supabaseClient.auth.signUp({ email, password });
+				if (error) { showMessage(mapAuthError(error), "error"); return; }
+				// Supabase는 이미 가입(확인완료)된 이메일로 다시 가입 요청이 오면 에러 대신
+				// identities가 빈 배열인 "가짜" 사용자를 돌려줍니다(이메일 존재 여부 유출 방지 기본 동작).
+				if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+					showMessage("이미 가입된 이메일이에요. 로그인해주세요.", "error");
+					setMode("signin");
+					return;
+				}
+				if (data.session) {
+					location.href = "PlanDoSee.html";
+					return;
+				}
+				showMessage("가입 확인 메일을 보냈어요. 메일함에서 확인한 뒤 로그인해주세요.", "info");
+				setMode("signin");
+			}
+
+			formEl.addEventListener("submit", async (event) => {
+				event.preventDefault();
+				const email = emailInput.value.trim();
+				const password = passwordInput.value;
+				if (mode === "signup" && password !== passwordConfirmInput.value) {
+					showMessage("비밀번호가 서로 달라요.", "error");
+					return;
+				}
+				submitButton.disabled = true;
+				showMessage("", null);
+				try {
+					if (mode === "signup") await handleSignUp(email, password);
+					else await handleSignIn(email, password);
+				} finally {
+					submitButton.disabled = false;
+				}
+			});
+
+			(async function init() {
+				const { data: { session } } = await supabaseClient.auth.getSession();
+				if (session) {
+					location.href = "PlanDoSee.html";
+					return;
+				}
+				loadingEl.hidden = true;
+				contentEl.hidden = false;
+				emailInput.focus();
+			})();
+		</script>
+	</body>
+</html>
