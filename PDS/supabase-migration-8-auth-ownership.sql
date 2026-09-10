@@ -5,8 +5,8 @@
 -- 실행 순서 안내:
 --   1) 이 파일을 먼저 실행 (스키마 변경 + RLS 재설정)
 --   2) Supabase 대시보드에서 회원가입을 한 번 진행
---   3) 옆의 supabase-claim-legacy-data.sql 파일을 참고해서, 로그인 없이 만들어둔 기존 테스트
---      데이터(user_id가 비어있는 행)를 방금 만든 내 계정 소유로 옮기기
+--   (로그인 없이 만들어둔 기존 테스트 데이터는 user_id가 없어 더 이상 보이지 않게 되는데,
+--    Table Editor에서 직접 지우고 새로 로그인해서 테스트 데이터를 다시 만드는 쪽을 권장합니다.)
 
 -- 1) 소유자 컬럼 추가 (기존 행은 user_id가 비어있는 채로 남고, 2단계 SQL로 나중에 채웁니다)
 alter table public.pds_plans add column if not exists user_id uuid references auth.users(id) on delete cascade;
