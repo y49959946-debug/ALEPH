@@ -149,7 +149,8 @@
 			}
 
 			async function handleSignUp(email, password) {
-				const { data, error } = await supabaseClient.auth.signUp({ email, password });
+				const redirectTo = new URL("PlanDoSee_verify.html", location.href).toString();
+				const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } });
 				if (error) { showMessage(mapAuthError(error), "error"); return; }
 				// Supabase는 이미 가입(확인완료)된 이메일로 다시 가입 요청이 오면 에러 대신
 				// identities가 빈 배열인 "가짜" 사용자를 돌려줍니다(이메일 존재 여부 유출 방지 기본 동작).

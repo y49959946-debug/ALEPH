@@ -8,10 +8,12 @@
     "method": "Supabase Auth 이메일/비밀번호(signUp / signInWithPassword)",
     "why_this_choice": "이미 Supabase를 DB로 쓰고 있어서 RLS의 auth.uid()와 그대로 맞물리고, 비밀번호 해시·세션 토큰 발급/검증을 직접 구현하지 않아도 되어 카드1 범위(가입/로그인/로그아웃 뼈대 + 소유권 기반 DB 구조)를 안전하게 빨리 만들 수 있음. 소셜 로그인이나 매직링크보다 이메일/비밀번호가 과제 설명 흐름(가입→로그인→로그아웃)을 보여주기에 가장 단순함.",
     "pages": {
-      "PDS/PlanDoSee_login.html": "로그인/회원가입 화면. 이미 세션이 있으면 즉시 PlanDoSee.html로 이동. 로그인 성공 시 PlanDoSee.html로 이동.",
+      "PDS/PlanDoSee_login.html": "로그인/회원가입 화면. 이미 세션이 있으면 즉시 PlanDoSee.html로 이동. 로그인 성공 시 PlanDoSee.html로 이동. 회원가입 시 signUp의 options.emailRedirectTo를 현재 페이지 기준 절대경로로 계산해 PlanDoSee_verify.html을 가리키게 함.",
+      "PDS/PlanDoSee_verify.html": "이메일 인증 링크의 착지 페이지. Supabase가 링크 클릭 후 이 페이지로 돌려보낼 때 URL에 실어주는 정보(해시의 access_token 또는 쿼리의 code, 실패 시 error_code)를 읽어 '이메일 인증이 완료되었습니다' 또는 실패 안내를 보여줌. 성공 시 이미 로그인된 상태이므로 '다이어리 시작하기' 버튼으로 바로 PlanDoSee.html로 이동 가능.",
       "PDS/PlanDoSee.html": "시작 시 supabaseClient.auth.getSession()으로 세션을 확인해 없으면 PlanDoSee_login.html로 이동하고, 있으면 다이어리 화면을 보여줌(#app-root는 확인 전까지 hidden). 우측 상단 '로그아웃' 버튼과 auth.onAuthStateChange(SIGNED_OUT) 리스너로 로그아웃/세션 만료 시 로그인 화면으로 돌려보냄."
     },
     "error_messages": "signInWithPassword는 '계정 없음'과 '비밀번호 틀림'에 대해 Supabase 기본 동작상 동일한 오류(invalid_credentials / 'Invalid login credentials')를 반환해 화면에서도 같은 문구('이메일 또는 비밀번호가 올바르지 않아요.')로 안내함(사용자 열거 공격 방지). signUp도 이미 가입 완료된 이메일로 재가입을 시도하면 에러 대신 identities가 빈 배열인 사용자 객체를 반환하는 Supabase 기본 동작을 이용해 '이미 가입된 이메일이에요' 문구로 안내함.",
+    "supabase_dashboard_setup": "Authentication → URL Configuration → Redirect URLs에 배포 도메인의 PDS 폴더 전체를 허용해야 함(예: https://<배포도메인>/PDS/** , 로컬 확인용으로 http://localhost:<포트>/PDS/** 도 추가). 여기 등록되지 않은 emailRedirectTo는 Supabase가 무시하고 기본 Site URL로 돌려보내서 인증 완료 페이지가 뜨지 않음.",
     "known_limits_for_next_card": "비밀번호 해시 방식/세션·토큰 만료 동작에 대한 상세 증명과, 다른 계정 자료 접근 차단(RLS)에 대한 실제 테스트는 다음 카드에서 다룸. 지금은 구조(로그인 게이트 + user_id 소유권 + RLS 정책)만 잡아둔 상태."
   },
   "tables": {
