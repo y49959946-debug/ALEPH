@@ -233,9 +233,54 @@
 
 			.toast { position: fixed; right: 24px; bottom: 24px; max-width: min(90vw, 480px); padding: 16px 22px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: var(--paper); box-shadow: var(--shadow); font-size: 20px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .25s ease; }
 			.toast.show { opacity: 1; transform: translateY(0); }
+
+			/* 프로필 위젯: 닉네임 + 아바타, 클릭하면 작은 메뉴 */
+			.profile-widget { position: relative; }
+			.profile-trigger { display: flex; align-items: center; gap: 9px; border: 0; padding: 3px 4px 3px 12px; border-radius: 20px; color: var(--ink); background: transparent; }
+			.profile-trigger:hover { background: var(--paper-deep); }
+			.profile-nickname { font-size: 13px; font-weight: 600; }
+			.profile-avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--paper); background: var(--coral); font-family: "Gowun Batang", serif; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+			.profile-menu { position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; width: 210px; padding: 10px; border: 1px solid #e0d8c8; border-radius: 10px; background: var(--paper); box-shadow: var(--shadow); }
+			.profile-menu-header { display: flex; align-items: center; gap: 10px; padding: 4px 6px 12px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+			.profile-menu-names { min-width: 0; }
+			.profile-menu-nickname { overflow: hidden; color: var(--ink); font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+			.profile-menu-email { overflow: hidden; color: var(--soft-ink); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+			.profile-menu-item { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; border-radius: 8px; padding: 9px 8px; color: var(--ink); background: transparent; font-size: 14px; text-align: left; }
+			.profile-menu-item:hover { background: var(--paper-deep); }
+
+			/* 내 계정 화면 */
+			.account-overlay { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: rgba(41, 45, 41, .38); }
+			.account-dialog { position: relative; width: min(420px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; border: 1px solid #e0d8c8; border-radius: 4px 4px 12px 4px; background: var(--paper); box-shadow: var(--shadow); }
+			.account-dialog-inner { padding: 32px 30px 30px; }
+			.account-dialog h2 { margin: 0 0 22px; font-family: "Nanum Pen Script", cursive; font-size: 30px; font-weight: 400; }
+			.account-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 50%; padding: 0; color: var(--soft-ink); background: transparent; font-size: 18px; }
+			.account-close:hover { color: var(--coral); background: var(--coral-pale); }
+			.account-section { padding: 18px 0; border-bottom: 1px solid var(--line); }
+			.account-section:last-child { border-bottom: 0; padding-bottom: 0; }
+			.account-section h3 { margin: 0 0 12px; font-size: 14px; font-weight: 700; }
+			.account-field { display: grid; gap: 6px; margin-bottom: 10px; }
+			.account-field label { font-size: 13px; color: var(--soft-ink); }
+			.account-field input { border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; color: var(--ink); background: var(--paper); font-size: 14px; }
+			.account-field input:focus { outline: 0; border-color: var(--coral); box-shadow: 0 0 0 2px rgba(219, 128, 108, .18); }
+			.account-save { border: 0; border-radius: 20px; padding: 9px 18px; color: var(--paper); background: var(--coral); font-size: 13px; font-weight: 700; }
+			.account-save:hover { background: #c96e5a; }
+			.account-save:disabled { opacity: .6; cursor: default; }
+			.account-message { min-height: 16px; margin: 8px 0 0; font-size: 12px; line-height: 1.6; }
+			.account-message.is-error { color: #a4432f; }
+			.account-message.is-info { color: #4f5c50; }
+			.account-danger-text { margin: 0 0 12px; color: var(--soft-ink); font-size: 13px; line-height: 1.6; }
+			.account-delete-button { border: 1px solid #a4432f; border-radius: 20px; padding: 8px 16px; color: #a4432f; background: transparent; font-size: 13px; font-weight: 700; }
+			.account-delete-button:hover { color: var(--paper); background: #a4432f; }
+			.account-delete-confirm { display: grid; gap: 10px; margin-top: 12px; padding: 12px; border: 1px dashed #a4432f; border-radius: 10px; }
+			.account-delete-confirm p { margin: 0; color: #a4432f; font-size: 13px; line-height: 1.6; }
+			.account-delete-actions { display: flex; gap: 10px; }
+			.account-delete-cancel { border: 1px solid var(--line); border-radius: 20px; padding: 8px 16px; color: var(--soft-ink); background: transparent; font-size: 13px; }
 			@media (max-width: 760px) {
 				.app { width: min(100% - 22px, 600px); padding-top: 20px; }
 				.topbar { margin-bottom: 23px; }
+				.topbar-actions { flex-wrap: wrap; justify-content: flex-end; }
+				.profile-nickname { display: none; }
+				.profile-trigger { padding: 3px; }
 				.paper-inner { padding: 28px 24px 36px 42px; }
 				.paper-inner::before { left: 24px; }
 				.calendar-card-inner { padding: 24px 20px; }
@@ -257,6 +302,24 @@
 				<div class="topbar-actions">
 					<button class="export-button" type="button" id="export-data-button">전체 데이터 내보내기</button>
 					<button class="export-button" type="button" id="logout-button">로그아웃</button>
+					<div class="profile-widget" id="profile-widget">
+						<button class="profile-trigger" type="button" id="profile-trigger" aria-haspopup="true" aria-expanded="false">
+							<span class="profile-nickname" id="profile-nickname-label"></span>
+							<span class="profile-avatar" id="profile-avatar" aria-hidden="true"></span>
+						</button>
+						<div class="profile-menu" id="profile-menu" hidden>
+							<div class="profile-menu-header">
+								<span class="profile-avatar" id="profile-menu-avatar" aria-hidden="true"></span>
+								<div class="profile-menu-names">
+									<div class="profile-menu-nickname" id="profile-menu-nickname"></div>
+									<div class="profile-menu-email" id="profile-menu-email"></div>
+								</div>
+							</div>
+							<button class="profile-menu-item" type="button" id="open-account-button">
+								<span aria-hidden="true">🔧</span> 내 계정
+							</button>
+						</div>
+					</div>
 				</div>
 			</header>
 
@@ -373,6 +436,53 @@
 			</section>
 		</main>
 		<div class="toast" id="toast" role="status"></div>
+
+		<div class="account-overlay" id="account-overlay" hidden>
+			<div class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="account-dialog-title">
+				<div class="account-dialog-inner">
+					<button class="account-close" type="button" id="account-close-button" aria-label="닫기">✕</button>
+					<h2 id="account-dialog-title">내 계정</h2>
+
+					<div class="account-section">
+						<h3>닉네임 변경</h3>
+						<div class="account-field">
+							<label for="account-nickname-input">닉네임</label>
+							<input type="text" id="account-nickname-input" maxlength="20" />
+						</div>
+						<button class="account-save" type="button" id="account-nickname-save">닉네임 저장</button>
+						<p class="account-message" id="account-nickname-message"></p>
+					</div>
+
+					<div class="account-section">
+						<h3>비밀번호 변경</h3>
+						<div class="account-field">
+							<label for="account-password-input">새 비밀번호</label>
+							<input type="password" id="account-password-input" autocomplete="new-password" minlength="6" />
+						</div>
+						<div class="account-field">
+							<label for="account-password-confirm-input">새 비밀번호 확인</label>
+							<input type="password" id="account-password-confirm-input" autocomplete="new-password" minlength="6" />
+						</div>
+						<button class="account-save" type="button" id="account-password-save">비밀번호 저장</button>
+						<p class="account-message" id="account-password-message"></p>
+					</div>
+
+					<div class="account-section">
+						<h3>계정 삭제</h3>
+						<p class="account-danger-text">계정을 삭제하면 내가 작성한 모든 계획, 할 일, 기록이 함께 사라지고 되돌릴 수 없어요.</p>
+						<button class="account-delete-button" type="button" id="account-delete-open">계정 삭제</button>
+						<div class="account-delete-confirm" id="account-delete-confirm" hidden>
+							<p>정말로 계정을 삭제할까요? 이 작업은 되돌릴 수 없어요.</p>
+							<div class="account-delete-actions">
+								<button class="account-delete-button" type="button" id="account-delete-confirm-button">삭제할게요</button>
+								<button class="account-delete-cancel" type="button" id="account-delete-cancel-button">취소</button>
+							</div>
+						</div>
+						<p class="account-message" id="account-delete-message"></p>
+					</div>
+				</div>
+			</div>
+		</div>
 		<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 		<script src="../supabase-client.js"></script>
 		<script>
@@ -1348,10 +1458,136 @@
 				if (event === "SIGNED_OUT") location.href = "PlanDoSee_login.html";
 			});
 
+			// ---- 프로필 위젯 (닉네임 + 아바타 + 작은 메뉴) ----
+			function getNickname() {
+				const raw = currentUser && currentUser.user_metadata && currentUser.user_metadata.nickname;
+				if (raw && raw.trim()) return raw.trim();
+				return currentUser ? currentUser.email.split("@")[0] : "";
+			}
+
+			function renderProfile() {
+				const nickname = getNickname();
+				const initial = nickname ? nickname[0].toUpperCase() : "?";
+				document.querySelector("#profile-nickname-label").textContent = nickname;
+				document.querySelector("#profile-avatar").textContent = initial;
+				document.querySelector("#profile-menu-avatar").textContent = initial;
+				document.querySelector("#profile-menu-nickname").textContent = nickname;
+				document.querySelector("#profile-menu-email").textContent = currentUser ? currentUser.email : "";
+			}
+
+			const profileTrigger = document.querySelector("#profile-trigger");
+			const profileMenu = document.querySelector("#profile-menu");
+
+			function closeProfileMenu() {
+				profileMenu.hidden = true;
+				profileTrigger.setAttribute("aria-expanded", "false");
+			}
+
+			profileTrigger.addEventListener("click", (event) => {
+				event.stopPropagation();
+				const willOpen = profileMenu.hidden;
+				closeProfileMenu();
+				if (willOpen) {
+					profileMenu.hidden = false;
+					profileTrigger.setAttribute("aria-expanded", "true");
+				}
+			});
+			document.addEventListener("click", (event) => {
+				if (!profileMenu.hidden && !document.querySelector("#profile-widget").contains(event.target)) closeProfileMenu();
+			});
+
+			// ---- 내 계정 화면 ----
+			const accountOverlay = document.querySelector("#account-overlay");
+			const accountNicknameInput = document.querySelector("#account-nickname-input");
+			const accountNicknameMessage = document.querySelector("#account-nickname-message");
+			const accountPasswordInput = document.querySelector("#account-password-input");
+			const accountPasswordConfirmInput = document.querySelector("#account-password-confirm-input");
+			const accountPasswordMessage = document.querySelector("#account-password-message");
+			const accountDeleteOpen = document.querySelector("#account-delete-open");
+			const accountDeleteConfirm = document.querySelector("#account-delete-confirm");
+			const accountDeleteMessage = document.querySelector("#account-delete-message");
+
+			function setAccountMessage(el, text, kind) {
+				el.textContent = text;
+				el.className = `account-message${kind ? ` is-${kind}` : ""}`;
+			}
+
+			function openAccountDialog() {
+				closeProfileMenu();
+				accountNicknameInput.value = getNickname();
+				accountPasswordInput.value = "";
+				accountPasswordConfirmInput.value = "";
+				setAccountMessage(accountNicknameMessage, "", null);
+				setAccountMessage(accountPasswordMessage, "", null);
+				setAccountMessage(accountDeleteMessage, "", null);
+				accountDeleteConfirm.hidden = true;
+				accountOverlay.hidden = false;
+			}
+
+			function closeAccountDialog() { accountOverlay.hidden = true; }
+
+			document.querySelector("#open-account-button").addEventListener("click", openAccountDialog);
+			document.querySelector("#account-close-button").addEventListener("click", closeAccountDialog);
+			accountOverlay.addEventListener("click", (event) => { if (event.target === accountOverlay) closeAccountDialog(); });
+			document.addEventListener("keydown", (event) => {
+				if (event.key !== "Escape") return;
+				if (!accountOverlay.hidden) closeAccountDialog();
+				else if (!profileMenu.hidden) closeProfileMenu();
+			});
+
+			document.querySelector("#account-nickname-save").addEventListener("click", async (event) => {
+				const button = event.currentTarget;
+				const nickname = accountNicknameInput.value.trim();
+				if (!nickname) { setAccountMessage(accountNicknameMessage, "닉네임을 입력해주세요.", "error"); return; }
+				button.disabled = true;
+				try {
+					const { data, error } = await supabaseClient.auth.updateUser({ data: { nickname } });
+					if (error) { setAccountMessage(accountNicknameMessage, "닉네임 저장에 실패했어요.", "error"); return; }
+					currentUser = data.user;
+					renderProfile();
+					setAccountMessage(accountNicknameMessage, "닉네임을 저장했어요.", "info");
+				} finally {
+					button.disabled = false;
+				}
+			});
+
+			document.querySelector("#account-password-save").addEventListener("click", async (event) => {
+				const button = event.currentTarget;
+				const password = accountPasswordInput.value;
+				if (password.length < 6) { setAccountMessage(accountPasswordMessage, "비밀번호는 6자 이상으로 입력해주세요.", "error"); return; }
+				if (password !== accountPasswordConfirmInput.value) { setAccountMessage(accountPasswordMessage, "비밀번호가 서로 달라요.", "error"); return; }
+				button.disabled = true;
+				try {
+					const { error } = await supabaseClient.auth.updateUser({ password });
+					if (error) { setAccountMessage(accountPasswordMessage, "비밀번호 저장에 실패했어요.", "error"); return; }
+					accountPasswordInput.value = "";
+					accountPasswordConfirmInput.value = "";
+					setAccountMessage(accountPasswordMessage, "비밀번호를 변경했어요.", "info");
+				} finally {
+					button.disabled = false;
+				}
+			});
+
+			accountDeleteOpen.addEventListener("click", () => { accountDeleteConfirm.hidden = false; });
+			document.querySelector("#account-delete-cancel-button").addEventListener("click", () => { accountDeleteConfirm.hidden = true; });
+			document.querySelector("#account-delete-confirm-button").addEventListener("click", async (event) => {
+				const button = event.currentTarget;
+				button.disabled = true;
+				try {
+					const { error } = await supabaseClient.rpc("delete_user");
+					if (error) { setAccountMessage(accountDeleteMessage, "계정 삭제에 실패했어요. 잠시 후 다시 시도해주세요.", "error"); return; }
+					await supabaseClient.auth.signOut();
+					location.href = "PlanDoSee_login.html";
+				} finally {
+					button.disabled = false;
+				}
+			});
+
 			async function init() {
 				const { data: { session } } = await supabaseClient.auth.getSession();
 				if (!session) { location.href = "PlanDoSee_login.html"; return; }
 				currentUser = session.user;
+				renderProfile();
 
 				await loadState();
 				moodInput.value = state.mood || "";

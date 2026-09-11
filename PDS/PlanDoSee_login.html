@@ -69,6 +69,10 @@
 					</nav>
 
 					<form id="auth-form" class="auth-form">
+						<div class="auth-field" id="auth-nickname-field" hidden>
+							<label for="auth-nickname">닉네임</label>
+							<input type="text" id="auth-nickname" autocomplete="nickname" maxlength="20" />
+						</div>
 						<div class="auth-field">
 							<label for="auth-email">이메일</label>
 							<input type="email" id="auth-email" autocomplete="email" required />
@@ -95,6 +99,8 @@
 			const contentEl = document.querySelector("#auth-content");
 			const tabButtons = document.querySelectorAll(".auth-tab");
 			const formEl = document.querySelector("#auth-form");
+			const nicknameField = document.querySelector("#auth-nickname-field");
+			const nicknameInput = document.querySelector("#auth-nickname");
 			const emailInput = document.querySelector("#auth-email");
 			const passwordInput = document.querySelector("#auth-password");
 			const passwordConfirmField = document.querySelector("#auth-password-confirm-field");
@@ -107,6 +113,8 @@
 			function setMode(nextMode) {
 				mode = nextMode;
 				tabButtons.forEach((tab) => tab.classList.toggle("active", tab.dataset.mode === mode));
+				nicknameField.hidden = mode !== "signup";
+				nicknameInput.required = mode === "signup";
 				passwordConfirmField.hidden = mode !== "signup";
 				passwordConfirmInput.required = mode === "signup";
 				passwordInput.autocomplete = mode === "signup" ? "new-password" : "current-password";
@@ -148,9 +156,9 @@
 				location.href = "PlanDoSee.html";
 			}
 
-			async function handleSignUp(email, password) {
+			async function handleSignUp(email, password, nickname) {
 				const redirectTo = new URL("PlanDoSee_verify.html", location.href).toString();
-				const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } });
+				const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo, data: { nickname } } });
 				if (error) { showMessage(mapAuthError(error), "error"); return; }
 				// Supabase는 이미 가입(확인완료)된 이메일로 다시 가입 요청이 오면 에러 대신
 				// identities가 빈 배열인 "가짜" 사용자를 돌려줍니다(이메일 존재 여부 유출 방지 기본 동작).
@@ -171,6 +179,11 @@
 				event.preventDefault();
 				const email = emailInput.value.trim();
 				const password = passwordInput.value;
+				const nickname = nicknameInput.value.trim();
+				if (mode === "signup" && !nickname) {
+					showMessage("닉네임을 입력해주세요.", "error");
+					return;
+				}
 				if (mode === "signup" && password !== passwordConfirmInput.value) {
 					showMessage("비밀번호가 서로 달라요.", "error");
 					return;
@@ -178,7 +191,7 @@
 				submitButton.disabled = true;
 				showMessage("", null);
 				try {
-					if (mode === "signup") await handleSignUp(email, password);
+					if (mode === "signup") await handleSignUp(email, password, nickname);
 					else await handleSignIn(email, password);
 				} finally {
 					submitButton.disabled = false;
