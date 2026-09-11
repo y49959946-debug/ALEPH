@@ -163,6 +163,8 @@
 			.todo-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
 			.plan-delete { display: grid; place-items: center; width: 20px; height: 20px; border: 0; border-radius: 50%; padding: 0; color: var(--soft-ink); background: transparent; font-size: 16px; line-height: 1; }
 			.plan-delete:hover { color: var(--coral); background: var(--coral-pale); }
+			.plan-card-delete { color: #a4432f; }
+			.plan-card-delete:hover { color: #802f21; }
 
 			.side-column { display: grid; align-content: start; gap: 32px; }
 			.mood-box { padding-bottom: 28px; border-bottom: 1px solid var(--line); }
@@ -849,6 +851,7 @@
 								<div class="plan-card-actions">
 									<button class="add-button" type="button" data-role="plan-edit" data-plan-id="${plan.id}">수정</button>
 									<button class="add-button" type="button" data-role="plan-finish" data-plan-id="${plan.id}">이 계획 마무리하기</button>
+									<button class="add-button plan-card-delete" type="button" data-role="plan-delete" data-plan-id="${plan.id}">삭제</button>
 								</div>
 							</section>
 							<p class="plan-todo-link">이 계획을 이루기 위한 할 일</p>
@@ -1121,6 +1124,26 @@
 					state.pastPlans.unshift(plan);
 					renderTodos();
 					showToast("계획을 마무리했어요. 지난 계획에서 볼 수 있어요.");
+					return;
+				}
+
+				const deletePlanButton = event.target.closest("[data-role='plan-delete']");
+				if (deletePlanButton) {
+					const planId = deletePlanButton.dataset.planId;
+					const plan = state.activePlans.find((p) => p.id === planId);
+					if (!plan) return;
+					const confirmed = confirm(`"${plan.title}" 계획을 삭제할까요? 이 계획에 속한 할 일도 함께 삭제되고, 되돌릴 수 없어요.`);
+					if (!confirmed) return;
+					const removedTodoIds = state.todos.filter((todo) => todo.planId === planId).map((todo) => todo.id);
+					state.activePlans = state.activePlans.filter((p) => p.id !== planId);
+					state.todos = state.todos.filter((todo) => todo.planId !== planId);
+					removedTodoIds.forEach((id) => delete state.executionLogsByTodo[id]);
+					renderTodos();
+					const { error: todosError } = await supabaseClient.from(TODOS_TABLE).delete().eq("plan_id", planId);
+					if (todosError) { console.error("계획의 할 일 삭제 실패", todosError); showToast("삭제에 실패했어요."); return; }
+					const { error: planError } = await supabaseClient.from(PLANS_TABLE).delete().eq("id", planId);
+					if (planError) { console.error("계획 삭제 실패", planError); showToast("삭제에 실패했어요."); return; }
+					showToast("계획을 삭제했어요.");
 					return;
 				}
 
