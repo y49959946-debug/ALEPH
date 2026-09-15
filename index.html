@@ -356,6 +356,107 @@
         line-height: 1.7;
       }
 
+      /* ---- 경계선: 여기서부터 공개 영역과 비공개 영역이 나뉩니다 ---- */
+      .zone-divider {
+        margin: 72px 0 28px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+
+      .zone-divider::before,
+      .zone-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: repeating-linear-gradient(
+          90deg,
+          rgba(125, 141, 149, 0.5) 0,
+          rgba(125, 141, 149, 0.5) 6px,
+          transparent 6px,
+          transparent 12px
+        );
+      }
+
+      /* ---- 비공개 영역: 공개 영역과 눈에 띄게 다른 톤(어두운 배경 + 잠금 배지)으로 구분 ---- */
+      .private-zone {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 28px;
+        padding: 32px clamp(20px, 4vw, 40px) 40px;
+        background: linear-gradient(160deg, #17222c 0%, #223140 100%);
+        box-shadow: 0 24px 50px rgba(10, 18, 26, 0.35);
+        color: #e7edf2;
+      }
+
+      .private-zone-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+
+      .private-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+      }
+
+      .private-caption {
+        margin: 0;
+        color: #a9b8c4;
+        font-size: 14px;
+      }
+
+      .private-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+      }
+
+      .private-card {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        padding: 20px;
+      }
+
+      .private-card h4 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+
+      .private-card p {
+        margin: 0;
+        color: #a9b8c4;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .private-placeholder {
+        grid-column: 1 / -1;
+        margin: 0;
+        padding: 28px 20px;
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        text-align: center;
+        color: #a9b8c4;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
       @media (max-width: 1024px) {
         .page-shell {
           width: min(100% - 30px, 1200px);
@@ -473,6 +574,18 @@
           <p>기술을 익히고, 더 나은 결과물을 만들며, 개인의 가치를 자연스럽게 드러내는 방향으로 나아갑니다.</p>
         </article>
       </section>
+
+      <p class="zone-divider">여기서부터 비공개 영역</p>
+
+      <section class="private-zone" aria-label="비공개 영역">
+        <div class="private-zone-header">
+          <span class="private-badge">🔒 비공개 영역</span>
+          <p class="private-caption">로그인한 나만 볼 수 있는 영역이에요. 로그인 전에는 내용이 아예 내려오지 않습니다.</p>
+        </div>
+        <div class="private-content" id="private-content">
+          <p class="private-placeholder" id="private-placeholder">불러오는 중...</p>
+        </div>
+      </section>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -538,6 +651,41 @@
           window.location.href = 'Plan_page.html';
         }
       });
+
+      // ---- 비공개 영역 ----
+      // 이 HTML에는 비공개 데이터가 전혀 들어있지 않습니다. 아래 fetch가 성공해야만
+      // 화면에 그려지고, 로그인 전에는 서버(API)가 401/403을 돌려주므로 안내 문구만 보입니다.
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+      }
+
+      async function loadPrivateContent() {
+        const contentEl = document.getElementById('private-content');
+        try {
+          const response = await fetch('/api/private/items', { credentials: 'include' });
+
+          if (response.status === 401 || response.status === 403) {
+            contentEl.innerHTML = '<p class="private-placeholder">🔒 로그인이 필요합니다. 로그인하면 이 영역에 내 비공개 항목이 표시돼요.</p>';
+            return;
+          }
+
+          if (!response.ok) throw new Error(`요청 실패: ${response.status}`);
+
+          const data = await response.json();
+          contentEl.innerHTML = '';
+          (data.items || []).forEach((item) => {
+            const card = document.createElement('article');
+            card.className = 'private-card';
+            card.innerHTML = `<h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.detail)}</p>`;
+            contentEl.appendChild(card);
+          });
+        } catch (error) {
+          console.error('비공개 영역 불러오기 실패', error);
+          contentEl.innerHTML = '<p class="private-placeholder">비공개 영역을 불러오지 못했어요. (서버가 켜져 있는지 확인해주세요)</p>';
+        }
+      }
+
+      loadPrivateContent();
     </script>
   </body>
 </html>

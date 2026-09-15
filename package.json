@@ -1,0 +1,13 @@
+{
+  "name": "aleph-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "행로 포트폴리오 사이트 정적 파일 서버 + 비공개 영역용 API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
