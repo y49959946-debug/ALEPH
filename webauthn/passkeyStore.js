@@ -46,7 +46,15 @@ function listCredentials() {
   return store.credentials.map(({ id, label, createdAt }) => ({ id, label, createdAt }));
 }
 
-function listCredentialsForExclude() {
+// 등록 게이트(부트스트랩 허용 여부)를 판단할 때 씀: 패스키가 하나라도 있는지만 빠르게 확인.
+function countCredentials() {
+  const store = readStoreFile();
+  return store ? store.credentials.length : 0;
+}
+
+// { id, transports } 형태만 필요한 두 군데(등록 시 excludeCredentials,
+// 로그인 시 allowCredentials)에서 함께 씁니다.
+function listCredentialRefs() {
   const store = readStoreFile();
   if (!store) return [];
   return store.credentials.map(({ id, transports }) => ({ id, transports }));
@@ -65,11 +73,41 @@ function addCredential(record) {
   return record;
 }
 
+// 로그인(인증) 성공 시 인증기가 보고한 사용 횟수(counter)로 갱신합니다.
+// 이 값이 뒤로 가거나 그대로면 복제된 인증기를 의심할 수 있어서(재사용 공격 탐지),
+// @simplewebauthn/server 문서에서도 반드시 저장해두라고 안내합니다.
+function updateCredentialCounter(id, counter) {
+  const store = readStoreFile();
+  if (!store) return null;
+  const credential = store.credentials.find((cred) => cred.id === id);
+  if (!credential) return null;
+  credential.counter = counter;
+  writeStoreFile(store);
+  return credential;
+}
+
+// 패스키 삭제. 삭제 후 남은 개수를 같이 돌려줘서(라우트가 응답에 그대로 실어 보낼 수 있게)
+// 호출하는 쪽에서 별도로 다시 세지 않아도 되게 합니다.
+function deleteCredential(id) {
+  const store = readStoreFile();
+  if (!store) return { deleted: false, remainingCount: 0 };
+
+  const beforeCount = store.credentials.length;
+  store.credentials = store.credentials.filter((cred) => cred.id !== id);
+  const deleted = store.credentials.length < beforeCount;
+
+  if (deleted) writeStoreFile(store);
+  return { deleted, remainingCount: store.credentials.length };
+}
+
 module.exports = {
   STORE_FILE,
   getOwner,
   listCredentials,
-  listCredentialsForExclude,
+  listCredentialRefs,
+  countCredentials,
   findCredentialById,
   addCredential,
+  updateCredentialCounter,
+  deleteCredential,
 };

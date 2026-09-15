@@ -468,6 +468,39 @@
         box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
       }
 
+      .passkey-login-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .passkey-login-row button {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      #passkey-login-button {
+        color: #fff;
+        background: linear-gradient(135deg, #2f7a5c, #4fa27f);
+      }
+
+      #passkey-logout-button {
+        color: var(--primary);
+        background: #eef2f5;
+        border: 1px solid var(--line);
+      }
+
+      .passkey-login-row button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
       .passkey-register-form {
         display: flex;
         flex-wrap: wrap;
@@ -528,9 +561,37 @@
         font-size: 14px;
       }
 
-      .passkey-item span {
+      .passkey-item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .passkey-item-date {
         color: var(--muted);
         font-size: 12px;
+      }
+
+      .passkey-delete-button {
+        flex-shrink: 0;
+        border: 1px solid #e3b5a8;
+        border-radius: 10px;
+        padding: 6px 12px;
+        color: #b3492f;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .passkey-delete-button:hover {
+        background: #fdecea;
+      }
+
+      .passkey-delete-button:disabled {
+        opacity: 0.6;
+        cursor: default;
       }
 
       @media (max-width: 1024px) {
@@ -653,12 +714,20 @@
 
       <p class="zone-divider">여기서부터 비공개 영역</p>
 
-      <section class="passkey-panel" aria-label="패스키 등록">
+      <section class="passkey-panel" aria-label="패스키 등록 및 로그인">
         <div class="private-zone-header">
-          <span class="card-tag">🔑 패스키 등록</span>
+          <span class="card-tag">🔑 패스키</span>
+          <p class="private-caption" id="passkey-auth-status">로그인 상태 확인 중...</p>
         </div>
-        <p class="route-text" style="margin-top: 0; font-size: 14px;">
-          지금은 등록만 할 수 있어요. 로그인 기능은 다음 단계에서 이 패스키로 붙일 예정입니다.
+
+        <div class="passkey-login-row">
+          <button type="button" id="passkey-login-button">패스키로 로그인</button>
+          <button type="button" id="passkey-logout-button" hidden>로그아웃</button>
+        </div>
+        <p class="passkey-message" id="passkey-login-message"></p>
+
+        <p class="route-text" style="margin-top: 4px; font-size: 14px;">
+          새 기기를 이 계정에 등록하려면 아래에서 이름을 붙여 등록해주세요.
         </p>
 
         <div class="passkey-register-form">
@@ -788,6 +857,7 @@
       const passkeyRegisterButton = document.getElementById('passkey-register-button');
       const passkeyMessageEl = document.getElementById('passkey-message');
       const passkeyListEl = document.getElementById('passkey-list');
+      let isAuthenticated = false; // refreshAuthStatus/applyAuthUi가 갱신 — 로그인 상태에 따라 삭제 버튼 노출 여부를 정함
 
       function setPasskeyMessage(text, kind) {
         passkeyMessageEl.textContent = text;
@@ -801,7 +871,7 @@
           const items = data.passkeys || [];
 
           if (!items.length) {
-            passkeyListEl.innerHTML = '<p class="private-placeholder">아직 등록된 패스키가 없어요.</p>';
+            passkeyListEl.innerHTML = '<p class="private-placeholder">등록된 패스키가 없습니다. 다음 로그인부터는 새로 등록해야 합니다.</p>';
             return;
           }
 
@@ -810,7 +880,13 @@
             const row = document.createElement('div');
             row.className = 'passkey-item';
             const dateLabel = new Date(item.createdAt).toLocaleString('ko-KR');
-            row.innerHTML = `<strong>${escapeHtml(item.label)}</strong><span>${escapeHtml(dateLabel)}</span>`;
+            row.innerHTML = `
+              <div class="passkey-item-info">
+                <strong>${escapeHtml(item.label)}</strong>
+                <span class="passkey-item-date">${escapeHtml(dateLabel)}</span>
+              </div>
+              ${isAuthenticated ? `<button type="button" class="passkey-delete-button" data-passkey-id="${escapeHtml(item.id)}">삭제</button>` : ''}
+            `;
             passkeyListEl.appendChild(row);
           });
         } catch (error) {
@@ -818,6 +894,35 @@
           passkeyListEl.innerHTML = '<p class="private-placeholder">패스키 목록을 불러오지 못했어요.</p>';
         }
       }
+
+      passkeyListEl.addEventListener('click', async (event) => {
+        const button = event.target.closest('.passkey-delete-button');
+        if (!button) return;
+
+        const id = button.dataset.passkeyId;
+        button.disabled = true;
+        try {
+          const response = await fetch(`/api/auth/passkeys/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+          const data = await response.json();
+          if (!response.ok || !data.deleted) {
+            throw new Error(data.message || '패스키 삭제에 실패했어요.');
+          }
+          setPasskeyMessage(
+            data.remainingCount === 0
+              ? '패스키를 삭제했어요. 이제 등록된 패스키가 없어요.'
+              : '패스키를 삭제했어요.',
+            'info'
+          );
+          loadPasskeyList();
+        } catch (error) {
+          console.error('패스키 삭제 실패', error);
+          setPasskeyMessage(error.message || '패스키 삭제에 실패했어요.', 'error');
+          button.disabled = false;
+        }
+      });
 
       passkeyRegisterButton.addEventListener('click', async () => {
         const label = passkeyLabelInput.value.trim() || '이름 없는 패스키';
@@ -866,6 +971,99 @@
       });
 
       loadPasskeyList();
+
+      // ---- 패스키 로그인 / 로그아웃 ----
+      const passkeyLoginButton = document.getElementById('passkey-login-button');
+      const passkeyLogoutButton = document.getElementById('passkey-logout-button');
+      const passkeyLoginMessageEl = document.getElementById('passkey-login-message');
+      const passkeyAuthStatusEl = document.getElementById('passkey-auth-status');
+
+      function setPasskeyLoginMessage(text, kind) {
+        passkeyLoginMessageEl.textContent = text;
+        passkeyLoginMessageEl.className = `passkey-message${kind ? ` is-${kind}` : ''}`;
+      }
+
+      function applyAuthUi(authenticated, label) {
+        isAuthenticated = authenticated;
+        passkeyLoginButton.hidden = authenticated;
+        passkeyLogoutButton.hidden = !authenticated;
+        passkeyAuthStatusEl.textContent = authenticated
+          ? `🔓 로그인됨${label ? ` (${label})` : ''}`
+          : '🔒 로그인 안 됨';
+        loadPasskeyList(); // 로그인 상태가 바뀌면 삭제 버튼 노출 여부도 다시 그려야 함
+      }
+
+      async function refreshAuthStatus() {
+        try {
+          const response = await fetch('/api/auth/session', { credentials: 'include' });
+          const data = await response.json();
+          applyAuthUi(Boolean(data.authenticated));
+        } catch (error) {
+          console.error('로그인 상태 확인 실패', error);
+          applyAuthUi(false);
+        }
+      }
+
+      passkeyLoginButton.addEventListener('click', async () => {
+        passkeyLoginButton.disabled = true;
+        setPasskeyLoginMessage('로그인 중...', null);
+
+        try {
+          const optionsResponse = await fetch('/api/auth/login/options', {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (!optionsResponse.ok) {
+            const err = await optionsResponse.json().catch(() => ({}));
+            throw new Error(err.message || '로그인 옵션을 받아오지 못했어요.');
+          }
+          const options = await optionsResponse.json();
+
+          // 비밀번호 입력 없이, 이 기기에 저장된 개인키로 서명만 만들어서 돌려줍니다.
+          const authenticationResponse = await SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: options });
+
+          const verifyResponse = await fetch('/api/auth/login/verify', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ authenticationResponse }),
+          });
+          const verifyData = await verifyResponse.json();
+          if (!verifyResponse.ok || !verifyData.verified) {
+            throw new Error(verifyData.message || '로그인에 실패했어요.');
+          }
+
+          setPasskeyLoginMessage(`"${verifyData.user.label}"(으)로 로그인했어요.`, 'info');
+          applyAuthUi(true, verifyData.user.label);
+          loadPrivateContent(); // 로그인 성공 → 비공개 영역을 다시 불러와서 카드가 보이게 함
+        } catch (error) {
+          if (error && error.name === 'NotAllowedError') {
+            setPasskeyLoginMessage('로그인을 취소했어요.', 'error');
+          } else {
+            console.error('패스키 로그인 실패', error);
+            setPasskeyLoginMessage(error.message || '패스키 로그인에 실패했어요.', 'error');
+          }
+        } finally {
+          passkeyLoginButton.disabled = false;
+        }
+      });
+
+      passkeyLogoutButton.addEventListener('click', async () => {
+        passkeyLogoutButton.disabled = true;
+        try {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+          setPasskeyLoginMessage('로그아웃했어요.', 'info');
+          applyAuthUi(false);
+          loadPrivateContent(); // 로그아웃 → 비공개 영역이 다시 잠긴 상태로 바뀌어야 함
+        } catch (error) {
+          console.error('로그아웃 실패', error);
+          setPasskeyLoginMessage('로그아웃에 실패했어요.', 'error');
+        } finally {
+          passkeyLogoutButton.disabled = false;
+        }
+      });
+
+      refreshAuthStatus();
     </script>
   </body>
 </html>

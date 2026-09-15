@@ -2,16 +2,16 @@ const express = require("express");
 const session = require("express-session");
 const path = require("path");
 const privateItemsRouter = require("./routes/privateItems");
-const authRegisterRouter = require("./routes/authRegister");
+const authRouter = require("./routes/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// WebAuthn 등록 과정에서 "지금 발급한 challenge"를 검증 전까지 임시로 들고 있을 곳이 필요해서
-// 세션을 붙입니다. SESSION_SECRET은 실제 배포 전에 환경변수로 반드시 바꿔주세요.
-// (로그인 기능이 아직 없으므로 지금은 이 세션이 "누가 로그인했는지"는 담지 않습니다.)
+// 이 세션은 두 가지 용도로 씁니다: (1) 등록/로그인 중 "지금 발급한 challenge"를 검증 전까지
+// 임시로 들고 있는 것, (2) 로그인에 성공한 뒤 req.session.isAuthenticated로 로그인 상태를 유지하는 것.
+// SESSION_SECRET은 실제 배포 전에 환경변수로 반드시 바꿔주세요.
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "dev-only-change-me",
@@ -30,8 +30,8 @@ app.use(
 // 항상 이 라우터(=인증 미들웨어)를 거치도록 합니다.
 app.use("/api/private", privateItemsRouter);
 
-// 패스키 등록 API.
-app.use("/api/auth", authRegisterRouter);
+// 패스키 등록/로그인/로그아웃 API.
+app.use("/api/auth", authRouter);
 
 // 브라우저용 @simplewebauthn/browser 번들만 콕 집어 내려줍니다.
 // (node_modules 전체를 정적 서빙하면 서버 소스/의존성이 그대로 노출되므로 아래 static 설정에서 막아뒀습니다)
