@@ -1,85 +1,121 @@
-// 등록된 패스키 저장소. Supabase(Postgres) 테이블에 저장합니다.
-// 스키마는 supabase/schema.sql 참고 (webauthn_owner, webauthn_credentials 두 테이블).
+// 계정 / 패스키 / 비공개 메모 저장소. Supabase(Postgres) 테이블에 저장합니다.
+// 스키마는 supabase/schema.sql 참고 (webauthn_accounts, webauthn_credentials, private_notes).
 //
-// 여기 저장되는 값은 전부 "공개키"입니다. WebAuthn 표준상 개인키는 등록에 사용한
+// 여기 저장되는 자격 증명 값은 전부 "공개키"입니다. WebAuthn 표준상 개인키는 등록에 사용한
 // 기기(브라우저의 보안 저장소, 보안키, 지문/얼굴 인식 모듈 등) 밖으로 절대 나가지 않고,
 // 이 저장소에도, 서버 코드 어디에도 개인키가 존재한 적이 없습니다.
+//
+// 이 파일 전체에서 지키는 규칙: "어떤 함수든 accountId를 파라미터로 받은 경우, 그 accountId로만
+// 필터링한 행만 돌려주거나 건드립니다." 라우트(routes/*.js)는 항상 req.session.accountId만
+// 넘기므로, 결과적으로 로그인한 계정 자신의 데이터 밖으로는 절대 나갈 수 없습니다.
 const { isoBase64URL, generateUserID } = require("@simplewebauthn/server/helpers");
 const { supabaseAdmin } = require("./supabaseAdmin");
 
-const OWNER_TABLE = "webauthn_owner";
+const ACCOUNTS_TABLE = "webauthn_accounts";
 const CREDENTIALS_TABLE = "webauthn_credentials";
-const OWNER_ROW_ID = 1; // 이 사이트는 소유자가 1명뿐이라 고정 행 하나만 씁니다.
+const NOTES_TABLE = "private_notes";
 
-// 이 사이트는 아직 다중 사용자 로그인이 없어서, "사이트 소유자" 1명의
-// WebAuthn user handle을 최초 1회 생성해서 저장해두고 계속 재사용합니다.
-async function getOwner() {
-  const { data: existing, error: selectError } = await supabaseAdmin
-    .from(OWNER_TABLE)
-    .select("owner_id,name,display_name")
-    .eq("id", OWNER_ROW_ID)
+function mapAccountRow(row) {
+  if (!row) return null;
+  return { id: row.id, userHandle: row.user_handle, username: row.username, displayName: row.display_name };
+}
+
+// WebAuthn 등록에 쓸 userID(userHandle)를 새로 하나 만듭니다. 계정을 실제로 만들기
+// 전(=회원가입 challenge 발급 시점)에 미리 필요해서 별도 함수로 뺐습니다.
+async function generateAccountUserHandle() {
+  const raw = await generateUserID();
+  return isoBase64URL.fromBuffer(raw);
+}
+
+async function findAccountByUsername(username) {
+  const { data, error } = await supabaseAdmin
+    .from(ACCOUNTS_TABLE)
+    .select("id,user_handle,username,display_name")
+    .eq("username", username)
     .maybeSingle();
-  if (selectError) throw selectError;
+  if (error) throw error;
+  return mapAccountRow(data);
+}
 
-  if (existing) {
-    return { id: existing.owner_id, name: existing.name, displayName: existing.display_name };
-  }
+async function findAccountById(id) {
+  if (!id) return null;
+  const { data, error } = await supabaseAdmin
+    .from(ACCOUNTS_TABLE)
+    .select("id,user_handle,username,display_name")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return mapAccountRow(data);
+}
 
-  const ownerID = await generateUserID();
-  const owner = {
-    id: isoBase64URL.fromBuffer(ownerID), // WebAuthn user.id (userHandle), 공개 식별자일 뿐 비밀값 아님
-    name: "owner",
-    displayName: "사이트 관리자",
-  };
-
-  const { error: insertError } = await supabaseAdmin.from(OWNER_TABLE).insert({
-    id: OWNER_ROW_ID,
-    owner_id: owner.id,
-    name: owner.name,
-    display_name: owner.displayName,
-  });
-  if (insertError) throw insertError;
-
-  return owner;
+// 새 계정 생성(= 패스키로 회원가입). username은 테이블에 unique 제약이 걸려 있어서,
+// 동시에 같은 아이디로 가입을 시도하는 경쟁 상태가 나도 DB가 최종적으로 막아줍니다
+// (이 경우 error.code === "23505").
+async function createAccount({ userHandle, username, displayName }) {
+  const { data, error } = await supabaseAdmin
+    .from(ACCOUNTS_TABLE)
+    .insert({ user_handle: userHandle, username, display_name: displayName })
+    .select("id,user_handle,username,display_name")
+    .single();
+  if (error) throw error;
+  return mapAccountRow(data);
 }
 
 // 목록 화면에는 공개키 원문까지 보낼 필요가 없어서 이름/날짜만 추려서 돌려줍니다.
-async function listCredentials() {
+// accountId로 필터링하므로, 로그인한 계정 본인의 패스키만 나옵니다.
+async function listCredentials(accountId) {
   const { data, error } = await supabaseAdmin
     .from(CREDENTIALS_TABLE)
     .select("credential_id,label,created_at")
+    .eq("account_id", accountId)
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data.map((row) => ({ id: row.credential_id, label: row.label, createdAt: row.created_at }));
 }
 
-// 등록 게이트(부트스트랩 허용 여부)를 판단할 때 씀: 패스키가 하나라도 있는지만 빠르게 확인.
-async function countCredentials() {
-  const { count, error } = await supabaseAdmin
-    .from(CREDENTIALS_TABLE)
-    .select("credential_id", { count: "exact", head: true });
-  if (error) throw error;
-  return count || 0;
-}
-
-// { id, transports } 형태만 필요한 두 군데(등록 시 excludeCredentials,
-// 로그인 시 allowCredentials)에서 함께 씁니다.
+// 로그인(인증) 시 allowCredentials에 쓸 목록. 여기서만 예외적으로 계정과 무관하게 전체를
+// 봅니다 — 로그인은 "이 패스키가 누구 것인지"를 아직 모르는 상태에서 시작하기 때문에,
+// 사이트에 등록된 모든 패스키 중 브라우저가 갖고 있는 것을 고르게 해야 합니다. credential_id와
+// transports만 담겨 있어 계정을 특정할 수 있는 정보(이름 등)는 없습니다.
 async function listCredentialRefs() {
   const { data, error } = await supabaseAdmin.from(CREDENTIALS_TABLE).select("credential_id,transports");
   if (error) throw error;
   return data.map((row) => ({ id: row.credential_id, transports: row.transports || [] }));
 }
 
+// 등록(회원가입/기기 추가) 시 excludeCredentials에 쓸 목록 — "새 기기 추가" 모드에서
+// 같은 계정에 이미 등록된 패스키를 중복 등록하지 않도록 해당 계정 것만 골라 봅니다.
+async function listCredentialRefsForAccount(accountId) {
+  const { data, error } = await supabaseAdmin
+    .from(CREDENTIALS_TABLE)
+    .select("credential_id,transports")
+    .eq("account_id", accountId);
+  if (error) throw error;
+  return data.map((row) => ({ id: row.credential_id, transports: row.transports || [] }));
+}
+
+// 한 계정에 등록된 패스키 개수. "마지막 남은 패스키는 삭제 못 하게" 막을 때 씀
+// (그거 하나까지 지우면 그 계정은 로그인할 방법이 영영 사라지므로).
+async function countCredentialsForAccount(accountId) {
+  const { count, error } = await supabaseAdmin
+    .from(CREDENTIALS_TABLE)
+    .select("credential_id", { count: "exact", head: true })
+    .eq("account_id", accountId);
+  if (error) throw error;
+  return count || 0;
+}
+
 async function findCredentialById(id) {
   const { data, error } = await supabaseAdmin
     .from(CREDENTIALS_TABLE)
-    .select("credential_id,public_key,counter,transports,label,device_type,backed_up,created_at")
+    .select("credential_id,account_id,public_key,counter,transports,label,device_type,backed_up,created_at")
     .eq("credential_id", id)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
   return {
     id: data.credential_id,
+    accountId: data.account_id,
     publicKey: data.public_key,
     counter: data.counter,
     transports: data.transports || [],
@@ -93,6 +129,7 @@ async function findCredentialById(id) {
 async function addCredential(record) {
   const { error } = await supabaseAdmin.from(CREDENTIALS_TABLE).insert({
     credential_id: record.id,
+    account_id: record.accountId,
     public_key: record.publicKey,
     counter: record.counter,
     transports: record.transports || [],
@@ -112,26 +149,57 @@ async function updateCredentialCounter(id, counter) {
   if (error) throw error;
 }
 
-// 패스키 삭제. 삭제 후 남은 개수를 같이 돌려줘서(라우트가 응답에 그대로 실어 보낼 수 있게)
-// 호출하는 쪽에서 별도로 다시 세지 않아도 되게 합니다.
-async function deleteCredential(id) {
+// 패스키 삭제. credential_id뿐 아니라 account_id까지 조건에 함께 걸어서, 혹시라도 남의
+// 패스키 id를 알아내 요청하더라도 자기 계정 것이 아니면 삭제 자체가 아예 안 먹히도록 합니다
+// (라우트에서 사전에 소유자 확인을 해도, 저장소 레벨에서 한 번 더 막아두는 이중 방어).
+async function deleteCredential(id, accountId) {
   const { error, count } = await supabaseAdmin
     .from(CREDENTIALS_TABLE)
     .delete({ count: "exact" })
-    .eq("credential_id", id);
+    .eq("credential_id", id)
+    .eq("account_id", accountId);
   if (error) throw error;
 
-  const remainingCount = await countCredentials();
+  const remainingCount = await countCredentialsForAccount(accountId);
   return { deleted: (count || 0) > 0, remainingCount };
 }
 
+// 계정별 비공개 메모 조회. 아직 한 번도 저장한 적이 없으면 빈 내용으로 취급합니다
+// (행이 없어도 에러를 내지 않고 기본값을 돌려줌).
+async function getPrivateNote(accountId) {
+  const { data, error } = await supabaseAdmin
+    .from(NOTES_TABLE)
+    .select("content,updated_at")
+    .eq("account_id", accountId)
+    .maybeSingle();
+  if (error) throw error;
+  return { content: data ? data.content : "", updatedAt: data ? data.updated_at : null };
+}
+
+// upsert(있으면 갱신, 없으면 생성)로 저장. account_id가 기본키라 계정당 메모는 항상 최대 1개입니다.
+async function savePrivateNote(accountId, content) {
+  const { data, error } = await supabaseAdmin
+    .from(NOTES_TABLE)
+    .upsert({ account_id: accountId, content, updated_at: new Date().toISOString() }, { onConflict: "account_id" })
+    .select("content,updated_at")
+    .single();
+  if (error) throw error;
+  return { content: data.content, updatedAt: data.updated_at };
+}
+
 module.exports = {
-  getOwner,
+  generateAccountUserHandle,
+  findAccountByUsername,
+  findAccountById,
+  createAccount,
   listCredentials,
   listCredentialRefs,
-  countCredentials,
+  listCredentialRefsForAccount,
+  countCredentialsForAccount,
   findCredentialById,
   addCredential,
   updateCredentialCounter,
   deleteCredential,
+  getPrivateNote,
+  savePrivateNote,
 };
