@@ -2,7 +2,7 @@
   "name": "aleph-site",
   "version": "1.0.0",
   "private": true,
-  "description": "행로 포트폴리오 사이트 정적 파일 서버 + 비공개 영역용 API",
+  "description": "행로 포트폴리오 사이트 정적 파일 서버 + 비공개 영역용 API (패스키/WebAuthn 인증, Supabase 저장소)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -10,7 +10,9 @@
   "dependencies": {
     "@simplewebauthn/browser": "^14.0.0",
     "@simplewebauthn/server": "^14.0.2",
-    "express": "^4.19.2",
-    "express-session": "^1.19.0"
+    "@supabase/supabase-js": "^2.45.4",
+    "cookie-session": "^2.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
   }
 }

@@ -18,6 +18,7 @@ const {
   deleteCredential,
 } = require("../webauthn/passkeyStore");
 const { logEvent, maskSecret } = require("../webauthn/debugLog");
+const { ensureLogId } = require("../webauthn/sessionLog");
 const { requireAuth } = require("../middleware/authStub");
 
 const router = express.Router();
@@ -29,17 +30,19 @@ const router = express.Router();
 // 등록 게이트: 패스키가 하나도 없으면(=사이트를 막 세팅하는 중) 누구나 최초 1명을 등록할 수 있게
 // 열어두고, 이미 하나라도 있으면 그때부터는 "이미 로그인한 사람만" 새 기기를 추가할 수 있습니다.
 // 이게 없으면 로그인 기능이 있어도 아무나 자기 패스키를 몰래 등록해서 남의 계정으로 로그인할 수 있습니다.
-function canStartRegistration(req) {
-  if (countCredentials() === 0) return true;
+// (Supabase 조회가 비동기라 이 함수도 비동기입니다 — 예전 파일 버전과 달라진 부분)
+async function canStartRegistration(req) {
+  const existing = await countCredentials();
+  if (existing === 0) return true;
   return Boolean(req.session && req.session.isAuthenticated);
 }
 
 // ---- 1) 등록 옵션 발급 ----
 // 매 요청마다 @simplewebauthn/server가 새 challenge를 만들어줍니다(직접 고정값을 넘기지 않음).
-// 그 challenge는 verify에서 다시 확인해야 하므로, 검증 전까지 서버 쪽 세션에 잠깐 보관합니다.
+// 그 challenge는 verify에서 다시 확인해야 하므로, 검증 전까지 서버 쪽 세션(쿠키)에 잠깐 보관합니다.
 router.post("/register/options", async (req, res) => {
-  if (!canStartRegistration(req)) {
-    logEvent("register_blocked_not_authenticated", { sessionId: maskSecret(req.sessionID) });
+  if (!(await canStartRegistration(req))) {
+    logEvent("register_blocked_not_authenticated", { sessionId: maskSecret(ensureLogId(req)) });
     return res.status(401).json({
       error: "unauthorized",
       message: "이미 등록된 패스키가 있어서, 로그인한 상태에서만 새 기기를 추가할 수 있어요.",
@@ -56,7 +59,7 @@ router.post("/register/options", async (req, res) => {
       userDisplayName: owner.displayName,
       userID: isoBase64URL.toBuffer(owner.id),
       attestationType: "none",
-      excludeCredentials: listCredentialRefs(),
+      excludeCredentials: await listCredentialRefs(),
       authenticatorSelection: {
         residentKey: "preferred",
         userVerification: "preferred",
@@ -72,7 +75,7 @@ router.post("/register/options", async (req, res) => {
     };
 
     logEvent("register_options_issued", {
-      sessionId: maskSecret(req.sessionID),
+      sessionId: maskSecret(ensureLogId(req)),
       challenge: options.challenge,
     });
 
@@ -87,9 +90,9 @@ router.post("/register/options", async (req, res) => {
 // 브라우저가 navigator.credentials.create()로 만든 attestation을 여기서 검증합니다.
 router.post("/register/verify", async (req, res) => {
   // options 발급 시점과 상태가 바뀌었을 수 있어서(예: 그 사이 로그아웃) 여기서도 다시 확인합니다.
-  if (!canStartRegistration(req)) {
+  if (!(await canStartRegistration(req))) {
     delete req.session.currentRegistration;
-    logEvent("register_blocked_not_authenticated", { sessionId: maskSecret(req.sessionID) });
+    logEvent("register_blocked_not_authenticated", { sessionId: maskSecret(ensureLogId(req)) });
     return res.status(401).json({
       error: "unauthorized",
       message: "이미 등록된 패스키가 있어서, 로그인한 상태에서만 새 기기를 추가할 수 있어요.",
@@ -115,7 +118,7 @@ router.post("/register/verify", async (req, res) => {
   const isExpired = Date.now() - pending.createdAt > CHALLENGE_TTL_MS;
   if (isExpired) {
     delete req.session.currentRegistration;
-    logEvent("register_challenge_expired", { sessionId: maskSecret(req.sessionID) });
+    logEvent("register_challenge_expired", { sessionId: maskSecret(ensureLogId(req)) });
     return res.status(400).json({ verified: false, error: "challenge_expired", message: "등록 시간이 지났어요. 다시 시도해주세요." });
   }
 
@@ -129,7 +132,7 @@ router.post("/register/verify", async (req, res) => {
     });
   } catch (error) {
     delete req.session.currentRegistration;
-    logEvent("register_verify_error", { sessionId: maskSecret(req.sessionID), message: error.message });
+    logEvent("register_verify_error", { sessionId: maskSecret(ensureLogId(req)), message: error.message });
     return res.status(400).json({ verified: false, error: "verification_failed", message: error.message });
   }
 
@@ -137,7 +140,7 @@ router.post("/register/verify", async (req, res) => {
   delete req.session.currentRegistration;
 
   if (!verification.verified || !verification.registrationInfo) {
-    logEvent("register_not_verified", { sessionId: maskSecret(req.sessionID) });
+    logEvent("register_not_verified", { sessionId: maskSecret(ensureLogId(req)) });
     return res.status(400).json({ verified: false, error: "not_verified", message: "등록을 확인하지 못했어요." });
   }
 
@@ -154,38 +157,42 @@ router.post("/register/verify", async (req, res) => {
     label: (typeof label === "string" && label.trim()) || "이름 없는 패스키",
     deviceType: credentialDeviceType,
     backedUp: credentialBackedUp,
-    createdAt: new Date().toISOString(),
   };
 
-  addCredential(record);
+  await addCredential(record);
 
   logEvent("register_verified", {
-    sessionId: maskSecret(req.sessionID),
+    sessionId: maskSecret(ensureLogId(req)),
     credentialId: record.id,
     publicKey: record.publicKey,
     label: record.label,
   });
 
-  res.json({ verified: true, credential: { id: record.id, label: record.label, createdAt: record.createdAt } });
+  res.json({ verified: true, credential: { id: record.id, label: record.label } });
 });
 
 // ---- 등록된 패스키 목록 (이름 + 등록일만, 공개키는 내려주지 않음) ----
-router.get("/passkeys", (req, res) => {
-  res.json({ passkeys: listCredentials() });
+router.get("/passkeys", async (req, res) => {
+  try {
+    res.json({ passkeys: await listCredentials() });
+  } catch (error) {
+    console.error("패스키 목록 조회 실패", error);
+    res.status(500).json({ error: "server_error", message: "패스키 목록을 불러오지 못했어요." });
+  }
 });
 
 // ---- 패스키 삭제 ----
 // 로그인한 상태에서만 지울 수 있습니다. (지금 로그인에 쓴 패스키 본인을 지우는 것도 허용 —
 // 그 경우 지금 세션은 로그아웃 전까지 유지되지만, 다음 로그인부터는 그 패스키를 못 씁니다.)
-router.delete("/passkeys/:id", requireAuth, (req, res) => {
-  const result = deleteCredential(req.params.id);
+router.delete("/passkeys/:id", requireAuth, async (req, res) => {
+  const result = await deleteCredential(req.params.id);
 
   if (!result.deleted) {
     return res.status(404).json({ deleted: false, error: "not_found", message: "그 패스키를 찾지 못했어요." });
   }
 
   logEvent("passkey_deleted", {
-    sessionId: maskSecret(req.sessionID),
+    sessionId: maskSecret(ensureLogId(req)),
     credentialId: req.params.id,
     remainingCount: result.remainingCount,
   });
@@ -198,10 +205,10 @@ router.delete("/passkeys/:id", requireAuth, (req, res) => {
 // =========================================================
 
 // ---- 3) 로그인 옵션 발급 ----
-// 등록 때와 마찬가지로 매 요청마다 새 challenge가 생기고, 검증 전까지 세션에 잠깐 둡니다.
+// 등록 때와 마찬가지로 매 요청마다 새 challenge가 생기고, 검증 전까지 세션(쿠키)에 잠깐 둡니다.
 router.post("/login/options", async (req, res) => {
   try {
-    const allowCredentials = listCredentialRefs();
+    const allowCredentials = await listCredentialRefs();
     if (!allowCredentials.length) {
       return res.status(400).json({ error: "no_passkeys", message: "등록된 패스키가 없어요. 먼저 패스키를 등록해주세요." });
     }
@@ -218,7 +225,7 @@ router.post("/login/options", async (req, res) => {
     };
 
     logEvent("login_options_issued", {
-      sessionId: maskSecret(req.sessionID),
+      sessionId: maskSecret(ensureLogId(req)),
       challenge: options.challenge,
     });
 
@@ -237,7 +244,7 @@ router.post("/login/verify", async (req, res) => {
   const pending = req.session.currentLogin;
 
   const fail = (errorCode, message, extra = {}) => {
-    logEvent("login_failed", { sessionId: maskSecret(req.sessionID), error: errorCode, ...extra });
+    logEvent("login_failed", { sessionId: maskSecret(ensureLogId(req)), error: errorCode, ...extra });
     return res.status(401).json({ verified: false, error: errorCode, message });
   };
 
@@ -256,7 +263,7 @@ router.post("/login/verify", async (req, res) => {
     return fail("challenge_expired", "로그인 시간이 지났어요. 다시 시도해주세요.");
   }
 
-  const storedCredential = findCredentialById(authenticationResponse.id);
+  const storedCredential = await findCredentialById(authenticationResponse.id);
   if (!storedCredential) {
     return fail("unknown_credential", "등록되지 않은 패스키예요.");
   }
@@ -284,13 +291,13 @@ router.post("/login/verify", async (req, res) => {
   }
 
   // 다음 로그인 때 재사용 탐지를 위해 이번에 인증기가 보고한 사용 횟수로 갱신.
-  updateCredentialCounter(storedCredential.id, verification.authenticationInfo.newCounter);
+  await updateCredentialCounter(storedCredential.id, verification.authenticationInfo.newCounter);
 
   req.session.isAuthenticated = true;
   req.session.credentialId = storedCredential.id;
 
   logEvent("login_verified", {
-    sessionId: maskSecret(req.sessionID),
+    sessionId: maskSecret(ensureLogId(req)),
     credentialId: storedCredential.id,
     label: storedCredential.label,
     newCounter: verification.authenticationInfo.newCounter,
@@ -300,17 +307,14 @@ router.post("/login/verify", async (req, res) => {
 });
 
 // ---- 5) 로그아웃 ----
+// cookie-session은 세션 데이터를 서버가 아니라 쿠키에 들고 있어서, express-session의
+// req.session.destroy()가 없습니다. req.session = null로 지우면 미들웨어가 알아서
+// 빈 값으로 쿠키를 다시 내려줍니다.
 router.post("/logout", (req, res) => {
-  const sessionId = maskSecret(req.sessionID);
-  req.session.destroy((error) => {
-    if (error) {
-      console.error("로그아웃 처리 실패", error);
-      return res.status(500).json({ ok: false, message: "로그아웃 처리에 실패했어요." });
-    }
-    res.clearCookie("connect.sid");
-    logEvent("logout", { sessionId });
-    res.json({ ok: true });
-  });
+  const sessionId = maskSecret(ensureLogId(req));
+  req.session = null;
+  logEvent("logout", { sessionId });
+  res.json({ ok: true });
 });
 
 // ---- 현재 로그인 여부 확인 (버튼 상태 등 화면 초기화용) ----

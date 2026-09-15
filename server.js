@@ -1,28 +1,34 @@
+require("dotenv").config();
+
 const express = require("express");
-const session = require("express-session");
+const cookieSession = require("cookie-session");
 const path = require("path");
 const privateItemsRouter = require("./routes/privateItems");
 const authRouter = require("./routes/auth");
-const { PORT, DATA_DIR } = require("./webauthn/rpConfig");
+const { PORT } = require("./webauthn/rpConfig");
 
 const app = express();
 
 app.use(express.json());
 
-// 이 세션은 두 가지 용도로 씁니다: (1) 등록/로그인 중 "지금 발급한 challenge"를 검증 전까지
-// 임시로 들고 있는 것, (2) 로그인에 성공한 뒤 req.session.isAuthenticated로 로그인 상태를 유지하는 것.
-// SESSION_SECRET은 실제 배포 전에 환경변수로 반드시 바꿔주세요.
+const SESSION_SECRET = process.env.SESSION_SECRET;
+if (!SESSION_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "SESSION_SECRET 환경변수가 설정되지 않았습니다. 배포 환경에서는 반드시 지정해야 합니다."
+  );
+}
+
+// 세션 데이터(등록/로그인 중 발급한 challenge, 로그인 상태)를 서버가 들고 있지 않고
+// 서명된 쿠키 안에 직접 담습니다(cookie-session). 요청마다 다른 서버 인스턴스가 응답할 수
+// 있는 서버리스 환경(Vercel 등)에서도 그대로 동작하게 하기 위한 선택입니다.
 app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "dev-only-change-me",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false, // HTTPS 배포 시 true로 바꿀 것 (localhost는 http여도 WebAuthn이 동작하는 예외 도메인)
-      maxAge: 15 * 60 * 1000,
-    },
+  cookieSession({
+    name: "session",
+    secret: SESSION_SECRET || "dev-only-change-me", // 개발 편의용 기본값. 배포 시엔 위에서 막습니다.
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production", // HTTPS로 배포됐을 때만 Secure 쿠키를 씁니다.
+    maxAge: 15 * 60 * 1000,
   })
 );
 
@@ -40,7 +46,7 @@ app.get("/vendor/simplewebauthn-browser.js", (req, res) => {
   res.sendFile(path.join(__dirname, "node_modules/@simplewebauthn/browser/dist/bundle/index.umd.min.js"));
 });
 
-// 서버 내부 파일(소스 코드, 저장된 공개키, 로그 등)이 정적 서빙으로 그대로 노출되지 않도록 차단.
+// 서버 내부 파일(소스 코드, .env, supabase 스키마 등)이 정적 서빙으로 그대로 노출되지 않도록 차단.
 const BLOCKED_STATIC_PREFIXES = [
   "/server.js",
   "/package.json",
@@ -50,24 +56,25 @@ const BLOCKED_STATIC_PREFIXES = [
   "/webauthn",
   "/node_modules",
   "/.git",
+  "/.env",
+  "/supabase",
 ];
-
-// DATA_DIR은 환경변수로 어디든 가리킬 수 있어서("/data"라고 하드코딩하면 DATA_DIR=./data-a 같은
-// 경우 안 막힘), 실제 설정된 DATA_DIR 경로를 기준으로 판단합니다.
-function isInsideDataDir(requestPath) {
-  const requestedAbsPath = path.resolve(path.join(__dirname, requestPath));
-  return requestedAbsPath === DATA_DIR || requestedAbsPath.startsWith(DATA_DIR + path.sep);
-}
 
 app.use((req, res, next) => {
   const isBlockedPrefix = BLOCKED_STATIC_PREFIXES.some((prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`));
-  if (isBlockedPrefix || isInsideDataDir(req.path)) return res.status(404).end();
+  if (isBlockedPrefix) return res.status(404).end();
   next();
 });
 
 // 기존 정적 사이트(index.html 및 하위 폴더들)는 그대로 서빙합니다.
 app.use(express.static(path.join(__dirname)));
 
-app.listen(PORT, () => {
-  console.log(`http://localhost:${PORT} 에서 서버가 실행 중입니다.`);
-});
+// Vercel 같은 서버리스 환경에서는 이 파일을 require만 하고(api/index.js) 직접 listen하지 않습니다.
+// `node server.js`로 로컬에서 직접 실행했을 때만 listen 합니다.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`http://localhost:${PORT} 에서 서버가 실행 중입니다.`);
+  });
+}
+
+module.exports = app;
