@@ -212,6 +212,7 @@ router.post("/register/verify", async (req, res) => {
         expectedChallenge: pending.challenge,
         expectedOrigin: ORIGIN,
         expectedRPID: RP_ID,
+        requireUserVerification: false,
       });
     } catch (error) {
       delete req.session.currentRegistration;
@@ -441,6 +442,7 @@ router.post("/login/verify", async (req, res) => {
           counter: storedCredential.counter,
           transports: storedCredential.transports,
         },
+          requireUserVerification: false,
       });
     } catch (error) {
       return fail("verification_failed", `서명 검증에 실패했어요. (${describeError(error)})`, { detail: describeError(error) });
