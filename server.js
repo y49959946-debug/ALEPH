@@ -9,6 +9,11 @@ const { PORT } = require("./webauthn/rpConfig");
 
 const app = express();
 
+// Vercel 같은 프록시 뒤에서 돌아갈 때 필요한 설정입니다. 이게 없으면 실제로는 HTTPS로
+// 들어온 요청인데도 Express/쿠키 라이브러리가 "암호화 안 된 연결"로 오해해서, secure 쿠키
+// (등록/로그인 challenge, 로그인 상태를 담은 세션 쿠키)가 제대로 저장되지 않을 수 있습니다.
+app.set("trust proxy", 1);
+
 app.use(express.json());
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
