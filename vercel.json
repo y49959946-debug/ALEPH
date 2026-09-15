@@ -12,9 +12,12 @@
           "Strength_page.html",
           "Haengro.png",
           "Sec_Gui.pen",
+          "supabase-client.js",
           "minigame/**",
           "Weather/**",
           "PDS/**",
+          "studio/**",
+          "project/**",
           "slime_project/**",
           "spell_project/**",
           "contracts/**"
