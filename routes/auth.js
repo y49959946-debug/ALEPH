@@ -443,7 +443,7 @@ router.post("/login/verify", async (req, res) => {
         },
       });
     } catch (error) {
-      return fail("verification_failed", "서명 검증에 실패했어요.", { detail: describeError(error) });
+      return fail("verification_failed", `서명 검증에 실패했어요. (${describeError(error)})`, { detail: describeError(error) });
     }
 
     if (!verification.verified) {
