@@ -12,8 +12,9 @@ const PRIVATE_ITEMS = [
   { id: 4, title: "비공개 메모 4", detail: "정리 안 된 링크 모음." },
 ];
 
-// requireAuth가 지금은 항상 401을 돌려주므로, 이 라우트는 실제로 동작하기 전까지
-// 항상 막혀 있습니다. 패스키 로그인이 붙으면 자연스럽게 열립니다.
+// requireAuth는 req.session.isAuthenticated만 확인하고, 이 응답은 세션이 "누구"인지와 무관하게
+// 항상 같은 PRIVATE_ITEMS를 돌려줍니다. 즉 쿼리·헤더·바디로 다른 계정의 자료를 지정해도
+// 서버가 그 값을 아예 읽지 않으므로 위조가 통할 방법이 없습니다.
 router.get("/items", requireAuth, (req, res) => {
   res.json({ items: PRIVATE_ITEMS });
 });

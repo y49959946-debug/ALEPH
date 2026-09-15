@@ -3,9 +3,9 @@ const session = require("express-session");
 const path = require("path");
 const privateItemsRouter = require("./routes/privateItems");
 const authRouter = require("./routes/auth");
+const { PORT, DATA_DIR } = require("./webauthn/rpConfig");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -48,15 +48,20 @@ const BLOCKED_STATIC_PREFIXES = [
   "/middleware",
   "/routes",
   "/webauthn",
-  "/data",
-  "/logs",
   "/node_modules",
   "/.git",
 ];
 
+// DATA_DIR은 환경변수로 어디든 가리킬 수 있어서("/data"라고 하드코딩하면 DATA_DIR=./data-a 같은
+// 경우 안 막힘), 실제 설정된 DATA_DIR 경로를 기준으로 판단합니다.
+function isInsideDataDir(requestPath) {
+  const requestedAbsPath = path.resolve(path.join(__dirname, requestPath));
+  return requestedAbsPath === DATA_DIR || requestedAbsPath.startsWith(DATA_DIR + path.sep);
+}
+
 app.use((req, res, next) => {
-  const isBlocked = BLOCKED_STATIC_PREFIXES.some((prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`));
-  if (isBlocked) return res.status(404).end();
+  const isBlockedPrefix = BLOCKED_STATIC_PREFIXES.some((prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`));
+  if (isBlockedPrefix || isInsideDataDir(req.path)) return res.status(404).end();
   next();
 });
 

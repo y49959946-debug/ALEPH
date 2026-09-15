@@ -6,8 +6,8 @@
 const fs = require("fs");
 const path = require("path");
 const { isoBase64URL, generateUserID } = require("@simplewebauthn/server/helpers");
+const { DATA_DIR } = require("./rpConfig");
 
-const DATA_DIR = path.join(__dirname, "..", "data");
 const STORE_FILE = path.join(DATA_DIR, "passkeys.json");
 
 function readStoreFile() {
