@@ -40,12 +40,16 @@ create table webauthn_credentials (
 create index webauthn_credentials_account_id_idx on webauthn_credentials(account_id);
 
 -- 계정별 비공개 메모. "다른 계정으로 로그인하면 내 메모가 절대 안 보인다"를 실제로
--- 증명하는 데이터입니다. account_id가 기본키라 계정 하나당 메모는 최대 1개입니다.
+-- 증명하는 데이터입니다. 계정 하나가 메모를 여러 개(추가/수정/삭제) 가질 수 있도록
+-- id를 따로 둔 일반 테이블입니다(= account_id는 그냥 외래키일 뿐 기본키가 아님).
 create table private_notes (
-  account_id uuid primary key references webauthn_accounts(id) on delete cascade,
-  content text not null default '',
+  id uuid primary key default gen_random_uuid(),
+  account_id uuid not null references webauthn_accounts(id) on delete cascade,
+  content text not null,
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+create index private_notes_account_id_idx on private_notes(account_id);
 
 -- 이 앱은 서버(service role 키)에서만 이 테이블들에 접근합니다.
 -- RLS를 켜두면, 혹시 모를 anon/publishable 키를 통한 접근은 기본적으로 전부 막히고

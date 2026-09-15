@@ -1,27 +1,30 @@
 const express = require("express");
 const { requireAuth } = require("../middleware/authStub");
-const { findAccountById, getPrivateNote, savePrivateNote } = require("../webauthn/passkeyStore");
+const {
+  findAccountById,
+  listPrivateNotes,
+  createPrivateNote,
+  updatePrivateNote,
+  deletePrivateNote,
+} = require("../webauthn/passkeyStore");
 
 const router = express.Router();
 
-// 데모용 고정 카드(로그인만 하면 누구에게나 같은 내용). 실제로 "계정마다 다른" 비공개
-// 데이터인지 증명하는 건 아래 note(비공개 메모) 쪽입니다.
-const PRIVATE_ITEMS = [
-  { id: 1, title: "비공개 메모 1", detail: "아직 공개하지 않은 프로젝트 아이디어 초안." },
-  { id: 2, title: "비공개 메모 2", detail: "다음 학기 계획을 정리 중인 개인 메모." },
-  { id: 3, title: "비공개 메모 3", detail: "혼자 보는 회고 기록." },
-  { id: 4, title: "비공개 메모 4", detail: "정리 안 된 링크 모음." },
-];
-
-// [계정 격리의 핵심] 아래 두 라우트 모두 "누구 것을 보여줄지"를 오직
+// [계정 격리의 핵심] 아래 모든 라우트는 "누구 것을 보여줄지·바꿀지"를 오직
 // req.session.accountId(서버가 로그인 검증 때 서명된 쿠키에 심어둔 값)로만 정합니다.
-// 클라이언트가 쿼리스트링/바디/헤더로 다른 계정의 id를 보내도 서버는 그 값을 아예 읽지
-// 않으므로, 로그인한 계정 자신의 데이터 외에는 절대 조회·수정할 방법이 없습니다.
+// URL의 :id는 "어느 메모인지"만 가리킬 뿐, 그 메모가 진짜 내 계정 것인지는
+// webauthn/passkeyStore.js의 updatePrivateNote/deletePrivateNote가 account_id까지
+// 조건에 함께 걸어서 다시 확인합니다 — 그래서 남의 메모 id를 알아내 요청해도
+// 수정·삭제가 아예 먹히지 않습니다(계정 A로 로그인한 채 계정 B의 메모 id를 넣어도 404).
+function isValidContent(content) {
+  return typeof content === "string" && content.trim().length > 0 && content.length <= 2000;
+}
+
 router.get("/items", requireAuth, async (req, res) => {
   try {
-    const [account, note] = await Promise.all([
+    const [account, items] = await Promise.all([
       findAccountById(req.session.accountId),
-      getPrivateNote(req.session.accountId),
+      listPrivateNotes(req.session.accountId),
     ]);
 
     if (!account) {
@@ -32,27 +35,57 @@ router.get("/items", requireAuth, async (req, res) => {
 
     res.json({
       account: { username: account.username, displayName: account.displayName },
-      items: PRIVATE_ITEMS,
-      note: { content: note.content },
+      items,
     });
   } catch (error) {
-    console.error("비공개 데이터 조회 실패", error);
-    res.status(500).json({ error: "server_error", message: "비공개 데이터를 불러오지 못했어요." });
+    console.error("비공개 메모 조회 실패", error);
+    res.status(500).json({ error: "server_error", message: "비공개 메모를 불러오지 못했어요." });
   }
 });
 
-router.put("/note", requireAuth, async (req, res) => {
+router.post("/items", requireAuth, async (req, res) => {
   try {
     const { content } = req.body || {};
-    if (typeof content !== "string" || content.length > 2000) {
-      return res.status(400).json({ error: "invalid_input", message: "메모 내용을 확인해주세요. (최대 2000자)" });
+    if (!isValidContent(content)) {
+      return res.status(400).json({ error: "invalid_input", message: "메모 내용을 입력해주세요. (최대 2000자)" });
     }
 
-    const saved = await savePrivateNote(req.session.accountId, content);
-    res.json({ saved: true, note: { content: saved.content } });
+    const item = await createPrivateNote(req.session.accountId, content.trim());
+    res.status(201).json({ created: true, item });
   } catch (error) {
-    console.error("비공개 메모 저장 실패", error);
-    res.status(500).json({ error: "server_error", message: "메모 저장에 실패했어요." });
+    console.error("비공개 메모 추가 실패", error);
+    res.status(500).json({ error: "server_error", message: "메모 추가에 실패했어요." });
+  }
+});
+
+router.put("/items/:id", requireAuth, async (req, res) => {
+  try {
+    const { content } = req.body || {};
+    if (!isValidContent(content)) {
+      return res.status(400).json({ error: "invalid_input", message: "메모 내용을 입력해주세요. (최대 2000자)" });
+    }
+
+    const item = await updatePrivateNote(req.params.id, req.session.accountId, content.trim());
+    if (!item) {
+      return res.status(404).json({ error: "not_found", message: "그 메모를 찾지 못했어요." });
+    }
+    res.json({ updated: true, item });
+  } catch (error) {
+    console.error("비공개 메모 수정 실패", error);
+    res.status(500).json({ error: "server_error", message: "메모 수정에 실패했어요." });
+  }
+});
+
+router.delete("/items/:id", requireAuth, async (req, res) => {
+  try {
+    const result = await deletePrivateNote(req.params.id, req.session.accountId);
+    if (!result.deleted) {
+      return res.status(404).json({ error: "not_found", message: "그 메모를 찾지 못했어요." });
+    }
+    res.json({ deleted: true });
+  } catch (error) {
+    console.error("비공개 메모 삭제 실패", error);
+    res.status(500).json({ error: "server_error", message: "메모 삭제에 실패했어요." });
   }
 });
 

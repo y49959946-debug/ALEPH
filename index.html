@@ -640,6 +640,70 @@
         cursor: default;
       }
 
+      .private-card {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .private-card-text {
+        margin: 0;
+        color: #e7edf2;
+        font-size: 14px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .private-card-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .private-card-edit-button,
+      .private-card-delete-button,
+      .private-card-save-button,
+      .private-card-cancel-button {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.06);
+        color: #e7edf2;
+      }
+
+      .private-card-delete-button {
+        border-color: #e3b5a8;
+        color: #f3b7a6;
+      }
+
+      .private-card-save-button {
+        border-color: #8fd9b6;
+        color: #8fd9b6;
+      }
+
+      .private-card-edit-button:disabled,
+      .private-card-delete-button:disabled,
+      .private-card-save-button:disabled,
+      .private-card-cancel-button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      .private-card textarea {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-family: inherit;
+        color: #e7edf2;
+        background: rgba(255, 255, 255, 0.06);
+        resize: vertical;
+      }
+
       @media (max-width: 1024px) {
         .page-shell {
           width: min(100% - 30px, 1200px);
@@ -797,18 +861,19 @@
       <section class="private-zone" aria-label="비공개 영역">
         <div class="private-zone-header">
           <span class="private-badge">🔒 비공개 영역</span>
-          <p class="private-caption" id="private-zone-caption">로그인한 나만 볼 수 있는 영역이에요. 로그인 전에는 내용이 아예 내려오지 않고, 다른 계정으로 로그인하면 다른 계정의 데이터가 보여요(서로 섞이지 않습니다).</p>
+          <p class="private-caption" id="private-zone-caption">로그인한 나만 볼 수 있는 영역이에요. 로그인 전에는 내용이 아예 내려오지 않고, 다른 계정으로 로그인하면 다른 계정의 메모가 보여요(서로 섞이지 않습니다).</p>
         </div>
         <div class="private-content" id="private-content">
           <p class="private-placeholder" id="private-placeholder">불러오는 중...</p>
         </div>
-        <div class="private-note" id="private-note-block" hidden>
-          <p class="route-text" style="margin: 0; font-size: 14px; color: #a9b8c4;">
-            나만 보이는 메모 — 다른 계정으로 로그인하면 이 내용은 전혀 보이지 않고, 그 계정 자신의 메모(비어있을 수 있음)가 대신 보여요.
+        <div class="private-note" id="private-note-add-block" hidden>
+          <p class="route-text" style="margin: 0 0 4px; font-size: 14px; color: #a9b8c4;">
+            아래에 적고 저장하면 위 목록에 새 메모로 추가돼요. 목록의 각 메모는 "수정"/"삭제" 버튼으로
+            직접 고치거나 지울 수 있어요 — 다른 계정으로 로그인하면 이 목록 자체가 그 계정 것으로 통째로 바뀝니다.
           </p>
-          <textarea id="private-note-textarea" rows="4" maxlength="2000" placeholder="여기에 나만의 메모를 적어보세요."></textarea>
+          <textarea id="private-note-textarea" rows="3" maxlength="2000" placeholder="여기에 나만의 메모를 적어보세요."></textarea>
           <br />
-          <button type="button" class="private-note-save-button" id="private-note-save-button">메모 저장</button>
+          <button type="button" class="private-note-save-button" id="private-note-save-button">메모 추가</button>
           <p class="passkey-message" id="private-note-message"></p>
         </div>
       </section>
@@ -886,77 +951,179 @@
         return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
       }
 
-      const privateNoteBlock = document.getElementById('private-note-block');
+      const privateNoteAddBlock = document.getElementById('private-note-add-block');
       const privateNoteTextarea = document.getElementById('private-note-textarea');
       const privateNoteSaveButton = document.getElementById('private-note-save-button');
       const privateNoteMessageEl = document.getElementById('private-note-message');
       const privateZoneCaptionEl = document.getElementById('private-zone-caption');
+      const privateContentEl = document.getElementById('private-content');
 
       function setPrivateNoteMessage(text, kind) {
         privateNoteMessageEl.textContent = text;
         privateNoteMessageEl.className = `passkey-message${kind ? ` is-${kind}` : ''}`;
       }
 
+      // 메모 목록을 카드로 그립니다. 카드마다 "수정"/"삭제" 버튼이 있고, data-item-id에
+      // 그 메모의 실제 id를 담아둬서 클릭 이벤트에서 어떤 메모인지 알 수 있게 합니다.
+      function renderPrivateItems(items) {
+        if (!items.length) {
+          privateContentEl.innerHTML = '<p class="private-placeholder">아직 메모가 없어요. 아래에서 첫 메모를 추가해보세요.</p>';
+          return;
+        }
+
+        privateContentEl.innerHTML = '';
+        items.forEach((item) => {
+          const card = document.createElement('article');
+          card.className = 'private-card';
+          card.dataset.itemId = item.id;
+          card.innerHTML = `
+            <p class="private-card-text">${escapeHtml(item.content)}</p>
+            <div class="private-card-actions">
+              <button type="button" class="private-card-edit-button" data-action="edit">수정</button>
+              <button type="button" class="private-card-delete-button" data-action="delete">삭제</button>
+            </div>
+          `;
+          privateContentEl.appendChild(card);
+        });
+      }
+
+      // "누구 것"을 보여줄지는 서버가 세션 쿠키 안의 accountId로만 판단하므로, 다른 계정으로
+      // 로그인하면 이 목록 자체가 그 계정 것으로 통째로 바뀝니다(절대 섞이지 않음).
       async function loadPrivateContent() {
-        const contentEl = document.getElementById('private-content');
         try {
           const response = await fetch('/api/private/items', { credentials: 'include' });
 
           if (response.status === 401 || response.status === 403) {
-            contentEl.innerHTML = '<p class="private-placeholder">🔒 로그인이 필요합니다. 로그인하면 이 영역에 내 비공개 항목이 표시돼요.</p>';
-            privateNoteBlock.hidden = true;
+            privateContentEl.innerHTML = '<p class="private-placeholder">🔒 로그인이 필요합니다. 로그인하면 이 영역에 내 비공개 메모가 표시돼요.</p>';
+            privateNoteAddBlock.hidden = true;
             return;
           }
 
           if (!response.ok) throw new Error(`요청 실패: ${response.status}`);
 
           const data = await response.json();
-          contentEl.innerHTML = '';
-          (data.items || []).forEach((item) => {
-            const card = document.createElement('article');
-            card.className = 'private-card';
-            card.innerHTML = `<h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.detail)}</p>`;
-            contentEl.appendChild(card);
-          });
+          renderPrivateItems(data.items || []);
 
           if (data.account) {
-            privateZoneCaptionEl.textContent = `"${data.account.displayName}"(${data.account.username}) 계정으로 로그인 중이에요. 이 계정의 비공개 데이터만 보여요.`;
+            privateZoneCaptionEl.textContent = `"${data.account.displayName}"(${data.account.username}) 계정으로 로그인 중이에요. 이 계정의 비공개 메모만 보여요.`;
           }
 
-          privateNoteBlock.hidden = false;
-          privateNoteTextarea.value = (data.note && data.note.content) || '';
-          setPrivateNoteMessage('', null);
+          privateNoteAddBlock.hidden = false;
         } catch (error) {
           console.error('비공개 영역 불러오기 실패', error);
-          contentEl.innerHTML = '<p class="private-placeholder">비공개 영역을 불러오지 못했어요. (서버가 켜져 있는지 확인해주세요)</p>';
-          privateNoteBlock.hidden = true;
+          privateContentEl.innerHTML = '<p class="private-placeholder">비공개 영역을 불러오지 못했어요. (서버가 켜져 있는지 확인해주세요)</p>';
+          privateNoteAddBlock.hidden = true;
         }
       }
 
       loadPrivateContent();
 
-      // 계정마다 하나뿐인 비공개 메모 저장. accountId는 서버가 세션에서만 읽으므로,
-      // 클라이언트가 아무리 애써도 다른 계정의 메모를 덮어쓸 방법이 없습니다.
+      // 새 메모 추가 — 저장되면 위 목록을 다시 불러와서 새 카드가 보이게 합니다.
       privateNoteSaveButton.addEventListener('click', async () => {
+        const content = privateNoteTextarea.value.trim();
+        if (!content) {
+          setPrivateNoteMessage('메모 내용을 입력해주세요.', 'error');
+          return;
+        }
+
         privateNoteSaveButton.disabled = true;
-        setPrivateNoteMessage('저장 중...', null);
+        setPrivateNoteMessage('추가하는 중...', null);
         try {
-          const response = await fetch('/api/private/note', {
-            method: 'PUT',
+          const response = await fetch('/api/private/items', {
+            method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: privateNoteTextarea.value }),
+            body: JSON.stringify({ content }),
           });
           const data = await response.json();
-          if (!response.ok || !data.saved) {
-            throw new Error(data.message || '메모 저장에 실패했어요.');
+          if (!response.ok || !data.created) {
+            throw new Error(data.message || '메모 추가에 실패했어요.');
           }
-          setPrivateNoteMessage('메모를 저장했어요.', 'info');
+          privateNoteTextarea.value = '';
+          setPrivateNoteMessage('메모를 추가했어요.', 'info');
+          loadPrivateContent();
         } catch (error) {
-          console.error('메모 저장 실패', error);
-          setPrivateNoteMessage(error.message || '메모 저장에 실패했어요.', 'error');
+          console.error('메모 추가 실패', error);
+          setPrivateNoteMessage(error.message || '메모 추가에 실패했어요.', 'error');
         } finally {
           privateNoteSaveButton.disabled = false;
+        }
+      });
+
+      // 목록 안의 수정/삭제/저장/취소는 카드마다 버튼을 따로 안 만들고
+      // private-content 하나에 이벤트 위임으로 처리합니다(카드가 다시 그려져도 계속 동작).
+      privateContentEl.addEventListener('click', async (event) => {
+        const actionButton = event.target.closest('[data-action]');
+        if (!actionButton) return;
+        const card = actionButton.closest('.private-card');
+        if (!card) return;
+        const itemId = card.dataset.itemId;
+        const action = actionButton.dataset.action;
+
+        if (action === 'delete') {
+          actionButton.disabled = true;
+          try {
+            const response = await fetch(`/api/private/items/${encodeURIComponent(itemId)}`, {
+              method: 'DELETE',
+              credentials: 'include',
+            });
+            const data = await response.json();
+            if (!response.ok || !data.deleted) {
+              throw new Error(data.message || '메모 삭제에 실패했어요.');
+            }
+            setPrivateNoteMessage('메모를 삭제했어요.', 'info');
+            loadPrivateContent();
+          } catch (error) {
+            console.error('메모 삭제 실패', error);
+            setPrivateNoteMessage(error.message || '메모 삭제에 실패했어요.', 'error');
+            actionButton.disabled = false;
+          }
+          return;
+        }
+
+        if (action === 'edit') {
+          const currentText = card.querySelector('.private-card-text').textContent;
+          card.innerHTML = `
+            <textarea class="private-card-edit-textarea" maxlength="2000" rows="3">${escapeHtml(currentText)}</textarea>
+            <div class="private-card-actions">
+              <button type="button" class="private-card-save-button" data-action="save">저장</button>
+              <button type="button" class="private-card-cancel-button" data-action="cancel">취소</button>
+            </div>
+          `;
+          return;
+        }
+
+        if (action === 'cancel') {
+          loadPrivateContent();
+          return;
+        }
+
+        if (action === 'save') {
+          const textarea = card.querySelector('.private-card-edit-textarea');
+          const newContent = textarea.value.trim();
+          if (!newContent) {
+            setPrivateNoteMessage('메모 내용을 입력해주세요.', 'error');
+            return;
+          }
+          actionButton.disabled = true;
+          try {
+            const response = await fetch(`/api/private/items/${encodeURIComponent(itemId)}`, {
+              method: 'PUT',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ content: newContent }),
+            });
+            const data = await response.json();
+            if (!response.ok || !data.updated) {
+              throw new Error(data.message || '메모 수정에 실패했어요.');
+            }
+            setPrivateNoteMessage('메모를 수정했어요.', 'info');
+            loadPrivateContent();
+          } catch (error) {
+            console.error('메모 수정 실패', error);
+            setPrivateNoteMessage(error.message || '메모 수정에 실패했어요.', 'error');
+            actionButton.disabled = false;
+          }
         }
       });
 

@@ -164,27 +164,55 @@ async function deleteCredential(id, accountId) {
   return { deleted: (count || 0) > 0, remainingCount };
 }
 
-// 계정별 비공개 메모 조회. 아직 한 번도 저장한 적이 없으면 빈 내용으로 취급합니다
-// (행이 없어도 에러를 내지 않고 기본값을 돌려줌).
-async function getPrivateNote(accountId) {
-  const { data, error } = await supabaseAdmin
-    .from(NOTES_TABLE)
-    .select("content,updated_at")
-    .eq("account_id", accountId)
-    .maybeSingle();
-  if (error) throw error;
-  return { content: data ? data.content : "", updatedAt: data ? data.updated_at : null };
+function mapNoteRow(row) {
+  if (!row) return null;
+  return { id: row.id, content: row.content, createdAt: row.created_at, updatedAt: row.updated_at };
 }
 
-// upsert(있으면 갱신, 없으면 생성)로 저장. account_id가 기본키라 계정당 메모는 항상 최대 1개입니다.
-async function savePrivateNote(accountId, content) {
+// 계정별 비공개 메모 목록. accountId로 필터링하므로, 로그인한 계정 본인의 메모만 나옵니다.
+// 최신 메모가 위로 오도록 최근 수정순으로 정렬합니다.
+async function listPrivateNotes(accountId) {
   const { data, error } = await supabaseAdmin
     .from(NOTES_TABLE)
-    .upsert({ account_id: accountId, content, updated_at: new Date().toISOString() }, { onConflict: "account_id" })
-    .select("content,updated_at")
+    .select("id,content,created_at,updated_at")
+    .eq("account_id", accountId)
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return data.map(mapNoteRow);
+}
+
+async function createPrivateNote(accountId, content) {
+  const { data, error } = await supabaseAdmin
+    .from(NOTES_TABLE)
+    .insert({ account_id: accountId, content })
+    .select("id,content,created_at,updated_at")
     .single();
   if (error) throw error;
-  return { content: data.content, updatedAt: data.updated_at };
+  return mapNoteRow(data);
+}
+
+// id뿐 아니라 account_id까지 조건에 함께 걸어서, 남의 메모 id를 알아내도 수정이
+// 아예 먹히지 않도록 합니다(패스키 삭제와 같은 이중 방어 패턴).
+async function updatePrivateNote(id, accountId, content) {
+  const { data, error } = await supabaseAdmin
+    .from(NOTES_TABLE)
+    .update({ content, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("account_id", accountId)
+    .select("id,content,created_at,updated_at")
+    .maybeSingle();
+  if (error) throw error;
+  return mapNoteRow(data);
+}
+
+async function deletePrivateNote(id, accountId) {
+  const { error, count } = await supabaseAdmin
+    .from(NOTES_TABLE)
+    .delete({ count: "exact" })
+    .eq("id", id)
+    .eq("account_id", accountId);
+  if (error) throw error;
+  return { deleted: (count || 0) > 0 };
 }
 
 module.exports = {
@@ -200,6 +228,8 @@ module.exports = {
   addCredential,
   updateCredentialCounter,
   deleteCredential,
-  getPrivateNote,
-  savePrivateNote,
+  listPrivateNotes,
+  createPrivateNote,
+  updatePrivateNote,
+  deletePrivateNote,
 };
