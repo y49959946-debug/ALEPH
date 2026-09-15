@@ -457,6 +457,82 @@
         line-height: 1.7;
       }
 
+      /* ---- 패스키 등록 패널: 공개/비공개 어느 쪽도 아닌 "계정 관리" 성격이라
+         밝은 톤으로 두 영역 사이에 별도로 구분합니다 ---- */
+      .passkey-panel {
+        margin-top: 28px;
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        padding: 28px clamp(20px, 4vw, 36px) 32px;
+        background: var(--panel-strong);
+        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
+      }
+
+      .passkey-register-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 18px 0 6px;
+      }
+
+      .passkey-register-form input {
+        flex: 1;
+        min-width: 200px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 14px;
+        color: var(--primary);
+        background: #fff;
+      }
+
+      .passkey-register-form button {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        background: linear-gradient(135deg, #1d2c3b, #46617a);
+        cursor: pointer;
+      }
+
+      .passkey-register-form button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      .passkey-message {
+        min-height: 18px;
+        margin: 6px 0 20px;
+        font-size: 13px;
+      }
+
+      .passkey-message.is-info { color: #2f7a5c; }
+      .passkey-message.is-error { color: #b3492f; }
+
+      .passkey-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .passkey-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #f8fafc;
+        font-size: 14px;
+      }
+
+      .passkey-item span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
       @media (max-width: 1024px) {
         .page-shell {
           width: min(100% - 30px, 1200px);
@@ -577,6 +653,25 @@
 
       <p class="zone-divider">여기서부터 비공개 영역</p>
 
+      <section class="passkey-panel" aria-label="패스키 등록">
+        <div class="private-zone-header">
+          <span class="card-tag">🔑 패스키 등록</span>
+        </div>
+        <p class="route-text" style="margin-top: 0; font-size: 14px;">
+          지금은 등록만 할 수 있어요. 로그인 기능은 다음 단계에서 이 패스키로 붙일 예정입니다.
+        </p>
+
+        <div class="passkey-register-form">
+          <input type="text" id="passkey-label-input" placeholder="예: 내 노트북 - 크롬" maxlength="40" />
+          <button type="button" id="passkey-register-button">패스키 등록</button>
+        </div>
+        <p class="passkey-message" id="passkey-message"></p>
+
+        <div class="passkey-list" id="passkey-list">
+          <p class="private-placeholder" id="passkey-list-placeholder">등록된 패스키를 불러오는 중...</p>
+        </div>
+      </section>
+
       <section class="private-zone" aria-label="비공개 영역">
         <div class="private-zone-header">
           <span class="private-badge">🔒 비공개 영역</span>
@@ -590,6 +685,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="supabase-client.js"></script>
+    <script src="/vendor/simplewebauthn-browser.js"></script>
     <script>
       const navItems = document.querySelectorAll('.nav-item');
 
@@ -686,6 +782,90 @@
       }
 
       loadPrivateContent();
+
+      // ---- 패스키 등록 ----
+      const passkeyLabelInput = document.getElementById('passkey-label-input');
+      const passkeyRegisterButton = document.getElementById('passkey-register-button');
+      const passkeyMessageEl = document.getElementById('passkey-message');
+      const passkeyListEl = document.getElementById('passkey-list');
+
+      function setPasskeyMessage(text, kind) {
+        passkeyMessageEl.textContent = text;
+        passkeyMessageEl.className = `passkey-message${kind ? ` is-${kind}` : ''}`;
+      }
+
+      async function loadPasskeyList() {
+        try {
+          const response = await fetch('/api/auth/passkeys');
+          const data = await response.json();
+          const items = data.passkeys || [];
+
+          if (!items.length) {
+            passkeyListEl.innerHTML = '<p class="private-placeholder">아직 등록된 패스키가 없어요.</p>';
+            return;
+          }
+
+          passkeyListEl.innerHTML = '';
+          items.forEach((item) => {
+            const row = document.createElement('div');
+            row.className = 'passkey-item';
+            const dateLabel = new Date(item.createdAt).toLocaleString('ko-KR');
+            row.innerHTML = `<strong>${escapeHtml(item.label)}</strong><span>${escapeHtml(dateLabel)}</span>`;
+            passkeyListEl.appendChild(row);
+          });
+        } catch (error) {
+          console.error('패스키 목록 불러오기 실패', error);
+          passkeyListEl.innerHTML = '<p class="private-placeholder">패스키 목록을 불러오지 못했어요.</p>';
+        }
+      }
+
+      passkeyRegisterButton.addEventListener('click', async () => {
+        const label = passkeyLabelInput.value.trim() || '이름 없는 패스키';
+        passkeyRegisterButton.disabled = true;
+        setPasskeyMessage('등록 중...', null);
+
+        try {
+          const optionsResponse = await fetch('/api/auth/register/options', {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (!optionsResponse.ok) {
+            const err = await optionsResponse.json().catch(() => ({}));
+            throw new Error(err.message || '등록 옵션을 받아오지 못했어요.');
+          }
+          const options = await optionsResponse.json();
+
+          // 브라우저(운영체제/보안키)에 등록을 요청. 여기서 개인키가 만들어지고,
+          // 개인키는 이 기기를 절대 벗어나지 않습니다. 서버로는 공개키만 돌아갑니다.
+          const attestationResponse = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options });
+
+          const verifyResponse = await fetch('/api/auth/register/verify', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ attestationResponse, label }),
+          });
+          const verifyData = await verifyResponse.json();
+          if (!verifyResponse.ok || !verifyData.verified) {
+            throw new Error(verifyData.message || '등록을 확인하지 못했어요.');
+          }
+
+          setPasskeyMessage(`"${verifyData.credential.label}" 패스키를 등록했어요.`, 'info');
+          passkeyLabelInput.value = '';
+          loadPasskeyList();
+        } catch (error) {
+          if (error && error.name === 'NotAllowedError') {
+            setPasskeyMessage('등록을 취소했어요.', 'error');
+          } else {
+            console.error('패스키 등록 실패', error);
+            setPasskeyMessage(error.message || '패스키 등록에 실패했어요.', 'error');
+          }
+        } finally {
+          passkeyRegisterButton.disabled = false;
+        }
+      });
+
+      loadPasskeyList();
     </script>
   </body>
 </html>
