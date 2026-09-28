@@ -8,6 +8,8 @@
         "includeFiles": [
           "index.html",
           "Intro.html",
+          "Paper.html",
+          "ritual_scatter.png",
           "Plan_page.html",
           "Preference_page.html",
           "Strength_page.html",
