@@ -1041,6 +1041,29 @@
         .number-card .source { font-size: 11px; }
         .work-card .work-name { font-size: 19px; }
       }
+
+      .number-card .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 5px 10px 5px 8px;
+        border-radius: 999px;
+        background: #e8eee5;
+        color: #436b4b;
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .number-card .status-badge::before {
+        display: block;
+        flex: 0 0 7px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #4f9858;
+        box-shadow: 0 0 0 3px rgba(79, 152, 88, 0.14), 0 0 9px rgba(79, 152, 88, 0.32);
+      }
     </style>
   </head>
   <body>
