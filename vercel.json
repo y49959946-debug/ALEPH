@@ -7,6 +7,7 @@
       "config": {
         "includeFiles": [
           "index.html",
+          "Intro.html",
           "Plan_page.html",
           "Preference_page.html",
           "Strength_page.html",
