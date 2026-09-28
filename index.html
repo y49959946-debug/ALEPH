@@ -1650,6 +1650,7 @@
         display: inline-block;
         padding: 0.08em 0.2em;
         background: #ded8c9;
+        border-radius: 0.18em;
       }
 
       .summary-card p {
@@ -1736,6 +1737,18 @@
 
       .summary::before { letter-spacing: 0.1em; }
       .passkey-panel::before { letter-spacing: 0.1em; }
+      .summary-card { container-type: inline-size; }
+
+      .summary-card h3 {
+        max-width: none;
+        font-size: min(clamp(27px, 3vw, 40px), 8.4cqi);
+      }
+
+      .summary-card h3 .line { white-space: nowrap; }
+
+      @media (max-width: 680px) {
+        .summary-card h3 { font-size: min(30px, 8.4cqi); }
+      }
     </style>
   </head>
   <body>
@@ -1806,20 +1819,20 @@
       <section class="summary" aria-label="핵심 요약">
         <article class="summary-card clickable" id="strength-card" role="link" tabindex="0">
           <div class="card-tag">강점</div>
-          <h3><span class="topic-highlight">나는<br />칼 같은 사람입니다.</span></h3>
+          <h3><span class="topic-highlight">나는<br /><span class="line">칼 같은 사람입니다.</span></span></h3>
           <p>칼은 갈고닦을수록 날카로워지고,
              사용하는 목적에 따라 그 쓰임이 달라집니다.</p>
         </article>
 
         <article class="summary-card clickable" id="preference-card" role="link" tabindex="0">
           <div class="card-tag">취향</div>
-          <h3><span class="topic-highlight">나는<br />청사진 같은 사람입니다.</span></h3>
+          <h3><span class="topic-highlight">나는<br /><span class="line">청사진 같은 사람입니다.</span></span></h3>
           <p>아직 보이지 않는 목표를 구체적인 형태로 그려내고, 하나씩 현실로 완성합니다.</p>
         </article>
 
         <article class="summary-card clickable" id="plan-card" role="link" tabindex="0">
           <div class="card-tag">계획</div>
-          <h3><span class="topic-highlight">앞으로의<br />성장 방향</span></h3>
+          <h3><span class="topic-highlight"><span class="line">앞으로의 성장 방향</span></span></h3>
           <p>기술을 익히고, 더 나은 결과물을 만들며, 개인의 가치를 자연스럽게 드러내는 방향으로 나아갑니다.</p>
         </article>
       </section>

@@ -367,6 +367,285 @@
           font-size: 36px;
         }
       }
+      /* 메인·자기소개 페이지와 같은 톤으로 맞춘 리디자인 */
+      :root {
+        --bg-top: #f5f2ea;
+        --bg-bottom: #f5f2ea;
+        --line: #d1d0c7;
+        --primary: #202724;
+        --secondary: #46514a;
+        --muted: #68706a;
+        --accent: #5b7163;
+      }
+
+      html, body {
+        font-family: "Pretendard", "SUIT", "Noto Sans KR", sans-serif;
+        background: #f5f2ea;
+        color: var(--primary);
+      }
+
+      body { overflow-x: clip; }
+
+      .page-shell {
+        width: min(1240px, calc(100% - 96px));
+        padding: 20px 0 100px;
+      }
+
+      .topbar { top: 0; }
+      .topbar::after { border-color: rgba(83, 94, 86, 0.2); }
+
+      .nav-wrap {
+        padding: 12px 0 14px;
+        background: rgba(245, 242, 234, 0.96);
+        backdrop-filter: none;
+      }
+
+      .nav-brand:hover { background: transparent; box-shadow: none; }
+
+      .nav-brand-word {
+        color: #59655e;
+        font-family: "Georgia", "Noto Serif KR", serif;
+        transform: none;
+      }
+
+      .nav-right { gap: clamp(14px, 2.2vw, 30px); }
+
+      .nav-button {
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        font-weight: 650;
+        transition: color 180ms ease;
+      }
+
+      .nav-button:hover,
+      .nav-button.active { color: var(--accent); }
+
+      .nav-button.current-section {
+        padding: 8px 0;
+        color: var(--accent);
+        box-shadow: inset 0 -1px var(--accent);
+      }
+
+      .dropdown-menu {
+        top: calc(100% + 12px);
+        border-color: var(--line);
+        border-radius: 4px;
+        background: #fbfaf7;
+        box-shadow: 0 14px 30px rgba(42, 48, 43, 0.1);
+        gap: 2px;
+      }
+
+      .dropdown-menu a {
+        border-radius: 2px;
+        background: transparent;
+      }
+
+      .dropdown-menu a:hover { background: #eeeee8; }
+
+      .dropdown-menu a[aria-current="page"] {
+        background: #eeeee8;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .hero-copy {
+        max-width: 940px;
+        margin-top: clamp(82px, 11vh, 124px);
+      }
+
+      .hero-copy .eyebrow {
+        margin-bottom: 18px;
+        color: var(--accent);
+        font-family: Arial, "Helvetica Neue", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+      }
+
+      .hero-copy h1 {
+        color: #202724;
+        font-size: clamp(38px, 4.4vw, 58px);
+        line-height: 1.2;
+        letter-spacing: 0;
+        font-weight: 760;
+        word-break: keep-all;
+      }
+
+      .hero-copy h1 .topic-highlight {
+        display: inline-block;
+        padding: 0.08em 0.2em;
+        background: #ded8c9;
+        border-radius: 0.18em;
+      }
+
+      .hero-copy p {
+        max-width: 720px;
+        margin-top: 22px;
+        color: #46514a;
+        font-size: 17px;
+        line-height: 1.8;
+        font-weight: 500;
+        word-break: keep-all;
+      }
+
+      .story-panel {
+        max-width: 910px;
+        margin: 64px 0 0 7%;
+        padding: 4px 0 4px clamp(24px, 5vw, 60px);
+        border: 0;
+        border-left: 2px solid var(--accent);
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        overflow: visible;
+      }
+
+      .story-panel::before,
+      .story-panel::after { display: none; }
+
+      .quote-mark {
+        margin-bottom: 4px;
+        color: rgba(91, 113, 99, 0.45);
+        font-family: "Georgia", serif;
+        font-size: 48px;
+      }
+
+      .story-panel p {
+        max-width: 60ch;
+        color: #202724;
+        font-size: 18px;
+        line-height: 1.9;
+        font-weight: 500;
+        word-break: keep-all;
+      }
+
+      .story-grid {
+        margin-top: 110px;
+        padding-top: 40px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        border-top: 1px solid rgba(83, 94, 86, 0.28);
+      }
+
+      .summary-card,
+      .summary-card:nth-child(n) {
+        min-width: 0;
+        min-height: 0;
+        padding: 0 30px;
+        gap: 12px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .summary-card:first-child { padding-left: 0; }
+      .summary-card:last-child { padding-right: 0; }
+
+      .summary-card + .summary-card {
+        border-left: 1px solid rgba(82, 102, 90, 0.24);
+      }
+
+      .story-card-label {
+        color: #536b5e;
+        font-family: Arial, "Helvetica Neue", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+      }
+
+      .summary-card h3 {
+        margin: 6px 0 8px;
+        color: #202724;
+        font-size: clamp(22px, 2.2vw, 28px);
+        line-height: 1.36;
+        font-weight: 700;
+        word-break: keep-all;
+      }
+
+      .summary-card p {
+        color: #46514a;
+        font-size: 15px;
+        line-height: 1.85;
+        word-break: keep-all;
+      }
+
+      .journey-pager {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        margin-top: 120px;
+        padding-top: 22px;
+        border-top: 1px solid rgba(83, 94, 86, 0.28);
+      }
+
+      .pager-link {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        color: #202724;
+        text-decoration: none;
+        font-size: clamp(18px, 2vw, 22px);
+        font-weight: 700;
+        transition: color 180ms ease;
+      }
+
+      .pager-link span {
+        color: #536b5e;
+        font-family: Arial, "Helvetica Neue", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+      }
+
+      .pager-link.next {
+        align-items: flex-end;
+        text-align: right;
+      }
+
+      .pager-link:hover { color: #3f5b4c; }
+
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+      }
+
+      @media (max-width: 1024px) {
+        .page-shell { width: min(calc(100% - 56px), 900px); }
+        .story-grid { grid-template-columns: 1fr; }
+        .summary-card,
+        .summary-card:nth-child(n) { padding: 28px 0; }
+        .summary-card:first-child { padding-top: 0; }
+        .summary-card + .summary-card {
+          border-left: 0;
+          border-top: 1px solid rgba(82, 102, 90, 0.2);
+        }
+      }
+
+      @media (max-width: 680px) {
+        .page-shell { width: calc(100% - 40px); padding: 12px 0 72px; }
+        .nav-wrap { gap: 8px; padding: 10px 0; }
+        .nav-left { height: 38px; }
+        .nav-brand-word { font-size: 33px; }
+        .nav-right { gap: 10px; }
+        .nav-button { font-size: 11px; gap: 4px; }
+        .nav-button.current-section { padding: 7px 0; }
+        .nav-button .caret { font-size: 8px; }
+        .hero-copy { margin-top: 62px; }
+        .hero-copy h1 { font-size: 32px; }
+        .hero-copy p { font-size: 16px; }
+        .story-panel { margin: 44px 0 0 4%; padding-left: 20px; }
+        .story-panel p { font-size: 16px; }
+        .story-grid { margin-top: 72px; padding-top: 30px; }
+        .journey-pager { margin-top: 80px; }
+        .pager-link { font-size: 17px; }
+      }
+
+      @media (max-width: 370px) {
+        .nav-right { gap: 7px; }
+        .nav-button { font-size: 10px; }
+      }
     </style>
   </head>
   <body>
@@ -385,10 +664,14 @@
             </div>
 
             <div class="nav-item">
-              <button class="nav-button nav-badge" type="button">행로 <span class="caret">▼</span></button>
+              <a class="nav-button" href="Intro.html">자기소개</a>
+            </div>
+
+            <div class="nav-item">
+              <button class="nav-button current-section" type="button">행로 <span class="caret">▼</span></button>
               <div class="dropdown-menu">
                 <a href="Strength_page.html">강점</a>
-                <a href="Preference_page.html">취향</a>
+                <a href="Preference_page.html" aria-current="page">취향</a>
                 <a href="Plan_page.html">앞으로의 계획</a>
               </div>
             </div>
@@ -409,7 +692,7 @@
       <main>
         <section class="hero-copy">
           <p class="eyebrow">Personal Journey · 취향</p>
-          <h1>계획과 규칙성을 좋아합니다.</h1>
+          <h1><span class="topic-highlight">계획과 규칙성을 좋아합니다.</span></h1>
           <p>
             무언가를 시작할 때는 구체적인 틀이 있을수록 더 안정적이고 효과적으로 움직일 수 있습니다.
             작은 습관부터 큰 목표까지, 체계적인 흐름을 만드는 일을 좋아하며 이를 통해 마음을 정리하고
@@ -470,6 +753,10 @@
             </p>
           </article>
         </section>
+        <nav class="journey-pager" aria-label="행로 페이지 이동">
+          <a class="pager-link prev" href="Strength_page.html"><span>← 이전</span>강점</a>
+          <a class="pager-link next" href="Plan_page.html"><span>다음 →</span>앞으로의 계획</a>
+        </nav>
       </main>
     </div>
 
