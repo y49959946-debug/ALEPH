@@ -4,3 +4,5 @@ data-*/
 logs/
 .env
 .vercel
+Claude outputs/인증_구현_설명서.docx
+Claude outputs/인증_구현_설명서.md
