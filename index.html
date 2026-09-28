@@ -1587,6 +1587,102 @@
         .hero-copy h1 { font-size: 34px; }
         .hero-copy h1 span { margin-left: 16px; white-space: nowrap; }
       }
+
+      .hero { min-height: min(570px, calc(100svh - 120px)); }
+
+      .summary {
+        --chapter-inset: max(48px, calc((100vw - 1320px) / 2));
+        width: 100vw;
+        margin-top: 54px;
+        margin-left: calc(50% - 50vw);
+        padding: 100px var(--chapter-inset) 86px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        background: #e9e6db;
+        border: 0;
+      }
+
+      .summary::before {
+        top: 40px;
+        left: var(--chapter-inset);
+        color: #52665a;
+        font-size: 12px;
+      }
+
+      .summary-card,
+      .summary-card:nth-child(n) {
+        min-width: 0;
+        margin: 0;
+        padding: 0 30px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .summary-card:first-child { padding-left: 0; }
+
+      .summary-card + .summary-card {
+        border-left: 1px solid rgba(82, 102, 90, 0.24);
+      }
+
+      .summary-card::before {
+        margin-bottom: 20px;
+        color: #52665a;
+        font-size: 17px;
+      }
+
+      .summary-card .card-tag {
+        color: #59625d;
+        font-size: 12px;
+      }
+
+      .summary-card h3 {
+        max-width: 15ch;
+        margin: 17px 0 14px;
+        color: #202724;
+        font-size: clamp(30px, 3vw, 40px);
+        line-height: 1.34;
+        font-weight: 700;
+      }
+
+      .summary-card p {
+        max-width: 34ch;
+        color: #46514a;
+        font-size: 15px;
+        line-height: 1.85;
+      }
+
+      @media (max-width: 1024px) {
+        .summary { --chapter-inset: max(28px, calc((100vw - 900px) / 2)); }
+        .summary-card,
+        .summary-card:nth-child(n) { padding-right: 22px; padding-left: 22px; }
+        .summary-card:first-child { padding-left: 0; }
+        .summary-card h3 { font-size: clamp(27px, 3vw, 34px); }
+      }
+
+      @media (max-width: 680px) {
+        .hero { min-height: 0; }
+        .summary {
+          --chapter-inset: 20px;
+          margin-top: 42px;
+          padding-top: 82px;
+          padding-bottom: 48px;
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+        .summary::before { top: 31px; }
+        .summary-card,
+        .summary-card:nth-child(n) {
+          padding: 22px 0 24px;
+          border-left: 0;
+          border-top: 1px solid rgba(82, 102, 90, 0.2);
+        }
+        .summary-card:first-child { padding-top: 8px; border-top: 0; }
+        .summary-card::before { margin-bottom: 12px; }
+        .summary-card h3 { margin: 12px 0 10px; font-size: 30px; }
+        .summary-card p { max-width: 42ch; }
+      }
     </style>
   </head>
   <body>
