@@ -1307,7 +1307,7 @@
       .summary-card:nth-child(3) { margin-top: -10px; }
 
       .summary-card::before {
-        color: #858b84;
+        color: #68706a;
         font-size: 12px;
       }
 
@@ -1337,7 +1337,7 @@
 
       .passkey-panel::before {
         margin-bottom: 24px;
-        color: #7d8880;
+        color: #626e66;
       }
 
       .passkey-panel .private-zone-header { gap: 18px; }
@@ -1422,6 +1422,170 @@
         .passkey-register-form button { grid-column: auto; justify-self: stretch; }
         .private-zone { margin-top: 42px; padding-top: 32px; }
         .private-zone-header { align-items: flex-start; flex-direction: column; gap: 8px; }
+      }
+
+      :root {
+        --bg-top: #f5f2ea;
+        --bg-bottom: #f5f2ea;
+        --panel: #faf8f2;
+        --panel-strong: #faf8f2;
+        --line: #d1d0c7;
+        --primary: #202724;
+        --secondary: #59625d;
+        --muted: #68706a;
+        --accent: #5b7163;
+      }
+
+      html, body { background: #f5f2ea; }
+
+      .nav-wrap { background: rgba(245, 242, 234, 0.96); }
+
+      .hero {
+        min-height: min(620px, calc(100svh - 100px));
+        padding-top: 32px;
+        padding-bottom: 34px;
+      }
+
+      .hero-copy .eyebrow {
+        margin-bottom: 22px;
+        color: #5b7163;
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+      }
+
+      .hero-copy h1 {
+        font-size: clamp(58px, 6.5vw, 94px);
+        line-height: 1.08;
+        font-weight: 760;
+      }
+
+      .hero-copy h1 span {
+        margin-top: 1px;
+        color: #53665b;
+        font-weight: 600;
+      }
+
+      .route-def {
+        margin-top: 27px;
+        color: #3f4943;
+        font-size: 14px;
+      }
+
+      .route-def .dot { background: #5b7163; }
+
+      .route-text {
+        max-width: 520px;
+        margin-top: 12px;
+        color: #46514a;
+        font-size: 16px;
+        line-height: 1.85;
+      }
+
+      .hero-visual::before,
+      .hero-visual::after {
+        color: #59645d;
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 11px;
+        letter-spacing: 0.11em;
+      }
+
+      .feature-frame {
+        box-shadow: 0 15px 32px rgba(38, 43, 38, 0.1);
+        transform: translateY(10px) rotate(0.6deg);
+      }
+
+      .summary {
+        margin-top: 72px;
+        padding-top: 78px;
+        border-top-color: #c6c7bc;
+      }
+
+      .summary::before {
+        top: 25px;
+        color: #5b7163;
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+      }
+
+      .summary-card,
+      .summary-card:nth-child(n) { border-top-color: rgba(101, 125, 112, 0.48); }
+
+      .summary-card::before {
+        margin-bottom: 16px;
+        color: #5b7163;
+        font-size: 15px;
+      }
+
+      .card-tag {
+        color: #626a64;
+        font-size: 12px;
+      }
+
+      .summary-card h3 {
+        margin-top: 15px;
+        margin-bottom: 12px;
+        color: #202724;
+        font-size: clamp(27px, 2.8vw, 36px);
+        line-height: 1.34;
+      }
+
+      .summary-card p {
+        color: #46514a;
+        font-size: 15px;
+        line-height: 1.8;
+      }
+
+      .zone-divider {
+        margin-top: 116px;
+        color: #59625d;
+        font-size: 11px;
+      }
+
+      .zone-divider::after { background: #c6c7bc; }
+
+      .passkey-panel::before {
+        color: #59625d;
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+      }
+
+      .passkey-panel .private-caption,
+      .passkey-account-hint,
+      .private-caption { color: #59625d; }
+
+      .passkey-panel .route-text {
+        color: #46514a;
+        font-size: 15px !important;
+        line-height: 1.8;
+      }
+
+      .private-zone { border-top-color: #c6c7bc; }
+
+      .private-card-text {
+        color: #46514a;
+        font-size: 15px;
+        line-height: 1.8;
+      }
+
+      .private-placeholder {
+        color: #59625d;
+        font-size: 14px;
+      }
+
+      @media (max-width: 680px) {
+        .hero { padding-top: 30px; padding-bottom: 20px; }
+        .hero-copy h1 { font-size: clamp(46px, 12vw, 62px); }
+        .route-text { font-size: 15px; }
+        .summary { margin-top: 58px; padding-top: 64px; }
+        .summary-card h3 { font-size: 28px; }
+      }
+
+      @media (max-width: 370px) {
+        .hero-copy h1 { font-size: 34px; }
+        .hero-copy h1 span { margin-left: 16px; white-space: nowrap; }
       }
     </style>
   </head>
