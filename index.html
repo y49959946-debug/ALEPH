@@ -1683,6 +1683,36 @@
         .summary-card h3 { margin: 12px 0 10px; font-size: 30px; }
         .summary-card p { max-width: 42ch; }
       }
+
+      .hero-visual-note {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        color: #59645d;
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+      }
+
+      .hero-visual::before,
+      .hero-visual::after { letter-spacing: 0.14em; }
+
+      .hero-visual::before { top: 2px; }
+      .hero-visual::after { bottom: 2px; }
+
+      .feature-frame {
+        border-radius: 2px;
+        box-shadow: 0 11px 26px rgba(32, 39, 36, 0.12);
+        transform: translateY(14px) rotate(0.65deg);
+      }
+
+      @media (max-width: 680px) {
+        .hero-visual-note { top: 0; left: 0; }
+        .hero-visual::before { top: 0; right: 0; }
+        .hero-visual::after { bottom: 0; left: 0; }
+      }
     </style>
   </head>
   <body>
@@ -1743,6 +1773,7 @@
         </section>
 
         <section class="hero-visual" aria-label="메인 이미지 영역">
+          <span class="hero-visual-note">01 / CURRENT JOURNEY</span>
           <div class="feature-frame">
             <img src="Haengro.png" alt="행로" />
           </div>

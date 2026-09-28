@@ -1064,6 +1064,115 @@
         background: #4f9858;
         box-shadow: 0 0 0 3px rgba(79, 152, 88, 0.14), 0 0 9px rgba(79, 152, 88, 0.32);
       }
+
+      .work-grid {
+        gap: 0;
+        margin-top: 8px;
+      }
+
+      .work-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+        align-items: center;
+        column-gap: clamp(36px, 8vw, 112px);
+        min-height: 210px;
+        padding: 34px 0 38px 54px;
+        border-top-color: rgba(83, 94, 86, 0.28);
+        background: transparent;
+        transition: color 180ms ease;
+      }
+
+      .work-card:first-child { min-height: 270px; }
+      .work-card > div:first-child { display: contents; }
+
+      .work-card .work-name {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        max-width: 16ch;
+        font-size: clamp(28px, 3.2vw, 42px);
+        line-height: 1.32;
+        font-weight: 700;
+        transition: color 180ms ease;
+      }
+
+      .work-card .work-desc {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+        max-width: 36ch;
+        margin: 0;
+        color: #46514a;
+        font-size: 15px;
+        line-height: 1.85;
+      }
+
+      .work-card .work-go {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: start;
+        align-self: start;
+        margin: 20px 0 0;
+        padding: 0 0 4px;
+        border-bottom: 1px solid rgba(83, 107, 94, 0.4);
+        color: #536b5e;
+        font-size: 13px;
+        font-weight: 650;
+        transition: color 180ms ease, border-color 180ms ease;
+      }
+
+      a.work-card:hover .work-name,
+      a.work-card:hover .work-go { color: #3f5b4c; }
+
+      a.work-card:hover .work-go { border-color: #3f5b4c; }
+
+      .work-card.pending {
+        margin-left: 8%;
+        opacity: 0.76;
+      }
+
+      .work-card.pending .work-name {
+        font-size: clamp(24px, 2.6vw, 32px);
+        font-weight: 620;
+      }
+
+      .work-card.pending .work-go {
+        border-bottom: 0;
+        color: #68706a;
+      }
+
+      @media (max-width: 680px) {
+        .work-card,
+        .work-card:first-child {
+          grid-template-columns: minmax(0, 1fr);
+          row-gap: 12px;
+          min-height: 0;
+          padding: 27px 0 30px 40px;
+        }
+
+        .work-card::before { top: 30px; }
+
+        .work-card .work-name {
+          grid-column: 1;
+          grid-row: 1;
+          max-width: 22ch;
+          font-size: 27px;
+        }
+
+        .work-card .work-desc {
+          grid-column: 1;
+          grid-row: 2;
+          font-size: 14px;
+        }
+
+        .work-card .work-go {
+          grid-column: 1;
+          grid-row: 3;
+          margin-top: 7px;
+        }
+
+        .work-card.pending { margin-left: 0; }
+        .work-card.pending .work-name { font-size: 24px; }
+      }
     </style>
   </head>
   <body>
@@ -1160,15 +1269,15 @@
           <a class="work-card" href="https://claude.ai/artifact/DSzQ3zD24VHAkaEPc1kQeh" target="_blank" rel="noopener">
             <div>
               <div class="work-name">리추얼 지속 기간이 자기 성찰 문장 길이에 미치는 영향</div>
-              <div class="work-desc">26일간의 자기관찰 연구 · 데이터 수집부터 분석·해석까지 직접 수행</div>
             </div>
+            <div class="work-desc">26일간의 자기관찰 연구 · 데이터 수집부터 분석·해석까지 직접 수행</div>
             <div class="work-go">읽기 →</div>
           </a>
           <div class="work-card pending">
             <div>
               <div class="work-name">13번 앱</div>
-              <div class="work-desc">준비 중 · 완성 후 이 자리에 링크가 채워집니다</div>
             </div>
+            <div class="work-desc">준비 중 · 완성 후 이 자리에 링크가 채워집니다</div>
             <div class="work-go">예정</div>
           </div>
         </section>
