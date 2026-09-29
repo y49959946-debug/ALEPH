@@ -401,7 +401,60 @@
         font-weight: 800;
         font-variant-numeric: tabular-nums;
       }
-      .quiz-progress { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: right; }
+      .quiz-progress {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 5px;
+        margin-top: 14px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .quiz-progress .count { margin-left: 6px; font-variant-numeric: tabular-nums; }
+      .quiz-dot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1.5px solid #efc39b;
+        background: #fffbf4;
+        font-size: 10px;
+        font-weight: 900;
+        color: #fff;
+      }
+      .quiz-dot.current { border-color: var(--accent-warm); }
+      .quiz-dot.done { background: var(--accent-warm); border-color: var(--accent-warm); animation: stamp 0.32s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+
+      /* 선택하면 번호 자리에 체크 도장이 찍힘 */
+      button.quiz-opt.picked { border-color: var(--accent-warm); background: #fff3e6; }
+      button.quiz-opt.picked .quiz-opt-icon {
+        color: #fff;
+        background: var(--cta);
+        border-color: var(--cta);
+        animation: stamp 0.34s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+      }
+      .quiz-q.answered button.quiz-opt:not(.picked) { opacity: 0.45; }
+      .quiz-q.answered button.quiz-opt { pointer-events: none; }
+      @keyframes stamp {
+        0% { transform: scale(1.8) rotate(-14deg); opacity: 0; }
+        60% { transform: scale(0.92) rotate(3deg); opacity: 1; }
+        100% { transform: scale(1) rotate(0); opacity: 1; }
+      }
+      .quiz-reveal {
+        padding: 34px 0 26px;
+        text-align: center;
+        font-family: var(--font-warm);
+        font-size: clamp(20px, 2.4vw, 24px);
+        color: var(--primary);
+        animation: reveal-in 0.35s ease-out both;
+      }
+      .quiz-reveal .quiz-progress { justify-content: center; margin-top: 16px; }
+      @keyframes reveal-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) {
+        button.quiz-opt.picked .quiz-opt-icon, .quiz-dot.done, .quiz-reveal, .quiz-illust { animation: none; }
+      }
       .quiz-badge {
         width: 84px;
         height: 84px;
@@ -701,18 +754,88 @@
       .explain-toggle p { margin: 8px 0 0; line-height: 1.7; color: var(--secondary); }
 
       .save-note {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--secondary);
+        margin-top: 10px;
       }
 
-      .method-note {
-        margin-top: 40px;
+      /* 결과 상태 안내 (예시로 본 결과 / 표가 바뀜 등) */
+      .result-status {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 10px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px dashed #efc39b;
+        background: rgba(255, 248, 239, 0.9);
         font-size: 13px;
-        color: var(--muted);
-        line-height: 1.8;
+        line-height: 1.6;
+        color: var(--secondary);
       }
-      .method-note a { color: var(--secondary); }
+      .result-status[hidden] { display: none; }
+      .result-status.stale { border-style: solid; border-color: var(--accent-warm); }
+      .result-status .status-text { flex: 1 1 240px; }
+      .result-status button.undo-btn { margin-left: 0; }
+      .status-chip {
+        display: inline-block;
+        padding: 1px 9px;
+        border-radius: 999px;
+        font-size: 11.5px;
+        font-weight: 800;
+        color: var(--secondary);
+        background: #ffe6cc;
+      }
+      .result-status.stale .status-chip { color: #fff; background: var(--accent-warm); }
+      .result-box.is-stale { opacity: 0.5; transition: opacity 0.2s; }
+
+      /* 맨 아래: 이 도구가 시작된 질문 (논문 ↔ 앱 연결) */
+      .origin-card {
+        margin-top: 56px;
+        padding: 28px 30px;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background: linear-gradient(160deg, rgba(255, 251, 244, 0.95) 0%, rgba(255, 233, 208, 0.9) 100%);
+        box-shadow: var(--shadow);
+      }
+      .origin-kicker {
+        margin: 0 0 10px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        color: var(--muted);
+      }
+      .origin-question {
+        margin: 0 0 14px;
+        font-family: var(--font-warm);
+        font-size: clamp(22px, 2.8vw, 30px);
+        line-height: 1.35;
+        color: var(--primary);
+      }
+      .origin-body { margin: 0 0 18px; font-size: 14.5px; line-height: 1.85; color: var(--secondary); max-width: 72ch; }
+      .origin-body strong { color: var(--primary); }
+      .origin-link {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 999px;
+        border: 1.5px solid var(--cta);
+        color: var(--cta);
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: background 0.15s, color 0.15s;
+      }
+      .origin-link:hover { background: var(--cta); color: #fff; }
+      .origin-method {
+        margin: 20px 0 0;
+        padding-top: 14px;
+        border-top: 1px dashed #efc39b;
+        font-size: 12.5px;
+        line-height: 1.75;
+        color: var(--muted);
+      }
 
       .page-foot {
         margin-top: 56px;
@@ -873,13 +996,14 @@
             </div>
             <button id="calc" class="primary cta-big" type="button">계산하기 →</button>
           </div>
-          <p class="save-note" id="save-note">입력한 내용은 이 브라우저에 자동으로 저장되어, 다시 들어와도 남아있습니다.</p>
+          <p class="save-note" id="save-note">🔒 입력한 기록은 서버로 보내지 않고 이 브라우저에만 저장돼요. 다시 들어와도 그대로 남아 있어요.</p>
           <p class="undo-note" id="undo-note" hidden></p>
         </div>
 
         <p class="interlude reveal">숫자로 바라보면, 평소에는 보이지 않던 패턴이 드러납니다.</p>
 
         <h2 id="step-result"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>3. 발견하기 — 결과</h2>
+        <div class="result-status" id="result-status" hidden></div>
         <div id="result" class="result-box empty">
           아직 계산하지 않았습니다. 위에서 "계산하기"를 눌러 보세요.
         </div>
@@ -887,12 +1011,22 @@
           <button id="export-json" type="button">결과 JSON으로 저장</button>
         </div>
 
-        <p class="method-note reveal">
-          계산 방법: 경과일수와 문장 길이(공백 제외 글자 수) 사이의 피어슨 상관계수를 그대로 계산합니다.
-          사건 유형별 평균 글자 수는 같은 태그로 묶은 행들의 평균입니다.
-          네트워크나 외부 서비스를 쓰지 않고, 이 페이지 안에서만 계산합니다.
-          방법의 출처 — <a href="Paper.html">원 논문 보러 가기</a>
-        </p>
+        <section class="origin-card reveal" aria-label="이 도구가 시작된 곳">
+          <p class="origin-kicker">이 도구가 시작된 곳</p>
+          <p class="origin-question">"오래 기록하면, 성찰도 깊어질까?"</p>
+          <p class="origin-body">
+            26일 동안 매일 쓴 제 성찰 기록으로 직접 확인해 봤더니, 기록한 기간과 문장 길이 사이에는
+            거의 상관이 없었어요(r = 0.0692). 그래서 질문을 바꿨어요. <strong>얼마나 오래</strong>가 아니라
+            <strong>어떤 날</strong>이 성찰을 깊게 만드는지. 이 앱은 그 두 번째 질문을 누구나 자기 기록으로
+            직접 해볼 수 있게 만든 도구예요.
+          </p>
+          <a class="origin-link" href="Paper.html">원 논문 보기 →</a>
+          <p class="origin-method">
+            계산 방법: 경과일수와 문장 길이(공백 제외 글자 수) 사이의 피어슨 상관계수를 논문과 같은 방식으로 계산합니다.
+            사건 유형별 평균 글자 수는 같은 태그로 묶은 행들의 평균입니다.
+            네트워크나 외부 서비스를 쓰지 않고, 이 페이지 안에서만 계산합니다.
+          </p>
+        </section>
 
         <footer class="page-foot">
           <p>박성민 · 13번 과제(BRB) 대표작 앱 · 10번 논문의 결과를 실제로 쓰는 애플리케이션</p>
@@ -1026,14 +1160,43 @@
       let quizAnswers = [];
       let quizResultTag = null; // 미니 테스트를 끝냈으면 그 유형(태그), 아니면 null
 
+      // 선택 → 도장 → 다음 문항까지의 짧은 틈 (움직임 줄이기 설정이면 더 짧게)
+      const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      let QUIZ_PICK_DELAY = REDUCED_MOTION ? 120 : 420;
+      let QUIZ_REVEAL_DELAY = REDUCED_MOTION ? 250 : 950;
+      let quizBusy = false;
+
+      function quizDotsHtml(done, current) {
+        let html = "";
+        for (let i = 0; i < QUIZ_QUESTIONS.length; i++) {
+          const cls = i < done ? "done" : i === current ? "current" : "";
+          html += `<span class="quiz-dot ${cls}">${i < done ? "✓" : ""}</span>`;
+        }
+        return html;
+      }
+
+      function renderQuizProgress(done, current) {
+        const progress = document.getElementById("quiz-progress");
+        if (!progress) return;
+        const shown = Math.min(current + 1, QUIZ_QUESTIONS.length);
+        progress.innerHTML = `${quizDotsHtml(done, current)}<span class="count">${shown} / ${QUIZ_QUESTIONS.length}</span>`;
+      }
+
       function renderQuizQuestion(idx) {
         document.querySelectorAll(".quiz-q").forEach((el, i) => {
           el.style.display = i === idx ? "block" : "none";
         });
-        const progress = document.getElementById("quiz-progress");
-        if (progress) {
-          progress.textContent = `${Math.min(idx + 1, QUIZ_QUESTIONS.length)} / ${QUIZ_QUESTIONS.length}`;
-        }
+        renderQuizProgress(idx, idx);
+      }
+
+      function showQuizReveal() {
+        const box = document.getElementById("quiz-box");
+        if (!box) return showQuizResult();
+        box.innerHTML = `<div class="quiz-reveal">당신의 성찰 유형은…<div class="quiz-progress">${quizDotsHtml(QUIZ_QUESTIONS.length, -1)}</div></div>`;
+        setTimeout(() => {
+          quizBusy = false;
+          showQuizResult();
+        }, QUIZ_REVEAL_DELAY);
       }
 
       // 선택지 순서를 문항마다 섞어서, "매번 3번을 골랐다" 같은 패턴으로 결과가 읽히지 않게
@@ -1065,16 +1228,29 @@
             </div>
           `
         ).join("");
-        box.innerHTML = `${questionsHtml}<div class="quiz-progress" id="quiz-progress">1 / ${QUIZ_QUESTIONS.length}</div>`;
+        box.innerHTML = `${questionsHtml}<div class="quiz-progress" id="quiz-progress"></div>`;
+        renderQuizProgress(0, 0);
         box.querySelectorAll(".quiz-opt").forEach((btn) => {
           btn.addEventListener("click", () => {
+            if (quizBusy) return; // 도장이 찍히는 동안 두 번 눌리지 않게
+            quizBusy = true;
             const qi = Number(btn.dataset.qi);
             quizAnswers[qi] = btn.dataset.tag;
-            if (qi + 1 < QUIZ_QUESTIONS.length) {
-              renderQuizQuestion(qi + 1);
-            } else {
-              showQuizResult();
-            }
+            // 도장: 고른 선택지 번호가 ✓로 바뀌고, 진행 점에도 체크가 찍힘
+            const qEl = btn.closest(".quiz-q");
+            if (qEl) qEl.classList.add("answered");
+            btn.classList.add("picked");
+            const mark = btn.querySelector(".quiz-opt-icon");
+            if (mark) mark.textContent = "✓";
+            renderQuizProgress(qi + 1, qi);
+            setTimeout(() => {
+              if (qi + 1 < QUIZ_QUESTIONS.length) {
+                quizBusy = false;
+                renderQuizQuestion(qi + 1);
+              } else {
+                showQuizReveal();
+              }
+            }, QUIZ_PICK_DELAY);
           });
         });
       }
@@ -1138,6 +1314,7 @@
 
       function resetQuiz() {
         quizAnswers = [];
+        quizBusy = false;
         quizResultTag = null;
         const box = document.getElementById("quiz-box");
         const resultBox = document.getElementById("quiz-result");
@@ -1395,7 +1572,7 @@
         rowsEl.innerHTML = "";
         imported.forEach(addRow);
         saveToStorage();
-        resetResultBox();
+        runCalc("import");
         offerUndo(beforeImport, "파일에서 불러온 기록으로 바꿨어요.");
         statusEl.textContent = `${imported.length}일치를 불러왔습니다${
           skipped > 0 ? ` (마무리 기록이 없는 ${skipped}일은 건너뜀)` : ""
@@ -1499,6 +1676,10 @@
         resultEl.className = "result-box empty";
         resultEl.innerHTML = '아직 계산하지 않았습니다. 위에서 "계산하기"를 눌러 보세요.';
         lastResult = null;
+        lastCalcSig = null;
+        resultStale = false;
+        resultOrigin = null;
+        renderResultStatus();
       }
 
       function persistUndo() {
@@ -1536,7 +1717,7 @@
         rowsEl.innerHTML = "";
         undoState.rows.forEach(addRow);
         saveToStorage();
-        resetResultBox();
+        checkStale(); // 결과는 지우지 않고, 계산한 표와 달라졌으면 "표가 바뀜"으로 알려줌
         // 되돌리기 직전의 표도 버리지 않고 남겨서, 한 번 더 누르면 그쪽으로 돌아갈 수 있게
         // 버튼을 누를 때마다 두 표 사이를 오가므로, 문구도 방향에 맞게 번갈아 바꿈
         const wentBack = undoState.label === "되돌리기";
@@ -1581,7 +1762,7 @@
       function replaceWithSample() {
         const before = serializeRows();
         loadSample();
-        resetResultBox();
+        runCalc("sample");
         offerUndo(before, "예시 데이터로 바꿨어요.");
       }
 
@@ -1727,6 +1908,66 @@
         `;
       }
 
+      // ---- 결과 상태 안내: 지금 보이는 결과가 어떤 기록으로 계산된 건지, 표가 바뀌었는지 ----
+      const resultStatusEl = document.getElementById("result-status");
+      let lastCalcSig = null; // 마지막으로 계산한 표의 내용(비교용)
+      let resultOrigin = null; // "sample" | "saved" | "import" | null(직접 계산)
+      let resultStale = false; // 계산 뒤에 표가 바뀌었는지
+
+      function rowsSig() {
+        return JSON.stringify(serializeRows());
+      }
+      function sampleSig() {
+        return JSON.stringify(SAMPLE.map((r) => ({ day: String(r.day), text: r.text, tag: r.tag })));
+      }
+
+      function renderResultStatus() {
+        if (!resultStatusEl) return;
+        resultEl.classList.toggle("is-stale", !!(lastResult && resultStale));
+        if (!lastResult || (!resultStale && !resultOrigin)) {
+          resultStatusEl.hidden = true;
+          resultStatusEl.className = "result-status";
+          resultStatusEl.innerHTML = "";
+          return;
+        }
+        resultStatusEl.hidden = false;
+        resultStatusEl.className = "result-status" + (resultStale ? " stale" : "");
+        if (resultStale) {
+          resultStatusEl.innerHTML =
+            '<span class="status-chip">표가 바뀜</span><span class="status-text">아래 결과는 바뀌기 전 기록으로 계산한 거예요.</span>' +
+            '<button type="button" class="undo-btn" id="recalc-btn">다시 계산하기</button>';
+          document.getElementById("recalc-btn").addEventListener("click", () => runCalc(null));
+          return;
+        }
+        const msg = {
+          sample: '<span class="status-chip">예시</span><span class="status-text">예시 데이터로 미리 계산한 결과예요. 2번 표를 내 기록으로 바꾸고 <strong>계산하기</strong>를 누르면 내 결과로 바뀌어요.</span>',
+          saved: '<span class="status-chip">저장된 기록</span><span class="status-text">이 브라우저에 저장해 둔 지난 기록으로 계산한 결과예요.</span>',
+          import: '<span class="status-chip">불러온 기록</span><span class="status-text">불러온 파일의 기록으로 계산한 결과예요. 표에서 태그를 고쳤다면 다시 계산해 주세요.</span>',
+        }[resultOrigin];
+        resultStatusEl.innerHTML = msg || "";
+        if (!msg) resultStatusEl.hidden = true;
+      }
+
+      // origin: 이번 계산이 어떤 기록인지 (null이면 표가 예시와 같을 때만 "예시"로 표시)
+      function runCalc(origin) {
+        calc();
+        if (lastResult) {
+          resultOrigin = origin || (rowsSig() === sampleSig() ? "sample" : null);
+        } else {
+          resultOrigin = null;
+        }
+        renderResultStatus();
+      }
+
+      function checkStale() {
+        if (!lastResult) return;
+        const nowStale = rowsSig() !== lastCalcSig;
+        if (nowStale !== resultStale) {
+          resultStale = nowStale;
+          renderResultStatus();
+        }
+      }
+
       function calc() {
         const trs = Array.from(rowsEl.querySelectorAll("tr"));
         const valid = [];
@@ -1747,6 +1988,10 @@
           resultEl.innerHTML =
             "계산하려면 경과일수와 문장이 모두 채워진 행이 2개 이상 필요합니다. 표에 데이터를 더 입력해 주세요.";
           lastResult = null;
+          lastCalcSig = null;
+          resultStale = false;
+          resultOrigin = null;
+          renderResultStatus();
           return;
         }
 
@@ -1841,9 +2086,24 @@
           <div class="tag-bars">${barsHtml}</div>
           ${discoveryHtml(tagStats, valid)}
         `;
+        // 다른 표로 다시 계산됐으면(예: 표를 고친 뒤 화면 폭 변경) 예전 안내 문구는 내림
+        const sig = rowsSig();
+        if (lastCalcSig !== null && sig !== lastCalcSig) resultOrigin = null;
+        lastCalcSig = sig;
+        resultStale = false;
+        renderResultStatus();
       }
 
-      document.getElementById("calc").addEventListener("click", calc);
+      document.getElementById("calc").addEventListener("click", () => runCalc(null));
+
+      // 표가 바뀌면(입력·행 추가/삭제·붙여넣기 등) 결과가 옛 기록 기준이라는 걸 알려줌
+      rowsEl.addEventListener("input", checkStale);
+      rowsEl.addEventListener("change", checkStale);
+      try {
+        new MutationObserver(checkStale).observe(rowsEl, { childList: true });
+      } catch (e) {
+        // MutationObserver가 없는 환경이면 입력 이벤트만으로 확인
+      }
       // 화면 폭이 바뀌면 산점도를 새 폭에 맞게 다시 그림
       let resizeTimer = null;
       window.addEventListener("resize", () => {
@@ -1932,6 +2192,13 @@
       if (!loadFromStorage()) {
         loadSample();
       }
+      // 처음 들어와도 3번 결과가 비어 있지 않게: 지금 표로 미리 계산해서 보여줌
+      runCalc(null);
+      if (lastResult && resultOrigin !== "sample") {
+        resultOrigin = "saved";
+        renderResultStatus();
+      }
+      if (!lastResult) resetResultBox(); // 기록이 부족하면 오류 문구 대신 기본 안내
       loadUndoFromStorage(); // 지난번에 남겨둔 되돌리기가 있으면 다시 보여줌
     </script>
   </body>
