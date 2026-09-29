@@ -1187,6 +1187,33 @@
         .work-card.pending { margin-left: 0; }
         .work-card.pending .work-name { font-size: 24px; }
       }
+
+      /* 대표작 카드: 앱 아이콘을 제목 위에 (FactorFinder 카드) */
+      .work-card.has-icon > div:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+        grid-column: 1;
+        grid-row: 1 / span 2;
+      }
+      .work-card.has-icon .work-icon {
+        display: block;
+        width: 72px;
+        height: 72px;
+        border-radius: 18px;
+        box-shadow: 0 10px 24px rgba(70, 60, 45, 0.14);
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+      a.work-card.has-icon:hover .work-icon {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 28px rgba(70, 60, 45, 0.18);
+      }
+
+      @media (max-width: 680px) {
+        .work-card.has-icon > div:first-child { grid-row: 1; gap: 14px; }
+        .work-card.has-icon .work-icon { width: 60px; height: 60px; border-radius: 15px; }
+      }
     </style>
   </head>
   <body>
@@ -1289,8 +1316,9 @@
             <div class="work-desc">26일간의 자기관찰 연구 · 데이터 수집부터 분석·해석까지 직접 수행</div>
             <div class="work-go">읽기 →</div>
           </a>
-          <a class="work-card" href="FactorFinder.html">
+          <a class="work-card has-icon" href="FactorFinder.html">
             <div>
+              <img class="work-icon" src="ff-icon-144.png" alt="" width="72" height="72" />
               <div class="work-name">성찰 요인 탐색기</div>
             </div>
             <div class="work-desc">리추얼을 막 시작한 사람이 자기 기록으로 어떤 날 성찰이 깊어지는지 직접 확인하도록 돕는 앱</div>

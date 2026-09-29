@@ -314,6 +314,21 @@
         color: var(--secondary);
       }
       .secondary-actions button:hover { background: #fff; border-color: var(--line); }
+      .undo-note { margin: 4px 0 0; font-size: 12.5px; color: var(--secondary); }
+      .undo-note[hidden] { display: none; }
+      button.undo-btn {
+        display: inline;
+        margin-left: 6px;
+        padding: 0 2px;
+        border: none;
+        background: none;
+        color: var(--cta);
+        font-size: inherit;
+        font-weight: 800;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      button.undo-btn:hover { background: none; color: var(--cta-hover); }
       button.cta-big {
         font-size: 16.5px;
         font-weight: 800;
@@ -381,6 +396,11 @@
         border: 1px solid var(--line);
       }
       .quiz-opt-icon svg { width: 22px; height: 22px; }
+      .quiz-opt-icon.num {
+        font-size: 16px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
       .quiz-progress { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: right; }
       .quiz-badge {
         width: 84px;
@@ -787,7 +807,7 @@
 
         <h2 id="step-quiz"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17.01"></line><circle cx="12" cy="12" r="9.5"></circle></svg></span>1. 나 알아보기 — 나는 어떤 환경에서 성찰이 깊어질까?</h2>
         <p class="hint">
-          3문항만 가볍게 답해 보세요. 정답은 없어요 — 진짜 나에게 맞는지는 2번에서 내 기록으로 확인할 수 있어요.
+          5문항만 가볍게 답해 보세요. 정답은 없어요 — 진짜 나에게 맞는지는 2번에서 내 기록으로 확인할 수 있어요.
         </p>
         <div class="quiz-box reveal" id="quiz-box"></div>
         <div id="quiz-result" class="result-box empty" style="display:none"></div>
@@ -847,12 +867,14 @@
           <div class="row-actions table-actions">
             <div class="secondary-actions">
               <button id="add-row" type="button">+ 행 추가</button>
+              <button id="clear-rows" type="button">전체 지우기</button>
               <button id="load-sample" type="button">예시 데이터로 되돌리기</button>
               <button id="export-csv" type="button">표 CSV로 저장</button>
             </div>
             <button id="calc" class="primary cta-big" type="button">계산하기 →</button>
           </div>
           <p class="save-note" id="save-note">입력한 내용은 이 브라우저에 자동으로 저장되어, 다시 들어와도 남아있습니다.</p>
+          <p class="undo-note" id="undo-note" hidden></p>
         </div>
 
         <p class="interlude reveal">숫자로 바라보면, 평소에는 보이지 않던 패턴이 드러납니다.</p>
@@ -912,7 +934,7 @@
         { day: 25, text: "조원들과 발표 준비를 하면서 서로 의견을 맞춰갔다", tag: "팀 활동" },
       ];
 
-      // ---- 미니 테스트 (MBTI 스타일 3문항, 위 태그 체계와 그대로 연결) ----
+      // ---- 미니 테스트 (MBTI 스타일 5문항, 위 태그 체계와 그대로 연결) ----
 
       const QUIZ_QUESTIONS = [
         {
@@ -940,6 +962,24 @@
             { tag: "실습·과제", label: "스스로 문제를 해결해냈을 때" },
             { tag: "개인 시간", label: "나만의 시간에 나를 되돌아볼 때" },
             { tag: "휴식", label: "아무 압박 없이 편안하게 지낼 때" },
+          ],
+        },
+        {
+          q: "하루를 마무리하며 기록할 때, 쓸 말이 가장 많은 날은?",
+          options: [
+            { tag: "팀 활동", label: "누군가와 의견을 주고받거나 부딪힌 날" },
+            { tag: "실습·과제", label: "무언가를 직접 만들어보거나 고쳐본 날" },
+            { tag: "개인 시간", label: "혼자 걷거나 조용히 생각할 틈이 있었던 날" },
+            { tag: "휴식", label: "일정 없이 느긋하게 보낸 날" },
+          ],
+        },
+        {
+          q: "생각이 복잡할 때, 나는 주로 어떻게 정리하나요?",
+          options: [
+            { tag: "팀 활동", label: "믿는 사람에게 털어놓으면서 정리한다" },
+            { tag: "실습·과제", label: "할 일을 하나씩 해치우면서 정리한다" },
+            { tag: "개인 시간", label: "혼자 글로 적어보면서 정리한다" },
+            { tag: "휴식", label: "일단 푹 쉬고 나면 저절로 정리된다" },
           ],
         },
       ];
@@ -996,18 +1036,29 @@
         }
       }
 
+      // 선택지 순서를 문항마다 섞어서, "매번 3번을 골랐다" 같은 패턴으로 결과가 읽히지 않게
+      function shuffled(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
       function buildQuizHtml() {
         const box = document.getElementById("quiz-box");
         if (!box) return;
-        const questionsHtml = QUIZ_QUESTIONS.map(
+        // 문항 순서도 매번 섞음 (결과는 고른 답의 유형만 세므로 순서와 무관)
+        const questionsHtml = shuffled(QUIZ_QUESTIONS).map(
           (q, qi) => `
             <div class="quiz-q" data-q="${qi}" style="display:${qi === 0 ? "block" : "none"}">
               <p class="quiz-question">Q${qi + 1}. ${q.q}</p>
               <div class="quiz-options">
-                ${q.options
+                ${shuffled(q.options)
                   .map(
-                    (o) =>
-                      `<button class="quiz-opt" type="button" data-qi="${qi}" data-tag="${o.tag}"><span class="quiz-opt-icon" aria-hidden="true">${QUIZ_TYPE_ICONS[o.tag] || ""}</span><span>${o.label}</span></button>`
+                    (o, oi) =>
+                      `<button class="quiz-opt" type="button" data-qi="${qi}" data-tag="${o.tag}"><span class="quiz-opt-icon num" aria-hidden="true">${oi + 1}</span><span>${o.label}</span></button>`
                   )
                   .join("")}
               </div>
@@ -1033,11 +1084,17 @@
         quizAnswers.forEach((t) => {
           counts[t] = (counts[t] || 0) + 1;
         });
+        const maxCount = Math.max(0, ...Object.values(counts));
+        const tied = Object.keys(counts).filter((t) => counts[t] === maxCount && t !== "기타");
         let best = null;
-        TAGS.forEach((t) => {
-          if (t === "기타") return;
-          if (counts[t] && (!best || counts[t] > counts[best])) best = t;
-        });
+        if (tied.length === 1) {
+          best = tied[0];
+        } else if (tied.length > 1) {
+          // 동점이면 가장 마지막에 고른 유형으로 (특정 유형에 쏠리지 않게)
+          for (let i = quizAnswers.length - 1; i >= 0; i--) {
+            if (tied.includes(quizAnswers[i])) { best = quizAnswers[i]; break; }
+          }
+        }
         if (!best) best = "개인 시간";
         const copy = QUIZ_TYPE_COPY[best] || { title: "성찰러", desc: "" };
         const color = TAG_COLORS[best] || "#886449";
@@ -1056,7 +1113,7 @@
           ${illustHtml}
           <div class="quiz-type" style="color:${color}">${copy.title}</div>
           <p class="quiz-desc">${copy.desc}</p>
-          <p class="quiz-caveat">이건 3문항짜리 가벼운 자가진단이에요. 진짜 나에게 맞는지는 아래 표에 실제 기록을 넣고 계산해서 확인해보세요.</p>
+          <p class="quiz-caveat">이건 5문항짜리 가벼운 자가진단이에요. 진짜 나에게 맞는지는 아래 표에 실제 기록을 넣고 계산해서 확인해보세요.</p>
           <div class="row-actions">
             <button id="quiz-goto-data" class="primary" type="button">내 기록으로 확인하러 가기</button>
             <button id="quiz-retry" type="button">다시 하기</button>
@@ -1086,7 +1143,7 @@
         const resultBox = document.getElementById("quiz-result");
         if (box) box.style.display = "block";
         if (resultBox) resultBox.style.display = "none";
-        renderQuizQuestion(0);
+        buildQuizHtml(); // 다시 할 때도 순서를 새로 섞음
         if (lastResult) calc(); // 발견 카드에서 지난 테스트 결과를 지움
       }
 
@@ -1334,9 +1391,12 @@
             "불러올 수 있는 기록이 2건 미만입니다. 표에 직접 입력해 주세요.";
           return;
         }
+        const beforeImport = serializeRows();
         rowsEl.innerHTML = "";
         imported.forEach(addRow);
         saveToStorage();
+        resetResultBox();
+        offerUndo(beforeImport, "파일에서 불러온 기록으로 바꿨어요.");
         statusEl.textContent = `${imported.length}일치를 불러왔습니다${
           skipped > 0 ? ` (마무리 기록이 없는 ${skipped}일은 건너뜀)` : ""
         }. 태그는 자동 추정이니 필요하면 표에서 고쳐 주세요.`;
@@ -1425,7 +1485,108 @@
       });
 
       document.getElementById("add-row").addEventListener("click", () => addRow(null));
-      document.getElementById("load-sample").addEventListener("click", loadSample);
+      // ---- 표를 통째로 바꾸는 동작(전체 지우기 · 예시로 되돌리기 · 파일 불러오기)은 언제든 되돌릴 수 있게 ----
+      // 되돌리기는 시간 제한 없이 남아 있고, 새로고침해도 유지됨(이 브라우저 안에만 저장).
+      const UNDO_KEY = "factorfinder_undo_v1";
+      const undoNoteEl = document.getElementById("undo-note");
+      let undoState = null; // { rows, message, label }
+
+      function rowsHaveContent(rows) {
+        return rows.some((r) => String(r.day).trim() !== "" || String(r.text).trim() !== "");
+      }
+
+      function resetResultBox() {
+        resultEl.className = "result-box empty";
+        resultEl.innerHTML = '아직 계산하지 않았습니다. 위에서 "계산하기"를 눌러 보세요.';
+        lastResult = null;
+      }
+
+      function persistUndo() {
+        try {
+          if (undoState) localStorage.setItem(UNDO_KEY, JSON.stringify(undoState));
+          else localStorage.removeItem(UNDO_KEY);
+        } catch (e) {
+          // 저장이 막힌 브라우저에서도 되돌리기 자체는 이 화면에서 계속 동작
+        }
+      }
+
+      function renderUndo() {
+        if (!undoNoteEl) return;
+        if (!undoState) {
+          undoNoteEl.hidden = true;
+          undoNoteEl.innerHTML = "";
+          return;
+        }
+        undoNoteEl.hidden = false;
+        undoNoteEl.innerHTML = `${escapeHtml(undoState.message)}<button type="button" class="undo-btn" id="undo-btn">${escapeHtml(undoState.label)}</button>`;
+        document.getElementById("undo-btn").addEventListener("click", undoReplace);
+      }
+
+      function offerUndo(prevRows, message) {
+        if (!rowsHaveContent(prevRows)) return; // 지울 게 없었으면 되돌릴 것도 없음
+        if (JSON.stringify(prevRows) === JSON.stringify(serializeRows())) return; // 바뀐 게 없음
+        undoState = { rows: prevRows, message, label: "되돌리기" };
+        persistUndo();
+        renderUndo();
+      }
+
+      function undoReplace() {
+        if (!undoState) return;
+        const current = serializeRows();
+        rowsEl.innerHTML = "";
+        undoState.rows.forEach(addRow);
+        saveToStorage();
+        resetResultBox();
+        // 되돌리기 직전의 표도 버리지 않고 남겨서, 한 번 더 누르면 그쪽으로 돌아갈 수 있게
+        // 버튼을 누를 때마다 두 표 사이를 오가므로, 문구도 방향에 맞게 번갈아 바꿈
+        const wentBack = undoState.label === "되돌리기";
+        undoState = rowsHaveContent(current)
+          ? wentBack
+            ? { rows: current, message: "이전 표로 되돌렸어요.", label: "다시 원래대로" }
+            : { rows: current, message: "원래대로 돌려놨어요.", label: "되돌리기" }
+          : null;
+        persistUndo();
+        renderUndo();
+      }
+
+      function loadUndoFromStorage() {
+        try {
+          const raw = localStorage.getItem(UNDO_KEY);
+          if (!raw) return;
+          const u = JSON.parse(raw);
+          if (u && Array.isArray(u.rows) && u.rows.length) {
+            undoState = {
+              rows: u.rows,
+              message: String(u.message || "이전 표로 되돌릴 수 있어요."),
+              label: String(u.label || "되돌리기"),
+            };
+            renderUndo();
+          }
+        } catch (e) {
+          // 저장된 값이 깨져 있으면 조용히 무시
+        }
+      }
+
+      function clearAllRows() {
+        const before = serializeRows();
+        rowsEl.innerHTML = "";
+        addRow(null); // 빈 줄 하나를 남겨서 바로 입력을 시작할 수 있게
+        saveToStorage();
+        resetResultBox(); // 지운 데이터로 계산한 옛 결과가 남아 헷갈리지 않게
+        const firstInput = rowsEl.querySelector(".in-day");
+        if (firstInput && firstInput.focus) firstInput.focus();
+        offerUndo(before, "표를 모두 지웠어요.");
+      }
+
+      function replaceWithSample() {
+        const before = serializeRows();
+        loadSample();
+        resetResultBox();
+        offerUndo(before, "예시 데이터로 바꿨어요.");
+      }
+
+      document.getElementById("load-sample").addEventListener("click", replaceWithSample);
+      document.getElementById("clear-rows").addEventListener("click", clearAllRows);
 
       function pearson(xs, ys) {
         const n = xs.length;
@@ -1771,6 +1932,7 @@
       if (!loadFromStorage()) {
         loadSample();
       }
+      loadUndoFromStorage(); // 지난번에 남겨둔 되돌리기가 있으면 다시 보여줌
     </script>
   </body>
 </html>
