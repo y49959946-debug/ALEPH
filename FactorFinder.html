@@ -288,7 +288,22 @@
         font-weight: 500;
       }
       .quiz-progress { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: right; }
-      .quiz-type { font-size: 22px; font-weight: 700; margin-bottom: 8px; font-family: var(--font-warm); }
+      .quiz-badge {
+        width: 84px;
+        height: 84px;
+        margin: 0 auto 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 2px solid;
+        box-shadow: var(--shadow);
+      }
+      .quiz-badge svg { width: 42px; height: 42px; }
+      .quiz-type { font-size: 22px; font-weight: 700; margin-bottom: 8px; font-family: var(--font-warm); text-align: center; }
+      #quiz-result .quiz-desc,
+      #quiz-result .quiz-caveat { text-align: center; }
+      #quiz-result .row-actions { justify-content: center; }
       .quiz-desc { font-size: 14.5px; line-height: 1.8; color: var(--secondary); margin: 0 0 10px; }
       .quiz-caveat { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin: 0 0 14px; }
 
@@ -697,6 +712,18 @@
         },
       };
 
+      // 유형마다 작은 배지 그림(선 아이콘) — 외부 이미지 없이 인라인 SVG로만 구성
+      const QUIZ_TYPE_ICONS = {
+        "팀 활동":
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"></circle><circle cx="16" cy="8" r="3"></circle><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5"></path><path d="M11 20c0-3 2.5-5 5-5s5 2 5 5"></path></svg>',
+        "실습·과제":
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a8.1 8.1 0 0 0-1.7-1L15 3h-4l-.3 2.6a8.1 8.1 0 0 0-1.7 1l-2.5-1-2 3.4L6.6 11a7.97 7.97 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a8.1 8.1 0 0 0 1.7 1L11 21h4l.3-2.6a8.1 8.1 0 0 0 1.7-1l2.5 1 2-3.4L19.4 13Z"></path></svg>',
+        "개인 시간":
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"></path></svg>',
+        "휴식":
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V9Z"></path><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"></path><path d="M8 3c0 1-1 1-1 2s1 1 1 2"></path><path d="M12 3c0 1-1 1-1 2s1 1 1 2"></path></svg>',
+      };
+
       let quizAnswers = [];
 
       function renderQuizQuestion(idx) {
@@ -754,11 +781,13 @@
         if (!best) best = "개인 시간";
         const copy = QUIZ_TYPE_COPY[best] || { title: "성찰러", desc: "" };
         const color = TAG_COLORS[best] || "#ab7d5c";
+        const icon = QUIZ_TYPE_ICONS[best] || "";
 
         const resultBox = document.getElementById("quiz-result");
         resultBox.className = "result-box";
         resultBox.style.display = "block";
         resultBox.innerHTML = `
+          <div class="quiz-badge" style="color:${color};background:${color}22;border-color:${color}55">${icon}</div>
           <div class="quiz-type" style="color:${color}">${copy.title}</div>
           <p class="quiz-desc">${copy.desc}</p>
           <p class="quiz-caveat">이건 3문항짜리 가벼운 자가진단이에요. 진짜 나에게 맞는지는 아래 표에 실제 기록을 넣고 계산해서 확인해보세요.</p>
@@ -1290,23 +1319,37 @@
             if (items[k]) items[k].classList.toggle("active", k === key);
           });
         };
-        if (!("IntersectionObserver" in window)) {
-          setActive(stepIds[0]);
-          return;
+        // 화면 위쪽 40% 선을 지난 마지막 단계 제목을 현재 단계로 봅니다.
+        // 페이지 끝까지 내려오면 마지막 단계(결과)가 선에 닿지 못해도 결과로 표시합니다.
+        const update = () => {
+          const line = window.innerHeight * 0.4;
+          let current = stepIds[0];
+          stepIds.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el && el.getBoundingClientRect().top <= line) current = id;
+          });
+          const doc = document.documentElement;
+          if (window.innerHeight + window.scrollY >= doc.scrollHeight - 4) {
+            current = stepIds[stepIds.length - 1];
+          }
+          setActive(current);
+        };
+        let ticking = false;
+        const schedule = () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            ticking = false;
+            update();
+          });
+        };
+        window.addEventListener("scroll", schedule, { passive: true });
+        window.addEventListener("resize", schedule);
+        // 결과 계산 등으로 페이지 높이가 바뀌어도 다시 맞춥니다.
+        if ("ResizeObserver" in window) {
+          new ResizeObserver(schedule).observe(document.body);
         }
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) setActive(entry.target.id);
-            });
-          },
-          { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
-        );
-        stepIds.forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) observer.observe(el);
-        });
-        setActive(stepIds[0]);
+        update();
       }
       initStepper();
 
