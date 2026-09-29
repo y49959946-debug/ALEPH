@@ -1,0 +1,1348 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>성찰 요인 탐색기 - 행로</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-top: #fff2e0;
+        --bg-bottom: #ffdfc2;
+        --line: #f5cfa8;
+        --primary: #33241a;
+        --secondary: #8a5a3f;
+        --muted: #ab7d5c;
+        --accent-warm: #e2652a;
+        --good: #4f8f3f;
+        --shadow: 0 18px 42px rgba(140, 70, 20, 0.18);
+        --font-warm: "Gowun Dodum", "Noto Sans KR", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: "Inter", "Pretendard", "Noto Sans KR", sans-serif;
+        background: linear-gradient(135deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+        color: var(--primary);
+      }
+
+      body { overflow-x: hidden; }
+
+      .page-shell {
+        width: min(920px, calc(100% - 60px));
+        margin: 0 auto;
+        padding: 28px 0 120px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 18px;
+        z-index: 120;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .topbar::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 100vw;
+        margin-left: -50vw;
+        border-bottom: 1px solid rgba(180, 140, 100, 0.32);
+      }
+
+      .nav-brand {
+        color: #9c6b45;
+        text-decoration: none;
+        font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        height: 52px;
+        font-family: "Georgia", "Times New Roman", serif;
+      }
+
+      .nav-brand-word {
+        display: inline-block;
+        font-size: clamp(30px, 3vw, 40px);
+        font-weight: 900;
+        color: #7a4a30;
+        font-family: "Segoe UI", "Arial", sans-serif;
+        transform: scaleX(1.18) scaleY(1.08);
+      }
+
+      .back-link {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--secondary);
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 10px;
+        background: rgba(255, 250, 240, 0.6);
+        border: 1px solid var(--line);
+      }
+
+      .stepper {
+        position: sticky;
+        top: 84px;
+        z-index: 110;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: fit-content;
+        margin: 10px auto 0;
+        background: rgba(255, 251, 244, 0.88);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12.5px;
+        box-shadow: var(--shadow);
+      }
+      .stepper-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        color: var(--muted);
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 999px;
+        transition: color 0.15s, background 0.15s;
+      }
+      .stepper-item svg { width: 14px; height: 14px; }
+      .stepper-item.active {
+        color: var(--primary);
+        background: var(--bg-bottom);
+      }
+      .stepper-arrow { color: var(--line); font-size: 11px; }
+
+      @media (max-width: 560px) {
+        .stepper-label { display: none; }
+        .stepper { gap: 2px; padding: 6px 8px; }
+        .stepper-item { padding: 7px; }
+      }
+
+      .kicker {
+        margin: 44px 0 14px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(26px, 3.4vw, 36px);
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+        font-family: var(--font-warm);
+        font-weight: 400;
+      }
+
+      .pitch {
+        margin: 0 0 32px;
+        background: rgba(255, 251, 244, 0.82);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 22px 26px;
+        font-size: 15px;
+        line-height: 1.85;
+        color: var(--secondary);
+        box-shadow: var(--shadow);
+      }
+      .pitch strong { color: var(--primary); }
+      .pitch .paper-title {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+
+      h2 {
+        margin: 44px 0 14px;
+        font-size: 20px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--line);
+        scroll-margin-top: 130px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-warm);
+        font-weight: 400;
+      }
+      .h2-icon {
+        display: inline-flex;
+        color: var(--accent-warm);
+        flex-shrink: 0;
+      }
+      .h2-icon svg { width: 17px; height: 17px; }
+
+      .hint {
+        font-size: 13.5px;
+        color: var(--muted);
+        margin: 0 0 18px;
+        line-height: 1.7;
+      }
+
+      .table-wrap {
+        background: rgba(255, 251, 244, 0.88);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        overflow-x: auto;
+      }
+
+      table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+      th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--line); color: var(--secondary); vertical-align: top; }
+      th { font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; color: var(--muted); }
+
+      td input[type="number"] {
+        width: 70px;
+      }
+      td input[type="text"], td textarea, td select {
+        width: 100%;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--primary);
+      }
+      input, select, textarea {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 8px;
+        background: #fff;
+      }
+      textarea { resize: vertical; min-height: 38px; }
+
+      .char-count {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      .row-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+      button {
+        font-family: inherit;
+        font-size: 13.5px;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 9px 16px;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--secondary);
+      }
+      button:hover { background: var(--bg-bottom); }
+      button.primary {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+      button.primary:hover { opacity: 0.9; }
+      button.del {
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        padding: 4px 8px;
+        font-weight: 400;
+      }
+      button.del:hover { color: #c1402e; }
+
+      .quiz-box {
+        background: linear-gradient(160deg, #ffe9d0 0%, #ffcd9a 100%);
+        border: 1px solid #f0b877;
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: var(--shadow);
+        margin-bottom: 10px;
+      }
+      .quiz-question {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0 0 14px;
+        font-family: var(--font-warm);
+      }
+      .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+      button.quiz-opt {
+        text-align: left;
+        width: 100%;
+        white-space: normal;
+        line-height: 1.5;
+        font-weight: 500;
+      }
+      .quiz-progress { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: right; }
+      .quiz-type { font-size: 22px; font-weight: 700; margin-bottom: 8px; font-family: var(--font-warm); }
+      .quiz-desc { font-size: 14.5px; line-height: 1.8; color: var(--secondary); margin: 0 0 10px; }
+      .quiz-caveat { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin: 0 0 14px; }
+
+      .import-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        background: rgba(255, 250, 240, 0.6);
+        border: 1px dashed var(--line);
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-bottom: 14px;
+        font-size: 13.5px;
+      }
+      .file-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        color: var(--secondary);
+        cursor: pointer;
+        padding: 7px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+      .file-label:hover { background: var(--bg-bottom); }
+      .file-label input[type="file"] {
+        display: none;
+      }
+      #import-status {
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+
+      .paste-box {
+        display: block;
+        background: rgba(255, 250, 240, 0.6);
+        border: 1px dashed var(--line);
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-bottom: 18px;
+        font-size: 13.5px;
+      }
+      .paste-box summary {
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--secondary);
+      }
+      .paste-box textarea {
+        width: 100%;
+        margin-top: 10px;
+        min-height: 90px;
+      }
+      .paste-box p.hint { margin: 8px 0; }
+      #paste-status {
+        display: block;
+        font-size: 12.5px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      .result-box {
+        margin-top: 18px;
+        background: rgba(255, 251, 244, 0.88);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: var(--shadow);
+      }
+      .result-box.empty { color: var(--muted); font-size: 14px; }
+
+      .stat-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+      .stat-tile {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .stat-tile .label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .stat-tile .value { font-size: 20px; font-weight: 800; color: var(--primary); }
+      .stat-tile.hero .value { color: var(--accent-warm); }
+
+      .interpret {
+        font-size: 14.5px;
+        line-height: 1.8;
+        color: var(--primary);
+        background: var(--bg-bottom);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+      }
+
+      .tag-bars { display: flex; flex-direction: column; gap: 8px; }
+      .tag-bar-row { display: grid; grid-template-columns: 130px 1fr 100px; align-items: center; gap: 10px; font-size: 13.5px; }
+      .tag-bar-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+      .tag-bar-track { display: block; background: var(--line); border-radius: 999px; height: 12px; overflow: hidden; }
+      .tag-bar-fill { display: block; height: 100%; border-radius: 999px; }
+      .tag-bar-row.top .tag-name { font-weight: 800; color: var(--primary); }
+      .top-badge {
+        display: inline-block;
+        margin-left: 6px;
+        font-size: 10px;
+        font-weight: 800;
+        color: #fff;
+        background: var(--good);
+        border-radius: 999px;
+        padding: 1px 7px;
+        vertical-align: middle;
+      }
+
+      .summary-line {
+        margin-top: 14px;
+        font-size: 14.5px;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .explain-toggle {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--secondary);
+      }
+      .explain-toggle summary { cursor: pointer; font-weight: 700; }
+      .explain-toggle p { margin: 8px 0 0; line-height: 1.7; color: var(--secondary); }
+
+      .save-note {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      .method-note {
+        margin-top: 40px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+      .method-note a { color: var(--secondary); }
+
+      .page-foot {
+        margin-top: 56px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+      }
+      .reveal.revealed {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 680px) {
+        .stat-row { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+
+        .table-wrap { overflow-x: visible; padding: 12px; }
+        table { min-width: 0; }
+        table, thead, tbody, tr, td { display: block; }
+        thead { display: none; }
+        #rows tr {
+          background: #fff;
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          padding: 10px 12px;
+          margin-bottom: 10px;
+        }
+        #rows td {
+          border-bottom: none;
+          padding: 6px 0;
+        }
+        #rows td[data-label]:not([data-label=""])::before {
+          content: attr(data-label);
+          display: block;
+          font-size: 11px;
+          font-weight: 800;
+          color: var(--muted);
+          margin-bottom: 3px;
+        }
+        #rows td input[type="number"] { width: 100%; }
+
+        .tag-bar-row { grid-template-columns: 96px 1fr 76px; font-size: 12.5px; gap: 6px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="nav-brand" href="index.html" aria-label="HR 로고">
+          <span class="nav-brand-word">HR</span>
+        </a>
+        <a class="back-link" href="Intro.html">← 자기소개로 돌아가기</a>
+      </header>
+
+      <nav class="stepper" id="stepper" aria-label="진행 단계">
+        <a class="stepper-item" data-step="quiz" href="#step-quiz">
+          <span class="stepper-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17.01"></line><circle cx="12" cy="12" r="9.5"></circle></svg></span>
+          <span class="stepper-label">미니 테스트</span>
+        </a>
+        <span class="stepper-arrow">→</span>
+        <a class="stepper-item" data-step="input" href="#step-input">
+          <span class="stepper-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></span>
+          <span class="stepper-label">내 기록</span>
+        </a>
+        <span class="stepper-arrow">→</span>
+        <a class="stepper-item" data-step="result" href="#step-result">
+          <span class="stepper-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
+          <span class="stepper-label">결과</span>
+        </a>
+      </nav>
+
+      <main>
+        <p class="kicker">10번 논문을 실제로 쓰는 앱 · 대표작</p>
+        <h1>성찰 요인 탐색기</h1>
+
+        <div class="pitch reveal">
+          <span class="paper-title">논문: 리추얼 지속 기간이 자기 성찰 문장 길이에 미치는 영향 (2026, 박성민)</span>
+          <strong>이 앱은 리추얼(자기 성찰 기록)을 막 시작한 사람에게</strong>, "꾸준히 오래 쓰면 저절로 성찰이 깊어지고 글이 길어질 것"이라는 생각이 실제로는 맞지 않을 수 있다는 것을, 본인의 기록을 직접 입력해서 확인시켜 줍니다. 대신 지속 기간이 아니라 <strong>어떤 날 유형(사건)</strong>에서 더 길게 썼는지를 계산해서 보여줍니다.
+        </div>
+
+        <h2 id="step-quiz"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17.01"></line><circle cx="12" cy="12" r="9.5"></circle></svg></span>1. 미니 테스트 — 나는 어떤 환경에서 성찰이 깊어질까?</h2>
+        <p class="hint">
+          MBTI 테스트처럼 가볍게, 3문항만 답해보세요. 정답은 없어요 — 그냥 나를 한번 돌아보는
+          시간이에요. 진짜 나에게 맞는지는 아래 2번에서 내 실제 기록으로 다시 확인할 수 있습니다.
+        </p>
+        <div class="quiz-box reveal" id="quiz-box"></div>
+        <div id="quiz-result" class="result-box empty" style="display:none"></div>
+
+        <h2 id="step-input"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></span>2. 내 기록 입력하기</h2>
+        <p class="hint">
+          먼저 이렇게 한번 써볼까요? 아래 표에는 예시 데이터를 미리 채워뒀어요. 그대로
+          "계산하기"를 눌러 봐도 되고, 행을 지우고 나의 이야기(경과일수·그날 쓴 성찰 문장·
+          그날 있었던 일 유형)로 바꿔 넣어도 됩니다. 문장 길이는 논문과 같은 방식으로
+          <strong>공백을 뺀 글자 수</strong>로 계산해요. 이미 리추얼 기록을 쓰고 계시다면,
+          표에 한 줄씩 옮겨 적는 대신 아래에서 파일을 불러오면 자동으로 채워집니다.
+        </p>
+
+        <div class="import-box">
+          <label class="file-label">
+            📄 나의 파일 불러오기
+            <input type="file" id="import-file" accept="application/json,.json" />
+          </label>
+          <span id="import-status">
+            12번 장치(regenerate.py)가 쓰는 것과 같은 형식입니다. 이 파일은 어디로도 전송되지 않고
+            이 페이지 안에서만(내 컴퓨터·브라우저 안에서만) 계산에 쓰입니다. 사건 유형(태그)은
+            문장 속 키워드로 자동 추정한 것이라, 불러온 뒤 표에서 필요하면 고쳐 주세요.
+          </span>
+        </div>
+
+        <details class="paste-box reveal">
+          <summary>또는 텍스트로 한 번에 붙여넣기</summary>
+          <p class="hint">
+            한 줄에 하루씩 적어 주세요. "2026-08-11: 오늘은..." 처럼 날짜로 시작해도 되고,
+            "3일차: 오늘은..."처럼 며칠째인지로 시작해도 됩니다. 아무 표시 없이 그냥 문장만
+            줄줄이 적으면 위에서부터 순서대로 1일, 2일...로 번호가 매겨집니다.
+          </p>
+          <textarea id="paste-text" placeholder="2026-08-11: 오늘은 실습이 막혀서 답답했지만 끝까지 붙잡았다&#10;2026-08-12: 동료와 이야기하며 생각을 정리했다"></textarea>
+          <div class="row-actions">
+            <button id="paste-add" type="button">표에 추가</button>
+          </div>
+          <span id="paste-status"></span>
+        </details>
+
+        <div class="table-wrap reveal">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px">경과일수</th>
+                <th>그날 쓴 성찰 문장</th>
+                <th style="width:150px">그날 있었던 일</th>
+                <th style="width:40px"></th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="row-actions">
+            <button id="add-row" type="button">+ 행 추가</button>
+            <button id="load-sample" type="button">예시 데이터로 되돌리기</button>
+            <button id="export-csv" type="button">표 CSV로 저장</button>
+            <button id="calc" class="primary" type="button">계산하기</button>
+          </div>
+          <p class="save-note" id="save-note">입력한 내용은 이 브라우저에 자동으로 저장되어, 다시 들어와도 남아있습니다.</p>
+        </div>
+
+        <h2 id="step-result"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>3. 결과</h2>
+        <div id="result" class="result-box empty">
+          아직 계산하지 않았습니다. 위에서 "계산하기"를 눌러 보세요.
+        </div>
+        <div class="row-actions">
+          <button id="export-json" type="button">결과 JSON으로 저장</button>
+        </div>
+
+        <p class="method-note reveal">
+          계산 방법: 경과일수와 문장 길이(공백 제외 글자 수) 사이의 피어슨 상관계수를 그대로 계산합니다.
+          사건 유형별 평균 글자 수는 같은 태그로 묶은 행들의 평균입니다.
+          네트워크나 외부 서비스를 쓰지 않고, 이 페이지 안에서만 계산합니다.
+          방법의 출처 — <a href="Paper.html">원 논문 보러 가기</a>
+        </p>
+
+        <footer class="page-foot">
+          <p>박성민 · 13번 과제(BRB) 대표작 앱 · 10번 논문의 결과를 실제로 쓰는 애플리케이션</p>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      const TAGS = ["팀 활동", "실습·과제", "개인 시간", "휴식", "기타"];
+      const TAG_COLORS = {
+        "팀 활동": "#e08a2e",
+        "실습·과제": "#c1502e",
+        "개인 시간": "#5c9c47",
+        "휴식": "#b8559e",
+        "기타": "#8a4a6b",
+      };
+
+      const TAG_ADVICE = {
+        "팀 활동":
+          "동료와 부딪히거나 협업한 날의 기억이 성찰을 더 길게 만드는 편이니, 조 활동이나 서로 피드백을 주고받는 시간을 의도적으로 가져보세요.",
+        "실습·과제":
+          "직접 손을 움직여 문제를 푼 날 성찰이 깊어지는 편이니, 이론만 보기보다 작게라도 실습해보는 시간을 늘려보세요.",
+        "개인 시간":
+          "혼자 정리하는 시간을 가진 날 성찰이 깊어지는 편이니, 하루 끝에 잠깐이라도 혼자 되짚어보는 시간을 만들어보세요.",
+        "휴식":
+          "쉬는 날 오히려 성찰이 깊어지는 편이니, 무리해서 계속 달리기보다 의도적인 휴식을 성찰의 재료로 삼아보세요.",
+        "기타":
+          "가장 길게 쓴 날들의 공통점을 스스로 다시 살펴보고, 그 조건을 의도적으로 다시 만들어보세요.",
+      };
+
+      const SAMPLE = [
+        { day: 1, text: "새로운 사람들과 처음 이야기를 나눠서 조금 긴장했지만 그래도 웃으면서 인사했다", tag: "팀 활동" },
+        { day: 3, text: "실습이 계속 막혀서 답답했지만 끝까지 붙잡고 다시 해봤다", tag: "실습·과제" },
+        { day: 5, text: "혼자 정리하는 시간을 가지면서 오늘 배운 걸 되짚어봤다", tag: "개인 시간" },
+        { day: 8, text: "팀원이 힘들어해서 같이 남아서 도와줬다", tag: "팀 활동" },
+        { day: 12, text: "오늘은 그냥 쉬었다", tag: "휴식" },
+        { day: 15, text: "과제 마감이 겹쳐서 정신없었지만 하나씩 처리했다", tag: "실습·과제" },
+        { day: 20, text: "산책하면서 이런저런 생각을 정리했다", tag: "개인 시간" },
+        { day: 25, text: "조원들과 발표 준비를 하면서 서로 의견을 맞춰갔다", tag: "팀 활동" },
+      ];
+
+      // ---- 미니 테스트 (MBTI 스타일 3문항, 위 태그 체계와 그대로 연결) ----
+
+      const QUIZ_QUESTIONS = [
+        {
+          q: "오늘 하루 중 가장 기억에 남는 순간은 대개 언제인가요?",
+          options: [
+            { tag: "팀 활동", label: "누군가와 이야기하거나 함께 무언가를 했을 때" },
+            { tag: "실습·과제", label: "어려운 문제를 붙잡고 씨름해서 풀어냈을 때" },
+            { tag: "개인 시간", label: "혼자 조용히 생각을 정리했을 때" },
+            { tag: "휴식", label: "아무것도 안 하고 쉬었을 때" },
+          ],
+        },
+        {
+          q: "성찰을 쓸 때 어떤 소재가 가장 잘 떠오르나요?",
+          options: [
+            { tag: "팀 활동", label: "동료나 주변 사람과 나눈 대화" },
+            { tag: "실습·과제", label: "오늘 풀었던 과제나 실습" },
+            { tag: "개인 시간", label: "오늘 나 혼자 느낀 감정이나 생각" },
+            { tag: "휴식", label: "특별한 일이 없었던 날의 여유" },
+          ],
+        },
+        {
+          q: "다음 중 나에게 더 만족감을 주는 쪽은?",
+          options: [
+            { tag: "팀 활동", label: "누군가를 돕거나 함께 무언가를 해냈을 때" },
+            { tag: "실습·과제", label: "스스로 문제를 해결해냈을 때" },
+            { tag: "개인 시간", label: "나만의 시간에 나를 되돌아볼 때" },
+            { tag: "휴식", label: "아무 압박 없이 편안하게 지낼 때" },
+          ],
+        },
+      ];
+
+      const QUIZ_TYPE_COPY = {
+        "팀 활동": {
+          title: "팀 활동형 성찰러",
+          desc: "사람과 부딪히고 이야기를 나눈 날, 성찰이 가장 깊어지는 편이에요. 협업하거나 대화가 많았던 날을 의도적으로 만들어보세요.",
+        },
+        "실습·과제": {
+          title: "실습·과제형 성찰러",
+          desc: "손으로 직접 문제를 풀어낸 날, 가장 깊이 있는 성찰이 나오는 편이에요. 이론보다 직접 부딪혀보는 실습 시간을 늘려보세요.",
+        },
+        "개인 시간": {
+          title: "개인 시간형 성찰러",
+          desc: "혼자 정리하는 시간을 가진 날, 성찰이 가장 깊어지는 편이에요. 하루 끝에 잠깐이라도 혼자 되짚어보는 시간을 만들어보세요.",
+        },
+        "휴식": {
+          title: "휴식형 성찰러",
+          desc: "여유롭게 쉰 날, 오히려 성찰이 더 깊어지는 편이에요. 무리해서 계속 달리기보다 의도적인 휴식을 가져보세요.",
+        },
+      };
+
+      let quizAnswers = [];
+
+      function renderQuizQuestion(idx) {
+        document.querySelectorAll(".quiz-q").forEach((el, i) => {
+          el.style.display = i === idx ? "block" : "none";
+        });
+        const progress = document.getElementById("quiz-progress");
+        if (progress) {
+          progress.textContent = `${Math.min(idx + 1, QUIZ_QUESTIONS.length)} / ${QUIZ_QUESTIONS.length}`;
+        }
+      }
+
+      function buildQuizHtml() {
+        const box = document.getElementById("quiz-box");
+        if (!box) return;
+        const questionsHtml = QUIZ_QUESTIONS.map(
+          (q, qi) => `
+            <div class="quiz-q" data-q="${qi}" style="display:${qi === 0 ? "block" : "none"}">
+              <p class="quiz-question">Q${qi + 1}. ${q.q}</p>
+              <div class="quiz-options">
+                ${q.options
+                  .map(
+                    (o) =>
+                      `<button class="quiz-opt" type="button" data-qi="${qi}" data-tag="${o.tag}">${o.label}</button>`
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `
+        ).join("");
+        box.innerHTML = `${questionsHtml}<div class="quiz-progress" id="quiz-progress">1 / ${QUIZ_QUESTIONS.length}</div>`;
+        box.querySelectorAll(".quiz-opt").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const qi = Number(btn.dataset.qi);
+            quizAnswers[qi] = btn.dataset.tag;
+            if (qi + 1 < QUIZ_QUESTIONS.length) {
+              renderQuizQuestion(qi + 1);
+            } else {
+              showQuizResult();
+            }
+          });
+        });
+      }
+
+      function showQuizResult() {
+        const counts = {};
+        quizAnswers.forEach((t) => {
+          counts[t] = (counts[t] || 0) + 1;
+        });
+        let best = null;
+        TAGS.forEach((t) => {
+          if (t === "기타") return;
+          if (counts[t] && (!best || counts[t] > counts[best])) best = t;
+        });
+        if (!best) best = "개인 시간";
+        const copy = QUIZ_TYPE_COPY[best] || { title: "성찰러", desc: "" };
+        const color = TAG_COLORS[best] || "#ab7d5c";
+
+        const resultBox = document.getElementById("quiz-result");
+        resultBox.className = "result-box";
+        resultBox.style.display = "block";
+        resultBox.innerHTML = `
+          <div class="quiz-type" style="color:${color}">${copy.title}</div>
+          <p class="quiz-desc">${copy.desc}</p>
+          <p class="quiz-caveat">이건 3문항짜리 가벼운 자가진단이에요. 진짜 나에게 맞는지는 아래 표에 실제 기록을 넣고 계산해서 확인해보세요.</p>
+          <div class="row-actions">
+            <button id="quiz-goto-data" class="primary" type="button">내 기록으로 확인하러 가기</button>
+            <button id="quiz-retry" type="button">다시 하기</button>
+          </div>
+        `;
+        const box = document.getElementById("quiz-box");
+        if (box) box.style.display = "none";
+
+        document.getElementById("quiz-goto-data").addEventListener("click", () => {
+          const target = document.getElementById("rows");
+          if (target && target.scrollIntoView) {
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        });
+        document.getElementById("quiz-retry").addEventListener("click", resetQuiz);
+      }
+
+      function resetQuiz() {
+        quizAnswers = [];
+        const box = document.getElementById("quiz-box");
+        const resultBox = document.getElementById("quiz-result");
+        if (box) box.style.display = "block";
+        if (resultBox) resultBox.style.display = "none";
+        renderQuizQuestion(0);
+      }
+
+      const rowsEl = document.getElementById("rows");
+      const resultEl = document.getElementById("result");
+
+      function charCountNoSpaces(str) {
+        return (str || "").replace(/\s/g, "").length;
+      }
+
+      function escapeHtml(str) {
+        return (str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function tagOptions(selected) {
+        return TAGS.map(
+          (t) => `<option value="${t}" ${t === selected ? "selected" : ""}>${t}</option>`
+        ).join("");
+      }
+
+      function addRow(data) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td data-label="경과일수"><input type="number" class="in-day" value="${data ? data.day : ""}" min="0" /></td>
+          <td data-label="그날 쓴 성찰 문장">
+            <textarea class="in-text" placeholder="그날 쓴 성찰 문장을 붙여넣으세요">${escapeHtml(data ? data.text : "")}</textarea>
+            <div class="char-count"></div>
+          </td>
+          <td data-label="그날 있었던 일"><select class="in-tag">${tagOptions(data ? data.tag : "")}</select></td>
+          <td data-label=""><button class="del" type="button" title="행 삭제">✕</button></td>
+        `;
+        rowsEl.appendChild(tr);
+        const dayInput = tr.querySelector(".in-day");
+        const textarea = tr.querySelector(".in-text");
+        const tagSelect = tr.querySelector(".in-tag");
+        const countEl = tr.querySelector(".char-count");
+        const updateCount = () => {
+          countEl.textContent = charCountNoSpaces(textarea.value) + "자 (공백 제외)";
+        };
+        textarea.addEventListener("input", updateCount);
+        updateCount();
+        [dayInput, textarea, tagSelect].forEach((el) => {
+          el.addEventListener("input", saveToStorage);
+          el.addEventListener("change", saveToStorage);
+        });
+        tr.querySelector(".del").addEventListener("click", () => {
+          tr.remove();
+          saveToStorage();
+        });
+      }
+
+      function loadSample() {
+        rowsEl.innerHTML = "";
+        SAMPLE.forEach(addRow);
+        saveToStorage();
+      }
+
+      // ---- 자동 저장 (이 브라우저 안에서만, 다른 사람에게 전송되지 않음) ----
+
+      const STORAGE_KEY = "factorfinder_rows_v1";
+
+      function serializeRows() {
+        return Array.from(rowsEl.querySelectorAll("tr")).map((tr) => ({
+          day: tr.querySelector(".in-day").value,
+          text: tr.querySelector(".in-text").value,
+          tag: tr.querySelector(".in-tag").value,
+        }));
+      }
+
+      function saveToStorage() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeRows()));
+        } catch (e) {
+          // 프라이빗 창 등에서 저장이 막혀도 앱은 계속 동작해야 하므로 조용히 넘어감
+        }
+      }
+
+      function loadFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return false;
+          const rows = JSON.parse(raw);
+          if (!Array.isArray(rows) || rows.length === 0) return false;
+          rowsEl.innerHTML = "";
+          rows.forEach((r) => addRow({ day: r.day, text: r.text, tag: r.tag }));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      // ---- 다운로드 (CSV / JSON, 서버 없이 브라우저 안에서만) ----
+
+      function todayStamp() {
+        const d = new Date();
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
+      }
+
+      function triggerDownload(filename, mime, content) {
+        try {
+          const blob = new Blob([content], { type: mime });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          return true;
+        } catch (e) {
+          const note = document.getElementById("save-note");
+          if (note) note.textContent = "이 브라우저에서는 다운로드가 지원되지 않습니다.";
+          return false;
+        }
+      }
+
+      function csvEscape(s) {
+        const v = String(s === undefined || s === null ? "" : s);
+        if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+        return v;
+      }
+
+      function exportCSV() {
+        const rows = serializeRows();
+        const header = "경과일수,그날 쓴 성찰 문장,그날 있었던 일,글자수(공백제외)\n";
+        const body = rows
+          .map((r) =>
+            [r.day, csvEscape(r.text), r.tag, charCountNoSpaces(r.text)].join(",")
+          )
+          .join("\n");
+        const bom = "﻿"; // 엑셀에서 한글이 깨지지 않도록
+        triggerDownload(`factorfinder_data_${todayStamp()}.csv`, "text/csv;charset=utf-8", bom + header + body);
+      }
+
+      let lastResult = null;
+
+      function exportResultJSON() {
+        const payload = {
+          generatedAt: new Date().toISOString(),
+          rows: serializeRows(),
+          result: lastResult,
+        };
+        triggerDownload(
+          `factorfinder_result_${todayStamp()}.json`,
+          "application/json",
+          JSON.stringify(payload, null, 2)
+        );
+      }
+
+      document.getElementById("export-csv").addEventListener("click", exportCSV);
+      document.getElementById("export-json").addEventListener("click", exportResultJSON);
+
+      // ---- ritual.json 불러오기 (규칙 기반, 재현 가능 — 12번 장치와 같은 방식) ----
+
+      const TAG_KEYWORDS = {
+        "팀 활동": ["동료", "조원", "조장", "팀원", "발표", "협업"],
+        "실습·과제": ["실습", "과제", "코드", "디버그", "스크립트", "해킹", "취약점", "필기", "복습", "공부"],
+        "개인 시간": ["혼자", "개인", "산책", "정리"],
+        "휴식": ["쉬었", "쉬는", "휴식", "잠자", "잠을"],
+      };
+
+      // 리추얼 기록에는 "동료 1에게 말한 장점" 같은 고정 항목 이름이 늘 들어 있어서,
+      // open/close 배열 전체를 통째로 검색하면 그 항목 이름 자체 때문에 태그가 한쪽으로 쏠립니다.
+      // 그래서 태그 추정에는 실제 서술형 문장(값)만 뽑아서 씁니다.
+      const NARRATIVE_FIELDS_OPEN = [
+        "덜 힘들었던 장면",
+        "강점이 드러난 일화",
+        "그 결과·알게 된 점",
+        "오늘 지킬 강점·가치",
+        "오늘의 첫 행동",
+      ];
+      const NARRATIVE_FIELDS_CLOSE = [
+        "강점 행동",
+        "강점을 위해 노력하고 생각한 것",
+        "나에게 남기는 말",
+      ];
+
+      function extractField(arr, label) {
+        if (!Array.isArray(arr)) return null;
+        const line = arr.find(
+          (s) => typeof s === "string" && s.startsWith(label + ":")
+        );
+        if (!line) return null;
+        return line.slice(label.length + 1).trim();
+      }
+
+      function buildTagText(day) {
+        const values = [];
+        NARRATIVE_FIELDS_OPEN.forEach((f) => {
+          const v = extractField(day.open, f);
+          if (v) values.push(v);
+        });
+        NARRATIVE_FIELDS_CLOSE.forEach((f) => {
+          const v = extractField(day.close, f);
+          if (v) values.push(v);
+        });
+        return values.join(" ");
+      }
+
+      function guessTag(text) {
+        for (const tag of TAGS) {
+          if (tag === "기타") continue;
+          const keywords = TAG_KEYWORDS[tag] || [];
+          if (keywords.some((k) => text.includes(k))) return tag;
+        }
+        return "기타";
+      }
+
+      function importRitualJson(data) {
+        const statusEl = document.getElementById("import-status");
+        const days = data && Array.isArray(data.days) ? data.days : null;
+        if (!days || days.length === 0) {
+          statusEl.textContent =
+            "days 배열을 찾을 수 없습니다. ritual.json 형식인지 확인해 주세요.";
+          return;
+        }
+        const dated = days
+          .filter((d) => d && typeof d.date === "string")
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+        if (dated.length === 0) {
+          statusEl.textContent = "날짜가 있는 기록을 찾을 수 없습니다.";
+          return;
+        }
+        const startDate = new Date(dated[0].date);
+        const imported = [];
+        let skipped = 0;
+        dated.forEach((d) => {
+          const text = extractField(d.close, "강점을 위해 노력하고 생각한 것");
+          if (!text) {
+            skipped += 1;
+            return; // 마무리 기록이 없는 날(예: 진행 중인 당일)은 건너뜀 — 멈추지 않게
+          }
+          const elapsed =
+            Math.round((new Date(d.date) - startDate) / 86400000) + 1;
+          imported.push({ day: elapsed, text, tag: guessTag(buildTagText(d)) });
+        });
+        if (imported.length < 2) {
+          statusEl.textContent =
+            "불러올 수 있는 기록이 2건 미만입니다. 표에 직접 입력해 주세요.";
+          return;
+        }
+        rowsEl.innerHTML = "";
+        imported.forEach(addRow);
+        saveToStorage();
+        statusEl.textContent = `${imported.length}일치를 불러왔습니다${
+          skipped > 0 ? ` (마무리 기록이 없는 ${skipped}일은 건너뜀)` : ""
+        }. 태그는 자동 추정이니 필요하면 표에서 고쳐 주세요.`;
+      }
+
+      document.getElementById("import-file").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        const statusEl = document.getElementById("import-status");
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(reader.result);
+            importRitualJson(data);
+          } catch (err) {
+            statusEl.textContent =
+              "JSON을 읽지 못했습니다. ritual.json 파일이 맞는지 확인해 주세요.";
+          }
+        };
+        reader.onerror = () => {
+          statusEl.textContent = "파일을 읽는 중 문제가 생겼습니다. 다시 시도해 주세요.";
+        };
+        reader.readAsText(file, "utf-8");
+      });
+
+      // ---- 텍스트 한 번에 붙여넣기 (ritual.json이 없어도 쓸 수 있게) ----
+
+      function parseFreeText(text) {
+        const lines = text
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter(Boolean);
+        const dateRe = /^(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})\s*[:\-.,]?\s*/;
+        const dayRe = /^(\d{1,4})\s*(?:일차|일째|day)?\s*[:\-.,]?\s*/i;
+
+        const raw = lines.map((line, idx) => {
+          let m = line.match(dateRe);
+          if (m) {
+            const dt = new Date(
+              `${m[1]}-${String(m[2]).padStart(2, "0")}-${String(m[3]).padStart(2, "0")}`
+            );
+            const rest = line.slice(m[0].length).trim();
+            return { kind: "date", date: dt, text: rest || line, idx };
+          }
+          m = line.match(dayRe);
+          if (m) {
+            const rest = line.slice(m[0].length).trim();
+            return { kind: "day", day: Number(m[1]), text: rest || line, idx };
+          }
+          return { kind: "plain", text: line, idx };
+        });
+
+        const dateEntries = raw.filter((r) => r.kind === "date");
+        const startDate =
+          dateEntries.length > 0
+            ? dateEntries.map((r) => r.date).sort((a, b) => a - b)[0]
+            : null;
+
+        return raw
+          .map((r) => {
+            let day;
+            if (r.kind === "date" && startDate) {
+              day = Math.round((r.date - startDate) / 86400000) + 1;
+            } else if (r.kind === "day") {
+              day = r.day;
+            } else {
+              day = r.idx + 1;
+            }
+            return { day, text: r.text, tag: guessTag(r.text) };
+          })
+          .filter((r) => r.text && Number.isFinite(r.day));
+      }
+
+      document.getElementById("paste-add").addEventListener("click", () => {
+        const ta = document.getElementById("paste-text");
+        const statusEl = document.getElementById("paste-status");
+        const parsed = parseFreeText(ta.value);
+        if (parsed.length === 0) {
+          statusEl.textContent = "인식할 수 있는 줄이 없습니다. 한 줄에 하루씩 적어 주세요.";
+          return;
+        }
+        parsed.forEach(addRow);
+        saveToStorage();
+        statusEl.textContent = `${parsed.length}줄을 표에 추가했습니다. 태그는 자동 추정이니 확인해 주세요.`;
+        ta.value = "";
+      });
+
+      document.getElementById("add-row").addEventListener("click", () => addRow(null));
+      document.getElementById("load-sample").addEventListener("click", loadSample);
+
+      function pearson(xs, ys) {
+        const n = xs.length;
+        const meanX = xs.reduce((a, b) => a + b, 0) / n;
+        const meanY = ys.reduce((a, b) => a + b, 0) / n;
+        let num = 0, denX = 0, denY = 0;
+        for (let i = 0; i < n; i++) {
+          const dx = xs[i] - meanX;
+          const dy = ys[i] - meanY;
+          num += dx * dy;
+          denX += dx * dx;
+          denY += dy * dy;
+        }
+        const den = Math.sqrt(denX * denY);
+        if (den === 0) return null;
+        return num / den;
+      }
+
+      function interpretR(r) {
+        const a = Math.abs(r);
+        let word;
+        if (a < 0.1) word = "거의 무관";
+        else if (a < 0.3) word = "약한 관계";
+        else if (a < 0.5) word = "뚜렷한 관계";
+        else word = "강한 관계";
+        return word;
+      }
+
+      function calc() {
+        const trs = Array.from(rowsEl.querySelectorAll("tr"));
+        const valid = [];
+        trs.forEach((tr) => {
+          const dayVal = tr.querySelector(".in-day").value;
+          const text = tr.querySelector(".in-text").value;
+          const tag = tr.querySelector(".in-tag").value;
+          const day = Number(dayVal);
+          const len = charCountNoSpaces(text);
+          if (dayVal !== "" && !Number.isNaN(day) && len > 0) {
+            valid.push({ day, len, tag });
+          }
+          // 비어있거나 숫자가 아닌 행은 조용히 제외 (앱이 멈추지 않게)
+        });
+
+        if (valid.length < 2) {
+          resultEl.className = "result-box empty";
+          resultEl.innerHTML =
+            "계산하려면 경과일수와 문장이 모두 채워진 행이 2개 이상 필요합니다. 표에 데이터를 더 입력해 주세요.";
+          lastResult = null;
+          return;
+        }
+
+        const xs = valid.map((v) => v.day);
+        const ys = valid.map((v) => v.len);
+        const r = pearson(xs, ys);
+
+        const avgLen = (ys.reduce((a, b) => a + b, 0) / ys.length).toFixed(1);
+
+        let rBlock;
+        if (r === null) {
+          rBlock = `<div class="interpret">경과일수가 모두 같아서 상관계수를 계산할 수 없습니다. 서로 다른 경과일수를 입력해 보세요.</div>`;
+        } else {
+          const word = interpretR(r);
+          rBlock = `
+            <div class="stat-row">
+              <div class="stat-tile"><div class="label">표본 수</div><div class="value">${valid.length}건</div></div>
+              <div class="stat-tile hero"><div class="label">상관계수 r</div><div class="value">${r.toFixed(4)}</div></div>
+              <div class="stat-tile"><div class="label">평균 글자수</div><div class="value">${avgLen}자</div></div>
+            </div>
+            <div class="interpret">
+              경과일수와 문장 길이의 상관계수는 <strong>r=${r.toFixed(4)}</strong>로, <strong>${word}</strong>입니다.
+              (참고: 원 논문의 26일 자기관찰 데이터에서는 r=0.0692로 거의 무관했습니다.)
+              <details class="explain-toggle">
+                <summary>숫자가 무슨 뜻이야?</summary>
+                <p>
+                  상관계수(r)는 -1~1 사이 숫자예요. 0에 가까울수록 "지속 기간이 길어져도 문장 길이는 별로
+                  안 변한다"는 뜻이고, 1이나 -1에 가까울수록 "지속 기간이 길어질(짧아질)수록 문장도 같이
+                  길어진다(짧아진다)"는 뜻이에요. 지금 값은 경과일수와 문장 길이 사이의 관계만 본 것이고,
+                  이 자체가 좋거나 나쁜 건 아니에요.
+                </p>
+              </details>
+            </div>
+          `;
+        }
+
+        const byTag = {};
+        valid.forEach((v) => {
+          if (!byTag[v.tag]) byTag[v.tag] = [];
+          byTag[v.tag].push(v.len);
+        });
+        const tagStats = Object.keys(byTag)
+          .map((tag) => ({
+            tag,
+            avg: byTag[tag].reduce((a, b) => a + b, 0) / byTag[tag].length,
+            n: byTag[tag].length,
+          }))
+          .sort((a, b) => b.avg - a.avg);
+
+        const maxAvg = Math.max(...tagStats.map((t) => t.avg), 1);
+        const topTag = tagStats[0];
+
+        const barsHtml = tagStats
+          .map((t, i) => {
+            const pct = Math.round((t.avg / maxAvg) * 100);
+            const color = TAG_COLORS[t.tag] || "#ab7d5c";
+            return `
+              <div class="tag-bar-row ${i === 0 ? "top" : ""}">
+                <span class="tag-name"><span class="tag-bar-dot" style="background:${color}"></span>${t.tag}${
+              i === 0 ? '<span class="top-badge">최고</span>' : ""
+            }</span>
+                <span class="tag-bar-track"><span class="tag-bar-fill" style="width:${pct}%;background:${color}"></span></span>
+                <span>${t.avg.toFixed(1)}자 · <strong style="color:${color}">${pct}%</strong></span>
+              </div>
+            `;
+          })
+          .join("");
+
+        const advice = TAG_ADVICE[topTag.tag] || TAG_ADVICE["기타"];
+        const suggestHtml =
+          tagStats.length > 1
+            ? `<div class="summary-line" style="font-weight:400;color:var(--secondary);margin-top:6px">
+                 → ${advice}
+               </div>`
+            : "";
+
+        lastResult = {
+          n: valid.length,
+          r: r,
+          avgLen: Number(avgLen),
+          topTag: topTag.tag,
+          tagStats: tagStats.map((t) => ({
+            tag: t.tag,
+            avg: Number(t.avg.toFixed(2)),
+            n: t.n,
+          })),
+        };
+
+        resultEl.className = "result-box";
+        resultEl.innerHTML = `
+          ${rBlock}
+          <h3 style="margin:18px 0 10px;font-size:15px;color:var(--secondary)">사건 유형별 평균 문장 길이</h3>
+          <div class="tag-bars">${barsHtml}</div>
+          <div class="summary-line">
+            입력하신 기록에서는 <strong>[${topTag.tag}]</strong>이 있었던 날 성찰 문장이 평균적으로 가장 길었습니다 (${topTag.avg.toFixed(
+          1
+        )}자, ${topTag.n}건).
+          </div>
+          ${suggestHtml}
+        `;
+      }
+
+      document.getElementById("calc").addEventListener("click", calc);
+
+      // ---- 진행 단계 표시(스테퍼): 스크롤 위치에 맞춰 현재 단계 강조 ----
+      function initStepper() {
+        const stepIds = ["step-quiz", "step-input", "step-result"];
+        const items = {};
+        document.querySelectorAll(".stepper-item").forEach((el) => {
+          items[el.dataset.step] = el;
+        });
+        const setActive = (id) => {
+          const key = id.replace("step-", "");
+          stepIds.forEach((sid) => {
+            const k = sid.replace("step-", "");
+            if (items[k]) items[k].classList.toggle("active", k === key);
+          });
+        };
+        if (!("IntersectionObserver" in window)) {
+          setActive(stepIds[0]);
+          return;
+        }
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) setActive(entry.target.id);
+            });
+          },
+          { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
+        );
+        stepIds.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) observer.observe(el);
+        });
+        setActive(stepIds[0]);
+      }
+      initStepper();
+
+      // ---- 스크롤하면 섹션이 은은하게 나타나는 효과 (실패해도 절대 안 보이는 일은 없게 안전장치) ----
+      function initReveal() {
+        const els = document.querySelectorAll(".reveal");
+        try {
+          if (!("IntersectionObserver" in window)) {
+            els.forEach((el) => el.classList.add("revealed"));
+            return;
+          }
+          const obs = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("revealed");
+                  obs.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+          );
+          els.forEach((el) => obs.observe(el));
+        } catch (e) {
+          els.forEach((el) => el.classList.add("revealed"));
+        }
+        // 관찰이 어떤 이유로든 걸리지 않는 경우를 대비한 안전장치
+        setTimeout(() => els.forEach((el) => el.classList.add("revealed")), 2500);
+      }
+      initReveal();
+
+      buildQuizHtml();
+
+      if (!loadFromStorage()) {
+        loadSample();
+      }
+    </script>
+  </body>
+</html>
