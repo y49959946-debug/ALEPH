@@ -17,8 +17,10 @@
         --line: #f5cfa8;
         --primary: #33241a;
         --secondary: #8a5a3f;
-        --muted: #ab7d5c;
-        --accent-warm: #e2652a;
+        --muted: #886449;
+        --accent-warm: #b45021;
+        --cta: #b8451f;
+        --cta-hover: #9c3a1a;
         --good: #4f8f3f;
         --shadow: 0 18px 42px rgba(140, 70, 20, 0.18);
         --font-warm: "Gowun Dodum", "Noto Sans KR", sans-serif;
@@ -41,18 +43,33 @@
       body { overflow-x: hidden; }
 
       .page-shell {
-        width: min(920px, calc(100% - 60px));
+        width: min(1100px, calc(100% - 40px));
         margin: 0 auto;
-        padding: 28px 0 120px;
+        padding: 12px 0 120px;
       }
 
       .topbar {
         position: sticky;
-        top: 18px;
+        top: 0;
         z-index: 120;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding: 8px 0;
+      }
+
+      .topbar::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 100vw;
+        margin-left: -50vw;
+        background: rgba(255, 243, 228, 0.88);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        z-index: -1;
       }
 
       .topbar::after {
@@ -77,7 +94,7 @@
 
       .nav-brand-word {
         display: inline-block;
-        font-size: clamp(30px, 3vw, 40px);
+        font-size: clamp(24px, 2.4vw, 32px);
         font-weight: 900;
         color: #7a4a30;
         font-family: "Segoe UI", "Arial", sans-serif;
@@ -97,7 +114,7 @@
 
       .stepper {
         position: sticky;
-        top: 84px;
+        top: 80px;
         z-index: 110;
         display: flex;
         align-items: center;
@@ -105,11 +122,13 @@
         gap: 8px;
         width: fit-content;
         margin: 10px auto 0;
-        background: rgba(255, 251, 244, 0.88);
+        background: rgba(255, 251, 244, 0.94);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         border: 1px solid var(--line);
         border-radius: 999px;
         padding: 6px 10px;
-        font-size: 12.5px;
+        font-size: 13px;
         box-shadow: var(--shadow);
       }
       .stepper-item {
@@ -125,8 +144,8 @@
       }
       .stepper-item svg { width: 14px; height: 14px; }
       .stepper-item.active {
-        color: var(--primary);
-        background: var(--bg-bottom);
+        color: #fff;
+        background: var(--cta);
       }
       .stepper-arrow { color: var(--line); font-size: 11px; }
 
@@ -147,11 +166,19 @@
 
       h1 {
         margin: 0 0 8px;
-        font-size: clamp(26px, 3.4vw, 36px);
-        line-height: 1.3;
-        letter-spacing: -0.5px;
+        font-size: clamp(34px, 4.6vw, 50px);
+        line-height: 1.2;
+        letter-spacing: -1px;
+        color: var(--primary);
         font-family: var(--font-warm);
         font-weight: 400;
+      }
+
+      .tagline {
+        margin: 0 0 22px;
+        font-size: clamp(16px, 1.8vw, 19px);
+        line-height: 1.6;
+        color: var(--secondary);
       }
 
       .pitch {
@@ -167,11 +194,14 @@
       }
       .pitch strong { color: var(--primary); }
       .pitch .paper-title {
-        display: block;
+        display: inline-block;
         font-size: 13px;
         color: var(--muted);
-        margin-bottom: 8px;
+        margin-top: 12px;
+        text-decoration: none;
+        border-bottom: 1px dotted var(--muted);
       }
+      .pitch .paper-title:hover { color: var(--secondary); }
 
       h2 {
         margin: 44px 0 14px;
@@ -182,8 +212,8 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        font-family: var(--font-warm);
-        font-weight: 400;
+        font-weight: 800;
+        letter-spacing: -0.3px;
       }
       .h2-icon {
         display: inline-flex;
@@ -193,7 +223,7 @@
       .h2-icon svg { width: 17px; height: 17px; }
 
       .hint {
-        font-size: 13.5px;
+        font-size: 14px;
         color: var(--muted);
         margin: 0 0 18px;
         line-height: 1.7;
@@ -250,11 +280,35 @@
       }
       button:hover { background: var(--bg-bottom); }
       button.primary {
-        background: var(--primary);
+        background: var(--cta);
         color: #fff;
-        border-color: var(--primary);
+        border-color: var(--cta);
       }
-      button.primary:hover { opacity: 0.9; }
+      button.primary:hover { background: var(--cta-hover); border-color: var(--cta-hover); }
+      .table-actions {
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 18px;
+      }
+      .secondary-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+      .secondary-actions button {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 7px 12px;
+        background: transparent;
+        border-color: transparent;
+        color: var(--secondary);
+      }
+      .secondary-actions button:hover { background: #fff; border-color: var(--line); }
+      button.cta-big {
+        font-size: 16.5px;
+        font-weight: 800;
+        padding: 14px 32px;
+        border-radius: 999px;
+        box-shadow: 0 10px 24px rgba(184, 69, 31, 0.32);
+        transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      }
+      button.cta-big:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(184, 69, 31, 0.38); }
       button.del {
         border: none;
         background: transparent;
@@ -276,17 +330,43 @@
         font-size: 16px;
         font-weight: 700;
         color: var(--primary);
-        margin: 0 0 14px;
-        font-family: var(--font-warm);
+        margin: 0 0 16px;
       }
       .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+      .quiz-options { gap: 10px; }
       button.quiz-opt {
+        display: flex;
+        align-items: center;
+        gap: 14px;
         text-align: left;
         width: 100%;
         white-space: normal;
         line-height: 1.5;
-        font-weight: 500;
+        font-size: 14.5px;
+        font-weight: 600;
+        color: var(--primary);
+        padding: 12px 16px;
+        border-radius: 14px;
+        transition: transform 0.15s, border-color 0.15s, background 0.15s;
       }
+      button.quiz-opt:hover {
+        background: #fff8ef;
+        border-color: var(--accent-warm);
+        transform: translateY(-1px);
+      }
+      .quiz-opt-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-warm);
+        background: #fff2e0;
+        border: 1px solid var(--line);
+      }
+      .quiz-opt-icon svg { width: 22px; height: 22px; }
       .quiz-progress { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: right; }
       .quiz-badge {
         width: 84px;
@@ -339,6 +419,15 @@
         font-size: 12.5px;
         color: var(--muted);
       }
+
+      .more-info {
+        margin: -4px 0 16px;
+        font-size: 13px;
+        color: var(--secondary);
+      }
+      .more-info summary { cursor: pointer; font-weight: 700; color: var(--muted); }
+      .more-info summary:hover { color: var(--secondary); }
+      .more-info ul { margin: 8px 0 0; padding-left: 18px; line-height: 1.8; }
 
       .paste-box {
         display: block;
@@ -397,8 +486,27 @@
         color: var(--muted);
         margin-bottom: 6px;
       }
-      .stat-tile .value { font-size: 20px; font-weight: 800; color: var(--primary); }
-      .stat-tile.hero .value { color: var(--accent-warm); }
+      .stat-row { grid-template-columns: 1.7fr 1fr 1fr; align-items: stretch; }
+      .stat-tile .value {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--primary);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.3px;
+      }
+      .stat-tile.hero {
+        background: #fff8ef;
+        border: 1.5px solid var(--accent-warm);
+        padding: 16px 20px;
+      }
+      .stat-tile.hero .value {
+        font-size: clamp(34px, 4.2vw, 46px);
+        line-height: 1.1;
+        color: var(--accent-warm);
+      }
+      .stat-tile.hero .label { text-transform: none; }
+      .stat-tile .caption { margin-top: 6px; font-size: 12px; color: var(--muted); }
+      .tag-bar-row { font-variant-numeric: tabular-nums; }
 
       .interpret {
         font-size: 14.5px;
@@ -477,6 +585,10 @@
 
       @media (max-width: 680px) {
         .stat-row { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+        .stat-tile.hero { grid-column: 1 / -1; }
+        .table-actions { flex-direction: column-reverse; align-items: stretch; }
+        button.cta-big { width: 100%; }
+        .secondary-actions { justify-content: center; }
 
         .table-wrap { overflow-x: visible; padding: 12px; }
         table { min-width: 0; }
@@ -519,44 +631,42 @@
       <nav class="stepper" id="stepper" aria-label="진행 단계">
         <a class="stepper-item" data-step="quiz" href="#step-quiz">
           <span class="stepper-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17.01"></line><circle cx="12" cy="12" r="9.5"></circle></svg></span>
-          <span class="stepper-label">미니 테스트</span>
+          <span class="stepper-label">나 알아보기</span>
         </a>
         <span class="stepper-arrow">→</span>
         <a class="stepper-item" data-step="input" href="#step-input">
           <span class="stepper-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></span>
-          <span class="stepper-label">내 기록</span>
+          <span class="stepper-label">기록하기</span>
         </a>
         <span class="stepper-arrow">→</span>
         <a class="stepper-item" data-step="result" href="#step-result">
           <span class="stepper-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
-          <span class="stepper-label">결과</span>
+          <span class="stepper-label">발견하기</span>
         </a>
       </nav>
 
       <main>
         <p class="kicker">10번 논문을 실제로 쓰는 앱 · 대표작</p>
         <h1>성찰 요인 탐색기</h1>
+        <p class="tagline">오래 쓰면 성찰이 저절로 깊어질까요? 내 기록으로 직접 확인해 보는 작은 데이터 저널이에요.</p>
 
         <div class="pitch reveal">
-          <span class="paper-title">논문: 리추얼 지속 기간이 자기 성찰 문장 길이에 미치는 영향 (2026, 박성민)</span>
-          <strong>이 앱은 리추얼(자기 성찰 기록)을 막 시작한 사람에게</strong>, "꾸준히 오래 쓰면 저절로 성찰이 깊어지고 글이 길어질 것"이라는 생각이 실제로는 맞지 않을 수 있다는 것을, 본인의 기록을 직접 입력해서 확인시켜 줍니다. 대신 지속 기간이 아니라 <strong>어떤 날 유형(사건)</strong>에서 더 길게 썼는지를 계산해서 보여줍니다.
+          <strong>이 앱은 리추얼(자기 성찰 기록)을 막 시작한 사람에게</strong>, 오래 쓴다고 성찰이 저절로 길어지지는 않았다는 논문 결과(기간과 문장 길이의 상관 r&nbsp;=&nbsp;0.07)를 내 기록으로 직접 확인시켜 주고, 대신 <strong>어떤 날</strong>에 더 길게 썼는지 찾아 줍니다.
+          <br />
+          <a class="paper-title" href="Paper.html">근거 논문 · 리추얼 지속 기간이 자기 성찰 문장 길이에 미치는 영향 (2026, 박성민) →</a>
         </div>
 
-        <h2 id="step-quiz"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17.01"></line><circle cx="12" cy="12" r="9.5"></circle></svg></span>1. 미니 테스트 — 나는 어떤 환경에서 성찰이 깊어질까?</h2>
+        <h2 id="step-quiz"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17.01"></line><circle cx="12" cy="12" r="9.5"></circle></svg></span>1. 나 알아보기 — 나는 어떤 환경에서 성찰이 깊어질까?</h2>
         <p class="hint">
-          MBTI 테스트처럼 가볍게, 3문항만 답해보세요. 정답은 없어요 — 그냥 나를 한번 돌아보는
-          시간이에요. 진짜 나에게 맞는지는 아래 2번에서 내 실제 기록으로 다시 확인할 수 있습니다.
+          3문항만 가볍게 답해 보세요. 정답은 없어요 — 진짜 나에게 맞는지는 2번에서 내 기록으로 확인할 수 있어요.
         </p>
         <div class="quiz-box reveal" id="quiz-box"></div>
         <div id="quiz-result" class="result-box empty" style="display:none"></div>
 
-        <h2 id="step-input"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></span>2. 내 기록 입력하기</h2>
+        <h2 id="step-input"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></span>2. 기록하기 — 내 기록 넣어보기</h2>
         <p class="hint">
-          먼저 이렇게 한번 써볼까요? 아래 표에는 예시 데이터를 미리 채워뒀어요. 그대로
-          "계산하기"를 눌러 봐도 되고, 행을 지우고 나의 이야기(경과일수·그날 쓴 성찰 문장·
-          그날 있었던 일 유형)로 바꿔 넣어도 됩니다. 문장 길이는 논문과 같은 방식으로
-          <strong>공백을 뺀 글자 수</strong>로 계산해요. 이미 리추얼 기록을 쓰고 계시다면,
-          표에 한 줄씩 옮겨 적는 대신 아래에서 파일을 불러오면 자동으로 채워집니다.
+          표에 예시 기록이 미리 채워져 있어요. 그대로 <strong>계산하기</strong>를 눌러 봐도 되고,
+          나의 이야기로 바꿔 적어도 돼요.
         </p>
 
         <div class="import-box">
@@ -565,11 +675,19 @@
             <input type="file" id="import-file" accept="application/json,.json" />
           </label>
           <span id="import-status">
-            12번 장치(regenerate.py)가 쓰는 것과 같은 형식입니다. 이 파일은 어디로도 전송되지 않고
-            이 페이지 안에서만(내 컴퓨터·브라우저 안에서만) 계산에 쓰입니다. 사건 유형(태그)은
-            문장 속 키워드로 자동 추정한 것이라, 불러온 뒤 표에서 필요하면 고쳐 주세요.
+            기록 파일을 불러오면 표가 자동으로 채워져요. 파일은 밖으로 전송되지 않고 이 브라우저 안에서만 처리돼요.
           </span>
         </div>
+
+        <details class="more-info">
+          <summary>ⓘ 자세한 입력 형식 보기</summary>
+          <ul>
+            <li>표의 한 줄 = 하루. 경과일수, 그날 쓴 성찰 문장, 그날 있었던 일의 유형을 적어요.</li>
+            <li>문장 길이는 논문과 같은 방식으로 <strong>공백을 뺀 글자 수</strong>로 계산해요.</li>
+            <li>불러올 수 있는 파일은 리추얼 기록 JSON(12번 장치 regenerate.py가 쓰는 ritual.json과 같은 형식)이에요.</li>
+            <li>불러온 기록의 사건 유형(태그)은 문장 속 키워드로 자동 추정한 거라, 필요하면 표에서 고쳐 주세요.</li>
+          </ul>
+        </details>
 
         <details class="paste-box reveal">
           <summary>또는 텍스트로 한 번에 붙여넣기</summary>
@@ -597,16 +715,18 @@
             </thead>
             <tbody id="rows"></tbody>
           </table>
-          <div class="row-actions">
-            <button id="add-row" type="button">+ 행 추가</button>
-            <button id="load-sample" type="button">예시 데이터로 되돌리기</button>
-            <button id="export-csv" type="button">표 CSV로 저장</button>
-            <button id="calc" class="primary" type="button">계산하기</button>
+          <div class="row-actions table-actions">
+            <div class="secondary-actions">
+              <button id="add-row" type="button">+ 행 추가</button>
+              <button id="load-sample" type="button">예시 데이터로 되돌리기</button>
+              <button id="export-csv" type="button">표 CSV로 저장</button>
+            </div>
+            <button id="calc" class="primary cta-big" type="button">계산하기 →</button>
           </div>
           <p class="save-note" id="save-note">입력한 내용은 이 브라우저에 자동으로 저장되어, 다시 들어와도 남아있습니다.</p>
         </div>
 
-        <h2 id="step-result"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>3. 결과</h2>
+        <h2 id="step-result"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>3. 발견하기 — 결과</h2>
         <div id="result" class="result-box empty">
           아직 계산하지 않았습니다. 위에서 "계산하기"를 눌러 보세요.
         </div>
@@ -747,7 +867,7 @@
                 ${q.options
                   .map(
                     (o) =>
-                      `<button class="quiz-opt" type="button" data-qi="${qi}" data-tag="${o.tag}">${o.label}</button>`
+                      `<button class="quiz-opt" type="button" data-qi="${qi}" data-tag="${o.tag}"><span class="quiz-opt-icon" aria-hidden="true">${QUIZ_TYPE_ICONS[o.tag] || ""}</span><span>${o.label}</span></button>`
                   )
                   .join("")}
               </div>
@@ -780,7 +900,7 @@
         });
         if (!best) best = "개인 시간";
         const copy = QUIZ_TYPE_COPY[best] || { title: "성찰러", desc: "" };
-        const color = TAG_COLORS[best] || "#ab7d5c";
+        const color = TAG_COLORS[best] || "#886449";
         const icon = QUIZ_TYPE_ICONS[best] || "";
 
         const resultBox = document.getElementById("quiz-result");
@@ -1217,8 +1337,8 @@
           const word = interpretR(r);
           rBlock = `
             <div class="stat-row">
+              <div class="stat-tile hero"><div class="label">상관계수 r (경과일수 × 문장 길이)</div><div class="value">${r.toFixed(4)}</div><div class="caption">0에 가까울수록 기간과 길이는 무관 · 논문은 0.0692</div></div>
               <div class="stat-tile"><div class="label">표본 수</div><div class="value">${valid.length}건</div></div>
-              <div class="stat-tile hero"><div class="label">상관계수 r</div><div class="value">${r.toFixed(4)}</div></div>
               <div class="stat-tile"><div class="label">평균 글자수</div><div class="value">${avgLen}자</div></div>
             </div>
             <div class="interpret">
