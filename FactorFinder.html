@@ -486,7 +486,8 @@
         color: var(--muted);
         margin-bottom: 6px;
       }
-      .stat-row { grid-template-columns: 1.7fr 1fr 1fr; align-items: stretch; }
+      .stat-row { grid-template-columns: 1.6fr 1fr; align-items: stretch; }
+      .stat-row .stat-tile.hero { grid-row: span 2; }
       .stat-tile .value {
         font-size: 22px;
         font-weight: 800;
@@ -506,6 +507,95 @@
       }
       .stat-tile.hero .label { text-transform: none; }
       .stat-tile .caption { margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+      /* C. 상관계수 눈금 (작게, 숫자 카드 안) */
+      .r-scale { margin-top: 12px; }
+      .r-scale-track {
+        position: relative;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #f3c9a4 0%, #f7e6d4 50%, #f3c9a4 100%);
+      }
+      .r-scale-zero {
+        position: absolute; left: 50%; top: -3px; width: 1px; height: 12px;
+        background: var(--muted); opacity: 0.6;
+      }
+      .r-scale-paper {
+        position: absolute; top: 9px; transform: translateX(-50%);
+        width: 0; height: 0;
+        border-left: 5px solid transparent; border-right: 5px solid transparent;
+        border-bottom: 7px solid var(--secondary);
+      }
+      .r-scale-dot {
+        position: absolute; top: 50%; transform: translate(-50%, -50%);
+        width: 14px; height: 14px; border-radius: 50%;
+        background: var(--accent-warm); border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(140, 70, 20, 0.35);
+      }
+      .r-scale-labels {
+        display: flex; justify-content: space-between;
+        margin-top: 12px; font-size: 11px; color: var(--muted);
+      }
+      .r-scale-legend { margin-top: 6px; font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+      .r-scale-legend .dot-key { color: var(--accent-warm); }
+      .sample-note { display: block; margin-top: 6px; font-size: 12.5px; color: var(--secondary); }
+
+      /* B. 산점도 */
+      .chart-title { margin: 22px 0 4px; font-size: 15px; color: var(--secondary); }
+      .chart-sub { margin: 0 0 10px; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+      .scatter-wrap {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 10px 12px 6px;
+      }
+      .scatter-wrap svg { display: block; width: 100%; height: auto; }
+      .scatter-axis-x { text-align: center; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+      /* A. 발견 카드 */
+      .discovery {
+        margin-top: 22px;
+        background: linear-gradient(160deg, #fff6ea 0%, #ffe6cc 100%);
+        border: 1px solid #f0c49a;
+        border-radius: 16px;
+        padding: 18px 20px;
+      }
+      .discovery-title {
+        font-family: var(--font-warm);
+        font-size: 17px;
+        color: var(--accent-warm);
+        margin-bottom: 10px;
+      }
+      .discovery p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.75; color: var(--primary); }
+      .discovery .discovery-note { font-size: 13px; color: var(--secondary); }
+      .discovery .discovery-advice { font-size: 13.5px; color: var(--secondary); }
+      .discovery-quote {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px dashed #efc39b;
+        font-size: 13px;
+        color: var(--secondary);
+        line-height: 1.7;
+      }
+      .discovery-quote .quote-meta { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 2px; }
+
+      /* E. 섹션 사이 한 문장 */
+      .interlude {
+        margin: 56px auto 0;
+        text-align: center;
+        font-family: var(--font-warm);
+        font-size: clamp(16px, 1.9vw, 19px);
+        color: var(--secondary);
+      }
+      .interlude::before, .interlude::after {
+        content: "";
+        display: inline-block;
+        width: 28px;
+        height: 1px;
+        background: var(--line);
+        vertical-align: middle;
+        margin: 0 12px;
+      }
       .tag-bar-row { font-variant-numeric: tabular-nums; }
 
       .interpret {
@@ -585,7 +675,7 @@
 
       @media (max-width: 680px) {
         .stat-row { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
-        .stat-tile.hero { grid-column: 1 / -1; }
+        .stat-row .stat-tile.hero { grid-column: 1 / -1; grid-row: auto; }
         .table-actions { flex-direction: column-reverse; align-items: stretch; }
         button.cta-big { width: 100%; }
         .secondary-actions { justify-content: center; }
@@ -726,6 +816,8 @@
           <p class="save-note" id="save-note">입력한 내용은 이 브라우저에 자동으로 저장되어, 다시 들어와도 남아있습니다.</p>
         </div>
 
+        <p class="interlude reveal">숫자로 바라보면, 평소에는 보이지 않던 패턴이 드러납니다.</p>
+
         <h2 id="step-result"><span class="h2-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>3. 발견하기 — 결과</h2>
         <div id="result" class="result-box empty">
           아직 계산하지 않았습니다. 위에서 "계산하기"를 눌러 보세요.
@@ -845,6 +937,7 @@
       };
 
       let quizAnswers = [];
+      let quizResultTag = null; // 미니 테스트를 끝냈으면 그 유형(태그), 아니면 null
 
       function renderQuizQuestion(idx) {
         document.querySelectorAll(".quiz-q").forEach((el, i) => {
@@ -902,6 +995,7 @@
         const copy = QUIZ_TYPE_COPY[best] || { title: "성찰러", desc: "" };
         const color = TAG_COLORS[best] || "#886449";
         const icon = QUIZ_TYPE_ICONS[best] || "";
+        quizResultTag = best;
 
         const resultBox = document.getElementById("quiz-result");
         resultBox.className = "result-box";
@@ -926,15 +1020,18 @@
           }
         });
         document.getElementById("quiz-retry").addEventListener("click", resetQuiz);
+        if (lastResult) calc(); // 이미 계산한 결과가 있으면 발견 카드도 새 테스트 결과로 갱신
       }
 
       function resetQuiz() {
         quizAnswers = [];
+        quizResultTag = null;
         const box = document.getElementById("quiz-box");
         const resultBox = document.getElementById("quiz-result");
         if (box) box.style.display = "block";
         if (resultBox) resultBox.style.display = "none";
         renderQuizQuestion(0);
+        if (lastResult) calc(); // 발견 카드에서 지난 테스트 결과를 지움
       }
 
       const rowsEl = document.getElementById("rows");
@@ -1301,6 +1398,118 @@
         return word;
       }
 
+      function rScaleHtml(r) {
+        const pos = (v) => Math.max(0, Math.min(100, ((v + 1) / 2) * 100));
+        return `
+          <div class="r-scale" aria-hidden="true">
+            <div class="r-scale-track">
+              <span class="r-scale-zero"></span>
+              <span class="r-scale-paper" style="left:${pos(0.0692)}%"></span>
+              <span class="r-scale-dot" style="left:${pos(r)}%"></span>
+            </div>
+            <div class="r-scale-labels"><span>-1 · 반대로 움직임</span><span>0 · 관계 없음</span><span>+1 · 함께 움직임</span></div>
+          </div>
+          <div class="r-scale-legend"><span class="dot-key">●</span> 내 기록 &nbsp; ▲ 논문(0.0692) &nbsp;·&nbsp; 상관이 곧 원인은 아니에요</div>
+        `;
+      }
+
+      function scatterSvg(valid, r) {
+        // 실제 화면 폭에 맞춰 그려서 글자가 과하게 커지거나 작아지지 않게
+        const measured = resultEl && resultEl.clientWidth ? resultEl.clientWidth - 70 : 0;
+        const W = measured > 0 ? Math.max(280, Math.min(900, measured)) : 480;
+        const H = W < 480 ? 200 : 240, L = 36, R = 12, T = 12, B = 26;
+        const xs = valid.map((v) => v.day);
+        const ys = valid.map((v) => v.len);
+        const xMin = Math.min(...xs), xMax = Math.max(...xs);
+        const yMax = Math.max(...ys);
+        const xSpan = xMax - xMin || 1;
+        const niceY = Math.max(10, Math.ceil(yMax / 10) * 10);
+        const px = (x) => L + ((x - xMin) / xSpan) * (W - L - R);
+        const py = (y) => T + (1 - y / niceY) * (H - T - B);
+
+        let grid = "";
+        const ySteps = 4;
+        for (let i = 0; i <= ySteps; i++) {
+          const val = Math.round((niceY / ySteps) * i);
+          const y = py(val);
+          grid += `<line x1="${L}" y1="${y}" x2="${W - R}" y2="${y}" stroke="#f3dcc4" stroke-width="1"/>`;
+          grid += `<text x="${L - 6}" y="${y + 4}" text-anchor="end" font-size="11" fill="#886449">${val}</text>`;
+        }
+        const xTicks = Array.from(new Set([xMin, Math.round(xMin + xSpan / 2), xMax]));
+        xTicks.forEach((xv) => {
+          grid += `<text x="${px(xv)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#886449">${xv}일</text>`;
+        });
+
+        // 추세선(최소제곱) — 기울기가 눈으로 보이게, 옅은 점선
+        let trend = "";
+        if (r !== null && valid.length >= 2) {
+          const n = xs.length;
+          const mx = xs.reduce((a, b) => a + b, 0) / n;
+          const my = ys.reduce((a, b) => a + b, 0) / n;
+          let sxy = 0, sxx = 0;
+          for (let i = 0; i < n; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) ** 2; }
+          if (sxx > 0) {
+            const b = sxy / sxx, a = my - b * mx;
+            const clampY = (y) => Math.max(0, Math.min(niceY, y));
+            trend = `<line x1="${px(xMin)}" y1="${py(clampY(a + b * xMin))}" x2="${px(xMax)}" y2="${py(clampY(a + b * xMax))}" stroke="#b45021" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.55"/>`;
+          }
+        }
+
+        const dots = valid
+          .map((v) => {
+            const c = TAG_COLORS[v.tag] || "#886449";
+            return `<circle cx="${px(v.day)}" cy="${py(v.len)}" r="5.5" fill="${c}" fill-opacity="0.85" stroke="#fff" stroke-width="1.5"><title>${v.day}일째 · ${v.len}자 · ${escapeHtml(v.tag)}</title></circle>`;
+          })
+          .join("");
+
+        return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="경과일수와 문장 길이 산점도">
+          ${grid}
+          <line x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}" stroke="#e6c3a0" stroke-width="1"/>
+          ${trend}
+          ${dots}
+        </svg>`;
+      }
+
+      function discoveryHtml(tagStats, valid) {
+        const topTag = tagStats[0];
+        const parts = [];
+        if (quizResultTag && QUIZ_TYPE_COPY[quizResultTag]) {
+          parts.push(`<p>미니 테스트에서는 <strong>'${QUIZ_TYPE_COPY[quizResultTag].title}'</strong>에 가까웠어요.</p>`);
+        }
+        if (tagStats.length > 1) {
+          parts.push(`<p>실제 기록에서는 <strong>${escapeHtml(topTag.tag)}</strong> 날의 문장이 평균 ${topTag.avg.toFixed(1)}자로 가장 길었어요 (${topTag.n}건).</p>`);
+        } else {
+          parts.push(`<p>이번 기록은 모두 <strong>${escapeHtml(topTag.tag)}</strong> 유형이에요 (평균 ${topTag.avg.toFixed(1)}자). 유형이 여러 개 섞이면 어떤 날에 더 길게 쓰는지 비교할 수 있어요.</p>`);
+        }
+        if (quizResultTag) {
+          let compare = "";
+          if (tagStats.length > 1) {
+            compare = quizResultTag === topTag.tag
+              ? "테스트와 기록이 같은 쪽을 가리키고 있어요. "
+              : "테스트와 기록이 서로 다른 쪽을 가리키고 있어요. ";
+          }
+          parts.push(`<p class="discovery-note">${compare}둘은 서로 다른 방식으로 나를 바라보는 참고 자료예요.</p>`);
+        } else {
+          parts.push(`<p class="discovery-note">위의 1번 미니 테스트를 해보면, 내가 생각하는 나와 기록 속의 나를 나란히 볼 수 있어요.</p>`);
+        }
+        if (tagStats.length > 1) {
+          const advice = TAG_ADVICE[topTag.tag] || TAG_ADVICE["기타"];
+          parts.push(`<p class="discovery-advice">→ ${advice}</p>`);
+        }
+        const longest = valid.reduce((a, b) => (b.len > a.len ? b : a), valid[0]);
+        const quoteText = longest.text.length > 70 ? longest.text.slice(0, 70) + "…" : longest.text;
+        return `
+          <div class="discovery">
+            <div class="discovery-title">✦ 이번 기록에서 발견한 것</div>
+            ${parts.join("")}
+            <div class="discovery-quote">
+              <span class="quote-meta">가장 긴 기록 · ${longest.day}일째 · ${longest.len}자</span>
+              "${escapeHtml(quoteText)}"
+            </div>
+          </div>
+        `;
+      }
+
       function calc() {
         const trs = Array.from(rowsEl.querySelectorAll("tr"));
         const valid = [];
@@ -1311,7 +1520,7 @@
           const day = Number(dayVal);
           const len = charCountNoSpaces(text);
           if (dayVal !== "" && !Number.isNaN(day) && len > 0) {
-            valid.push({ day, len, tag });
+            valid.push({ day, len, tag, text: text.trim() });
           }
           // 비어있거나 숫자가 아닌 행은 조용히 제외 (앱이 멈추지 않게)
         });
@@ -1337,13 +1546,16 @@
           const word = interpretR(r);
           rBlock = `
             <div class="stat-row">
-              <div class="stat-tile hero"><div class="label">상관계수 r (경과일수 × 문장 길이)</div><div class="value">${r.toFixed(4)}</div><div class="caption">0에 가까울수록 기간과 길이는 무관 · 논문은 0.0692</div></div>
+              <div class="stat-tile hero"><div class="label">상관계수 r (경과일수 × 문장 길이)</div><div class="value">${r.toFixed(4)}</div>${rScaleHtml(r)}</div>
               <div class="stat-tile"><div class="label">표본 수</div><div class="value">${valid.length}건</div></div>
               <div class="stat-tile"><div class="label">평균 글자수</div><div class="value">${avgLen}자</div></div>
             </div>
             <div class="interpret">
               경과일수와 문장 길이의 상관계수는 <strong>r=${r.toFixed(4)}</strong>로, <strong>${word}</strong>입니다.
               (참고: 원 논문의 26일 자기관찰 데이터에서는 r=0.0692로 거의 무관했습니다.)
+              <span class="sample-note">${valid.length}개 기록으로 분석했어요.${
+                valid.length < 10 ? " 기록이 적으면 이 숫자는 크게 흔들릴 수 있어요." : ""
+              }</span>
               <details class="explain-toggle">
                 <summary>숫자가 무슨 뜻이야?</summary>
                 <p>
@@ -1389,19 +1601,12 @@
           })
           .join("");
 
-        const advice = TAG_ADVICE[topTag.tag] || TAG_ADVICE["기타"];
-        const suggestHtml =
-          tagStats.length > 1
-            ? `<div class="summary-line" style="font-weight:400;color:var(--secondary);margin-top:6px">
-                 → ${advice}
-               </div>`
-            : "";
-
         lastResult = {
           n: valid.length,
           r: r,
           avgLen: Number(avgLen),
           topTag: topTag.tag,
+          quizType: quizResultTag,
           tagStats: tagStats.map((t) => ({
             tag: t.tag,
             avg: Number(t.avg.toFixed(2)),
@@ -1412,18 +1617,22 @@
         resultEl.className = "result-box";
         resultEl.innerHTML = `
           ${rBlock}
-          <h3 style="margin:18px 0 10px;font-size:15px;color:var(--secondary)">사건 유형별 평균 문장 길이</h3>
+          <h3 class="chart-title">경과일 × 문장 길이</h3>
+          <p class="chart-sub">점 하나가 하루예요. 점들이 오른쪽 위로 모이면 오래 쓸수록 길어진 것이고, 고르게 흩어져 있으면 기간과 길이는 별 상관이 없는 거예요. 점선은 전체 흐름이에요.</p>
+          <div class="scatter-wrap">${scatterSvg(valid, r)}</div>
+          <h3 class="chart-title" style="margin-bottom:10px">사건 유형별 평균 문장 길이</h3>
           <div class="tag-bars">${barsHtml}</div>
-          <div class="summary-line">
-            입력하신 기록에서는 <strong>[${topTag.tag}]</strong>이 있었던 날 성찰 문장이 평균적으로 가장 길었습니다 (${topTag.avg.toFixed(
-          1
-        )}자, ${topTag.n}건).
-          </div>
-          ${suggestHtml}
+          ${discoveryHtml(tagStats, valid)}
         `;
       }
 
       document.getElementById("calc").addEventListener("click", calc);
+      // 화면 폭이 바뀌면 산점도를 새 폭에 맞게 다시 그림
+      let resizeTimer = null;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { if (lastResult) calc(); }, 250);
+      });
 
       // ---- 진행 단계 표시(스테퍼): 스크롤 위치에 맞춰 현재 단계 강조 ----
       function initStepper() {
