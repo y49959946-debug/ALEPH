@@ -394,6 +394,31 @@
         box-shadow: var(--shadow);
       }
       .quiz-badge svg { width: 42px; height: 42px; }
+
+      /* 결과 유형 일러스트 (이미지가 안 뜨면 선 아이콘 배지로 대체) */
+      .quiz-illust {
+        width: 188px;
+        height: 188px;
+        margin: 4px auto 18px;
+        padding: 5px;
+        border-radius: 50%;
+        border: 3px solid;
+        background: #fffbf4;
+        box-shadow: var(--shadow);
+        animation: illust-in 0.5s ease-out both;
+      }
+      .quiz-illust img { display: block; width: 100%; height: 100%; border-radius: 50%; }
+      .quiz-illust .quiz-badge { display: none; margin: 0; width: 100%; height: 100%; box-shadow: none; }
+      .quiz-illust.fallback { width: 84px; height: 84px; padding: 0; border: none; background: none; box-shadow: none; }
+      .quiz-illust.fallback img { display: none; }
+      .quiz-illust.fallback .quiz-badge { display: flex; }
+      @keyframes illust-in {
+        from { opacity: 0; transform: scale(0.88); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @media (max-width: 560px) {
+        .quiz-illust { width: 160px; height: 160px; }
+      }
       .quiz-type { font-size: 22px; font-weight: 700; margin-bottom: 8px; font-family: var(--font-warm); text-align: center; }
       #quiz-result .quiz-desc,
       #quiz-result .quiz-caveat { text-align: center; }
@@ -950,6 +975,14 @@
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V9Z"></path><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"></path><path d="M8 3c0 1-1 1-1 2s1 1 1 2"></path><path d="M12 3c0 1-1 1-1 2s1 1 1 2"></path></svg>',
       };
 
+      // 유형별 일러스트 (Aleph 폴더의 이미지 파일)
+      const QUIZ_TYPE_IMAGES = {
+        "팀 활동": { src: "ff-type-team.webp", alt: "세 사람이 노트북 앞에 모여 이야기하는 그림" },
+        "실습·과제": { src: "ff-type-practice.webp", alt: "노트와 연필, 쌓인 책 그림" },
+        "개인 시간": { src: "ff-type-personal.webp", alt: "창가에서 혼자 커피를 두고 기록하는 사람 그림" },
+        "휴식": { src: "ff-type-rest.webp", alt: "담요 옆에서 잠든 고양이와 따뜻한 차 그림" },
+      };
+
       let quizAnswers = [];
       let quizResultTag = null; // 미니 테스트를 끝냈으면 그 유형(태그), 아니면 null
 
@@ -1010,12 +1043,17 @@
         const color = TAG_COLORS[best] || "#886449";
         const icon = QUIZ_TYPE_ICONS[best] || "";
         quizResultTag = best;
+        const img = QUIZ_TYPE_IMAGES[best];
+        const badge = `<div class="quiz-badge" style="color:${color};background:${color}22;border-color:${color}55">${icon}</div>`;
+        const illustHtml = img
+          ? `<div class="quiz-illust" style="border-color:${color}66"><img src="${img.src}" alt="${img.alt}" width="188" height="188" onerror="this.parentNode.classList.add('fallback')" />${badge}</div>`
+          : badge;
 
         const resultBox = document.getElementById("quiz-result");
         resultBox.className = "result-box";
         resultBox.style.display = "block";
         resultBox.innerHTML = `
-          <div class="quiz-badge" style="color:${color};background:${color}22;border-color:${color}55">${icon}</div>
+          ${illustHtml}
           <div class="quiz-type" style="color:${color}">${copy.title}</div>
           <p class="quiz-desc">${copy.desc}</p>
           <p class="quiz-caveat">이건 3문항짜리 가벼운 자가진단이에요. 진짜 나에게 맞는지는 아래 표에 실제 기록을 넣고 계산해서 확인해보세요.</p>
@@ -1026,6 +1064,10 @@
         `;
         const box = document.getElementById("quiz-box");
         if (box) box.style.display = "none";
+        // 결과 그림 윗부분이 상단 메뉴에 가려지지 않게, 필요할 때만 살짝 스크롤
+        if (typeof resultBox.getBoundingClientRect === "function" && resultBox.getBoundingClientRect().top < 130) {
+          try { window.scrollBy({ top: resultBox.getBoundingClientRect().top - 140, behavior: "smooth" }); } catch (e) {}
+        }
 
         document.getElementById("quiz-goto-data").addEventListener("click", () => {
           const target = document.getElementById("rows");
