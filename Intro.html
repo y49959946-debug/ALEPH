@@ -1210,7 +1210,24 @@
         box-shadow: 0 14px 28px rgba(70, 60, 45, 0.18);
       }
 
+      /* 동료 한 줄 감상 (설명과 '열기' 사이) */
+      .work-card.has-icon > div:first-child { grid-row: 1 / span 3; }
+      .work-card .work-quote {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: start;
+        max-width: 36ch;
+        margin: 14px 0 0;
+        padding-left: 12px;
+        border-left: 2px solid rgba(83, 107, 94, 0.3);
+      }
+      .work-card .work-quote p { margin: 0; color: #46514a; font-size: 13.5px; line-height: 1.7; }
+      .work-card .work-quote span { display: block; margin-top: 3px; color: #6f7a73; font-size: 12px; }
+      .work-card.has-icon .work-go { grid-row: 3; }
+
       @media (max-width: 680px) {
+        .work-card .work-quote { grid-column: 1; grid-row: 3; margin-top: 2px; }
+        .work-card.has-icon .work-go { grid-row: 4; }
         .work-card.has-icon > div:first-child { grid-row: 1; gap: 14px; }
         .work-card.has-icon .work-icon { width: 60px; height: 60px; border-radius: 15px; }
       }
@@ -1322,6 +1339,10 @@
               <div class="work-name">성찰 요인 탐색기</div>
             </div>
             <div class="work-desc">리추얼을 막 시작한 사람이 자기 기록으로 어떤 날 성찰이 깊어지는지 직접 확인하도록 돕는 앱</div>
+            <div class="work-quote">
+              <p>"AI가 만든 것 같지 않고 잘 만들었다. 되게 감성적이다."</p>
+              <span>— 처음 써 본 동료의 한 줄 감상</span>
+            </div>
             <div class="work-go">열기 →</div>
           </a>
         </section>
