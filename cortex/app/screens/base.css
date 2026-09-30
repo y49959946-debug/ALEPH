@@ -54,14 +54,16 @@ button { cursor: pointer; }
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
 }
 .top .back { font-size: 14px; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
-.top .brand { font-size: 12px; font-weight: 800; letter-spacing: .14em; color: var(--ink-3); }
+.top .brand { display: inline-flex; align-items: center; gap: 7px; font-size: 16px; font-weight: 800; letter-spacing: -.01em; color: #2c576d; }
+:root[data-theme="dark"] .top .brand { color: var(--ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .top .brand { color: var(--ink); } }
 .tabs { display: inline-flex; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
 .tabs a {
   padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--ink-2); text-decoration: none; white-space: nowrap;
 }
 .tabs a[aria-current="page"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .top-side { display: flex; align-items: center; gap: 10px; min-width: 0; }
-@media (max-width: 560px) { .top .brand { display: none; } .tabs a { padding: 6px 11px; } }
+@media (max-width: 560px) { .top .brand { font-size: 15px; } .top-side { gap: 8px; } .tabs a { padding: 6px 10px; font-size: 13.5px; } }
 
 .page { max-width: 760px; margin: 0 auto; padding: 28px 16px 96px; }
 .fine { font-size: 13px; color: var(--ink-3); }

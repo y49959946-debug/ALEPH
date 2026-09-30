@@ -87,6 +87,12 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path in ("/", "/index.html", "/view.html"):
             return self._send(200, _page())
+        if path.startswith("/assets/"):
+            f = (web.DEMO_DIR / "assets" / path.rsplit("/", 1)[-1])
+            types = {".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon"}
+            if f.suffix in types and f.exists():
+                return self._send(200, f.read_bytes(), types[f.suffix])
+            return self._send(404, "없는 파일이에요")
         if path.startswith("/api/run/"):
             rid = path.rsplit("/", 1)[-1]
             f = web.RUNS_DIR / f"{rid}.json"
