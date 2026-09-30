@@ -1,13 +1,14 @@
 :root {
   color-scheme: light;
-  --bg-top: #f8fbff; --bg-bottom: #edf6f4;
-  --panel: #ffffff; --panel-2: #f3f7f8; --line: #dfeae6;
-  --ink: #1c2a35; --ink-2: #5d7284; --ink-3: #798b9a;
-  --accent: #2b6f8a; --accent-soft: #e3f0f4; --on-accent: #ffffff;
-  --me: #1c2a35; --on-me: #f4f8fa;
+  /* 따뜻한 종이 바탕 + 흰 카드 (2026-09-30 배경 비교에서 B 선택) */
+  --bg-top: #f7f4ee; --bg-bottom: #f3efe7;
+  --panel: #ffffff; --panel-2: #f4f0e8; --line: #e6dfd2;
+  --ink: #2b2622; --ink-2: #5b534b; --ink-3: #6f665c;  /* 따뜻한 먹색 */
+  --accent: #2b6f8a; --accent-soft: #e6eff2; --on-accent: #ffffff;
+  --me: #2b2622; --on-me: #f7f4ee;
   --c-conf: #2a78d6; --c-pass: #eb6834; --c-hes: #1baf7a; --hatch: #8a8f94;
   --good: #1b6e33; --good-soft: #e3f4e8; --warn: #9a5b00; --warn-soft: #fdf0dc;
-  --shadow: 0 10px 24px rgba(85, 108, 121, 0.08);
+  --shadow: 0 1px 2px rgba(60, 50, 30, .06), 0 8px 20px rgba(60, 50, 30, .06);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -37,7 +38,7 @@
 html { min-height: 100%; background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-bottom) 100%); background-attachment: fixed; }
 body {
   margin: 0; min-height: 100vh; color: var(--ink); background: transparent;
-  font-family: "Pretendard", "Inter", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  font-family: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
   font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: anywhere;
 }
 a { color: var(--accent); }
