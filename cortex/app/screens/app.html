@@ -183,6 +183,38 @@ details.info summary { cursor: pointer; font-weight: 700; }
 details.info dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0; }
 details.info dt { color: var(--ink-3); font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; } details.info dd { margin: 0; }
 
+/* 문장 지도 (평가자 장 맨 위) */
+.smap { display: flex; flex-wrap: wrap; gap: 14px 6px; margin: 4px 0 8px; }
+.smap .para { display: flex; gap: 4px; padding-right: 10px; border-right: 1px solid var(--rule); }
+.smap .para:last-child { border-right: 0; }
+.smap .cell { width: 46px; height: 52px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0; }
+.smap .cell .i { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+.smap .cell .m { font-size: 17px; font-weight: 800; line-height: 1.2; }
+.smap .cell.good { background: var(--good-soft); border-color: transparent; } .smap .cell.good .m { color: var(--good); }
+.smap .cell.warn { background: var(--warn-soft); border-color: transparent; } .smap .cell.warn .m { color: var(--warn); }
+.smap .cell.mixed { background: var(--accent-soft); border-color: transparent; } .smap .cell.mixed .m { color: var(--accent); }
+.smap .cell.none .m { color: var(--line); }
+.smap-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-3); margin-bottom: 26px; }
+.smap-legend .role { font-family: var(--mono); font-size: 11.5px; }
+/* 심의 표 (요약 장) */
+.matrix { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 6px 0 8px; font-size: 14.5px; }
+.matrix th { font-size: 12.5px; font-weight: 800; color: var(--ink-2); padding: 8px 6px; border-bottom: 1.5px solid var(--rule-strong); text-align: center; }
+.matrix th:first-child { text-align: left; }
+.matrix td { padding: 9px 6px; border-bottom: 1px solid var(--rule); text-align: center; vertical-align: middle; }
+.matrix td.s { text-align: left; }
+.matrix td.s .sid { margin-right: 8px; }
+.matrix td.s .tx { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+.matrix td.c, .matrix th.c { width: 60px; }
+@media (max-width: 560px) { .matrix td.c, .matrix th.c { width: 44px; } .matrix .chip2 { width: 28px; } }
+.matrix .chip2 { display: inline-grid; place-items: center; width: 32px; height: 28px; border-radius: 8px; font-weight: 800; }
+.matrix .chip2.good { background: var(--good-soft); color: var(--good); } .matrix .chip2.warn { background: var(--warn-soft); color: var(--warn); } .matrix .chip2.mixed { background: var(--accent-soft); color: var(--accent); } .matrix .chip2.none { color: var(--line); }
+.matrix tr.mrow { cursor: pointer; } .matrix tr.mrow:hover td { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.matrix tr.clash td.s .tx { color: var(--ink); font-weight: 700; }
+/* 긴 메모는 3줄까지 */
+.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+.clamp.open { display: block; }
+.more-hint { display: block; font-size: 12.5px; font-weight: 700; color: var(--accent); margin-top: 2px; cursor: pointer; }
+
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
 .pager .in { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
@@ -535,6 +567,7 @@ $("#dash").addEventListener("touchend", (e) => {
 });
 // 문장 번호를 누르면 원문 장으로 가서 그 문장을 보여준다
 $("#dash").addEventListener("click", (e) => {
+  const c = e.target.closest(".clamp"); if (c) { c.classList.toggle("open"); return; }
   const t = e.target.closest("[data-sid]"); if (!t) return;
   const orig = pages.findIndex((p) => p.id === "orig");
   if (pageNo !== orig) go(orig);
@@ -569,6 +602,11 @@ function buildPages(M) {
   const sref = (ids) => (ids || []).filter((i) => S[i]).map((i) => `<button class="sid" data-sid="${i}">${i}</button>`).join(" ");
   const total = 8;
   const chap = (n, name, meta, who) => `<div class="chap"><span class="no">${String(n).padStart(2, "0")}</span><span class="name">${who ? av(who, true) : ""}${esc(name)}</span>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}</div>`;
+  // 문장 지도: 이 평가자가 어느 문장을 어떻게 봤는지 한눈에
+  const paraGroups = []; R.sentences.forEach((s) => { const l = paraGroups[paraGroups.length - 1]; if (!l || l.p !== s.p) paraGroups.push({ p: s.p, ss: [s] }); else l.ss.push(s); });
+  const smap = (pid) => `<div class="smap" aria-label="문장별 판정">${paraGroups.map((g) => `<div class="para" title="${esc(R.roles[g.p] || "")}">${g.ss.map((s) => { const v = verdict(s.id, pid); return `<button class="cell ${v[0]}" data-sid="${s.id}" aria-label="${s.id} ${v[2]}"><span class="i">${s.id}</span><span class="m">${v[0] === "none" ? "·" : v[1]}</span></button>`; }).join("")}</div>`).join("")}</div>
+    <div class="smap-legend"><span><span class="mark good">✓</span> 좋게 본 문장</span><span><span class="mark warn">△</span> 아쉽게 본 문장</span><span><span class="mark mixed">±</span> 둘 다</span><span>칸 묶음 = 문단 (${paraGroups.map((g) => esc(R.roles[g.p] || "")).filter(Boolean).join(" · ")})</span></div>`;
+  const matrix = () => `<table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : v[1]}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
   const dots = (n) => `${"●".repeat(n)}<span class="off">${"●".repeat(5 - n)}</span><b>${n}</b>`;
   const P = [];
 
@@ -602,12 +640,13 @@ function buildPages(M) {
       if (!(notes[i] || []).some((m) => m.fix === r.suggestion)) add(i, { cls: "plain", mark: "→ 고쳐보면", text: r.suggestion, why: r.reason });
     }));
     const line = (s, hit) => `<div class="line ${hit ? "hit" : "dim"}"><span class="sid">${s.id}</span><span class="t">${esc(s.text)}</span></div>
-      <div class="notes">${(notes[s.id] || []).map((m) => `<div class="memo ${m.cls}"><div class="by">${av(pid, true)}<span class="mark ${m.cls}">${m.mark}</span></div>${esc(m.text)}${m.fix ? `<span class="fix">${esc(m.fix)}</span>` : ""}${m.why ? `<span class="why">${esc(m.why)}</span>` : ""}</div>`).join("")}</div>`;
+      <div class="notes">${(notes[s.id] || []).map((m) => `<div class="memo ${m.cls}"><div class="by">${av(pid, true)}<span class="mark ${m.cls}">${m.mark}</span></div><span class="clamp">${esc(m.text)}</span>${m.fix ? `<span class="fix">${esc(m.fix)}</span>` : ""}${m.why ? `<span class="why">${esc(m.why)}</span>` : ""}</div>`).join("")}</div>`;
     const hitS = R.sentences.filter((s) => notes[s.id]), restS = R.sentences.filter((s) => !notes[s.id]);
     P.push({ id: pid, tab: pname(pid), html: `
       ${chap(idx + 2, pname(pid), `Review ${idx + 1} / ${R.personas.length}`, pid)}
       <h2>${esc(firstSentence(p.summary))}</h2>
-      <p class="lead">${esc(meta.lens || "")} 원고에 남긴 메모를 따라 읽어 보세요.</p>
+      <p class="lead" style="margin-bottom:18px">${esc(meta.lens || "")}</p>
+      ${smap(pid)}
       <div class="ms">${hitS.map((s) => line(s, true)).join("")}</div>
       ${restS.length ? `<details class="rest"><summary>메모가 없는 문장 ${restS.length}개 보기</summary><div class="ms">${restS.map((s) => line(s, false)).join("")}</div></details>` : ""}
       <div class="ledger"><h3>기준별 점수</h3>${(p.scores || []).map((s) => `<div class="srow"><span>${esc(s.criterion)}</span><span class="pips" aria-label="${s.score}점 / 5점">${dots(s.score)}</span></div>`).join("")}</div>` });
@@ -622,7 +661,7 @@ function buildPages(M) {
       <h2>같은 문장을 두고, 세 사람의 판정이 갈렸습니다</h2>
       <p class="lead">보는 기준이 다르면, 한 사람의 강점이 다른 사람에게는 아쉬운 점이 돼요.</p>
       <p class="bigline"><button class="sid" data-sid="${sid}">${sid}</button><br><span class="t">${esc(S[sid].text)}</span></p>
-      <div class="tri">${R.personas.map((p) => { const v = verdict(sid, p.persona_id); return `<div><div class="who">${av(p.persona_id, true)}${esc(pname(p.persona_id))}</div><div class="v mark ${v[0]}">${v[1]} ${v[2]}</div><p>${v[3] ? esc(v[3]) : "이 문장은 언급하지 않았어요."}</p></div>`; }).join("")}</div>
+      <div class="tri">${R.personas.map((p) => { const v = verdict(sid, p.persona_id); return `<div><div class="who">${av(p.persona_id, true)}${esc(pname(p.persona_id))}</div><div class="v mark ${v[0]}">${v[1]} ${v[2]}</div><p class="clamp">${v[3] ? esc(v[3]) : "이 문장은 언급하지 않았어요."}</p></div>`; }).join("")}</div>
       ${clashes.length > 1 ? `<p class="fine" style="margin-top:16px">판정이 갈린 문장이 ${clashes.length - 1}개 더 있어요 · ${sref(clashes.slice(1))}</p>` : ""}` });
   } else {
     const d = (J.disagreements || [])[0];
@@ -662,8 +701,10 @@ function buildPages(M) {
   P.push({ id: "sum", tab: "요약", html: `
     ${chap(n5 + 3, "요약", "Summary")}
     <h2>이 글의 심의 요약</h2>
-    <p class="lead">${esc(J.overall_summary || "")}</p>
-    <div class="rows">
+    <p class="lead">${esc(firstSentence(J.overall_summary || ""))}</p>
+    <h3 style="margin-top:10px">심의 표 <span class="fine" style="font-family:var(--sans);font-weight:500">문장마다 세 평가자의 판정 · 행을 누르면 원문으로</span></h3>
+    ${matrix()}
+    <div class="rows" style="margin-top:30px">
       <div class="r">${av("analyst")}<div class="body"><span class="k">첫인상</span>“${esc(imp.archetype)}”</div></div>
       ${R.personas.map((p) => `<div class="r">${av(p.persona_id)}<div class="body"><span class="k">${esc(pname(p.persona_id))} · ${cnt(p)}</span>${esc(firstSentence(p.summary))}</div></div>`).join("")}
       <div class="r">${av("judge")}<div class="body"><span class="k">갈린 판정</span>${clashLine}</div></div>
