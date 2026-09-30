@@ -1,0 +1,15 @@
+# 상위 폴더(D:\Aleph)의 .gitignore가 모든 data/ 폴더를 무시하므로, cortex의 data는 다시 포함시킨다.
+!data/
+
+# 비밀 정보
+.env
+
+# 파이썬 환경·캐시
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 실행 결과 (실행할 때마다 새로 생김)
+data/runs/*.json
+data/reports/*.html
