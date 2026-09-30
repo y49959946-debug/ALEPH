@@ -1,0 +1,84 @@
+{
+  "_설명": "samples.md의 '짚어야 할 점'을 코드가 채점할 수 있게 옮긴 것. AI에게 보내지 않는다. 항목은 평가자 지적(약점·수정 제안·의장 이슈) 중 ids에 있는 문장을 인용하고, keywords가 있으면 그 지적 문장에 키워드가 하나라도 들어 있을 때 '찾음'으로 본다. type: objective(코드 확인 가능)/subjective(사람마다 다름)/ai_judgment(근거 자료 없음). samples.md를 고치면 이 파일도 함께 고친다.",
+  "version": "2026-09-30",
+  "samples": {
+    "sample_01": {
+      "items": [
+        {"key": "A", "label": "희망 직무와 경험의 연결 부족", "ids": ["s07", "s08"], "keywords": ["연결", "연관", "결제", "직무", "관련"], "type": "subjective", "source": "S3"},
+        {"key": "B", "label": "처리 기준(초당 50건)의 근거", "ids": ["s04"], "keywords": ["50", "기준", "근거", "산정", "이유"], "type": "subjective", "source": "S1"},
+        {"key": "C", "label": "전문 용어의 접근성", "ids": ["s03", "s04"], "keywords": ["용어", "비전문", "이해", "설명", "어렵"], "type": "subjective", "source": "S2"}
+      ],
+      "strengths": ["s05", "s06"]
+    },
+    "sample_02": {
+      "items": [
+        {"key": "A", "label": "상투어·모호한 수식어", "ids": ["s01", "s02", "s03", "s08", "s09"], "keywords": ["상투", "추상", "모호", "진부", "구체", "흔한", "뻔한", "막연"], "type": "objective", "source": "S2, S4 (O3)"},
+        {"key": "B", "label": "경험의 실체 없음", "ids": ["s03", "s04"], "keywords": ["구체", "어떤", "무엇", "사례", "역할", "결과"], "type": "subjective", "source": "S1"},
+        {"key": "C", "label": "변명조 (환경 탓)", "ids": ["s06"], "keywords": ["변명", "탓", "책임", "핑계", "방어", "환경", "부정"], "type": "objective", "source": "S3 (O4)"},
+        {"key": "D", "label": "망설임", "ids": ["s07"], "keywords": ["확신", "자신감", "소극", "것 같", "모호", "망설"], "type": "ai_judgment", "source": "AI 판단"}
+      ],
+      "strengths": []
+    },
+    "sample_03": {
+      "items": [
+        {"key": "A", "label": "기술 선택의 이유 없음", "ids": ["s01", "s02", "s03", "s04", "s05", "s06"], "keywords": ["이유", "왜", "선택", "근거", "배경"], "type": "subjective", "source": "S1, S2"},
+        {"key": "B", "label": "본인 역할·과정 불명확", "ids": ["s01", "s02", "s03", "s04", "s05", "s06"], "keywords": ["역할", "기여", "본인", "직접", "과정", "팀"], "type": "subjective", "source": "S1"},
+        {"key": "C", "label": "결과·수치 없음", "ids": ["s01", "s02", "s03", "s04", "s05", "s06", "s07"], "keywords": ["결과", "성과", "수치", "효과", "개선"], "type": "objective", "source": "S1 (O1)"},
+        {"key": "D", "label": "일반 독자에게 용어 과다", "ids": ["s01", "s02", "s03", "s04", "s05", "s06"], "keywords": ["용어", "나열", "이해", "어렵", "비전문"], "type": "subjective", "source": "S2"}
+      ],
+      "strengths": []
+    },
+    "sample_04": {
+      "items": [
+        {"key": "A", "label": "결과·성과 부재", "ids": ["s03", "s04", "s05", "s06", "s07", "s08", "s09"], "keywords": ["결과", "성과", "수치", "개선", "효과", "변화"], "type": "subjective", "source": "S1"},
+        {"key": "B", "label": "'다양한'의 추상성", "ids": ["s01", "s09"], "keywords": ["다양", "추상", "모호", "구체", "나열"], "type": "objective", "source": "S2 (O3)"},
+        {"key": "C", "label": "기술 변경 이유 없음 (Redux→Zustand)", "ids": ["s05"], "keywords": ["이유", "왜", "근거", "Zustand", "Redux", "선택"], "type": "subjective", "source": "S2"}
+      ],
+      "strengths": []
+    },
+    "sample_05": {
+      "items": [
+        {"key": "A", "label": "방법·과정 부재", "ids": ["s02", "s03", "s04"], "keywords": ["과정", "방법", "어떻게", "분석", "기법", "접근", "모델"], "type": "subjective", "source": "S2"},
+        {"key": "B", "label": "본인 기여 범위 불명확", "ids": ["s02", "s03", "s04"], "keywords": ["기여", "역할", "본인", "인과", "팀", "직접"], "type": "subjective", "source": "S1"}
+      ],
+      "strengths": ["s02", "s03", "s04"]
+    },
+    "sample_06": {
+      "items": [
+        {"key": "A", "label": "감정 표현 과잉", "ids": ["s01", "s02", "s07", "s08", "s09", "s10"], "keywords": ["감정", "감성", "열정", "과장", "추상", "모호", "주관"], "type": "ai_judgment", "source": "AI 판단 (O6)"},
+        {"key": "B", "label": "결과 없음", "ids": ["s06", "s07", "s08"], "keywords": ["결과", "성과", "수치", "사용자", "다운로드", "반응"], "type": "subjective", "source": "S1"},
+        {"key": "C", "label": "기술 깊이 부족", "ids": ["s04", "s06"], "keywords": ["기술", "구현", "Flutter", "아키텍처", "구체"], "type": "subjective", "source": "S2"}
+      ],
+      "strengths": ["s03", "s05"]
+    },
+    "sample_07": {
+      "items": [
+        {"key": "A", "label": "자기 축소 표현", "ids": ["s01", "s03", "s04", "s05", "s07", "s08"], "keywords": ["겸손", "축소", "부족", "운", "자신감", "소극", "낮추"], "type": "ai_judgment", "source": "AI 판단 (O5)"}
+      ],
+      "strengths": ["s05", "s06"]
+    },
+    "sample_08": {
+      "items": [
+        {"key": "A", "label": "문장이 지나치게 김", "ids": ["s01", "s02", "s03", "s04"], "keywords": ["길", "장황", "문장", "가독", "호흡", "간결", "나누"], "type": "objective", "source": "S3 (O2)"},
+        {"key": "B", "label": "결과의 정량화 부족", "ids": ["s03"], "keywords": ["수치", "정량", "구체", "얼마나", "측정"], "type": "subjective", "source": "S1"}
+      ],
+      "strengths": ["s02"]
+    },
+    "sample_09": {
+      "items": [
+        {"key": "A", "label": "맥락 부족", "ids": ["s01", "s02"], "keywords": ["맥락", "배경", "상황", "어디", "왜", "동기", "짧"], "type": "subjective", "source": "S1"},
+        {"key": "B", "label": "기술 선택 이유 없음", "ids": ["s04"], "keywords": ["이유", "왜", "선택", "메시지 큐", "근거"], "type": "subjective", "source": "S1, S2"},
+        {"key": "C", "label": "포부가 너무 짧음", "ids": ["s07"], "keywords": ["포부", "동기", "구체", "짧", "막연"], "type": "subjective", "source": "-"}
+      ],
+      "strengths": ["s03", "s04", "s06"]
+    },
+    "sample_10": {
+      "items": [
+        {"key": "A", "label": "변명조 (서버 탓)", "ids": ["s06"], "keywords": ["변명", "탓", "책임", "외부", "환경", "원인", "방어"], "type": "objective", "source": "S3 (O4)"},
+        {"key": "B", "label": "장애 대응 과정이 모호", "ids": ["s07"], "keywords": ["대응", "구체", "어떻게", "과정", "조치"], "type": "subjective", "source": "S1"},
+        {"key": "C", "label": "상투적 마무리", "ids": ["s09"], "keywords": ["혁신", "창의", "상투", "추상", "모호", "진부"], "type": "objective", "source": "S4 (O3)"}
+      ],
+      "strengths": ["s04"]
+    }
+  }
+}

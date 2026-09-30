@@ -1,8 +1,9 @@
 """LLM 호출 래퍼.
 
-다른 모델로 바꾸고 싶으면 이 파일만 고치면 된다.
-- GeminiClient: 실제 Gemini API 호출 (구조화 출력 + 429 재시도)
-- MockClient: API 없이 파이프라인 전체를 시험하기 위한 가짜 응답
+다른 모델로 바꾸고 싶으면 이 파일만 고치면 된다. .env의 LLM_PROVIDER로 고른다.
+- GeminiClient: Gemini API (구조화 출력 + 429 재시도)          LLM_PROVIDER=gemini (기본)
+- OllamaClient: 내 컴퓨터의 Ollama 로컬 AI (한도·비용 없음)   LLM_PROVIDER=ollama
+- MockClient: API 없이 파이프라인 전체를 시험하기 위한 가짜 응답  --mock
 """
 from __future__ import annotations
 
@@ -12,6 +13,9 @@ import re
 import threading
 import time
 import typing
+import json
+import urllib.error
+import urllib.request
 from typing import Type, TypeVar, get_args, get_origin
 
 from pydantic import BaseModel, ValidationError
@@ -210,5 +214,100 @@ class MockClient(LLMClient):
         return f"(mock {name})"
 
 
+# ---------------------------------------------------------------------------
+# Ollama (로컬)
+# ---------------------------------------------------------------------------
+
+_THINK_BLOCK = re.compile(r"<think>.*?</think>", re.S)
+_FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.S)
+
+
+class OllamaClient(LLMClient):
+    """Ollama REST API를 표준 라이브러리만으로 호출한다 (추가 설치 없음).
+
+    - format에 JSON 스키마를 넘겨 구조화 출력을 강제한다 (Ollama 0.5 이상)
+    - 프롬프트가 길어서(원문 + 분석 + 평가) 문맥 길이를 넉넉히 잡는다
+    - 추론(thinking) 모드는 끈다. 모델이 지원하지 않으면 자동으로 빼고 다시 보낸다
+    """
+
+    def __init__(self, model: str | None = None):
+        self.host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        name = model or os.getenv("OLLAMA_MODEL", "").strip()
+        if not name:
+            raise LLMError(
+                "OLLAMA_MODEL이 비어 있습니다. 터미널에서 `ollama list`로 모델 이름을 확인해 "
+                ".env의 OLLAMA_MODEL에 적어주세요. (예: OLLAMA_MODEL=qwen3.5:9b)"
+            )
+        self.model = name
+        self.model_name = f"ollama/{name}"
+        self.num_ctx = int(os.getenv("OLLAMA_NUM_CTX", "16384"))
+        self.timeout = float(os.getenv("OLLAMA_TIMEOUT", "900"))
+        self.think_off = os.getenv("OLLAMA_THINK", "false").lower() != "true"
+        self._check_server()
+
+    def _post(self, path: str, body: dict) -> dict:
+        req = urllib.request.Request(
+            self.host + path, data=json.dumps(body).encode("utf-8"),
+            headers={"Content-Type": "application/json"}, method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=self.timeout) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    def _check_server(self) -> None:
+        try:
+            with urllib.request.urlopen(self.host + "/api/tags", timeout=5) as r:
+                tags = json.loads(r.read().decode("utf-8"))
+        except Exception as e:
+            raise LLMError(
+                f"Ollama에 연결할 수 없습니다 ({self.host}). Ollama가 켜져 있는지 확인하세요. "
+                "(작업 표시줄에 라마 아이콘이 있거나, 터미널에서 `ollama list`가 동작해야 함)"
+            ) from e
+        names = [m.get("name", "") for m in tags.get("models", [])]
+        if names and not any(n == self.model or n.split(":")[0] == self.model for n in names):
+            raise LLMError(f"Ollama에 '{self.model}' 모델이 없습니다. 설치된 모델: {', '.join(names)}")
+
+    @staticmethod
+    def _clean(text: str) -> str:
+        text = _THINK_BLOCK.sub("", text).strip()
+        return _FENCE.sub("", text).strip()
+
+    def generate(self, *, system: str, user: str, schema: Type[T], temperature: float) -> T:
+        body = {
+            "model": self.model,
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            "format": schema.model_json_schema(),
+            "stream": False,
+            "options": {"temperature": temperature, "num_ctx": self.num_ctx},
+        }
+        if self.think_off:
+            body["think"] = False
+        last_err: Exception | None = None
+        for attempt in range(2):
+            try:
+                resp = self._post("/api/chat", body)
+            except urllib.error.HTTPError as e:
+                detail = e.read().decode("utf-8", "ignore")
+                if "think" in body and "think" in detail.lower():
+                    body.pop("think")  # 추론 모드를 지원하지 않는 모델 → 다음 호출부터는 빼고 보낸다
+                    self.think_off = False
+                    continue
+                raise LLMError(f"Ollama 오류 ({e.code}): {detail[:300]}") from e
+            except (urllib.error.URLError, TimeoutError) as e:
+                raise LLMError(f"Ollama 응답이 없습니다 ({self.timeout:.0f}초 초과 또는 연결 끊김): {e}") from e
+            try:
+                return schema.model_validate_json(self._clean(resp.get("message", {}).get("content", "")))
+            except (ValidationError, ValueError) as e:
+                last_err = e
+                print("    ! 응답 형식 오류 — 다시 요청합니다")
+        raise LLMError(f"Ollama 응답을 해석하지 못했습니다: {last_err}")
+
+
 def make_client(mock: bool = False, model: str | None = None) -> LLMClient:
-    return MockClient() if mock else GeminiClient(model=model)
+    if mock:
+        return MockClient()
+    provider = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
+    if provider == "ollama":
+        return OllamaClient(model=model)
+    if provider == "gemini":
+        return GeminiClient(model=model)
+    raise LLMError(f"LLM_PROVIDER='{provider}'는 지원하지 않습니다. gemini 또는 ollama로 적어주세요.")

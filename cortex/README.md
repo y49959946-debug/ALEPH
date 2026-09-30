@@ -53,6 +53,9 @@ python -m app.report --demo data\runs\20260930_103907_001.json   # 사이트용 
 
 # 5) 샘플의 객관 항목 확인 (숫자·긴 문장·상투어 등, AI 호출 없음)
 python -m scripts.objective_check
+
+# 6) 실행 결과 자동 채점 (정답지 적중률·체크리스트, AI 호출 없음)
+python -m scripts.grade
 ```
 
 실행이 끝나면 `data\reports\실행ID.html` 결과 화면이 자동으로 만들어집니다. 파일 탐색기에서 더블클릭하면 브라우저로 열립니다.
@@ -97,6 +100,21 @@ data/
   inputs/            입력 자기소개서
   runs/              실행 결과 JSON
 ```
+
+## 로컬 AI(Ollama)로 실행하기
+
+Gemini 무료 한도 없이 내 컴퓨터에서 돌립니다. 그래픽카드가 있는 컴퓨터(예: RTX 4080)에서 빠르고, 내장 그래픽만 있으면 매우 느립니다.
+
+1. [ollama.com/download](https://ollama.com/download)에서 설치하고 모델을 받습니다 (예: `ollama pull qwen3.5:9b`)
+2. 터미널에서 `ollama list`로 모델 이름을 확인합니다
+3. `.env`에 두 줄을 적습니다
+   ```
+   LLM_PROVIDER=ollama
+   OLLAMA_MODEL=ollama list에 나온 이름
+   ```
+4. 평소처럼 실행합니다: `python -m app.main --file data\inputs\sample_01.txt`
+
+결과 파일의 모델 이름은 `ollama/모델이름`으로 기록됩니다. **Gemini 결과와 로컬 결과를 섞어서 비교하지 마세요.**
 
 ## 알아둘 것
 

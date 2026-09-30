@@ -16,3 +16,6 @@ data/reports/*.html
 
 # 사람 검토 답변 (개인 의견, 공개 저장소에 올리지 않음)
 data/review/
+
+# 채점 결과 (실행 결과에서 다시 만들 수 있음)
+data/grades/
