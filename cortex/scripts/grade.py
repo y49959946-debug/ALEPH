@@ -178,10 +178,17 @@ def main() -> int:
         print("채점할 결과 파일이 없습니다.")
         return 1
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    skipped = 0
     for f in files:
-        g = grade(json.loads(f.read_text(encoding="utf-8")), key)
+        run = json.loads(f.read_text(encoding="utf-8"))
+        if run.get("metadata", {}).get("model") == "mock" and len(sys.argv) == 1:
+            skipped += 1  # 가짜 응답(--mock) 결과는 채점하지 않는다
+            continue
+        g = grade(run, key)
         show(g)
         (OUT_DIR / f"{g['run_id']}.json").write_text(json.dumps(g, ensure_ascii=False, indent=2), encoding="utf-8")
+    if skipped:
+        print(f"\n가짜 응답(mock) 결과 {skipped}개는 건너뜀")
     print(f"\n채점 결과 저장: {OUT_DIR}")
     return 0
 

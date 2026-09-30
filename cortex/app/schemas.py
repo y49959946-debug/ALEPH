@@ -165,3 +165,18 @@ class JudgeOutput(BaseModel):
     key_issues: List[JudgeIssue]
     disagreements: List[Disagreement]
     keep: List[str] = Field(description="페르소나들이 강점으로 본 유지할 점")
+
+
+# ---------------------------------------------------------------------------
+# 편집자 (화면용 짧은 글, 평가 결과에는 영향 없음)
+# ---------------------------------------------------------------------------
+
+
+class DisplayLine(BaseModel):
+    ref: str = Field(description="입력 항목의 ref를 그대로")
+    headline: str = Field(description="해요체 한 줄, 20자 안팎")
+    detail: str = Field(default="", description="필요할 때만. 40자 안팎")
+
+
+class EditorOutput(BaseModel):
+    lines: List[DisplayLine]

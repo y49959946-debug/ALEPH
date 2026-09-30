@@ -120,7 +120,8 @@ class GeminiClient(LLMClient):
                 # 429(분당 한도)와 5xx(서버 혼잡)만 재시도한다.
                 if code == 429 or (isinstance(code, int) and code >= 500):
                     m = _RETRY_DELAY.search(msg)  # 서버가 알려준 대기 시간이 있으면 따른다
-                    base = float(m.group(1)) if m else 2 ** attempt * 3
+                    # 서버 혼잡(5xx)은 거절된 요청도 하루 한도에 포함되는 것으로 보여서, 짧게 여러 번보다 길게 기다린다
+                    base = float(m.group(1)) if m else (2 ** attempt * 3 if code == 429 else 15 * (attempt + 1))
                     wait = min(65, base) + random.uniform(0.5, 2.0)
                     reason = "호출 한도 초과" if code == 429 else "서버 혼잡"
                     print(f"    ! {reason}({code}) — {wait:.0f}초 후 재시도 ({attempt + 1}/{self.max_retries})")

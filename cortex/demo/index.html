@@ -163,75 +163,54 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .leaving { animation: leave .45s ease-in forwards; }
 @keyframes leave { to { opacity: 0; transform: translateY(-16px) scale(.98); } }
 
-/* ============ 3. 결과: 한 장씩 넘겨 읽기 (첨삭 원고 스타일) ============ */
-:root { --serif: "Nanum Myeongjo", "Noto Serif KR", "AppleMyungjo", "Batang", serif; --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace; --rule: color-mix(in srgb, var(--ink) 14%, transparent); --rule-strong: color-mix(in srgb, var(--ink) 38%, transparent); }
-.book { max-width: 900px; margin: 0 auto; padding: 18px 16px 150px; }
+/* ============ 3. 결과: 한 장씩 넘겨 읽기 (짧은 글 카드) ============ */
+:root { --serif: "Nanum Myeongjo", "Noto Serif KR", "AppleMyungjo", "Batang", serif; --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace; --rule: color-mix(in srgb, var(--ink) 12%, transparent); --rule-strong: color-mix(in srgb, var(--ink) 30%, transparent); }
+.book { max-width: 660px; margin: 0 auto; padding: 16px 20px 150px; }
 .book-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 .book-head select, .btn { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; max-width: 100%; }
-.toc { display: flex; gap: 4px; margin: 0 0 30px; }
+.toc { display: flex; gap: 4px; margin: 0 0 28px; }
 .toc button { flex: 1; min-width: 0; border: 0; background: none; padding: 6px 0 0; text-align: left; color: var(--ink-3); font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .toc button::before { content: ""; display: block; height: 3px; border-radius: 3px; background: var(--line); margin-bottom: 6px; }
 .toc button.done::before { background: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .toc button[aria-current="step"] { color: var(--ink); }
 .toc button[aria-current="step"]::before { background: var(--accent); }
 @media (max-width: 560px) { .toc button span { display: none; } .toc button[aria-current="step"] span { display: inline; } .toc button[aria-current="step"] { flex: 3; } }
-
 .pg { animation: slidein .35s ease-out both; }
 .pg.back { animation-name: slideback; }
 @keyframes slidein { from { opacity: 0; transform: translateX(28px); } }
 @keyframes slideback { from { opacity: 0; transform: translateX(-28px); } }
 
-/* 장 머리 */
-.chap { display: flex; align-items: baseline; gap: 14px; border-bottom: 1.5px solid var(--rule-strong); padding-bottom: 12px; }
-.chap .no { font-family: var(--serif); font-size: 44px; font-weight: 800; line-height: 1; color: var(--accent); }
-.chap .name { font-family: var(--serif); font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-.chap .meta { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
-.pg h2 { font-family: var(--serif); font-size: clamp(23px, 4vw, 32px); font-weight: 800; line-height: 1.55; letter-spacing: -.02em; margin: 26px 0 10px; max-width: 760px; }
-.pg h2.quote::before { content: "“"; color: var(--accent); } .pg h2.quote::after { content: "”"; color: var(--accent); }
-.pg .lead { color: var(--ink-2); margin: 0 0 30px; font-size: 16.5px; max-width: 700px; }
-.pg h3 { font-family: var(--serif); font-size: 17px; font-weight: 800; margin: 34px 0 6px; padding-top: 14px; border-top: 1.5px solid var(--rule-strong); }
-.sid { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: .02em; }
-button.sid { border: 0; background: none; padding: 0; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.who { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; margin-bottom: 16px; }
+.who .av { width: 40px; height: 40px; font-size: 15px; }
+.who small { display: block; font-weight: 500; color: var(--ink-3); font-size: 13px; }
+.pg h1 { font-family: var(--serif); font-weight: 800; font-size: clamp(27px, 6.4vw, 38px); line-height: 1.4; letter-spacing: -.02em; margin: 0 0 12px; }
+.pg .sub { font-size: 17.5px; color: var(--ink-2); margin: 0 0 26px; line-height: 1.65; }
+.pg h3 { font-size: 15px; margin: 28px 0 10px; }
+.sid { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink-3); }
+button.sid { border: 0; background: none; padding: 0 0 0 4px; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
 button.sid:hover { color: var(--accent); }
 
-/* 원고 + 여백 메모 */
-.ms { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 0 34px; }
-.ms .line { grid-column: 1; padding: 14px 0; border-top: 1px dashed var(--rule); font-size: 17px; line-height: 1.9; }
-.ms .line .sid { display: block; }
-.ms .line.hit .t { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 20%, transparent) 62%); }
-.ms .line.dim { color: var(--ink-3); }
-.ms .notes { grid-column: 2; padding: 14px 0; }
-.ms .line.click { cursor: pointer; }
-.ms .line.click:hover .t { background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.ms .line.sel .t { background: linear-gradient(transparent 55%, color-mix(in srgb, var(--accent) 30%, transparent) 55%); }
-.ms .line.tone { text-decoration: none; }
-.ms .line .t.자신감 { text-decoration: underline 3px var(--c-conf); text-underline-offset: 6px; }
-.ms .line .t.열정 { text-decoration: underline 3px var(--c-pass); text-underline-offset: 6px; }
-.ms .line .t.망설임 { text-decoration: underline 3px var(--c-hes); text-underline-offset: 6px; }
-.ms .line .t.방어적 { text-decoration: underline 3px dashed var(--hatch); text-underline-offset: 6px; }
-.memo { padding: 8px 12px 8px 14px; border-left: 2px solid var(--accent); background: color-mix(in srgb, var(--panel) 70%, transparent); border-radius: 0 12px 12px 0; font-size: 14.5px; line-height: 1.65; margin-bottom: 10px; }
-.memo.good { border-left-color: var(--good); } .memo.warn { border-left-color: var(--warn); } .memo.mixed { border-left-color: var(--accent); } .memo.plain { border-left-color: var(--ink-3); }
-.memo .by { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; margin-bottom: 2px; flex-wrap: wrap; }
-.memo .fix { display: block; margin-top: 6px; color: var(--ink-2); }
-.memo .fix::before { content: "→ "; color: var(--accent); font-weight: 800; }
-.memo .why { display: block; margin-top: 4px; font-size: 13.5px; color: var(--ink-3); }
-@media (max-width: 820px) {
-  .ms { grid-template-columns: 1fr; }
-  .ms .notes { grid-column: 1; padding: 0 0 12px; }
-  .ms .notes:empty { display: none; }
-}
-details.rest { border-top: 1px dashed var(--rule); padding: 12px 0; }
-details.rest summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--ink-3); }
-details.rest .ms .line:first-child { border-top: 0; }
-
-/* 점수 장부 */
-.ledger .srow { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 15.5px; }
-.ledger .pips { font-family: var(--mono); letter-spacing: .18em; color: var(--accent); font-size: 14px; white-space: nowrap; }
-.ledger .pips .off { color: var(--line); }
-.ledger .pips b { font-family: var(--sans); letter-spacing: 0; color: var(--ink); margin-left: 6px; }
+.card { background: var(--panel); border-radius: 20px; padding: 16px 20px; box-shadow: var(--shadow); border: 1px solid var(--line); margin-bottom: 12px; }
+.card .tag { font-size: 13px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.card .tag.good { color: var(--good); } .card .tag.warn { color: var(--warn); } .card .tag.fix { color: var(--accent); } .card .tag.plain { color: var(--ink-3); }
+.card .h { font-size: 18.5px; font-weight: 800; line-height: 1.5; }
+.card .h.long { font-size: 16px; font-weight: 600; }
+.card .d { font-size: 15px; color: var(--ink-2); margin-top: 4px; }
+details.orig { margin-top: 8px; font-size: 13.5px; color: var(--ink-3); }
+details.orig summary { cursor: pointer; font-weight: 700; list-style: none; display: inline; }
+details.orig summary::-webkit-details-marker { display: none; }
+details.orig summary::after { content: " ↓"; } details.orig[open] summary::after { content: " ↑"; }
+details.orig p { margin: 6px 0 0; line-height: 1.65; }
+details.more { margin-top: 6px; }
+details.more > summary { cursor: pointer; font-size: 14.5px; font-weight: 700; color: var(--accent); padding: 6px 0; }
+details.more[open] > summary { margin-bottom: 8px; }
+.scores { display: grid; gap: 8px; }
+.srow2 { display: grid; grid-template-columns: 1fr auto; gap: 10px; font-size: 15px; align-items: center; }
+.pips { font-family: var(--mono); letter-spacing: .16em; color: var(--accent); font-size: 13px; white-space: nowrap; }
+.pips .off { color: var(--line); } .pips b { font-family: var(--sans, inherit); letter-spacing: 0; color: var(--ink); margin-left: 4px; }
 
 /* 어조 */
-.tone { display: flex; gap: 2px; height: 14px; margin: 12px 0 12px; }
+.tone { display: flex; gap: 2px; height: 12px; margin: 0 0 10px; }
 .tone i { display: block; height: 100%; border-radius: 4px; min-width: 6px; }
 .t-자신감 { background: var(--c-conf); } .t-열정 { background: var(--c-pass); } .t-망설임 { background: var(--c-hes); }
 .t-방어적 { background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px var(--hatch); }
@@ -242,67 +221,63 @@ details.rest .ms .line:first-child { border-top: 0; }
 .mark.good { color: var(--good); } .mark.warn { color: var(--warn); } .mark.mixed { color: var(--accent); } .mark.none { color: var(--ink-3); }
 
 /* 갈린 판정 */
-.bigline { font-size: clamp(18px, 3vw, 22px); font-weight: 700; line-height: 1.8; padding: 18px 0 22px; margin: 0; }
-.bigline .t { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 20%, transparent) 62%); }
-.tri { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1.5px solid var(--rule-strong); }
-.tri > div { padding: 14px 16px 16px 0; }
-.tri > div + div { border-left: 1px solid var(--rule); padding-left: 16px; }
-.tri .who { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
-.tri .v { font-family: var(--serif); font-size: 22px; font-weight: 800; margin: 6px 0; }
-.tri p { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.7; }
-@media (max-width: 720px) { .tri { grid-template-columns: 1fr; } .tri > div + div { border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; } }
+.quote { font-size: 17.5px; font-weight: 700; line-height: 1.7; border-left: 4px solid var(--accent); padding-left: 16px; margin: 0 0 20px; }
+.vs .card { display: flex; gap: 12px; align-items: flex-start; }
+.vs .v { font-size: 22px; font-weight: 800; width: 28px; text-align: center; flex: none; line-height: 1.3; }
+.vs .av { margin-top: 2px; }
+.vs .body { flex: 1; min-width: 0; }
+.vs .body .h { font-size: 17px; }
+.vs .body .who2 { font-size: 12.5px; font-weight: 800; color: var(--ink-3); }
 
-/* 고칠 것 / 요약 목록 */
-.rows > .r { display: grid; grid-template-columns: 44px 1fr; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--rule); }
-.rows > .r:first-child { border-top: 1.5px solid var(--rule-strong); }
-.rows .n { font-family: var(--serif); font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1.1; }
-.rows .body { font-size: 16.5px; line-height: 1.75; }
-.rows .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--ink-3); }
-.rows .k { display: block; font-size: 12.5px; font-weight: 800; color: var(--ink-3); margin-bottom: 2px; }
+/* 고칠 것 */
+.fixes .card { display: flex; gap: 14px; align-items: flex-start; }
+.fixes .n { font-family: var(--serif); font-size: 30px; font-weight: 800; color: var(--accent); line-height: 1; flex: none; width: 24px; }
+.fixes .body { flex: 1; min-width: 0; }
+.fixes .meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .prio { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 1px 9px; }
 .prio.높음 { background: var(--warn-soft); color: var(--warn); } .prio.중간 { background: var(--accent-soft); color: var(--accent); } .prio.낮음 { background: var(--panel-2); color: var(--ink-3); }
-.keep { margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.8; } .keep li + li { margin-top: 4px; }
-.again { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
-details.info { margin-top: 26px; font-size: 14px; color: var(--ink-2); }
-details.info summary { cursor: pointer; font-weight: 700; }
-details.info dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0; }
-details.info dt { color: var(--ink-3); font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; } details.info dd { margin: 0; }
+.keepline { font-size: 15.5px; color: var(--ink-2); margin-top: 18px; line-height: 1.7; }
 
-/* 문장 지도 (평가자 장 맨 위) */
-.smap { display: flex; flex-wrap: wrap; gap: 14px 6px; margin: 4px 0 8px; }
-.smap .para { display: flex; gap: 4px; padding-right: 10px; border-right: 1px solid var(--rule); }
-.smap .para:last-child { border-right: 0; }
-.smap .cell { width: 46px; height: 52px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0; }
-.smap .cell .i { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
-.smap .cell .m { font-size: 17px; font-weight: 800; line-height: 1.2; }
-.smap .cell.good { background: var(--good-soft); border-color: transparent; } .smap .cell.good .m { color: var(--good); }
-.smap .cell.warn { background: var(--warn-soft); border-color: transparent; } .smap .cell.warn .m { color: var(--warn); }
-.smap .cell.mixed { background: var(--accent-soft); border-color: transparent; } .smap .cell.mixed .m { color: var(--accent); }
-.smap .cell.none .m { color: var(--line); }
-.smap-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-3); margin-bottom: 26px; }
-.smap-legend .role { font-family: var(--mono); font-size: 11.5px; }
-/* 심의 표 (요약 장) */
-.matrix { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 6px 0 8px; font-size: 14.5px; }
-.matrix th { font-size: 12.5px; font-weight: 800; color: var(--ink-2); padding: 8px 6px; border-bottom: 1.5px solid var(--rule-strong); text-align: center; }
+/* 원문 + 메모 */
+.ms .line { padding: 14px 0; border-top: 1px dashed var(--rule); font-size: 16.5px; line-height: 1.85; cursor: pointer; }
+.ms .line .sid { display: block; }
+.ms .line:hover .t { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.ms .line.sel .t { background: linear-gradient(transparent 55%, color-mix(in srgb, var(--accent) 28%, transparent) 55%); }
+.ms .line .t.자신감 { text-decoration: underline 3px var(--c-conf); text-underline-offset: 6px; }
+.ms .line .t.열정 { text-decoration: underline 3px var(--c-pass); text-underline-offset: 6px; }
+.ms .line .t.망설임 { text-decoration: underline 3px var(--c-hes); text-underline-offset: 6px; }
+.ms .line .t.방어적 { text-decoration: underline 3px dashed var(--hatch); text-underline-offset: 6px; }
+.ms .notes:empty { display: none; }
+.ms .notes { padding: 0 0 12px; }
+.memo { padding: 8px 12px 8px 14px; border-left: 2px solid var(--accent); background: var(--panel); border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
+.memo.good { border-left-color: var(--good); } .memo.warn { border-left-color: var(--warn); } .memo.mixed { border-left-color: var(--accent); } .memo.plain { border-left-color: var(--ink-3); }
+.memo .by { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; margin-bottom: 2px; flex-wrap: wrap; }
+.memo .fix { display: block; margin-top: 4px; color: var(--ink-2); }
+.memo .fix::before { content: "→ "; color: var(--accent); font-weight: 800; }
+
+/* 심의 표 */
+.matrix { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 4px 0 8px; font-size: 14.5px; }
+.matrix th { font-size: 12.5px; font-weight: 800; color: var(--ink-2); padding: 8px 4px; border-bottom: 1.5px solid var(--rule-strong); text-align: center; }
 .matrix th:first-child { text-align: left; }
-.matrix td { padding: 9px 6px; border-bottom: 1px solid var(--rule); text-align: center; vertical-align: middle; }
+.matrix td { padding: 9px 4px; border-bottom: 1px solid var(--rule); text-align: center; vertical-align: middle; }
 .matrix td.s { text-align: left; }
-.matrix td.s .sid { margin-right: 8px; }
 .matrix td.s .tx { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
-.matrix td.c, .matrix th.c { width: 60px; }
-@media (max-width: 560px) { .matrix td.c, .matrix th.c { width: 44px; } .matrix .chip2 { width: 28px; } }
-.matrix .chip2 { display: inline-grid; place-items: center; width: 32px; height: 28px; border-radius: 8px; font-weight: 800; }
+.matrix td.s .sid { margin-right: 8px; }
+.matrix td.c, .matrix th.c { width: 54px; }
+@media (max-width: 560px) { .matrix td.c, .matrix th.c { width: 42px; } }
+.matrix .chip2 { display: inline-grid; place-items: center; width: 30px; height: 28px; border-radius: 8px; font-weight: 800; }
 .matrix .chip2.good { background: var(--good-soft); color: var(--good); } .matrix .chip2.warn { background: var(--warn-soft); color: var(--warn); } .matrix .chip2.mixed { background: var(--accent-soft); color: var(--accent); } .matrix .chip2.none { color: var(--line); }
 .matrix tr.mrow { cursor: pointer; } .matrix tr.mrow:hover td { background: color-mix(in srgb, var(--accent) 5%, transparent); }
 .matrix tr.clash td.s .tx { color: var(--ink); font-weight: 700; }
-/* 긴 메모는 3줄까지 */
-.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
-.clamp.open { display: block; }
-.more-hint { display: block; font-size: 12.5px; font-weight: 700; color: var(--accent); margin-top: 2px; cursor: pointer; }
+.again { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
+details.info { margin-top: 26px; font-size: 14px; color: var(--ink-2); }
+details.info summary { cursor: pointer; font-weight: 700; }
+details.info dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0; }
+details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
-.pager .in { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+.pager .in { max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
 .pager .pos { font-size: 14px; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; margin: 0 auto; }
 .pager button { border-radius: 999px; padding: 12px 20px; font-size: 15px; font-weight: 700; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
 .pager button.next { background: var(--accent); color: var(--on-accent); border-color: var(--accent); min-width: 140px; }
@@ -352,7 +327,7 @@ details.info dt { color: var(--ink-3); font-family: var(--mono); font-size: 12.5
 <div class="pager" id="pager" hidden><div class="in"><button id="prev">← 이전</button><span class="pos" id="pos"></span><button class="next" id="next">다음 →</button></div></div>
 
 <script>
-const D = {"local": false, "repo": "https://github.com/y49959946-debug/ALEPH/tree/main/cortex", "samples": [{"id": "sample_01", "note": "문제·해결·수치가 분명한 글 · 백엔드", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다. 대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다.\n\n저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다. 기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다.\n\n그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다. 도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다.\n\n입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다. 특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다."}, {"id": "sample_02", "note": "상투어가 많고 변명조 · 직무 불명", "text": "저는 항상 열정적으로 도전하는 인재입니다. 어떤 일이든 최선을 다하며 주어진 역할에 책임감을 가지고 임해왔습니다.\n\n대학 시절 여러 프로젝트에 참여하며 AI 기술을 활용하여 사용자에게 편리하고 혁신적인 서비스를 제공했습니다. 팀원들과 원활하게 소통하며 좋은 결과를 얻을 수 있었습니다. 이 과정에서 협업의 중요성을 깨달았습니다.\n\n물론 부족한 점도 있었지만 그것은 일정이 촉박했기 때문이었고, 주어진 환경에서는 할 수 있는 만큼 했다고 생각합니다. 앞으로는 더 잘할 수 있을 것 같습니다.\n\n귀사에 입사하게 된다면 창의적인 아이디어로 회사의 성장에 기여하는 인재가 되겠습니다. 끊임없이 배우고 성장하는 모습을 보여드리겠습니다."}, {"id": "sample_03", "note": "기술만 나열 · 인프라", "text": "저는 Kubernetes 기반 MSA 환경에서 gRPC와 Kafka를 이용한 이벤트 드리븐 아키텍처를 구축한 경험이 있습니다. Istio 서비스 메시로 mTLS와 트래픽 라우팅을 구성했고, ArgoCD로 GitOps 파이프라인을 운영했습니다.\n\n모니터링은 Prometheus와 Grafana, 분산 추적은 Jaeger와 OpenTelemetry를 도입했습니다. Terraform으로 AWS EKS 클러스터와 RDS, ElastiCache를 코드로 관리했으며, HPA와 Karpenter로 오토스케일링을 구성했습니다.\n\n또한 LangChain과 벡터 DB를 활용한 RAG 파이프라인도 구현했습니다. 임베딩은 오픈소스 모델을 사용했고, 검색 성능 향상을 위해 하이브리드 검색과 리랭킹을 적용했습니다.\n\n이러한 기술 역량을 바탕으로 귀사의 클라우드 네이티브 전환에 기여하고 싶습니다."}, {"id": "sample_04", "note": "경험은 많지만 결과가 없음 · 프론트엔드", "text": "저는 대학 생활 동안 다양한 개발 경험을 쌓아온 프론트엔드 개발 지망생입니다. 교내 해커톤에 네 번 참가했고, 동아리에서 웹 서비스 프로젝트를 세 개 진행했으며, 스타트업에서 6개월간 인턴으로 일했습니다.\n\n동아리에서는 React와 TypeScript로 학과 공지 모아보기 서비스를 만들었습니다. 저는 메인 화면과 검색 기능을 맡았고, 디자이너와 협업하며 Figma 시안을 컴포넌트로 옮기는 작업을 주로 했습니다. 이후에는 Next.js로 스터디 매칭 서비스를 만들면서 서버 사이드 렌더링을 처음 접했고, 상태 관리 라이브러리도 Redux에서 Zustand로 바꿔 보았습니다.\n\n인턴 기간에는 사내 관리자 페이지의 화면 개발을 담당했습니다. 기획서를 받아 화면을 구현하고, QA 과정에서 나온 요청 사항을 반영했습니다. 코드 리뷰 문화가 있는 팀이어서 매주 리뷰를 주고받았고, 테스트 코드 작성도 시작했습니다.\n\n이처럼 여러 프로젝트와 실무를 경험하며 다양한 기술을 익혔습니다. 입사 후에도 새로운 기술을 빠르게 배우며 팀에 기여하는 프론트엔드 개발자가 되겠습니다."}, {"id": "sample_05", "note": "수치는 있지만 과정이 없음 · 데이터", "text": "저는 데이터로 서비스를 개선하는 일에 관심이 많은 데이터 분석가 지망생입니다.\n\n지난 여름 온라인 쇼핑몰 인턴십에서 장바구니 이탈률을 18% 낮췄습니다. 또한 추천 영역의 클릭률을 2.3배 높였고, 이 결과로 월 매출이 약 12% 증가했습니다.\n\n학부 연구실에서는 교내 식당 잔반 예측 모델을 만들어 식재료 폐기량을 30% 줄였습니다. 이 프로젝트는 교내 경진대회에서 최우수상을 받았고, 현재 학생식당에서 실제로 사용되고 있습니다.\n\n이런 경험을 통해 데이터가 실제 성과로 이어질 때 가장 큰 보람을 느낀다는 것을 알게 되었습니다. 입사 후에도 숫자로 증명되는 개선을 만들어 내는 분석가가 되고 싶습니다."}, {"id": "sample_06", "note": "감정 표현이 강함 · 모바일", "text": "개발은 저에게 단순한 직업이 아니라 가슴을 뛰게 하는 꿈입니다! 처음으로 제가 만든 앱이 스마트폰에서 실행되던 순간의 떨림을 저는 아직도 생생하게 기억합니다.\n\n고등학생 때 할머니께서 약 드실 시간을 자꾸 잊으셔서, 할머니만을 위한 복약 알림 앱을 만들었습니다. 밤을 새워 가며 Flutter를 독학했고, 수없이 실패했지만 포기하지 않았습니다. 할머니께서 \"우리 손주 덕분에 약을 안 빼먹는다\"고 말씀하셨을 때, 저는 개발자가 되기로 결심했습니다.\n\n대학에 와서는 모바일 앱 동아리 회장을 맡아 후배들과 함께 교내 분실물 찾기 앱을 만들었습니다. 매일 늦은 밤까지 동아리방에 남아 코드를 고치던 시간들이 너무나 행복했습니다. 앱이 출시되던 날, 저희는 서로 부둥켜안고 기뻐했습니다.\n\n사람의 마음을 움직이는 앱을 만들고 싶다는 저의 뜨거운 열정은 누구에게도 지지 않는다고 자신합니다. 귀사에서 그 열정을 마음껏 불태우고 싶습니다!"}, {"id": "sample_07", "note": "지나치게 겸손함 · QA", "text": "부족한 점이 많지만, 소프트웨어 품질을 책임지는 QA 엔지니어가 되고 싶어 지원하게 되었습니다.\n\n학부 캡스톤 프로젝트에서 저는 테스트를 맡았습니다. 개발 실력이 뛰어난 팀원들에 비해 제가 할 수 있는 일이 많지 않다고 생각해, 할 수 있는 일부터 하자는 마음으로 시작했습니다. 기능별로 테스트 케이스를 정리하고, Selenium으로 회원가입과 결제 흐름을 자동으로 확인하는 스크립트를 조금 만들어 보았습니다.\n\n그 과정에서 발표 전날 결제 금액이 두 번 청구되는 문제를 발견할 수 있었는데, 운이 좋았던 것 같습니다. 팀원들이 빠르게 고쳐 준 덕분에 발표는 무사히 끝났고, 이후 교수님께서 테스트 문서를 다른 팀의 참고 자료로 쓰셨습니다. 제가 특별히 잘해서라기보다는 꼼꼼하게 정리하려고 노력한 정도였습니다.\n\n아직 배워야 할 것이 많은 부족한 사람이지만, 맡은 일은 끝까지 책임지려고 노력하겠습니다. 기회를 주신다면 열심히 배우겠습니다."}, {"id": "sample_08", "note": "문장이 장황함 · 인프라", "text": "저는 어린 시절부터 컴퓨터라는 기계가 어떻게 수많은 사람들의 요청을 동시에 처리하면서도 멈추지 않고 돌아갈 수 있는지에 대해 막연하지만 깊은 호기심을 가지고 있었으며, 이러한 호기심은 대학에 진학하여 컴퓨터공학을 전공하게 되면서 자연스럽게 서버와 인프라, 그리고 그 뒤에서 시스템을 안정적으로 운영하는 사람들의 역할에 대한 관심으로 이어지게 되었고, 결국 저는 클라우드 인프라 엔지니어라는 직무를 목표로 삼게 되었습니다.\n\n이러한 목표를 이루기 위해 저는 학부 3학년 때 학과 선배님들과 함께 교내 동아리 서버를 운영하는 활동에 참여하게 되었는데, 당시 동아리 서버는 한 대의 오래된 물리 서버에 여러 서비스가 뒤섞여 있어서 한 서비스에 문제가 생기면 다른 서비스까지 함께 멈추는 일이 자주 발생하였고, 이 때문에 저는 선배님들과 여러 차례 회의를 거친 끝에 각 서비스를 Docker 컨테이너로 분리하고, 이를 다시 AWS의 EC2 인스턴스로 옮기는 작업을 맡아 진행하게 되었습니다.\n\n이 과정에서 저는 처음 접해 보는 개념과 도구가 너무 많아서 어려움을 겪기도 하였지만, 공식 문서와 여러 블로그 글을 찾아 읽고, 모르는 부분은 선배님들께 여쭈어 보면서 하나씩 해결해 나갔으며, 그 결과 서비스가 서로 영향을 주지 않고 독립적으로 운영될 수 있게 되었고, 장애가 발생하였을 때에도 어느 부분에서 문제가 생겼는지 이전보다 훨씬 빠르게 파악할 수 있게 되었다는 점에서 큰 보람을 느낄 수 있었습니다.\n\n앞으로 귀사에 입사하게 된다면 저는 이러한 경험을 바탕으로 하여 서비스가 언제나 안정적으로 운영될 수 있도록 인프라를 설계하고 관리하는 일에 최선을 다하는 것은 물론이고, 끊임없이 변화하는 클라우드 기술을 꾸준히 공부하여 팀과 회사의 성장에 보탬이 될 수 있는 엔지니어가 되기 위해 노력하겠습니다."}, {"id": "sample_09", "note": "짧고 간결함 · 백엔드", "text": "백엔드 개발자 지원자입니다.\n\n주문 알림 서버를 만들었습니다. 알림 지연이 평균 40초였습니다. 메시지 큐를 도입해 3초로 줄였습니다.\n\n실패한 알림은 다시 보내도록 설계했습니다. 누락률은 0.5%에서 0.01%가 됐습니다.\n\n입사 후에는 안정적인 서버를 만들겠습니다."}, {"id": "sample_10", "note": "장점과 약점이 섞임 · 풀스택", "text": "저는 사용자의 불편을 기술로 해결하는 풀스택 개발자가 되고 싶습니다.\n\n대학교 3학년 때 학과 사물함 신청이 매 학기 선착순 종이 신청으로 진행되어, 새벽부터 줄을 서는 문제가 있었습니다. 저는 친구 한 명과 함께 Django와 PostgreSQL로 온라인 신청 시스템을 만들었습니다. 동시에 같은 사물함을 신청하는 경우를 막기 위해 데이터베이스 트랜잭션과 잠금을 적용했고, 첫 학기에 학생 320명이 줄 서지 않고 신청을 마쳤습니다.\n\n다만 이 과정이 순탄하지만은 않았습니다. 신청 첫날 서버가 잠시 멈추는 일이 있었는데, 사실 이건 학교 서버 사양이 너무 낮았기 때문이었고 저희가 어떻게 할 수 있는 부분은 아니었다고 생각합니다. 그래도 최선을 다해 대응했고, 다행히 큰 문제 없이 마무리되었습니다.\n\n이 경험으로 작은 서비스라도 실제 사용자가 생기면 책임이 따른다는 것을 배웠습니다. 입사 후에는 혁신적이고 창의적인 아이디어로 회사의 성장에 기여하는 인재가 되겠습니다."}], "ready": ["sample_01"], "runs": {"sample_01": {"run_id": "20260930_103907_001", "sample": "sample_01", "sentences": [{"id": "s01", "p": "p01", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다."}, {"id": "s02", "p": "p01", "text": "대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다."}, {"id": "s03", "p": "p02", "text": "저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다."}, {"id": "s04", "p": "p02", "text": "기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다."}, {"id": "s05", "p": "p03", "text": "그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다."}, {"id": "s06", "p": "p03", "text": "도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다."}, {"id": "s07", "p": "p04", "text": "입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다."}, {"id": "s08", "p": "p04", "text": "특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다."}], "roles": {"p01": "도입", "p02": "경험", "p03": "결과", "p04": "포부"}, "signals": {"sentence_signals": [{"sentence_id": "s01", "label": "자신감", "intensity": 2, "quote": "끝까지 파고드는 개발자입니다", "reason": "자신의 개발 성향과 역량을 단정적인 어조로 선언하고 있습니다."}, {"sentence_id": "s02", "label": "중립", "intensity": 1, "quote": "대기열 기반 예약 서비스를 만들었습니다", "reason": "프로젝트를 시작하게 된 계기와 행동을 객관적으로 서술하고 있습니다."}, {"sentence_id": "s03", "label": "자신감", "intensity": 2, "quote": "선착순 대기열을 구현했습니다", "reason": "자신이 담당한 역할과 사용한 기술을 명확하고 주도적으로 밝히고 있습니다."}, {"sentence_id": "s04", "label": "자신감", "intensity": 2, "quote": "초당 50건씩 처리하도록 바꿨습니다", "reason": "기존의 기술적 문제를 분석하고 이를 해결하기 위해 취한 구체적인 조치를 확신 있게 설명합니다."}, {"sentence_id": "s05", "label": "자신감", "intensity": 3, "quote": "12초에서 0.8초로 줄었고", "reason": "정량적인 수치를 통해 자신의 기여로 이뤄낸 성과를 당당하게 제시하고 있습니다."}, {"sentence_id": "s06", "label": "자신감", "intensity": 3, "quote": "학교 공식 시스템에 통합되었습니다", "reason": "외부 기관으로부터 성과의 가치를 공식적으로 인정받았음을 단정적으로 서술합니다."}, {"sentence_id": "s07", "label": "열정", "intensity": 2, "quote": "개선을 만드는 개발자가 되고 싶습니다", "reason": "입사 후 지향하는 개발자상과 성장에 대한 의지를 드러내고 있습니다."}, {"sentence_id": "s08", "label": "열정", "intensity": 2, "quote": "안정성을 높이는 일에 기여하고 싶습니다", "reason": "관심 있는 분야와 기여하고 싶은 직무 영역을 구체적으로 밝히며 열정을 나타냅니다."}], "paragraph_scores": [{"paragraph_id": "p01", "confidence": 4, "passion": 3, "tension": 1, "concreteness": 3}, {"paragraph_id": "p02", "confidence": 4, "passion": 4, "tension": 1, "concreteness": 5}, {"paragraph_id": "p03", "confidence": 5, "passion": 3, "tension": 1, "concreteness": 5}, {"paragraph_id": "p04", "confidence": 3, "passion": 4, "tension": 1, "concreteness": 3}]}, "impression": {"archetype": "구체적인 수치로 성과를 당당하게 증명하면서도 미래의 계획 앞에서는 차분하게 포부를 밝히는 증명가", "summary": "자신의 기술적 해결 과정과 정량적 성과를 명확한 수치로 당당하게 제시하여 강한 신뢰감을 주는 글입니다.", "key_contrast": "구체적인 수치와 기술명을 활용해 과거 성과를 확신에 찬 어조로 서술한 부분에 비해, 입사 후 포부를 밝히는 문단에서는 상대적으로 차분하고 희망적인 어조로 전환됩니다.", "evidence_sentence_ids": ["s04", "s05", "s08"]}, "personas": [{"summary": "구체적인 수치와 기술적 해결 과정을 통해 백엔드 개발자로서의 역량과 성과를 확실하게 증명한 우수한 지원서입니다.", "scores": [{"criterion": "구체적 성과", "score": 5}, {"criterion": "직무 적합성", "score": 4}, {"criterion": "차별성", "score": 5}, {"criterion": "주장의 근거", "score": 5}, {"criterion": "본인의 역할과 기여", "score": 4}], "strengths": [{"claim": "정량적인 수치를 활용하여 개선 성과를 명확하게 증명했습니다.", "evidence_ids": ["s05"]}, {"claim": "단순 토이 프로젝트에 그치지 않고 실제 학교 공식 시스템에 도입되는 수준의 차별화된 결과를 만들어냈습니다.", "evidence_ids": ["s06"]}, {"claim": "기존 시스템의 병목 원인(DB Lock)과 이를 해결하기 위한 기술적 접근법(Redis Sorted Set)을 구체적으로 서술하여 설득력을 높였습니다.", "evidence_ids": ["s04"]}], "weaknesses": [{"claim": "포부에서 언급한 '결제 서비스'와 본인이 수행한 '대기열 구현 경험' 사이의 구체적인 연결고리가 부족합니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "대기열 구현을 통해 확보한 트래픽 제어 및 동시성 해결 역량이 결제 서비스의 안정성(예: 중복 결제 방지, 선착순 쿠폰 이벤트 등)에 어떻게 기여할 수 있는지 구체적으로 연결하여 서술하세요.", "reason": "지원자가 희망하는 결제 서비스 팀의 직무 적합성을 한층 더 강조하고, 포부의 설득력을 높이기 위함입니다.", "target_ids": ["s08"]}], "persona_id": "recruiter", "status": "initial"}, {"summary": "기술적 병목을 정확히 인지하고 Redis를 활용해 구체적인 수치 개선을 이끌어낸 우수한 기술적 역량이 돋보입니다.", "scores": [{"criterion": "기술적 구체성", "score": 5}, {"criterion": "문제-해결-결과 구조", "score": 5}, {"criterion": "기술 선택의 근거", "score": 4}, {"criterion": "실제 기여도", "score": 5}], "strengths": [{"claim": "데이터베이스 락 문제를 Redis Sorted Set을 활용한 대기열 방식으로 해결한 기술적 접근 방식이 매우 구체적입니다.", "evidence_ids": ["s04"]}, {"claim": "응답 속도 개선(12초에서 0.8초)과 사용자 수 등 정량적인 지표로 개발 성과를 명확히 증명했습니다.", "evidence_ids": ["s05"]}], "weaknesses": [{"claim": "초당 50건 처리라는 기준을 설정한 기술적 근거(임계치 산정 이유)가 누락되어 있습니다.", "evidence_ids": ["s04"]}, {"claim": "포부에서 언급한 결제 서비스와 앞서 서술한 대기열 구현 경험 간의 기술적 연결고리가 다소 부족합니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "초당 50건씩 처리하도록 설정한 이유(예: 대상 DB의 처리 한계, 커넥션 풀 크기 고려 등)를 1문장 추가하십시오.", "reason": "단순히 임의의 수치로 처리한 것이 아니라, 대상 시스템의 인프라 한계를 고려한 아키텍처 설계였음을 보여주어 기술적 신뢰도를 높일 수 있습니다.", "target_ids": ["s04"]}, {"suggestion": "결제 서비스에서 발생할 수 있는 동시성 이슈나 트래픽 폭주 문제를 본인의 Redis 대기열 경험과 엮어 포부를 보완하십시오.", "reason": "지원 동기와 포부 단계에서 본인의 기술적 강점이 어떻게 실무에 적용될 수 있는지 설득력을 더하기 위함입니다.", "target_ids": ["s08"]}], "persona_id": "technical", "status": "initial"}, {"summary": "도서관 예약 시스템 개선이라는 누구나 공감할 만한 소재를 명확한 수치와 결과로 보여주어 쉽게 읽히고 신뢰가 가는 글입니다.", "scores": [{"criterion": "이해 가능성", "score": 4}, {"criterion": "문장 자연스러움", "score": 5}, {"criterion": "흐름", "score": 5}, {"criterion": "기억에 남는가", "score": 4}], "strengths": [{"claim": "대학생이라면 누구나 겪어봤을 법한 도서관 예약 문제를 다루어 도입부부터 쉽게 몰입하고 공감할 수 있습니다.", "evidence_ids": ["s02"]}, {"claim": "개선 결과를 '12초에서 0.8초', '4,200명'과 같이 구체적인 숫자로 제시하여 대단한 성과를 냈음이 직관적으로 와닿습니다.", "evidence_ids": ["s05"]}, {"claim": "학교 공식 시스템에 통합되었다는 사실을 통해 지원자의 문제 해결 능력이 실제로 인정받았음을 확실히 보여줍니다.", "evidence_ids": ["s06"]}], "weaknesses": [{"claim": "'Redis', 'Sorted Set'과 같은 기술 용어는 비전문가 입장에서 정확히 어떤 원리로 문제를 해결했다는 것인지 이해하기 어렵습니다.", "evidence_ids": ["s03", "s04"]}], "recommendations": [{"suggestion": "'Redis의 Sorted Set으로 요청 순서를 먼저 저장하고' 부분을 '온라인 번호표를 나누어 주어 차례대로 접속하게 만드는 방식'처럼 일반 독자도 직관적으로 이해할 수 있는 비유나 설명을 덧붙여 수정하는 것이 좋습니다.", "reason": "전문 기술을 모르는 면접관이나 평가자가 읽더라도 지원자가 구체적으로 어떤 아이디어를 내어 문제를 해결했는지 쉽게 이해하도록 돕기 위함입니다.", "target_ids": ["s03", "s04"]}], "persona_id": "reader", "status": "initial"}], "judge": {"overall_summary": "본 자기소개서는 도서관 예약 시스템 개선이라는 공감대 높은 소재를 바탕으로 구체적인 기술적 접근과 정량적 성과를 명확히 제시하여 우수한 평가를 받았습니다. 다만 희망 직무인 결제 서비스와 본인의 대기열 구현 경험 간의 연결고리를 보완하고, 기술적 근거 및 비전문가를 위한 설명 방식을 다듬을 필요가 있습니다.", "key_issues": [{"issue": "포부에서 언급한 결제 서비스와 본인의 대기열 구현 경험 간의 구체적인 연결고리가 부족합니다.", "raised_by": ["recruiter", "technical"], "evidence_ids": ["s08"], "priority": "높음"}, {"issue": "초당 50건 처리 기준을 설정한 기술적 근거(임계치 산정 이유)가 누락되어 있습니다.", "raised_by": ["technical"], "evidence_ids": ["s04"], "priority": "중간"}, {"issue": "Redis, Sorted Set 등 전문 기술 용어가 비전문가 입장에서 이해하기 어려울 수 있습니다.", "raised_by": ["reader"], "evidence_ids": ["s03", "s04"], "priority": "낮음"}], "disagreements": [{"topic": "기술적 상세 서술의 적절성", "positions": [{"persona_id": "technical", "position": "Redis Sorted Set을 활용한 구체적인 기술적 해결 방식을 강점으로 평가함."}, {"persona_id": "reader", "position": "비전문가 관점에서는 Redis, Sorted Set과 같은 기술 용어가 어떤 원리로 문제를 해결했는지 이해하기 어렵다고 지적함."}]}], "keep": ["정량적인 수치(평균 응답 시간 12초에서 0.8초 단축, 사용자 4,200명)를 활용하여 개선 성과를 명확하게 증명한 점", "단순 프로젝트에 그치지 않고 학교 공식 시스템에 통합되는 실제적인 성과를 낸 점", "기존 시스템의 병목 원인(DB Lock)을 정확히 짚고 기술적 해결책을 제시한 점", "도서관 예약 문제라는 누구나 공감할 수 있는 소재를 활용하여 몰입감을 높인 점"]}, "invalid": 0, "model": "gemini-3.5-flash", "created_at": "2026-09-30T10:39:07"}}, "personas": {"recruiter": {"name": "채용 담당자", "criteria": ["구체적 성과", "직무 적합성", "차별성", "주장의 근거", "본인의 역할과 기여"], "lens": "무엇을 했고, 어떤 결과를 냈는지를 봐요."}, "technical": {"name": "기술 전문가", "criteria": ["기술적 구체성", "문제-해결-결과 구조", "기술 선택의 근거", "실제 기여도"], "lens": "어떤 문제를 어떤 기술로, 왜 그렇게 풀었는지를 봐요."}, "reader": {"name": "일반 독자", "criteria": ["이해 가능성", "문장 자연스러움", "흐름", "기억에 남는가"], "lens": "전문 지식이 없어도 쉽게 읽히고 기억에 남는지를 봐요."}}, "notes": {"sample_01": "문제·해결·수치가 분명한 글 · 백엔드", "sample_02": "상투어가 많고 변명조 · 직무 불명", "sample_03": "기술만 나열 · 인프라", "sample_04": "경험은 많지만 결과가 없음 · 프론트엔드", "sample_05": "수치는 있지만 과정이 없음 · 데이터", "sample_06": "감정 표현이 강함 · 모바일", "sample_07": "지나치게 겸손함 · QA", "sample_08": "문장이 장황함 · 인프라", "sample_09": "짧고 간결함 · 백엔드", "sample_10": "장점과 약점이 섞임 · 풀스택"}};
+const D = {"local": false, "repo": "https://github.com/y49959946-debug/ALEPH/tree/main/cortex", "samples": [{"id": "sample_01", "note": "문제·해결·수치가 분명한 글 · 백엔드", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다. 대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다.\n\n저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다. 기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다.\n\n그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다. 도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다.\n\n입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다. 특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다."}, {"id": "sample_02", "note": "상투어가 많고 변명조 · 직무 불명", "text": "저는 항상 열정적으로 도전하는 인재입니다. 어떤 일이든 최선을 다하며 주어진 역할에 책임감을 가지고 임해왔습니다.\n\n대학 시절 여러 프로젝트에 참여하며 AI 기술을 활용하여 사용자에게 편리하고 혁신적인 서비스를 제공했습니다. 팀원들과 원활하게 소통하며 좋은 결과를 얻을 수 있었습니다. 이 과정에서 협업의 중요성을 깨달았습니다.\n\n물론 부족한 점도 있었지만 그것은 일정이 촉박했기 때문이었고, 주어진 환경에서는 할 수 있는 만큼 했다고 생각합니다. 앞으로는 더 잘할 수 있을 것 같습니다.\n\n귀사에 입사하게 된다면 창의적인 아이디어로 회사의 성장에 기여하는 인재가 되겠습니다. 끊임없이 배우고 성장하는 모습을 보여드리겠습니다."}, {"id": "sample_03", "note": "기술만 나열 · 인프라", "text": "저는 Kubernetes 기반 MSA 환경에서 gRPC와 Kafka를 이용한 이벤트 드리븐 아키텍처를 구축한 경험이 있습니다. Istio 서비스 메시로 mTLS와 트래픽 라우팅을 구성했고, ArgoCD로 GitOps 파이프라인을 운영했습니다.\n\n모니터링은 Prometheus와 Grafana, 분산 추적은 Jaeger와 OpenTelemetry를 도입했습니다. Terraform으로 AWS EKS 클러스터와 RDS, ElastiCache를 코드로 관리했으며, HPA와 Karpenter로 오토스케일링을 구성했습니다.\n\n또한 LangChain과 벡터 DB를 활용한 RAG 파이프라인도 구현했습니다. 임베딩은 오픈소스 모델을 사용했고, 검색 성능 향상을 위해 하이브리드 검색과 리랭킹을 적용했습니다.\n\n이러한 기술 역량을 바탕으로 귀사의 클라우드 네이티브 전환에 기여하고 싶습니다."}, {"id": "sample_04", "note": "경험은 많지만 결과가 없음 · 프론트엔드", "text": "저는 대학 생활 동안 다양한 개발 경험을 쌓아온 프론트엔드 개발 지망생입니다. 교내 해커톤에 네 번 참가했고, 동아리에서 웹 서비스 프로젝트를 세 개 진행했으며, 스타트업에서 6개월간 인턴으로 일했습니다.\n\n동아리에서는 React와 TypeScript로 학과 공지 모아보기 서비스를 만들었습니다. 저는 메인 화면과 검색 기능을 맡았고, 디자이너와 협업하며 Figma 시안을 컴포넌트로 옮기는 작업을 주로 했습니다. 이후에는 Next.js로 스터디 매칭 서비스를 만들면서 서버 사이드 렌더링을 처음 접했고, 상태 관리 라이브러리도 Redux에서 Zustand로 바꿔 보았습니다.\n\n인턴 기간에는 사내 관리자 페이지의 화면 개발을 담당했습니다. 기획서를 받아 화면을 구현하고, QA 과정에서 나온 요청 사항을 반영했습니다. 코드 리뷰 문화가 있는 팀이어서 매주 리뷰를 주고받았고, 테스트 코드 작성도 시작했습니다.\n\n이처럼 여러 프로젝트와 실무를 경험하며 다양한 기술을 익혔습니다. 입사 후에도 새로운 기술을 빠르게 배우며 팀에 기여하는 프론트엔드 개발자가 되겠습니다."}, {"id": "sample_05", "note": "수치는 있지만 과정이 없음 · 데이터", "text": "저는 데이터로 서비스를 개선하는 일에 관심이 많은 데이터 분석가 지망생입니다.\n\n지난 여름 온라인 쇼핑몰 인턴십에서 장바구니 이탈률을 18% 낮췄습니다. 또한 추천 영역의 클릭률을 2.3배 높였고, 이 결과로 월 매출이 약 12% 증가했습니다.\n\n학부 연구실에서는 교내 식당 잔반 예측 모델을 만들어 식재료 폐기량을 30% 줄였습니다. 이 프로젝트는 교내 경진대회에서 최우수상을 받았고, 현재 학생식당에서 실제로 사용되고 있습니다.\n\n이런 경험을 통해 데이터가 실제 성과로 이어질 때 가장 큰 보람을 느낀다는 것을 알게 되었습니다. 입사 후에도 숫자로 증명되는 개선을 만들어 내는 분석가가 되고 싶습니다."}, {"id": "sample_06", "note": "감정 표현이 강함 · 모바일", "text": "개발은 저에게 단순한 직업이 아니라 가슴을 뛰게 하는 꿈입니다! 처음으로 제가 만든 앱이 스마트폰에서 실행되던 순간의 떨림을 저는 아직도 생생하게 기억합니다.\n\n고등학생 때 할머니께서 약 드실 시간을 자꾸 잊으셔서, 할머니만을 위한 복약 알림 앱을 만들었습니다. 밤을 새워 가며 Flutter를 독학했고, 수없이 실패했지만 포기하지 않았습니다. 할머니께서 \"우리 손주 덕분에 약을 안 빼먹는다\"고 말씀하셨을 때, 저는 개발자가 되기로 결심했습니다.\n\n대학에 와서는 모바일 앱 동아리 회장을 맡아 후배들과 함께 교내 분실물 찾기 앱을 만들었습니다. 매일 늦은 밤까지 동아리방에 남아 코드를 고치던 시간들이 너무나 행복했습니다. 앱이 출시되던 날, 저희는 서로 부둥켜안고 기뻐했습니다.\n\n사람의 마음을 움직이는 앱을 만들고 싶다는 저의 뜨거운 열정은 누구에게도 지지 않는다고 자신합니다. 귀사에서 그 열정을 마음껏 불태우고 싶습니다!"}, {"id": "sample_07", "note": "지나치게 겸손함 · QA", "text": "부족한 점이 많지만, 소프트웨어 품질을 책임지는 QA 엔지니어가 되고 싶어 지원하게 되었습니다.\n\n학부 캡스톤 프로젝트에서 저는 테스트를 맡았습니다. 개발 실력이 뛰어난 팀원들에 비해 제가 할 수 있는 일이 많지 않다고 생각해, 할 수 있는 일부터 하자는 마음으로 시작했습니다. 기능별로 테스트 케이스를 정리하고, Selenium으로 회원가입과 결제 흐름을 자동으로 확인하는 스크립트를 조금 만들어 보았습니다.\n\n그 과정에서 발표 전날 결제 금액이 두 번 청구되는 문제를 발견할 수 있었는데, 운이 좋았던 것 같습니다. 팀원들이 빠르게 고쳐 준 덕분에 발표는 무사히 끝났고, 이후 교수님께서 테스트 문서를 다른 팀의 참고 자료로 쓰셨습니다. 제가 특별히 잘해서라기보다는 꼼꼼하게 정리하려고 노력한 정도였습니다.\n\n아직 배워야 할 것이 많은 부족한 사람이지만, 맡은 일은 끝까지 책임지려고 노력하겠습니다. 기회를 주신다면 열심히 배우겠습니다."}, {"id": "sample_08", "note": "문장이 장황함 · 인프라", "text": "저는 어린 시절부터 컴퓨터라는 기계가 어떻게 수많은 사람들의 요청을 동시에 처리하면서도 멈추지 않고 돌아갈 수 있는지에 대해 막연하지만 깊은 호기심을 가지고 있었으며, 이러한 호기심은 대학에 진학하여 컴퓨터공학을 전공하게 되면서 자연스럽게 서버와 인프라, 그리고 그 뒤에서 시스템을 안정적으로 운영하는 사람들의 역할에 대한 관심으로 이어지게 되었고, 결국 저는 클라우드 인프라 엔지니어라는 직무를 목표로 삼게 되었습니다.\n\n이러한 목표를 이루기 위해 저는 학부 3학년 때 학과 선배님들과 함께 교내 동아리 서버를 운영하는 활동에 참여하게 되었는데, 당시 동아리 서버는 한 대의 오래된 물리 서버에 여러 서비스가 뒤섞여 있어서 한 서비스에 문제가 생기면 다른 서비스까지 함께 멈추는 일이 자주 발생하였고, 이 때문에 저는 선배님들과 여러 차례 회의를 거친 끝에 각 서비스를 Docker 컨테이너로 분리하고, 이를 다시 AWS의 EC2 인스턴스로 옮기는 작업을 맡아 진행하게 되었습니다.\n\n이 과정에서 저는 처음 접해 보는 개념과 도구가 너무 많아서 어려움을 겪기도 하였지만, 공식 문서와 여러 블로그 글을 찾아 읽고, 모르는 부분은 선배님들께 여쭈어 보면서 하나씩 해결해 나갔으며, 그 결과 서비스가 서로 영향을 주지 않고 독립적으로 운영될 수 있게 되었고, 장애가 발생하였을 때에도 어느 부분에서 문제가 생겼는지 이전보다 훨씬 빠르게 파악할 수 있게 되었다는 점에서 큰 보람을 느낄 수 있었습니다.\n\n앞으로 귀사에 입사하게 된다면 저는 이러한 경험을 바탕으로 하여 서비스가 언제나 안정적으로 운영될 수 있도록 인프라를 설계하고 관리하는 일에 최선을 다하는 것은 물론이고, 끊임없이 변화하는 클라우드 기술을 꾸준히 공부하여 팀과 회사의 성장에 보탬이 될 수 있는 엔지니어가 되기 위해 노력하겠습니다."}, {"id": "sample_09", "note": "짧고 간결함 · 백엔드", "text": "백엔드 개발자 지원자입니다.\n\n주문 알림 서버를 만들었습니다. 알림 지연이 평균 40초였습니다. 메시지 큐를 도입해 3초로 줄였습니다.\n\n실패한 알림은 다시 보내도록 설계했습니다. 누락률은 0.5%에서 0.01%가 됐습니다.\n\n입사 후에는 안정적인 서버를 만들겠습니다."}, {"id": "sample_10", "note": "장점과 약점이 섞임 · 풀스택", "text": "저는 사용자의 불편을 기술로 해결하는 풀스택 개발자가 되고 싶습니다.\n\n대학교 3학년 때 학과 사물함 신청이 매 학기 선착순 종이 신청으로 진행되어, 새벽부터 줄을 서는 문제가 있었습니다. 저는 친구 한 명과 함께 Django와 PostgreSQL로 온라인 신청 시스템을 만들었습니다. 동시에 같은 사물함을 신청하는 경우를 막기 위해 데이터베이스 트랜잭션과 잠금을 적용했고, 첫 학기에 학생 320명이 줄 서지 않고 신청을 마쳤습니다.\n\n다만 이 과정이 순탄하지만은 않았습니다. 신청 첫날 서버가 잠시 멈추는 일이 있었는데, 사실 이건 학교 서버 사양이 너무 낮았기 때문이었고 저희가 어떻게 할 수 있는 부분은 아니었다고 생각합니다. 그래도 최선을 다해 대응했고, 다행히 큰 문제 없이 마무리되었습니다.\n\n이 경험으로 작은 서비스라도 실제 사용자가 생기면 책임이 따른다는 것을 배웠습니다. 입사 후에는 혁신적이고 창의적인 아이디어로 회사의 성장에 기여하는 인재가 되겠습니다."}], "ready": ["sample_01"], "runs": {"sample_01": {"run_id": "20260930_163738_001", "sample": "sample_01", "sentences": [{"id": "s01", "p": "p01", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다."}, {"id": "s02", "p": "p01", "text": "대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다."}, {"id": "s03", "p": "p02", "text": "저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다."}, {"id": "s04", "p": "p02", "text": "기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다."}, {"id": "s05", "p": "p03", "text": "그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다."}, {"id": "s06", "p": "p03", "text": "도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다."}, {"id": "s07", "p": "p04", "text": "입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다."}, {"id": "s08", "p": "p04", "text": "특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다."}], "roles": {"p01": "도입", "p02": "경험", "p03": "결과", "p04": "포부"}, "signals": {"sentence_signals": [{"sentence_id": "s01", "label": "자신감", "intensity": 2, "quote": "끝까지 파고드는 개발자입니다", "reason": "자신의 개발 성향과 역량을 단정적인 어조로 선언하고 있습니다."}, {"sentence_id": "s02", "label": "중립", "intensity": 1, "quote": "대기열 기반 예약 서비스를 만들었습니다", "reason": "프로젝트를 시작하게 된 계기와 행동을 객관적으로 서술하고 있습니다."}, {"sentence_id": "s03", "label": "자신감", "intensity": 2, "quote": "선착순 대기열을 구현했습니다", "reason": "자신이 담당한 역할과 사용한 기술을 명확하고 주도적으로 밝히고 있습니다."}, {"sentence_id": "s04", "label": "자신감", "intensity": 2, "quote": "초당 50건씩 처리하도록 바꿨습니다", "reason": "기존의 기술적 문제를 분석하고 이를 해결하기 위해 취한 구체적인 조치를 확신 있게 설명합니다."}, {"sentence_id": "s05", "label": "자신감", "intensity": 3, "quote": "12초에서 0.8초로 줄었고", "reason": "정량적인 수치를 통해 자신의 기여로 이뤄낸 성과를 당당하게 제시하고 있습니다."}, {"sentence_id": "s06", "label": "자신감", "intensity": 3, "quote": "학교 공식 시스템에 통합되었습니다", "reason": "외부 기관으로부터 성과의 가치를 공식적으로 인정받았음을 단정적으로 서술합니다."}, {"sentence_id": "s07", "label": "열정", "intensity": 2, "quote": "개선을 만드는 개발자가 되고 싶습니다", "reason": "입사 후 지향하는 개발자상과 성장에 대한 의지를 드러내고 있습니다."}, {"sentence_id": "s08", "label": "열정", "intensity": 2, "quote": "안정성을 높이는 일에 기여하고 싶습니다", "reason": "관심 있는 분야와 기여하고 싶은 직무 영역을 구체적으로 밝히며 열정을 나타냅니다."}], "paragraph_scores": [{"paragraph_id": "p01", "confidence": 4, "passion": 3, "tension": 1, "concreteness": 3}, {"paragraph_id": "p02", "confidence": 4, "passion": 4, "tension": 1, "concreteness": 5}, {"paragraph_id": "p03", "confidence": 5, "passion": 3, "tension": 1, "concreteness": 5}, {"paragraph_id": "p04", "confidence": 3, "passion": 4, "tension": 1, "concreteness": 3}]}, "impression": {"archetype": "구체적인 수치와 기술적 해결 과정으로 성과를 증명하는 작성자", "summary": "문제 상황에 대한 기술적 해결책과 정량적 성과를 명확한 어조로 일관되게 서술하는 글입니다.", "key_contrast": null, "evidence_sentence_ids": ["s04", "s05", "s06"]}, "personas": [{"summary": "실제 불편함을 기술적으로 해결하고 정량적 성과와 공식 도입이라는 확실한 결과를 증명한 우수한 지원서입니다.", "scores": [{"criterion": "구체적 성과", "score": 5}, {"criterion": "직무 적합성", "score": 5}, {"criterion": "차별성", "score": 4}, {"criterion": "주장의 근거", "score": 5}, {"criterion": "본인의 역할과 기여", "score": 4}], "strengths": [{"claim": "기존 시스템의 병목 원인과 이를 해결하기 위한 기술적 접근법을 구체적으로 제시하여 기술적 역량의 설득력을 높였습니다.", "evidence_ids": ["s04"]}, {"claim": "평균 응답 시간 단축 및 실제 사용자 수와 같은 정량적 지표를 통해 프로젝트의 성과를 명확히 입증했습니다.", "evidence_ids": ["s05"]}, {"claim": "학교 공식 시스템 통합이라는 결과를 제시하여 프로젝트의 실질적인 가치와 완성도를 증명했습니다.", "evidence_ids": ["s06"]}], "weaknesses": [{"claim": "결제 서비스 및 대규모 트래픽 제어에 기여하겠다는 포부에 비해, 해당 도메인과 관련된 본인의 준비 과정이나 구체적인 실행 계획이 언급되지 않아 아쉽습니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "결제 서비스에서 중요하게 다루는 트랜잭션 정합성 보장이나 분산 락 등 대규모 트래픽 제어와 관련된 기술적 고민이나 학습 경험을 추가하여 포부를 보완하세요.", "reason": "목표로 하는 결제 도메인에 대한 진정성과 준비도를 보여줌으로써 입사 후 기여 가능성을 더 설득력 있게 전달하기 위함입니다.", "target_ids": ["s08"]}], "persona_id": "recruiter", "status": "initial"}, {"summary": "기술적 문제 정의와 해결 과정이 구체적이고 정량적 성과가 뛰어나나, 기술 선택 및 임계치 설정에 대한 공학적 근거 보완이 필요합니다.", "scores": [{"criterion": "기술적 구체성", "score": 4}, {"criterion": "문제-해결-결과 구조", "score": 5}, {"criterion": "기술 선택의 근거", "score": 3}, {"criterion": "실제 기여도", "score": 4}], "strengths": [{"claim": "데이터베이스 락이라는 구체적인 병목 지점을 파악하고, Redis Sorted Set을 활용해 대기열을 구현하는 아키텍처적 해결책을 명확히 제시했습니다.", "evidence_ids": ["s04"]}, {"claim": "평균 응답 시간 단축(12초에서 0.8초) 및 사용자 수 등 정량적인 수치로 개선 결과를 증명했습니다.", "evidence_ids": ["s05"]}], "weaknesses": [{"claim": "초당 50건씩 처리하도록 설정한 기준이나 Redis를 선택한 구체적인 공학적 근거가 누락되어 있습니다.", "evidence_ids": ["s04"]}, {"claim": "포부 문항에서 결제 서비스의 안정성을 언급했으나, 본인의 대기열 구현 경험이 결제 도메인의 어떤 기술적 도전 과제와 연결되는지 구체성이 부족합니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "초당 50건 처리 성능 제한을 결정한 이유(예: 대상 RDB의 최대 처리량, 커넥션 풀 크기 고려 등)를 기술적 근거와 함께 서술하세요.", "reason": "단순히 임의의 숫자를 정한 것이 아니라 시스템의 한계를 측정하고 그에 맞춰 처리율 제한(Rate Limiting)을 설계했음을 보여주기 위함입니다.", "target_ids": ["s04"]}, {"suggestion": "결제 서비스에서 발생할 수 있는 동시성 이슈나 트랜잭션 정합성 문제에 대기열 및 분산 락 경험을 어떻게 접목할 것인지 구체적인 기술 키워드를 포함하여 수정하세요.", "reason": "막연한 포부 대신 지원하는 도메인의 기술적 문제를 깊이 이해하고 있음을 어필할 수 있습니다.", "target_ids": ["s08"]}], "persona_id": "technical", "status": "initial"}, {"summary": "전문 용어는 어렵지만 도서관 예약 대기 시간을 12초에서 0.8초로 줄이고 학교 공식 시스템에 도입한 성과가 매우 명확하고 인상적입니다.", "scores": [{"criterion": "이해 가능성", "score": 4}, {"criterion": "문장 자연스러움", "score": 5}, {"criterion": "흐름", "score": 5}, {"criterion": "기억에 남는가", "score": 5}], "strengths": [{"claim": "12초에서 0.8초로의 시간 단축과 4,200명의 이용자 수 등 구체적인 숫자를 제시하여 성과를 직관적으로 증명했습니다.", "evidence_ids": ["s05"]}, {"claim": "학교 공식 시스템에 통합되었다는 객관적인 사실을 제시하여 프로젝트의 실용성과 가치를 확실하게 보여줍니다.", "evidence_ids": ["s06"]}], "weaknesses": [{"claim": "'Redis의 Sorted Set'이나 '데이터베이스 직접 쓰기' 같은 기술적인 표현은 일반 독자 입장에서 구체적으로 어떤 원리로 문제가 해결된 것인지 이해하기 어렵습니다.", "evidence_ids": ["s03", "s04"]}], "recommendations": [{"suggestion": "'Redis의 Sorted Set으로 요청 순서를 저장했다'는 기법을 '은행 번호표 발행기처럼 들어온 순서대로 대기 번호를 부여하는 방식'과 같이 일상적인 비유를 곁들여 설명해 보세요.", "reason": "전문 지식이 없는 독자도 지원자가 고안한 해결책의 원리를 직관적으로 이해할 수 있어 문제 해결 능력이 훨씬 더 돋보이게 됩니다.", "target_ids": ["s04"]}], "persona_id": "reader", "status": "initial"}], "judge": {"overall_summary": "본 자기소개서는 도서관 예약 시스템의 병목 문제를 해결하여 응답 시간을 대폭 단축하고 학교 공식 시스템에 통합시킨 구체적이고 정량적인 성과를 명확하게 제시하여 우수한 평가를 받았습니다. 다만, 결제 서비스 및 대규모 트래픽 제어라는 포부에 걸맞은 구체적인 준비 과정이나 기술적 연계성이 부족하다는 지적이 공통으로 제기되었습니다. 또한, 기술적 선택의 공학적 근거를 보완하는 것과 일반 독자의 이해를 돕기 위한 비유적 설명을 추가하는 것에 대한 제안이 있었습니다.", "key_issues": [{"issue": "결제 서비스 및 대규모 트래픽 제어에 기여하겠다는 포부에 비해, 해당 도메인과 관련된 구체적인 준비 과정, 실행 계획, 혹은 기술적 연계성(동시성 이슈, 트랜잭션 정합성 등)이 부족합니다.", "raised_by": ["recruiter", "technical"], "evidence_ids": ["s08"], "priority": "높음"}, {"issue": "초당 50건씩 처리하도록 설정한 기준이나 Redis를 선택한 구체적인 공학적 근거가 누락되어 있습니다.", "raised_by": ["technical"], "evidence_ids": ["s04"], "priority": "중간"}, {"issue": "'Redis의 Sorted Set'이나 '데이터베이스 직접 쓰기' 같은 기술적인 표현은 일반 독자 입장에서 구체적으로 어떤 원리로 문제가 해결된 것인지 이해하기 어렵습니다.", "raised_by": ["reader"], "evidence_ids": ["s03", "s04"], "priority": "낮음"}], "disagreements": [{"topic": "기술적 표현의 서술 방식 및 전달력", "positions": [{"persona_id": "technical", "position": "데이터베이스 락과 Redis Sorted Set을 활용한 아키텍처적 해결책을 명확히 제시하여 기술적 구체성이 높다고 긍정적으로 평가했습니다."}, {"persona_id": "reader", "position": "전문 용어가 많아 일반 독자 입장에서는 구체적인 해결 원리를 이해하기 어려우므로 일상적인 비유를 곁들인 설명이 필요하다고 평가했습니다."}]}], "keep": ["기존 시스템의 병목 원인(데이터베이스 락)을 파악하고 Redis Sorted Set을 활용해 대기열을 구현하는 기술적 접근법을 구체적으로 제시한 점", "평균 응답 시간 단축(12초에서 0.8초) 및 실제 사용자 수(4,200명) 등 정량적 지표를 통해 프로젝트 성과를 명확히 입증한 점", "학교 공식 시스템 통합이라는 객관적 결과를 통해 프로젝트의 실질적 가치와 완성도를 증명한 점"]}, "invalid": 0, "display": {"impression.title": {"headline": "수치와 기술로 성과를 증명해요", "detail": ""}, "impression.summary": {"headline": "명확한 어조로 성과를 서술해요", "detail": "문제 상황에 대한 기술적 해결책과 정량적 성과를 담았어요."}, "recruiter.summary": {"headline": "공식 도입으로 결과를 증명했어요", "detail": "실제 불편함을 기술로 해결하고 정량적 성과를 냈어요."}, "recruiter.s0": {"headline": "병목 원인과 기술 접근법이 구체적이에요", "detail": ""}, "recruiter.s1": {"headline": "정량적 지표로 성과를 입증했어요", "detail": "평균 응답 시간 단축과 실제 사용자 수를 제시했어요."}, "recruiter.s2": {"headline": "학교 공식 시스템에 통합되었어요", "detail": ""}, "recruiter.w0": {"headline": "포부에 비해 준비 과정이 없어요", "detail": "결제 서비스 도메인과 관련된 실행 계획이 안 보여요."}, "recruiter.r0": {"headline": "결제 도메인 학습 경험을 더해보세요", "detail": "트랜잭션 정합성 보장이나 분산 락 고민을 추가해 보세요."}, "technical.summary": {"headline": "성과는 좋으나 공학적 근거가 아쉬워요", "detail": "기술 선택 및 임계치 설정에 대한 설명이 필요해요."}, "technical.s0": {"headline": "Redis Sorted Set으로 대기열을 구현했어요", "detail": ""}, "technical.s1": {"headline": "12초에서 0.8초로 단축했어요", "detail": "응답 시간 단축과 사용자 수로 성과를 증명했어요."}, "technical.w0": {"headline": "초당 50건 처리의 근거가 없어요", "detail": "Redis를 선택한 구체적인 공학적 근거가 누락되었어요."}, "technical.w1": {"headline": "결제 서비스와의 연계성이 부족해요", "detail": "대기열 경험이 결제 도메인 과제와 어떻게 닿는지 몰라요."}, "technical.r0": {"headline": "초당 50건 처리 제한 이유를 쓰세요", "detail": "대상 RDB의 최대 처리량 등 기술적 근거를 함께 적어보세요."}, "technical.r1": {"headline": "동시성 이슈 해결 경험을 엮어보세요", "detail": "결제 서비스 도메인과 연결되는 기술 키워드를 포함해 보세요."}, "reader.summary": {"headline": "도서관 예약 성과가 매우 인상적이에요", "detail": "대기 시간을 12초에서 0.8초로 줄인 성과가 명확해요."}, "reader.s0": {"headline": "0.8초 단축과 4,200명을 제시했어요", "detail": ""}, "reader.s1": {"headline": "학교 공식 시스템에 통합되었어요", "detail": ""}, "reader.w0": {"headline": "전문 용어라 원리 이해가 어려워요", "detail": "Redis Sorted Set 같은 표현은 일반 독자에게 생소해요."}, "reader.r0": {"headline": "일상적인 비유를 곁들여 설명해 보세요", "detail": "은행 번호표 발행기처럼 빗대어 원리를 풀어보세요."}, "judge.summary": {"headline": "정량적 성과는 우수하나 포부 보완이 필요해요", "detail": "대기 시간을 줄인 성과는 좋으나 결제 서비스 준비 과정이 부족해요."}, "judge.i0": {"headline": "결제 서비스 도메인 연계성이 부족해요", "detail": ""}, "judge.k0": {"headline": "Redis를 활용한 대기열 구현이 좋아요", "detail": ""}, "judge.k1": {"headline": "정량적 지표로 성과를 잘 입증했어요", "detail": ""}, "judge.k2": {"headline": "학교 공식 시스템에 통합된 점이 좋아요", "detail": ""}}, "display_model": "gemini-3.5-flash-lite", "display_warn": 2, "model": "gemini-3.5-flash", "created_at": "2026-09-30T16:37:38"}}, "personas": {"recruiter": {"name": "채용 담당자", "criteria": ["구체적 성과", "직무 적합성", "차별성", "주장의 근거", "본인의 역할과 기여"], "lens": "무엇을 했고, 어떤 결과를 냈는지를 봐요."}, "technical": {"name": "기술 전문가", "criteria": ["기술적 구체성", "문제-해결-결과 구조", "기술 선택의 근거", "실제 기여도"], "lens": "어떤 문제를 어떤 기술로, 왜 그렇게 풀었는지를 봐요."}, "reader": {"name": "일반 독자", "criteria": ["이해 가능성", "문장 자연스러움", "흐름", "기억에 남는가"], "lens": "전문 지식이 없어도 쉽게 읽히고 기억에 남는지를 봐요."}}, "notes": {"sample_01": "문제·해결·수치가 분명한 글 · 백엔드", "sample_02": "상투어가 많고 변명조 · 직무 불명", "sample_03": "기술만 나열 · 인프라", "sample_04": "경험은 많지만 결과가 없음 · 프론트엔드", "sample_05": "수치는 있지만 과정이 없음 · 데이터", "sample_06": "감정 표현이 강함 · 모바일", "sample_07": "지나치게 겸손함 · QA", "sample_08": "문장이 장황함 · 인프라", "sample_09": "짧고 간결함 · 백엔드", "sample_10": "장점과 약점이 섞임 · 풀스택"}};
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -459,7 +434,19 @@ function model(R) {
     if (v.good.length) return ["good", "✓", "강점", v.good.join(" ")];
     return ["warn", "△", "아쉬움", v.warn.join(" ")];
   };
-  return { R, S, SIG, byS, clashes, verdict };
+  // 문장 → 그 문장을 인용한 평가자의 지적 (화면용 짧은 글 포함)
+  const claimsFor = (sid, pid) => {
+    const p = R.personas.find((x) => x.persona_id === pid); if (!p) return [];
+    const out = [];
+    (p.strengths || []).forEach((x, i) => (x.evidence_ids || []).includes(sid) && out.push({ cls: "good", t: T(R, `${pid}.s${i}`, x.claim) }));
+    (p.weaknesses || []).forEach((x, i) => (x.evidence_ids || []).includes(sid) && out.push({ cls: "warn", t: T(R, `${pid}.w${i}`, x.claim) }));
+    return out;
+  };
+  const fixesFor = (sid, pid) => {
+    const p = R.personas.find((x) => x.persona_id === pid); if (!p) return [];
+    return (p.recommendations || []).map((x, i) => [x, i]).filter(([x]) => (x.target_ids || []).includes(sid)).map(([x, i]) => T(R, `${pid}.r${i}`, x.suggestion));
+  };
+  return { R, S, SIG, byS, clashes, verdict, claimsFor, fixesFor };
 }
 const essayText = (R) => R.sentences.reduce((a, s, i, arr) => a + (i && arr[i - 1].p !== s.p ? "\n\n" : i ? " " : "") + s.text, "");
 const firstSentence = (t) => { const m = String(t || "").match(/^.+?[.!?](\s|$)/); return m ? m[0].trim() : t; };
@@ -487,25 +474,24 @@ function openingLines(textValue, label) {
 
 // 결과 데이터로 대화를 만든다 (평가자들은 서로 보지 않고 각자 썼음 → 화면이 순서대로 배치)
 function lines(M) {
-  const { R, clashes, verdict, SIG } = M;
+  const { R, clashes } = M;
   const L = [];
   const imp = R.impression || {};
-  const conf = Object.values(SIG).length;
-  L.push(["analyst", [`<p>문장 ${R.sentences.length}개를 읽었어요. 이 글은 <b>“${esc(imp.archetype)}”</b>처럼 읽혀요.</p>`], "첫인상을 정리하고 있어요"]);
+  L.push(["analyst", [`<p>문장 ${R.sentences.length}개를 읽었어요. <b>“${esc(T(R, "impression.title", imp.archetype).h)}”</b>로 읽혀요.</p>`], "첫인상을 정리하고 있어요"]);
   R.personas.forEach((p) => {
-    const w = (p.weaknesses || [])[0];
-    const html = [`<p>${esc(firstSentence(p.summary))}</p>`];
-    if (w) html.push(`<p><span class="mark warn">△</span>다만 ${esc(w.claim)}</p>`);
-    L.push([p.persona_id, html, `${pname(p.persona_id)} 기준으로 읽는 중`]);
+    const pid = p.persona_id, w = (p.weaknesses || [])[0];
+    const html = [`<p>${esc(T(R, `${pid}.summary`, firstSentence(p.summary)).h)}</p>`];
+    if (w) html.push(`<p><span class="mark warn">△</span> ${esc(T(R, `${pid}.w0`, w.claim).h)}</p>`);
+    L.push([pid, html, `${pname(pid)} 기준으로 읽는 중`]);
   });
   if (clashes.length) {
     const sid = clashes[0];
-    const parts = R.personas.map((p) => [p.persona_id, verdict(sid, p.persona_id)]).filter(([, v]) => v[0] !== "none")
-      .map(([pid, v]) => `${esc(pname(pid))}는 <span class="mark ${v[0]}">${v[1]} ${v[2]}</span>`).join(", ");
-    L.push(["judge", [`<p>같은 문장에서 판정이 갈렸어요. <b>${sid}</b>를 두고 ${parts}으로 봤어요.</p>`], "평가를 맞춰 보는 중"]);
+    const parts = R.personas.map((p) => [p.persona_id, M.verdict(sid, p.persona_id)]).filter(([, v]) => v[0] !== "none")
+      .map(([pid, v]) => `${esc(pname(pid))} <span class="mark ${v[0]}">${v[1]}</span>`).join(" · ");
+    L.push(["judge", [`<p>같은 문장(<b>${sid}</b>)에서 판정이 갈렸어요. ${parts}</p>`], "평가를 맞춰 보는 중"]);
   }
   const J = R.judge || {};
-  L.push(["judge", [`<p>정리했어요. 먼저 고칠 것 <b>${(J.key_issues || []).length}가지</b>, 그대로 둘 점 <b>${(J.keep || []).length}가지</b>예요. 결과를 한 장씩 보여드릴게요.</p>`], "종합하는 중"]);
+  L.push(["judge", [`<p>정리했어요. 먼저 고칠 것 <b>${(J.key_issues || []).length}가지</b>. 한 장씩 보여드릴게요.</p>`], "종합하는 중"]);
   return L;
 }
 
@@ -652,13 +638,13 @@ $("#dash").addEventListener("touchend", (e) => {
 });
 // 문장 번호를 누르면 원문 장으로 가서 그 문장을 보여준다
 $("#dash").addEventListener("click", (e) => {
-  const c = e.target.closest(".clamp"); if (c) { c.classList.toggle("open"); return; }
+  if (e.target.closest("summary")) return;
   const t = e.target.closest("[data-sid]"); if (!t) return;
   const orig = pages.findIndex((p) => p.id === "orig");
   if (pageNo !== orig) go(orig);
   pickSentence(t.dataset.sid);
 });
-$("#dash").addEventListener("keydown", (e) => { const t = e.target.closest(".line.click"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pickSentence(t.dataset.sid); } });
+$("#dash").addEventListener("keydown", (e) => { const t = e.target.closest(".line"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pickSentence(t.dataset.sid); } });
 
 function pickSentence(sid) {
   const line = $(`#origMs .line[data-sid="${sid}"]`); if (!line) return;
@@ -668,136 +654,123 @@ function pickSentence(sid) {
   if (already) return;
   line.classList.add("sel");
   const sig = M.SIG[sid];
-  const memos = [];
-  memos.push(`<div class="memo plain"><div class="by"><i class="av sm analyst">분</i>분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`);
+  const memos = [`<div class="memo plain"><div class="by"><i class="av sm analyst">분</i>분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`];
   M.R.personas.forEach((p) => {
-    const v = M.verdict(sid, p.persona_id);
-    if (v[0] === "none") return;
-    const fix = (p.recommendations || []).find((x) => (x.target_ids || []).includes(sid));
-    memos.push(`<div class="memo ${v[0]}"><div class="by">${av(p.persona_id, true)}${esc(pname(p.persona_id))} <span class="mark ${v[0]}">${v[1]} ${v[2]}</span></div>${esc(v[3])}${fix ? `<span class="fix">${esc(fix.suggestion)}</span>` : ""}</div>`);
+    const cl = M.claimsFor(sid, p.persona_id);
+    if (!cl.length) return;
+    const fx = M.fixesFor(sid, p.persona_id)[0];
+    memos.push(cl.map((c) => `<div class="memo ${c.cls}"><div class="by">${av(p.persona_id, true)}${esc(pname(p.persona_id))} <span class="mark ${c.cls}">${c.cls === "good" ? "✓ 좋았던 점" : "△ 아쉬운 점"}</span></div>${esc(c.t.h)}${fx && c.cls === "warn" ? `<span class="fix">${esc(fx.h)}</span>` : ""}</div>`).join(""));
   });
   if (memos.length === 1) memos.push(`<p class="fine" style="margin:0">세 평가자 모두 이 문장은 언급하지 않았어요.</p>`);
   line.nextElementSibling.innerHTML = memos.join("");
   line.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
 }
 
+// 화면용 짧은 글 (편집자 결과). 없거나 검증에 실패한 항목은 원래 평가 글.
+function T(R, ref, orig) {
+  const d = (R.display || {})[ref];
+  return d ? { h: d.headline, d: d.detail || "", o: orig, short: true } : { h: orig || "", d: "", o: orig || "", short: false };
+}
+
 function buildPages(M) {
-  const { R, SIG, clashes, verdict, S } = M;
+  const { R, SIG, clashes, S } = M;
   const imp = R.impression || {}, J = R.judge || {};
-  const sref = (ids) => (ids || []).filter((i) => S[i]).map((i) => `<button class="sid" data-sid="${i}">${i}</button>`).join(" ");
-  const total = 8;
-  const chap = (n, name, meta, who) => `<div class="chap"><span class="no">${String(n).padStart(2, "0")}</span><span class="name">${who ? av(who, true) : ""}${esc(name)}</span>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}</div>`;
-  // 문장 지도: 이 평가자가 어느 문장을 어떻게 봤는지 한눈에
-  const paraGroups = []; R.sentences.forEach((s) => { const l = paraGroups[paraGroups.length - 1]; if (!l || l.p !== s.p) paraGroups.push({ p: s.p, ss: [s] }); else l.ss.push(s); });
-  const smap = (pid) => `<div class="smap" aria-label="문장별 판정">${paraGroups.map((g) => `<div class="para" title="${esc(R.roles[g.p] || "")}">${g.ss.map((s) => { const v = verdict(s.id, pid); return `<button class="cell ${v[0]}" data-sid="${s.id}" aria-label="${s.id} ${v[2]}"><span class="i">${s.id}</span><span class="m">${v[0] === "none" ? "·" : v[1]}</span></button>`; }).join("")}</div>`).join("")}</div>
-    <div class="smap-legend"><span><span class="mark good">✓</span> 좋게 본 문장</span><span><span class="mark warn">△</span> 아쉽게 본 문장</span><span><span class="mark mixed">±</span> 둘 다</span><span>칸 묶음 = 문단 (${paraGroups.map((g) => esc(R.roles[g.p] || "")).filter(Boolean).join(" · ")})</span></div>`;
-  const matrix = () => `<table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : v[1]}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
-  const dots = (n) => `${"●".repeat(n)}<span class="off">${"●".repeat(5 - n)}</span><b>${n}</b>`;
+  const sref = (ids) => (ids || []).filter((i) => S[i]).map((i) => `<button class="sid" data-sid="${i}">${i}</button>`).join("");
+  const who = (id, name, small) => `<div class="who">${av(id)}<div>${esc(name)}<small>${esc(small)}</small></div></div>`;
+  const card = (tag, cls, t, ids) => `<div class="card"><div class="tag ${cls}">${tag}</div><div class="h ${t.short ? "" : "long"}">${esc(t.h)}${sref(ids)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div>`;
   const P = [];
 
-  // 01 첫인상
+  // 1. 첫인상
   const order = ["자신감", "열정", "망설임", "방어적", "중립"];
   const counts = Object.fromEntries(order.map((l) => [l, 0]));
   R.sentences.forEach((s) => counts[(SIG[s.id] || {}).label || "중립"]++);
   const used = order.filter((l) => counts[l]);
+  const title = T(R, "impression.title", imp.archetype), isum = T(R, "impression.summary", imp.summary);
   P.push({ id: "imp", tab: "첫인상", html: `
-    ${chap(1, "첫인상", "Analyzer", "analyst")}
-    <h2 class="quote">${esc(imp.archetype)}</h2>
-    <p class="lead">${esc(imp.summary)} ${sref(imp.evidence_sentence_ids)}</p>
-    <h3>문장 ${R.sentences.length}개의 어조</h3>
+    ${who("analyst", "분석가", "글의 첫인상")}
+    <h1>${esc(title.h)}</h1>
+    <p class="sub">${esc(isum.h)}${isum.d ? ` ${esc(isum.d)}` : ""}</p>
     <div class="tone" role="img" aria-label="${used.map((l) => `${l} ${counts[l]}문장`).join(", ")}">${used.map((l) => `<i class="t-${l}" style="flex:${counts[l]}"></i>`).join("")}</div>
     <div class="legend">${used.map((l) => `<span class="lab ${l}">${l} <b>${counts[l]}</b></span>`).join("")}</div>
-    <div class="memo plain" style="margin-top:24px"><div class="by"><i class="av sm analyst">분</i>어조가 바뀌는 곳</div>${imp.key_contrast ? esc(imp.key_contrast) : "글 전체에서 어조가 뚜렷하게 바뀌는 곳은 없었어요."}</div>
-    <p class="fine" style="margin-top:18px">글이 이렇게 읽힌다는 인상이지, 작성자의 성격을 판단한 것이 아니에요.</p>` });
+    ${imp.key_contrast ? `<details class="more" style="margin-top:18px"><summary>어조가 바뀌는 곳</summary><p class="sub" style="font-size:15px;margin:0">${esc(imp.key_contrast)}</p></details>` : ""}
+    ${title.short ? `<details class="orig" style="margin-top:16px"><summary>분석가의 원래 표현</summary><p>“${esc(imp.archetype)}” ${esc(imp.summary)}</p></details>` : ""}` });
 
-  // 02~04 평가자: 원고 위에 남긴 메모
-  R.personas.forEach((p, idx) => {
+  // 2~4. 평가자
+  R.personas.forEach((p) => {
     const pid = p.persona_id, meta = D.personas[pid] || {};
-    const notes = {};
-    const add = (sid, m) => S[sid] && (notes[sid] ??= []).push(m);
-    (p.strengths || []).forEach((x) => (x.evidence_ids || []).forEach((i) => add(i, { cls: "good", mark: "✓ 좋았던 점", text: x.claim })));
-    (p.weaknesses || []).forEach((x) => (x.evidence_ids || []).forEach((i) => {
-      const r = (p.recommendations || []).find((y) => (y.target_ids || []).includes(i));
-      add(i, { cls: "warn", mark: "△ 아쉬운 점", text: x.claim, fix: r && r.suggestion });
-    }));
-    // 약점과 연결되지 않은 수정 제안도 빠뜨리지 않는다
-    (p.recommendations || []).forEach((r) => (r.target_ids || []).forEach((i) => {
-      if (!(notes[i] || []).some((m) => m.fix === r.suggestion)) add(i, { cls: "plain", mark: "→ 고쳐보면", text: r.suggestion, why: r.reason });
-    }));
-    const line = (s, hit) => `<div class="line ${hit ? "hit" : "dim"}"><span class="sid">${s.id}</span><span class="t">${esc(s.text)}</span></div>
-      <div class="notes">${(notes[s.id] || []).map((m) => `<div class="memo ${m.cls}"><div class="by">${av(pid, true)}<span class="mark ${m.cls}">${m.mark}</span></div><span class="clamp">${esc(m.text)}</span>${m.fix ? `<span class="fix">${esc(m.fix)}</span>` : ""}${m.why ? `<span class="why">${esc(m.why)}</span>` : ""}</div>`).join("")}</div>`;
-    const hitS = R.sentences.filter((s) => notes[s.id]), restS = R.sentences.filter((s) => !notes[s.id]);
+    const g = (p.strengths || []).map((x, i) => [T(R, `${pid}.s${i}`, x.claim), x.evidence_ids]);
+    const w = (p.weaknesses || []).map((x, i) => [T(R, `${pid}.w${i}`, x.claim), x.evidence_ids]);
+    const r = (p.recommendations || []).map((x, i) => [T(R, `${pid}.r${i}`, x.suggestion), x.target_ids]);
+    const sum = T(R, `${pid}.summary`, firstSentence(p.summary));
+    const rest = [...g.slice(1).map(([t, ids]) => card("✓ 좋았던 점", "good", t, ids)), ...w.slice(1).map(([t, ids]) => card("△ 아쉬운 점", "warn", t, ids)), ...r.slice(1).map(([t, ids]) => card("→ 이렇게 고쳐보면", "fix", t, ids))];
+    const scores = (p.scores || []).map((s) => `<div class="srow2"><span>${esc(s.criterion)}</span><span class="pips" aria-label="${s.score}점 / 5점">${"●".repeat(s.score)}<span class="off">${"●".repeat(5 - s.score)}</span><b>${s.score}</b></span></div>`).join("");
     P.push({ id: pid, tab: pname(pid), html: `
-      ${chap(idx + 2, pname(pid), `Review ${idx + 1} / ${R.personas.length}`, pid)}
-      <h2>${esc(firstSentence(p.summary))}</h2>
-      <p class="lead" style="margin-bottom:18px">${esc(meta.lens || "")}</p>
-      ${smap(pid)}
-      <div class="ms">${hitS.map((s) => line(s, true)).join("")}</div>
-      ${restS.length ? `<details class="rest"><summary>메모가 없는 문장 ${restS.length}개 보기</summary><div class="ms">${restS.map((s) => line(s, false)).join("")}</div></details>` : ""}
-      <div class="ledger"><h3>기준별 점수</h3>${(p.scores || []).map((s) => `<div class="srow"><span>${esc(s.criterion)}</span><span class="pips" aria-label="${s.score}점 / 5점">${dots(s.score)}</span></div>`).join("")}</div>` });
+      ${who(pid, pname(pid), meta.lens || "")}
+      <h1>${esc(sum.h)}</h1>
+      ${g[0] ? card("✓ 좋았던 점", "good", g[0][0], g[0][1]) : ""}
+      ${w[0] ? card("△ 아쉬운 점", "warn", w[0][0], w[0][1]) : ""}
+      ${r[0] ? card("→ 이렇게 고쳐보면", "fix", r[0][0], r[0][1]) : ""}
+      ${rest.length ? `<details class="more"><summary>${rest.length}개 더 보기</summary>${rest.join("")}</details>` : ""}
+      <details class="more"><summary>기준별 점수</summary><div class="card scores">${scores}</div></details>` });
   });
 
-  // 05 갈린 판정
-  const n5 = R.personas.length + 2;
+  // 5. 갈린 판정
   if (clashes.length) {
     const sid = clashes[0];
+    const rows = R.personas.map((p) => {
+      const cl = M.claimsFor(sid, p.persona_id);
+      const v = M.verdict(sid, p.persona_id);
+      const text = cl.length ? cl.map((c) => esc(c.t.h)).join("<br>") : `<span class="fine">이 문장은 언급하지 않았어요.</span>`;
+      return `<div class="card"><span class="v mark ${v[0]}">${v[0] === "none" ? "–" : v[1]}</span>${av(p.persona_id, true)}<div class="body"><div class="who2">${esc(pname(p.persona_id))} · ${v[2]}</div><div class="h">${text}</div></div></div>`;
+    }).join("");
     P.push({ id: "clash", tab: "갈린 판정", html: `
-      ${chap(n5, "갈린 판정", `${sid} · ${R.personas.length} reviews`, "judge")}
-      <h2>같은 문장을 두고, 세 사람의 판정이 갈렸습니다</h2>
-      <p class="lead">보는 기준이 다르면, 한 사람의 강점이 다른 사람에게는 아쉬운 점이 돼요.</p>
-      <p class="bigline"><button class="sid" data-sid="${sid}">${sid}</button><br><span class="t">${esc(S[sid].text)}</span></p>
-      <div class="tri">${R.personas.map((p) => { const v = verdict(sid, p.persona_id); return `<div><div class="who">${av(p.persona_id, true)}${esc(pname(p.persona_id))}</div><div class="v mark ${v[0]}">${v[1]} ${v[2]}</div><p class="clamp">${v[3] ? esc(v[3]) : "이 문장은 언급하지 않았어요."}</p></div>`; }).join("")}</div>
-      ${clashes.length > 1 ? `<p class="fine" style="margin-top:16px">판정이 갈린 문장이 ${clashes.length - 1}개 더 있어요 · ${sref(clashes.slice(1))}</p>` : ""}` });
+      ${who("judge", "의장", "판정이 갈린 문장")}
+      <h1>같은 문장,<br>다른 판정</h1>
+      <p class="quote">${esc(S[sid].text)}${sref([sid])}</p>
+      <div class="vs">${rows}</div>
+      ${clashes.length > 1 ? `<p class="fine" style="margin-top:12px">판정이 갈린 문장이 ${clashes.length - 1}개 더 있어요 ${sref(clashes.slice(1))}</p>` : ""}` });
   } else {
     const d = (J.disagreements || [])[0];
     P.push({ id: "clash", tab: "갈린 판정", html: `
-      ${chap(n5, "갈린 판정", "", "judge")}
-      <h2>같은 문장을 두고 판정이 갈린 곳은 없었습니다</h2>
-      ${d ? `<p class="lead">다만 <b>${esc(d.topic)}</b>에서는 관점이 달랐어요.</p><div class="tri">${(d.positions || []).map((x) => `<div><div class="who">${av(x.persona_id, true)}${esc(pname(x.persona_id))}</div><p style="margin-top:8px">${esc(x.position)}</p></div>`).join("")}</div>` : `<p class="lead">세 평가자가 같은 문장을 보고 서로 다른 판단을 내린 경우가 없었어요.</p>`}` });
+      ${who("judge", "의장", "판정이 갈린 문장")}
+      <h1>판정이 갈린<br>문장은 없었어요</h1>
+      ${d ? `<p class="sub">다만 <b>${esc(d.topic)}</b>에서는 관점이 달랐어요.</p><div class="vs">${(d.positions || []).map((x) => `<div class="card">${av(x.persona_id, true)}<div class="body"><div class="who2">${esc(pname(x.persona_id))}</div><div class="h long">${esc(x.position)}</div></div></div>`).join("")}</div>` : `<p class="sub">세 평가자가 같은 문장을 보고 다르게 판단한 경우가 없었어요.</p>`}` });
   }
 
-  // 06 고칠 것
+  // 6. 고칠 것
   const issues = J.key_issues || [];
+  const keeps = (J.keep || []).map((k, i) => T(R, `judge.k${i}`, k));
   P.push({ id: "fix", tab: "고칠 것", html: `
-    ${chap(n5 + 1, "고칠 것", "Chair", "judge")}
-    <h2>${issues.length ? `이 ${issues.length}가지부터 고쳐 보세요` : "크게 고칠 점은 없었습니다"}</h2>
-    <p class="lead">세 평가를 모아 의장이 우선순위를 정했어요.</p>
-    <div class="rows">${issues.map((i, n) => `<div class="r"><span class="n">${n + 1}</span><div class="body">${esc(i.issue)}<div class="meta"><span class="prio ${esc(i.priority)}">우선순위 ${esc(i.priority)}</span>${(i.raised_by || []).map((x) => av(x, true)).join("")} ${sref(i.evidence_ids)}</div></div></div>`).join("")}</div>
-    ${(J.keep || []).length ? `<h3>그대로 두세요</h3><ul class="keep">${J.keep.map((k) => `<li>${esc(k)}</li>`).join("")}</ul>` : ""}` });
+    ${who("judge", "의장", "세 평가를 모아서")}
+    <h1>${issues.length ? `이 ${issues.length}가지부터<br>고쳐 보세요` : "크게 고칠 점은<br>없었어요"}</h1>
+    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => av(r, true)).join("")}${sref(x.evidence_ids)}</div>${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
+    ${keeps.length ? `<p class="keepline"><span class="mark good">✓ 그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
 
-  // 07 원문
+  // 7. 원문
   P.push({ id: "orig", tab: "원문", html: `
-    ${chap(n5 + 2, "원문", `${R.sentences.length} sentences`)}
-    <h2>문장을 눌러 보세요</h2>
-    <p class="lead">밑줄 색은 문장의 어조예요. 문장을 누르면 분석가와 평가자들의 메모가 붙어요.</p>
-    <div class="legend" style="margin:-12px 0 18px">${["자신감", "열정", "망설임", "방어적"].map((l) => `<span class="lab ${l}">${l}</span>`).join("")}</div>
-    <div class="ms" id="origMs">${R.sentences.map((s) => { const n = Object.keys(M.byS[s.id] || {}).length; return `<div class="line click" data-sid="${s.id}" tabindex="0" role="button"><span class="sid">${s.id}${n ? ` · 평가자 ${n}명 언급` : ""}${R.roles[s.p] ? ` · ${esc(R.roles[s.p])}` : ""}</span><span class="t ${esc((SIG[s.id] || {}).label || "")}">${esc(s.text)}</span></div><div class="notes"></div>`; }).join("")}</div>
-    <details class="info"><summary>실험 정보</summary><dl>
-      <dt>Model</dt><dd>${esc(R.model)}</dd><dt>Run</dt><dd>${esc(R.run_id)} · ${esc(R.created_at)}</dd>
-      <dt>근거 검증</dt><dd>원문에 없는 근거 ${R.invalid}건 제외</dd>
-      <dt>방식</dt><dd>분석가 → 첫인상 → 평가자 3명 각자 평가 → 의장 종합 (AI 6번 호출). 평가자들은 서로의 평가를 보지 않았고, 심의 대화는 결과를 순서대로 보여주는 연출이에요. 판정이 갈린 문장은 코드가 평가자들의 근거 데이터에서 찾았어요.</dd>
-      <dt>코드</dt><dd><a href="${D.repo}" target="_blank" rel="noopener">GitHub</a></dd></dl></details>` });
+    ${who("analyst", "원문", "문장을 누르면 메모가 붙어요")}
+    <h1>문장을<br>눌러 보세요</h1>
+    <div class="legend" style="margin:0 0 14px">${["자신감", "열정", "망설임", "방어적"].map((l) => `<span class="lab ${l}">${l}</span>`).join("")}<span class="fine">밑줄 색 = 어조</span></div>
+    <div class="ms" id="origMs">${R.sentences.map((s) => { const n = Object.keys(M.byS[s.id] || {}).length; return `<div class="line" data-sid="${s.id}" tabindex="0" role="button"><span class="sid">${s.id}${n ? ` · 평가자 ${n}명 언급` : ""}${R.roles[s.p] ? ` · ${esc(R.roles[s.p])}` : ""}</span><span class="t ${esc((SIG[s.id] || {}).label || "")}">${esc(s.text)}</span></div><div class="notes"></div>`; }).join("")}</div>` });
 
-  // 08 요약
-  const cnt = (p) => `<span class="mark good">✓ ${(p.strengths || []).length}</span> <span class="mark warn">△ ${(p.weaknesses || []).length}</span>`;
-  const clashLine = clashes.length
-    ? `${sref([clashes[0]])} 문장에서 ${R.personas.map((p) => [p, verdict(clashes[0], p.persona_id)]).filter(([, v]) => v[0] !== "none").map(([p, v]) => `${esc(pname(p.persona_id))} <span class="mark ${v[0]}">${v[1]}</span>`).join(" · ")}`
-    : "판정이 갈린 문장은 없었어요.";
+  // 8. 요약
+  const osum = T(R, "judge.summary", firstSentence(J.overall_summary || ""));
   P.push({ id: "sum", tab: "요약", html: `
-    ${chap(n5 + 3, "요약", "Summary")}
-    <h2>이 글의 심의 요약</h2>
-    <p class="lead">${esc(firstSentence(J.overall_summary || ""))}</p>
-    <h3 style="margin-top:10px">심의 표 <span class="fine" style="font-family:var(--sans);font-weight:500">문장마다 세 평가자의 판정 · 행을 누르면 원문으로</span></h3>
-    ${matrix()}
-    <div class="rows" style="margin-top:30px">
-      <div class="r">${av("analyst")}<div class="body"><span class="k">첫인상</span>“${esc(imp.archetype)}”</div></div>
-      ${R.personas.map((p) => `<div class="r">${av(p.persona_id)}<div class="body"><span class="k">${esc(pname(p.persona_id))} · ${cnt(p)}</span>${esc(firstSentence(p.summary))}</div></div>`).join("")}
-      <div class="r">${av("judge")}<div class="body"><span class="k">갈린 판정</span>${clashLine}</div></div>
-      ${issues.length ? `<div class="r"><span class="n">!</span><div class="body"><span class="k">먼저 고칠 것</span><ol style="margin:0;padding-left:20px">${issues.map((i) => `<li>${esc(i.issue)} <span class="prio ${esc(i.priority)}">${esc(i.priority)}</span></li>`).join("")}</ol></div></div>` : ""}
-      ${(J.keep || []).length ? `<div class="r"><span class="n">✓</span><div class="body"><span class="k">그대로 둘 점</span><ul style="margin:0;padding-left:20px">${J.keep.slice(0, 3).map((k) => `<li>${esc(k)}</li>`).join("")}</ul></div></div>` : ""}
-    </div>
+    ${who("judge", "요약", "한눈에 보기")}
+    <h1>${esc(title.h)}</h1>
+    <p class="sub">${esc(osum.h)}</p>
+    <h3>심의 표 <span class="fine">행을 누르면 원문으로</span></h3>
+    <table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = M.verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : v[1]}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>
+    <h3>먼저 고칠 것</h3>
+    ${issues.map((x, n) => `<div class="card"><div class="h" style="font-size:16px">${n + 1}. ${esc(T(R, `judge.i${n}`, x.issue).h)} <span class="prio ${esc(x.priority)}">${esc(x.priority)}</span></div></div>`).join("")}
     <div class="again"><button class="btn" id="againFirst">처음 장부터 다시 보기</button><button class="btn" id="againTalk">▶ 심의 다시 보기</button></div>
-    <p class="fine" style="margin-top:18px">글이 이렇게 읽힌다는 인상과 AI 평가자들의 의견이에요. 작성자의 역량이나 성격을 판단한 것이 아니에요.</p>`,
+    <details class="info"><summary>실험 정보</summary><dl>
+      <dt>평가 모델</dt><dd>${esc(R.model)}</dd><dt>실행</dt><dd>${esc(R.run_id)} · ${esc(R.created_at)}</dd>
+      <dt>근거 검증</dt><dd>원문에 없는 근거 ${R.invalid}건 제외</dd>
+      <dt>화면용 글</dt><dd>${R.display_model ? `편집자 AI(${esc(R.display_model)})가 평가를 짧게 옮김 · 핵심어 빠짐 경고 ${R.display_warn}건 · 카드마다 "원래 평가"로 원문 확인` : "원래 평가 글을 그대로 표시"}</dd>
+      <dt>방식</dt><dd>분석가 → 첫인상 → 평가자 3명 각자 평가 → 의장 종합. 평가자들은 서로의 평가를 보지 않았고, 심의 대화는 결과를 순서대로 보여주는 연출이에요. 판정이 갈린 문장은 코드가 근거 데이터에서 찾았어요.</dd>
+      <dt>코드</dt><dd><a href="${D.repo}" target="_blank" rel="noopener">GitHub</a></dd></dl></details>
+    <p class="fine" style="margin-top:16px">글이 이렇게 읽힌다는 인상과 AI 평가자들의 의견이에요. 작성자의 역량이나 성격을 판단한 것이 아니에요.</p>`,
     after: () => {
       $("#againFirst").addEventListener("click", () => go(0));
       $("#againTalk").addEventListener("click", () => startTalk(current));

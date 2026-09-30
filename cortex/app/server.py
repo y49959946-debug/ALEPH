@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-from . import web  # noqa: E402
+from . import editor, web  # noqa: E402
 from .pipeline import run_pipeline  # noqa: E402
 from .utils.llm import LLMError, make_client  # noqa: E402
 
@@ -51,7 +51,13 @@ def _worker(job_id: str, text: str, source: str) -> None:
     job = JOBS[job_id]
     try:
         client = make_client(mock=OPTS["mock"], model=OPTS["model"])
-        run, _ = run_pipeline(text, client, web.RUNS_DIR, source=source, log=job["logs"].append)
+        run, path = run_pipeline(text, client, web.RUNS_DIR, source=source, log=job["logs"].append)
+        # 화면용 짧은 글 (AI 1번 더). 실패해도 원래 평가 글로 보여주므로 분석은 성공으로 둔다.
+        job["logs"].append("[편집자] 화면용 짧은 글 만드는 중")
+        try:
+            editor.apply(path, client, force=True, log=job["logs"].append)
+        except LLMError as e:
+            job["logs"].append(f"[편집자] 건너뜀: {e}")
         job.update(status="done", run_id=run["run_id"])
     except LLMError as e:
         job.update(status="error", error=str(e))

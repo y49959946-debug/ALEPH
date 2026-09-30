@@ -19,3 +19,4 @@ data/review/
 
 # 채점 결과 (실행 결과에서 다시 만들 수 있음)
 data/grades/
+data/runs/_partial/

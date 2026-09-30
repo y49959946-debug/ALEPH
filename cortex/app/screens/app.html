@@ -78,75 +78,54 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .leaving { animation: leave .45s ease-in forwards; }
 @keyframes leave { to { opacity: 0; transform: translateY(-16px) scale(.98); } }
 
-/* ============ 3. 결과: 한 장씩 넘겨 읽기 (첨삭 원고 스타일) ============ */
-:root { --serif: "Nanum Myeongjo", "Noto Serif KR", "AppleMyungjo", "Batang", serif; --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace; --rule: color-mix(in srgb, var(--ink) 14%, transparent); --rule-strong: color-mix(in srgb, var(--ink) 38%, transparent); }
-.book { max-width: 900px; margin: 0 auto; padding: 18px 16px 150px; }
+/* ============ 3. 결과: 한 장씩 넘겨 읽기 (짧은 글 카드) ============ */
+:root { --serif: "Nanum Myeongjo", "Noto Serif KR", "AppleMyungjo", "Batang", serif; --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace; --rule: color-mix(in srgb, var(--ink) 12%, transparent); --rule-strong: color-mix(in srgb, var(--ink) 30%, transparent); }
+.book { max-width: 660px; margin: 0 auto; padding: 16px 20px 150px; }
 .book-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 .book-head select, .btn { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; max-width: 100%; }
-.toc { display: flex; gap: 4px; margin: 0 0 30px; }
+.toc { display: flex; gap: 4px; margin: 0 0 28px; }
 .toc button { flex: 1; min-width: 0; border: 0; background: none; padding: 6px 0 0; text-align: left; color: var(--ink-3); font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .toc button::before { content: ""; display: block; height: 3px; border-radius: 3px; background: var(--line); margin-bottom: 6px; }
 .toc button.done::before { background: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .toc button[aria-current="step"] { color: var(--ink); }
 .toc button[aria-current="step"]::before { background: var(--accent); }
 @media (max-width: 560px) { .toc button span { display: none; } .toc button[aria-current="step"] span { display: inline; } .toc button[aria-current="step"] { flex: 3; } }
-
 .pg { animation: slidein .35s ease-out both; }
 .pg.back { animation-name: slideback; }
 @keyframes slidein { from { opacity: 0; transform: translateX(28px); } }
 @keyframes slideback { from { opacity: 0; transform: translateX(-28px); } }
 
-/* 장 머리 */
-.chap { display: flex; align-items: baseline; gap: 14px; border-bottom: 1.5px solid var(--rule-strong); padding-bottom: 12px; }
-.chap .no { font-family: var(--serif); font-size: 44px; font-weight: 800; line-height: 1; color: var(--accent); }
-.chap .name { font-family: var(--serif); font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-.chap .meta { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
-.pg h2 { font-family: var(--serif); font-size: clamp(23px, 4vw, 32px); font-weight: 800; line-height: 1.55; letter-spacing: -.02em; margin: 26px 0 10px; max-width: 760px; }
-.pg h2.quote::before { content: "“"; color: var(--accent); } .pg h2.quote::after { content: "”"; color: var(--accent); }
-.pg .lead { color: var(--ink-2); margin: 0 0 30px; font-size: 16.5px; max-width: 700px; }
-.pg h3 { font-family: var(--serif); font-size: 17px; font-weight: 800; margin: 34px 0 6px; padding-top: 14px; border-top: 1.5px solid var(--rule-strong); }
-.sid { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: .02em; }
-button.sid { border: 0; background: none; padding: 0; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.who { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; margin-bottom: 16px; }
+.who .av { width: 40px; height: 40px; font-size: 15px; }
+.who small { display: block; font-weight: 500; color: var(--ink-3); font-size: 13px; }
+.pg h1 { font-family: var(--serif); font-weight: 800; font-size: clamp(27px, 6.4vw, 38px); line-height: 1.4; letter-spacing: -.02em; margin: 0 0 12px; }
+.pg .sub { font-size: 17.5px; color: var(--ink-2); margin: 0 0 26px; line-height: 1.65; }
+.pg h3 { font-size: 15px; margin: 28px 0 10px; }
+.sid { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink-3); }
+button.sid { border: 0; background: none; padding: 0 0 0 4px; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
 button.sid:hover { color: var(--accent); }
 
-/* 원고 + 여백 메모 */
-.ms { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 0 34px; }
-.ms .line { grid-column: 1; padding: 14px 0; border-top: 1px dashed var(--rule); font-size: 17px; line-height: 1.9; }
-.ms .line .sid { display: block; }
-.ms .line.hit .t { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 20%, transparent) 62%); }
-.ms .line.dim { color: var(--ink-3); }
-.ms .notes { grid-column: 2; padding: 14px 0; }
-.ms .line.click { cursor: pointer; }
-.ms .line.click:hover .t { background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.ms .line.sel .t { background: linear-gradient(transparent 55%, color-mix(in srgb, var(--accent) 30%, transparent) 55%); }
-.ms .line.tone { text-decoration: none; }
-.ms .line .t.자신감 { text-decoration: underline 3px var(--c-conf); text-underline-offset: 6px; }
-.ms .line .t.열정 { text-decoration: underline 3px var(--c-pass); text-underline-offset: 6px; }
-.ms .line .t.망설임 { text-decoration: underline 3px var(--c-hes); text-underline-offset: 6px; }
-.ms .line .t.방어적 { text-decoration: underline 3px dashed var(--hatch); text-underline-offset: 6px; }
-.memo { padding: 8px 12px 8px 14px; border-left: 2px solid var(--accent); background: color-mix(in srgb, var(--panel) 70%, transparent); border-radius: 0 12px 12px 0; font-size: 14.5px; line-height: 1.65; margin-bottom: 10px; }
-.memo.good { border-left-color: var(--good); } .memo.warn { border-left-color: var(--warn); } .memo.mixed { border-left-color: var(--accent); } .memo.plain { border-left-color: var(--ink-3); }
-.memo .by { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; margin-bottom: 2px; flex-wrap: wrap; }
-.memo .fix { display: block; margin-top: 6px; color: var(--ink-2); }
-.memo .fix::before { content: "→ "; color: var(--accent); font-weight: 800; }
-.memo .why { display: block; margin-top: 4px; font-size: 13.5px; color: var(--ink-3); }
-@media (max-width: 820px) {
-  .ms { grid-template-columns: 1fr; }
-  .ms .notes { grid-column: 1; padding: 0 0 12px; }
-  .ms .notes:empty { display: none; }
-}
-details.rest { border-top: 1px dashed var(--rule); padding: 12px 0; }
-details.rest summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--ink-3); }
-details.rest .ms .line:first-child { border-top: 0; }
-
-/* 점수 장부 */
-.ledger .srow { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 15.5px; }
-.ledger .pips { font-family: var(--mono); letter-spacing: .18em; color: var(--accent); font-size: 14px; white-space: nowrap; }
-.ledger .pips .off { color: var(--line); }
-.ledger .pips b { font-family: var(--sans); letter-spacing: 0; color: var(--ink); margin-left: 6px; }
+.card { background: var(--panel); border-radius: 20px; padding: 16px 20px; box-shadow: var(--shadow); border: 1px solid var(--line); margin-bottom: 12px; }
+.card .tag { font-size: 13px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.card .tag.good { color: var(--good); } .card .tag.warn { color: var(--warn); } .card .tag.fix { color: var(--accent); } .card .tag.plain { color: var(--ink-3); }
+.card .h { font-size: 18.5px; font-weight: 800; line-height: 1.5; }
+.card .h.long { font-size: 16px; font-weight: 600; }
+.card .d { font-size: 15px; color: var(--ink-2); margin-top: 4px; }
+details.orig { margin-top: 8px; font-size: 13.5px; color: var(--ink-3); }
+details.orig summary { cursor: pointer; font-weight: 700; list-style: none; display: inline; }
+details.orig summary::-webkit-details-marker { display: none; }
+details.orig summary::after { content: " ↓"; } details.orig[open] summary::after { content: " ↑"; }
+details.orig p { margin: 6px 0 0; line-height: 1.65; }
+details.more { margin-top: 6px; }
+details.more > summary { cursor: pointer; font-size: 14.5px; font-weight: 700; color: var(--accent); padding: 6px 0; }
+details.more[open] > summary { margin-bottom: 8px; }
+.scores { display: grid; gap: 8px; }
+.srow2 { display: grid; grid-template-columns: 1fr auto; gap: 10px; font-size: 15px; align-items: center; }
+.pips { font-family: var(--mono); letter-spacing: .16em; color: var(--accent); font-size: 13px; white-space: nowrap; }
+.pips .off { color: var(--line); } .pips b { font-family: var(--sans, inherit); letter-spacing: 0; color: var(--ink); margin-left: 4px; }
 
 /* 어조 */
-.tone { display: flex; gap: 2px; height: 14px; margin: 12px 0 12px; }
+.tone { display: flex; gap: 2px; height: 12px; margin: 0 0 10px; }
 .tone i { display: block; height: 100%; border-radius: 4px; min-width: 6px; }
 .t-자신감 { background: var(--c-conf); } .t-열정 { background: var(--c-pass); } .t-망설임 { background: var(--c-hes); }
 .t-방어적 { background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px var(--hatch); }
@@ -157,67 +136,63 @@ details.rest .ms .line:first-child { border-top: 0; }
 .mark.good { color: var(--good); } .mark.warn { color: var(--warn); } .mark.mixed { color: var(--accent); } .mark.none { color: var(--ink-3); }
 
 /* 갈린 판정 */
-.bigline { font-size: clamp(18px, 3vw, 22px); font-weight: 700; line-height: 1.8; padding: 18px 0 22px; margin: 0; }
-.bigline .t { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 20%, transparent) 62%); }
-.tri { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1.5px solid var(--rule-strong); }
-.tri > div { padding: 14px 16px 16px 0; }
-.tri > div + div { border-left: 1px solid var(--rule); padding-left: 16px; }
-.tri .who { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
-.tri .v { font-family: var(--serif); font-size: 22px; font-weight: 800; margin: 6px 0; }
-.tri p { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.7; }
-@media (max-width: 720px) { .tri { grid-template-columns: 1fr; } .tri > div + div { border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; } }
+.quote { font-size: 17.5px; font-weight: 700; line-height: 1.7; border-left: 4px solid var(--accent); padding-left: 16px; margin: 0 0 20px; }
+.vs .card { display: flex; gap: 12px; align-items: flex-start; }
+.vs .v { font-size: 22px; font-weight: 800; width: 28px; text-align: center; flex: none; line-height: 1.3; }
+.vs .av { margin-top: 2px; }
+.vs .body { flex: 1; min-width: 0; }
+.vs .body .h { font-size: 17px; }
+.vs .body .who2 { font-size: 12.5px; font-weight: 800; color: var(--ink-3); }
 
-/* 고칠 것 / 요약 목록 */
-.rows > .r { display: grid; grid-template-columns: 44px 1fr; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--rule); }
-.rows > .r:first-child { border-top: 1.5px solid var(--rule-strong); }
-.rows .n { font-family: var(--serif); font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1.1; }
-.rows .body { font-size: 16.5px; line-height: 1.75; }
-.rows .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--ink-3); }
-.rows .k { display: block; font-size: 12.5px; font-weight: 800; color: var(--ink-3); margin-bottom: 2px; }
+/* 고칠 것 */
+.fixes .card { display: flex; gap: 14px; align-items: flex-start; }
+.fixes .n { font-family: var(--serif); font-size: 30px; font-weight: 800; color: var(--accent); line-height: 1; flex: none; width: 24px; }
+.fixes .body { flex: 1; min-width: 0; }
+.fixes .meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .prio { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 1px 9px; }
 .prio.높음 { background: var(--warn-soft); color: var(--warn); } .prio.중간 { background: var(--accent-soft); color: var(--accent); } .prio.낮음 { background: var(--panel-2); color: var(--ink-3); }
-.keep { margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.8; } .keep li + li { margin-top: 4px; }
-.again { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
-details.info { margin-top: 26px; font-size: 14px; color: var(--ink-2); }
-details.info summary { cursor: pointer; font-weight: 700; }
-details.info dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0; }
-details.info dt { color: var(--ink-3); font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; } details.info dd { margin: 0; }
+.keepline { font-size: 15.5px; color: var(--ink-2); margin-top: 18px; line-height: 1.7; }
 
-/* 문장 지도 (평가자 장 맨 위) */
-.smap { display: flex; flex-wrap: wrap; gap: 14px 6px; margin: 4px 0 8px; }
-.smap .para { display: flex; gap: 4px; padding-right: 10px; border-right: 1px solid var(--rule); }
-.smap .para:last-child { border-right: 0; }
-.smap .cell { width: 46px; height: 52px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0; }
-.smap .cell .i { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
-.smap .cell .m { font-size: 17px; font-weight: 800; line-height: 1.2; }
-.smap .cell.good { background: var(--good-soft); border-color: transparent; } .smap .cell.good .m { color: var(--good); }
-.smap .cell.warn { background: var(--warn-soft); border-color: transparent; } .smap .cell.warn .m { color: var(--warn); }
-.smap .cell.mixed { background: var(--accent-soft); border-color: transparent; } .smap .cell.mixed .m { color: var(--accent); }
-.smap .cell.none .m { color: var(--line); }
-.smap-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-3); margin-bottom: 26px; }
-.smap-legend .role { font-family: var(--mono); font-size: 11.5px; }
-/* 심의 표 (요약 장) */
-.matrix { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 6px 0 8px; font-size: 14.5px; }
-.matrix th { font-size: 12.5px; font-weight: 800; color: var(--ink-2); padding: 8px 6px; border-bottom: 1.5px solid var(--rule-strong); text-align: center; }
+/* 원문 + 메모 */
+.ms .line { padding: 14px 0; border-top: 1px dashed var(--rule); font-size: 16.5px; line-height: 1.85; cursor: pointer; }
+.ms .line .sid { display: block; }
+.ms .line:hover .t { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.ms .line.sel .t { background: linear-gradient(transparent 55%, color-mix(in srgb, var(--accent) 28%, transparent) 55%); }
+.ms .line .t.자신감 { text-decoration: underline 3px var(--c-conf); text-underline-offset: 6px; }
+.ms .line .t.열정 { text-decoration: underline 3px var(--c-pass); text-underline-offset: 6px; }
+.ms .line .t.망설임 { text-decoration: underline 3px var(--c-hes); text-underline-offset: 6px; }
+.ms .line .t.방어적 { text-decoration: underline 3px dashed var(--hatch); text-underline-offset: 6px; }
+.ms .notes:empty { display: none; }
+.ms .notes { padding: 0 0 12px; }
+.memo { padding: 8px 12px 8px 14px; border-left: 2px solid var(--accent); background: var(--panel); border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
+.memo.good { border-left-color: var(--good); } .memo.warn { border-left-color: var(--warn); } .memo.mixed { border-left-color: var(--accent); } .memo.plain { border-left-color: var(--ink-3); }
+.memo .by { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; margin-bottom: 2px; flex-wrap: wrap; }
+.memo .fix { display: block; margin-top: 4px; color: var(--ink-2); }
+.memo .fix::before { content: "→ "; color: var(--accent); font-weight: 800; }
+
+/* 심의 표 */
+.matrix { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 4px 0 8px; font-size: 14.5px; }
+.matrix th { font-size: 12.5px; font-weight: 800; color: var(--ink-2); padding: 8px 4px; border-bottom: 1.5px solid var(--rule-strong); text-align: center; }
 .matrix th:first-child { text-align: left; }
-.matrix td { padding: 9px 6px; border-bottom: 1px solid var(--rule); text-align: center; vertical-align: middle; }
+.matrix td { padding: 9px 4px; border-bottom: 1px solid var(--rule); text-align: center; vertical-align: middle; }
 .matrix td.s { text-align: left; }
-.matrix td.s .sid { margin-right: 8px; }
 .matrix td.s .tx { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
-.matrix td.c, .matrix th.c { width: 60px; }
-@media (max-width: 560px) { .matrix td.c, .matrix th.c { width: 44px; } .matrix .chip2 { width: 28px; } }
-.matrix .chip2 { display: inline-grid; place-items: center; width: 32px; height: 28px; border-radius: 8px; font-weight: 800; }
+.matrix td.s .sid { margin-right: 8px; }
+.matrix td.c, .matrix th.c { width: 54px; }
+@media (max-width: 560px) { .matrix td.c, .matrix th.c { width: 42px; } }
+.matrix .chip2 { display: inline-grid; place-items: center; width: 30px; height: 28px; border-radius: 8px; font-weight: 800; }
 .matrix .chip2.good { background: var(--good-soft); color: var(--good); } .matrix .chip2.warn { background: var(--warn-soft); color: var(--warn); } .matrix .chip2.mixed { background: var(--accent-soft); color: var(--accent); } .matrix .chip2.none { color: var(--line); }
 .matrix tr.mrow { cursor: pointer; } .matrix tr.mrow:hover td { background: color-mix(in srgb, var(--accent) 5%, transparent); }
 .matrix tr.clash td.s .tx { color: var(--ink); font-weight: 700; }
-/* 긴 메모는 3줄까지 */
-.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
-.clamp.open { display: block; }
-.more-hint { display: block; font-size: 12.5px; font-weight: 700; color: var(--accent); margin-top: 2px; cursor: pointer; }
+.again { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
+details.info { margin-top: 26px; font-size: 14px; color: var(--ink-2); }
+details.info summary { cursor: pointer; font-weight: 700; }
+details.info dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0; }
+details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
-.pager .in { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+.pager .in { max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
 .pager .pos { font-size: 14px; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; margin: 0 auto; }
 .pager button { border-radius: 999px; padding: 12px 20px; font-size: 15px; font-weight: 700; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
 .pager button.next { background: var(--accent); color: var(--on-accent); border-color: var(--accent); min-width: 140px; }
@@ -374,7 +349,19 @@ function model(R) {
     if (v.good.length) return ["good", "✓", "강점", v.good.join(" ")];
     return ["warn", "△", "아쉬움", v.warn.join(" ")];
   };
-  return { R, S, SIG, byS, clashes, verdict };
+  // 문장 → 그 문장을 인용한 평가자의 지적 (화면용 짧은 글 포함)
+  const claimsFor = (sid, pid) => {
+    const p = R.personas.find((x) => x.persona_id === pid); if (!p) return [];
+    const out = [];
+    (p.strengths || []).forEach((x, i) => (x.evidence_ids || []).includes(sid) && out.push({ cls: "good", t: T(R, `${pid}.s${i}`, x.claim) }));
+    (p.weaknesses || []).forEach((x, i) => (x.evidence_ids || []).includes(sid) && out.push({ cls: "warn", t: T(R, `${pid}.w${i}`, x.claim) }));
+    return out;
+  };
+  const fixesFor = (sid, pid) => {
+    const p = R.personas.find((x) => x.persona_id === pid); if (!p) return [];
+    return (p.recommendations || []).map((x, i) => [x, i]).filter(([x]) => (x.target_ids || []).includes(sid)).map(([x, i]) => T(R, `${pid}.r${i}`, x.suggestion));
+  };
+  return { R, S, SIG, byS, clashes, verdict, claimsFor, fixesFor };
 }
 const essayText = (R) => R.sentences.reduce((a, s, i, arr) => a + (i && arr[i - 1].p !== s.p ? "\n\n" : i ? " " : "") + s.text, "");
 const firstSentence = (t) => { const m = String(t || "").match(/^.+?[.!?](\s|$)/); return m ? m[0].trim() : t; };
@@ -402,25 +389,24 @@ function openingLines(textValue, label) {
 
 // 결과 데이터로 대화를 만든다 (평가자들은 서로 보지 않고 각자 썼음 → 화면이 순서대로 배치)
 function lines(M) {
-  const { R, clashes, verdict, SIG } = M;
+  const { R, clashes } = M;
   const L = [];
   const imp = R.impression || {};
-  const conf = Object.values(SIG).length;
-  L.push(["analyst", [`<p>문장 ${R.sentences.length}개를 읽었어요. 이 글은 <b>“${esc(imp.archetype)}”</b>처럼 읽혀요.</p>`], "첫인상을 정리하고 있어요"]);
+  L.push(["analyst", [`<p>문장 ${R.sentences.length}개를 읽었어요. <b>“${esc(T(R, "impression.title", imp.archetype).h)}”</b>로 읽혀요.</p>`], "첫인상을 정리하고 있어요"]);
   R.personas.forEach((p) => {
-    const w = (p.weaknesses || [])[0];
-    const html = [`<p>${esc(firstSentence(p.summary))}</p>`];
-    if (w) html.push(`<p><span class="mark warn">△</span>다만 ${esc(w.claim)}</p>`);
-    L.push([p.persona_id, html, `${pname(p.persona_id)} 기준으로 읽는 중`]);
+    const pid = p.persona_id, w = (p.weaknesses || [])[0];
+    const html = [`<p>${esc(T(R, `${pid}.summary`, firstSentence(p.summary)).h)}</p>`];
+    if (w) html.push(`<p><span class="mark warn">△</span> ${esc(T(R, `${pid}.w0`, w.claim).h)}</p>`);
+    L.push([pid, html, `${pname(pid)} 기준으로 읽는 중`]);
   });
   if (clashes.length) {
     const sid = clashes[0];
-    const parts = R.personas.map((p) => [p.persona_id, verdict(sid, p.persona_id)]).filter(([, v]) => v[0] !== "none")
-      .map(([pid, v]) => `${esc(pname(pid))}는 <span class="mark ${v[0]}">${v[1]} ${v[2]}</span>`).join(", ");
-    L.push(["judge", [`<p>같은 문장에서 판정이 갈렸어요. <b>${sid}</b>를 두고 ${parts}으로 봤어요.</p>`], "평가를 맞춰 보는 중"]);
+    const parts = R.personas.map((p) => [p.persona_id, M.verdict(sid, p.persona_id)]).filter(([, v]) => v[0] !== "none")
+      .map(([pid, v]) => `${esc(pname(pid))} <span class="mark ${v[0]}">${v[1]}</span>`).join(" · ");
+    L.push(["judge", [`<p>같은 문장(<b>${sid}</b>)에서 판정이 갈렸어요. ${parts}</p>`], "평가를 맞춰 보는 중"]);
   }
   const J = R.judge || {};
-  L.push(["judge", [`<p>정리했어요. 먼저 고칠 것 <b>${(J.key_issues || []).length}가지</b>, 그대로 둘 점 <b>${(J.keep || []).length}가지</b>예요. 결과를 한 장씩 보여드릴게요.</p>`], "종합하는 중"]);
+  L.push(["judge", [`<p>정리했어요. 먼저 고칠 것 <b>${(J.key_issues || []).length}가지</b>. 한 장씩 보여드릴게요.</p>`], "종합하는 중"]);
   return L;
 }
 
@@ -567,13 +553,13 @@ $("#dash").addEventListener("touchend", (e) => {
 });
 // 문장 번호를 누르면 원문 장으로 가서 그 문장을 보여준다
 $("#dash").addEventListener("click", (e) => {
-  const c = e.target.closest(".clamp"); if (c) { c.classList.toggle("open"); return; }
+  if (e.target.closest("summary")) return;
   const t = e.target.closest("[data-sid]"); if (!t) return;
   const orig = pages.findIndex((p) => p.id === "orig");
   if (pageNo !== orig) go(orig);
   pickSentence(t.dataset.sid);
 });
-$("#dash").addEventListener("keydown", (e) => { const t = e.target.closest(".line.click"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pickSentence(t.dataset.sid); } });
+$("#dash").addEventListener("keydown", (e) => { const t = e.target.closest(".line"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pickSentence(t.dataset.sid); } });
 
 function pickSentence(sid) {
   const line = $(`#origMs .line[data-sid="${sid}"]`); if (!line) return;
@@ -583,136 +569,123 @@ function pickSentence(sid) {
   if (already) return;
   line.classList.add("sel");
   const sig = M.SIG[sid];
-  const memos = [];
-  memos.push(`<div class="memo plain"><div class="by"><i class="av sm analyst">분</i>분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`);
+  const memos = [`<div class="memo plain"><div class="by"><i class="av sm analyst">분</i>분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`];
   M.R.personas.forEach((p) => {
-    const v = M.verdict(sid, p.persona_id);
-    if (v[0] === "none") return;
-    const fix = (p.recommendations || []).find((x) => (x.target_ids || []).includes(sid));
-    memos.push(`<div class="memo ${v[0]}"><div class="by">${av(p.persona_id, true)}${esc(pname(p.persona_id))} <span class="mark ${v[0]}">${v[1]} ${v[2]}</span></div>${esc(v[3])}${fix ? `<span class="fix">${esc(fix.suggestion)}</span>` : ""}</div>`);
+    const cl = M.claimsFor(sid, p.persona_id);
+    if (!cl.length) return;
+    const fx = M.fixesFor(sid, p.persona_id)[0];
+    memos.push(cl.map((c) => `<div class="memo ${c.cls}"><div class="by">${av(p.persona_id, true)}${esc(pname(p.persona_id))} <span class="mark ${c.cls}">${c.cls === "good" ? "✓ 좋았던 점" : "△ 아쉬운 점"}</span></div>${esc(c.t.h)}${fx && c.cls === "warn" ? `<span class="fix">${esc(fx.h)}</span>` : ""}</div>`).join(""));
   });
   if (memos.length === 1) memos.push(`<p class="fine" style="margin:0">세 평가자 모두 이 문장은 언급하지 않았어요.</p>`);
   line.nextElementSibling.innerHTML = memos.join("");
   line.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
 }
 
+// 화면용 짧은 글 (편집자 결과). 없거나 검증에 실패한 항목은 원래 평가 글.
+function T(R, ref, orig) {
+  const d = (R.display || {})[ref];
+  return d ? { h: d.headline, d: d.detail || "", o: orig, short: true } : { h: orig || "", d: "", o: orig || "", short: false };
+}
+
 function buildPages(M) {
-  const { R, SIG, clashes, verdict, S } = M;
+  const { R, SIG, clashes, S } = M;
   const imp = R.impression || {}, J = R.judge || {};
-  const sref = (ids) => (ids || []).filter((i) => S[i]).map((i) => `<button class="sid" data-sid="${i}">${i}</button>`).join(" ");
-  const total = 8;
-  const chap = (n, name, meta, who) => `<div class="chap"><span class="no">${String(n).padStart(2, "0")}</span><span class="name">${who ? av(who, true) : ""}${esc(name)}</span>${meta ? `<span class="meta">${esc(meta)}</span>` : ""}</div>`;
-  // 문장 지도: 이 평가자가 어느 문장을 어떻게 봤는지 한눈에
-  const paraGroups = []; R.sentences.forEach((s) => { const l = paraGroups[paraGroups.length - 1]; if (!l || l.p !== s.p) paraGroups.push({ p: s.p, ss: [s] }); else l.ss.push(s); });
-  const smap = (pid) => `<div class="smap" aria-label="문장별 판정">${paraGroups.map((g) => `<div class="para" title="${esc(R.roles[g.p] || "")}">${g.ss.map((s) => { const v = verdict(s.id, pid); return `<button class="cell ${v[0]}" data-sid="${s.id}" aria-label="${s.id} ${v[2]}"><span class="i">${s.id}</span><span class="m">${v[0] === "none" ? "·" : v[1]}</span></button>`; }).join("")}</div>`).join("")}</div>
-    <div class="smap-legend"><span><span class="mark good">✓</span> 좋게 본 문장</span><span><span class="mark warn">△</span> 아쉽게 본 문장</span><span><span class="mark mixed">±</span> 둘 다</span><span>칸 묶음 = 문단 (${paraGroups.map((g) => esc(R.roles[g.p] || "")).filter(Boolean).join(" · ")})</span></div>`;
-  const matrix = () => `<table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : v[1]}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
-  const dots = (n) => `${"●".repeat(n)}<span class="off">${"●".repeat(5 - n)}</span><b>${n}</b>`;
+  const sref = (ids) => (ids || []).filter((i) => S[i]).map((i) => `<button class="sid" data-sid="${i}">${i}</button>`).join("");
+  const who = (id, name, small) => `<div class="who">${av(id)}<div>${esc(name)}<small>${esc(small)}</small></div></div>`;
+  const card = (tag, cls, t, ids) => `<div class="card"><div class="tag ${cls}">${tag}</div><div class="h ${t.short ? "" : "long"}">${esc(t.h)}${sref(ids)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div>`;
   const P = [];
 
-  // 01 첫인상
+  // 1. 첫인상
   const order = ["자신감", "열정", "망설임", "방어적", "중립"];
   const counts = Object.fromEntries(order.map((l) => [l, 0]));
   R.sentences.forEach((s) => counts[(SIG[s.id] || {}).label || "중립"]++);
   const used = order.filter((l) => counts[l]);
+  const title = T(R, "impression.title", imp.archetype), isum = T(R, "impression.summary", imp.summary);
   P.push({ id: "imp", tab: "첫인상", html: `
-    ${chap(1, "첫인상", "Analyzer", "analyst")}
-    <h2 class="quote">${esc(imp.archetype)}</h2>
-    <p class="lead">${esc(imp.summary)} ${sref(imp.evidence_sentence_ids)}</p>
-    <h3>문장 ${R.sentences.length}개의 어조</h3>
+    ${who("analyst", "분석가", "글의 첫인상")}
+    <h1>${esc(title.h)}</h1>
+    <p class="sub">${esc(isum.h)}${isum.d ? ` ${esc(isum.d)}` : ""}</p>
     <div class="tone" role="img" aria-label="${used.map((l) => `${l} ${counts[l]}문장`).join(", ")}">${used.map((l) => `<i class="t-${l}" style="flex:${counts[l]}"></i>`).join("")}</div>
     <div class="legend">${used.map((l) => `<span class="lab ${l}">${l} <b>${counts[l]}</b></span>`).join("")}</div>
-    <div class="memo plain" style="margin-top:24px"><div class="by"><i class="av sm analyst">분</i>어조가 바뀌는 곳</div>${imp.key_contrast ? esc(imp.key_contrast) : "글 전체에서 어조가 뚜렷하게 바뀌는 곳은 없었어요."}</div>
-    <p class="fine" style="margin-top:18px">글이 이렇게 읽힌다는 인상이지, 작성자의 성격을 판단한 것이 아니에요.</p>` });
+    ${imp.key_contrast ? `<details class="more" style="margin-top:18px"><summary>어조가 바뀌는 곳</summary><p class="sub" style="font-size:15px;margin:0">${esc(imp.key_contrast)}</p></details>` : ""}
+    ${title.short ? `<details class="orig" style="margin-top:16px"><summary>분석가의 원래 표현</summary><p>“${esc(imp.archetype)}” ${esc(imp.summary)}</p></details>` : ""}` });
 
-  // 02~04 평가자: 원고 위에 남긴 메모
-  R.personas.forEach((p, idx) => {
+  // 2~4. 평가자
+  R.personas.forEach((p) => {
     const pid = p.persona_id, meta = D.personas[pid] || {};
-    const notes = {};
-    const add = (sid, m) => S[sid] && (notes[sid] ??= []).push(m);
-    (p.strengths || []).forEach((x) => (x.evidence_ids || []).forEach((i) => add(i, { cls: "good", mark: "✓ 좋았던 점", text: x.claim })));
-    (p.weaknesses || []).forEach((x) => (x.evidence_ids || []).forEach((i) => {
-      const r = (p.recommendations || []).find((y) => (y.target_ids || []).includes(i));
-      add(i, { cls: "warn", mark: "△ 아쉬운 점", text: x.claim, fix: r && r.suggestion });
-    }));
-    // 약점과 연결되지 않은 수정 제안도 빠뜨리지 않는다
-    (p.recommendations || []).forEach((r) => (r.target_ids || []).forEach((i) => {
-      if (!(notes[i] || []).some((m) => m.fix === r.suggestion)) add(i, { cls: "plain", mark: "→ 고쳐보면", text: r.suggestion, why: r.reason });
-    }));
-    const line = (s, hit) => `<div class="line ${hit ? "hit" : "dim"}"><span class="sid">${s.id}</span><span class="t">${esc(s.text)}</span></div>
-      <div class="notes">${(notes[s.id] || []).map((m) => `<div class="memo ${m.cls}"><div class="by">${av(pid, true)}<span class="mark ${m.cls}">${m.mark}</span></div><span class="clamp">${esc(m.text)}</span>${m.fix ? `<span class="fix">${esc(m.fix)}</span>` : ""}${m.why ? `<span class="why">${esc(m.why)}</span>` : ""}</div>`).join("")}</div>`;
-    const hitS = R.sentences.filter((s) => notes[s.id]), restS = R.sentences.filter((s) => !notes[s.id]);
+    const g = (p.strengths || []).map((x, i) => [T(R, `${pid}.s${i}`, x.claim), x.evidence_ids]);
+    const w = (p.weaknesses || []).map((x, i) => [T(R, `${pid}.w${i}`, x.claim), x.evidence_ids]);
+    const r = (p.recommendations || []).map((x, i) => [T(R, `${pid}.r${i}`, x.suggestion), x.target_ids]);
+    const sum = T(R, `${pid}.summary`, firstSentence(p.summary));
+    const rest = [...g.slice(1).map(([t, ids]) => card("✓ 좋았던 점", "good", t, ids)), ...w.slice(1).map(([t, ids]) => card("△ 아쉬운 점", "warn", t, ids)), ...r.slice(1).map(([t, ids]) => card("→ 이렇게 고쳐보면", "fix", t, ids))];
+    const scores = (p.scores || []).map((s) => `<div class="srow2"><span>${esc(s.criterion)}</span><span class="pips" aria-label="${s.score}점 / 5점">${"●".repeat(s.score)}<span class="off">${"●".repeat(5 - s.score)}</span><b>${s.score}</b></span></div>`).join("");
     P.push({ id: pid, tab: pname(pid), html: `
-      ${chap(idx + 2, pname(pid), `Review ${idx + 1} / ${R.personas.length}`, pid)}
-      <h2>${esc(firstSentence(p.summary))}</h2>
-      <p class="lead" style="margin-bottom:18px">${esc(meta.lens || "")}</p>
-      ${smap(pid)}
-      <div class="ms">${hitS.map((s) => line(s, true)).join("")}</div>
-      ${restS.length ? `<details class="rest"><summary>메모가 없는 문장 ${restS.length}개 보기</summary><div class="ms">${restS.map((s) => line(s, false)).join("")}</div></details>` : ""}
-      <div class="ledger"><h3>기준별 점수</h3>${(p.scores || []).map((s) => `<div class="srow"><span>${esc(s.criterion)}</span><span class="pips" aria-label="${s.score}점 / 5점">${dots(s.score)}</span></div>`).join("")}</div>` });
+      ${who(pid, pname(pid), meta.lens || "")}
+      <h1>${esc(sum.h)}</h1>
+      ${g[0] ? card("✓ 좋았던 점", "good", g[0][0], g[0][1]) : ""}
+      ${w[0] ? card("△ 아쉬운 점", "warn", w[0][0], w[0][1]) : ""}
+      ${r[0] ? card("→ 이렇게 고쳐보면", "fix", r[0][0], r[0][1]) : ""}
+      ${rest.length ? `<details class="more"><summary>${rest.length}개 더 보기</summary>${rest.join("")}</details>` : ""}
+      <details class="more"><summary>기준별 점수</summary><div class="card scores">${scores}</div></details>` });
   });
 
-  // 05 갈린 판정
-  const n5 = R.personas.length + 2;
+  // 5. 갈린 판정
   if (clashes.length) {
     const sid = clashes[0];
+    const rows = R.personas.map((p) => {
+      const cl = M.claimsFor(sid, p.persona_id);
+      const v = M.verdict(sid, p.persona_id);
+      const text = cl.length ? cl.map((c) => esc(c.t.h)).join("<br>") : `<span class="fine">이 문장은 언급하지 않았어요.</span>`;
+      return `<div class="card"><span class="v mark ${v[0]}">${v[0] === "none" ? "–" : v[1]}</span>${av(p.persona_id, true)}<div class="body"><div class="who2">${esc(pname(p.persona_id))} · ${v[2]}</div><div class="h">${text}</div></div></div>`;
+    }).join("");
     P.push({ id: "clash", tab: "갈린 판정", html: `
-      ${chap(n5, "갈린 판정", `${sid} · ${R.personas.length} reviews`, "judge")}
-      <h2>같은 문장을 두고, 세 사람의 판정이 갈렸습니다</h2>
-      <p class="lead">보는 기준이 다르면, 한 사람의 강점이 다른 사람에게는 아쉬운 점이 돼요.</p>
-      <p class="bigline"><button class="sid" data-sid="${sid}">${sid}</button><br><span class="t">${esc(S[sid].text)}</span></p>
-      <div class="tri">${R.personas.map((p) => { const v = verdict(sid, p.persona_id); return `<div><div class="who">${av(p.persona_id, true)}${esc(pname(p.persona_id))}</div><div class="v mark ${v[0]}">${v[1]} ${v[2]}</div><p class="clamp">${v[3] ? esc(v[3]) : "이 문장은 언급하지 않았어요."}</p></div>`; }).join("")}</div>
-      ${clashes.length > 1 ? `<p class="fine" style="margin-top:16px">판정이 갈린 문장이 ${clashes.length - 1}개 더 있어요 · ${sref(clashes.slice(1))}</p>` : ""}` });
+      ${who("judge", "의장", "판정이 갈린 문장")}
+      <h1>같은 문장,<br>다른 판정</h1>
+      <p class="quote">${esc(S[sid].text)}${sref([sid])}</p>
+      <div class="vs">${rows}</div>
+      ${clashes.length > 1 ? `<p class="fine" style="margin-top:12px">판정이 갈린 문장이 ${clashes.length - 1}개 더 있어요 ${sref(clashes.slice(1))}</p>` : ""}` });
   } else {
     const d = (J.disagreements || [])[0];
     P.push({ id: "clash", tab: "갈린 판정", html: `
-      ${chap(n5, "갈린 판정", "", "judge")}
-      <h2>같은 문장을 두고 판정이 갈린 곳은 없었습니다</h2>
-      ${d ? `<p class="lead">다만 <b>${esc(d.topic)}</b>에서는 관점이 달랐어요.</p><div class="tri">${(d.positions || []).map((x) => `<div><div class="who">${av(x.persona_id, true)}${esc(pname(x.persona_id))}</div><p style="margin-top:8px">${esc(x.position)}</p></div>`).join("")}</div>` : `<p class="lead">세 평가자가 같은 문장을 보고 서로 다른 판단을 내린 경우가 없었어요.</p>`}` });
+      ${who("judge", "의장", "판정이 갈린 문장")}
+      <h1>판정이 갈린<br>문장은 없었어요</h1>
+      ${d ? `<p class="sub">다만 <b>${esc(d.topic)}</b>에서는 관점이 달랐어요.</p><div class="vs">${(d.positions || []).map((x) => `<div class="card">${av(x.persona_id, true)}<div class="body"><div class="who2">${esc(pname(x.persona_id))}</div><div class="h long">${esc(x.position)}</div></div></div>`).join("")}</div>` : `<p class="sub">세 평가자가 같은 문장을 보고 다르게 판단한 경우가 없었어요.</p>`}` });
   }
 
-  // 06 고칠 것
+  // 6. 고칠 것
   const issues = J.key_issues || [];
+  const keeps = (J.keep || []).map((k, i) => T(R, `judge.k${i}`, k));
   P.push({ id: "fix", tab: "고칠 것", html: `
-    ${chap(n5 + 1, "고칠 것", "Chair", "judge")}
-    <h2>${issues.length ? `이 ${issues.length}가지부터 고쳐 보세요` : "크게 고칠 점은 없었습니다"}</h2>
-    <p class="lead">세 평가를 모아 의장이 우선순위를 정했어요.</p>
-    <div class="rows">${issues.map((i, n) => `<div class="r"><span class="n">${n + 1}</span><div class="body">${esc(i.issue)}<div class="meta"><span class="prio ${esc(i.priority)}">우선순위 ${esc(i.priority)}</span>${(i.raised_by || []).map((x) => av(x, true)).join("")} ${sref(i.evidence_ids)}</div></div></div>`).join("")}</div>
-    ${(J.keep || []).length ? `<h3>그대로 두세요</h3><ul class="keep">${J.keep.map((k) => `<li>${esc(k)}</li>`).join("")}</ul>` : ""}` });
+    ${who("judge", "의장", "세 평가를 모아서")}
+    <h1>${issues.length ? `이 ${issues.length}가지부터<br>고쳐 보세요` : "크게 고칠 점은<br>없었어요"}</h1>
+    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => av(r, true)).join("")}${sref(x.evidence_ids)}</div>${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
+    ${keeps.length ? `<p class="keepline"><span class="mark good">✓ 그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
 
-  // 07 원문
+  // 7. 원문
   P.push({ id: "orig", tab: "원문", html: `
-    ${chap(n5 + 2, "원문", `${R.sentences.length} sentences`)}
-    <h2>문장을 눌러 보세요</h2>
-    <p class="lead">밑줄 색은 문장의 어조예요. 문장을 누르면 분석가와 평가자들의 메모가 붙어요.</p>
-    <div class="legend" style="margin:-12px 0 18px">${["자신감", "열정", "망설임", "방어적"].map((l) => `<span class="lab ${l}">${l}</span>`).join("")}</div>
-    <div class="ms" id="origMs">${R.sentences.map((s) => { const n = Object.keys(M.byS[s.id] || {}).length; return `<div class="line click" data-sid="${s.id}" tabindex="0" role="button"><span class="sid">${s.id}${n ? ` · 평가자 ${n}명 언급` : ""}${R.roles[s.p] ? ` · ${esc(R.roles[s.p])}` : ""}</span><span class="t ${esc((SIG[s.id] || {}).label || "")}">${esc(s.text)}</span></div><div class="notes"></div>`; }).join("")}</div>
-    <details class="info"><summary>실험 정보</summary><dl>
-      <dt>Model</dt><dd>${esc(R.model)}</dd><dt>Run</dt><dd>${esc(R.run_id)} · ${esc(R.created_at)}</dd>
-      <dt>근거 검증</dt><dd>원문에 없는 근거 ${R.invalid}건 제외</dd>
-      <dt>방식</dt><dd>분석가 → 첫인상 → 평가자 3명 각자 평가 → 의장 종합 (AI 6번 호출). 평가자들은 서로의 평가를 보지 않았고, 심의 대화는 결과를 순서대로 보여주는 연출이에요. 판정이 갈린 문장은 코드가 평가자들의 근거 데이터에서 찾았어요.</dd>
-      <dt>코드</dt><dd><a href="${D.repo}" target="_blank" rel="noopener">GitHub</a></dd></dl></details>` });
+    ${who("analyst", "원문", "문장을 누르면 메모가 붙어요")}
+    <h1>문장을<br>눌러 보세요</h1>
+    <div class="legend" style="margin:0 0 14px">${["자신감", "열정", "망설임", "방어적"].map((l) => `<span class="lab ${l}">${l}</span>`).join("")}<span class="fine">밑줄 색 = 어조</span></div>
+    <div class="ms" id="origMs">${R.sentences.map((s) => { const n = Object.keys(M.byS[s.id] || {}).length; return `<div class="line" data-sid="${s.id}" tabindex="0" role="button"><span class="sid">${s.id}${n ? ` · 평가자 ${n}명 언급` : ""}${R.roles[s.p] ? ` · ${esc(R.roles[s.p])}` : ""}</span><span class="t ${esc((SIG[s.id] || {}).label || "")}">${esc(s.text)}</span></div><div class="notes"></div>`; }).join("")}</div>` });
 
-  // 08 요약
-  const cnt = (p) => `<span class="mark good">✓ ${(p.strengths || []).length}</span> <span class="mark warn">△ ${(p.weaknesses || []).length}</span>`;
-  const clashLine = clashes.length
-    ? `${sref([clashes[0]])} 문장에서 ${R.personas.map((p) => [p, verdict(clashes[0], p.persona_id)]).filter(([, v]) => v[0] !== "none").map(([p, v]) => `${esc(pname(p.persona_id))} <span class="mark ${v[0]}">${v[1]}</span>`).join(" · ")}`
-    : "판정이 갈린 문장은 없었어요.";
+  // 8. 요약
+  const osum = T(R, "judge.summary", firstSentence(J.overall_summary || ""));
   P.push({ id: "sum", tab: "요약", html: `
-    ${chap(n5 + 3, "요약", "Summary")}
-    <h2>이 글의 심의 요약</h2>
-    <p class="lead">${esc(firstSentence(J.overall_summary || ""))}</p>
-    <h3 style="margin-top:10px">심의 표 <span class="fine" style="font-family:var(--sans);font-weight:500">문장마다 세 평가자의 판정 · 행을 누르면 원문으로</span></h3>
-    ${matrix()}
-    <div class="rows" style="margin-top:30px">
-      <div class="r">${av("analyst")}<div class="body"><span class="k">첫인상</span>“${esc(imp.archetype)}”</div></div>
-      ${R.personas.map((p) => `<div class="r">${av(p.persona_id)}<div class="body"><span class="k">${esc(pname(p.persona_id))} · ${cnt(p)}</span>${esc(firstSentence(p.summary))}</div></div>`).join("")}
-      <div class="r">${av("judge")}<div class="body"><span class="k">갈린 판정</span>${clashLine}</div></div>
-      ${issues.length ? `<div class="r"><span class="n">!</span><div class="body"><span class="k">먼저 고칠 것</span><ol style="margin:0;padding-left:20px">${issues.map((i) => `<li>${esc(i.issue)} <span class="prio ${esc(i.priority)}">${esc(i.priority)}</span></li>`).join("")}</ol></div></div>` : ""}
-      ${(J.keep || []).length ? `<div class="r"><span class="n">✓</span><div class="body"><span class="k">그대로 둘 점</span><ul style="margin:0;padding-left:20px">${J.keep.slice(0, 3).map((k) => `<li>${esc(k)}</li>`).join("")}</ul></div></div>` : ""}
-    </div>
+    ${who("judge", "요약", "한눈에 보기")}
+    <h1>${esc(title.h)}</h1>
+    <p class="sub">${esc(osum.h)}</p>
+    <h3>심의 표 <span class="fine">행을 누르면 원문으로</span></h3>
+    <table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = M.verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : v[1]}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>
+    <h3>먼저 고칠 것</h3>
+    ${issues.map((x, n) => `<div class="card"><div class="h" style="font-size:16px">${n + 1}. ${esc(T(R, `judge.i${n}`, x.issue).h)} <span class="prio ${esc(x.priority)}">${esc(x.priority)}</span></div></div>`).join("")}
     <div class="again"><button class="btn" id="againFirst">처음 장부터 다시 보기</button><button class="btn" id="againTalk">▶ 심의 다시 보기</button></div>
-    <p class="fine" style="margin-top:18px">글이 이렇게 읽힌다는 인상과 AI 평가자들의 의견이에요. 작성자의 역량이나 성격을 판단한 것이 아니에요.</p>`,
+    <details class="info"><summary>실험 정보</summary><dl>
+      <dt>평가 모델</dt><dd>${esc(R.model)}</dd><dt>실행</dt><dd>${esc(R.run_id)} · ${esc(R.created_at)}</dd>
+      <dt>근거 검증</dt><dd>원문에 없는 근거 ${R.invalid}건 제외</dd>
+      <dt>화면용 글</dt><dd>${R.display_model ? `편집자 AI(${esc(R.display_model)})가 평가를 짧게 옮김 · 핵심어 빠짐 경고 ${R.display_warn}건 · 카드마다 "원래 평가"로 원문 확인` : "원래 평가 글을 그대로 표시"}</dd>
+      <dt>방식</dt><dd>분석가 → 첫인상 → 평가자 3명 각자 평가 → 의장 종합. 평가자들은 서로의 평가를 보지 않았고, 심의 대화는 결과를 순서대로 보여주는 연출이에요. 판정이 갈린 문장은 코드가 근거 데이터에서 찾았어요.</dd>
+      <dt>코드</dt><dd><a href="${D.repo}" target="_blank" rel="noopener">GitHub</a></dd></dl></details>
+    <p class="fine" style="margin-top:16px">글이 이렇게 읽힌다는 인상과 AI 평가자들의 의견이에요. 작성자의 역량이나 성격을 판단한 것이 아니에요.</p>`,
     after: () => {
       $("#againFirst").addEventListener("click", () => go(0));
       $("#againTalk").addEventListener("click", () => startTalk(current));

@@ -75,6 +75,9 @@ def slim(run: dict) -> dict:
         "personas": run.get("rounds", {}).get("round_0", []),
         "judge": run.get("judge", {}),
         "invalid": run.get("validation", {}).get("invalid_evidence_count", 0),
+        "display": (run.get("display") or {}).get("lines", {}),
+        "display_model": (run.get("display") or {}).get("model"),
+        "display_warn": len([w for w in (run.get("display") or {}).get("warnings", []) if w.get("type") == "keyword_missing"]),
         "model": run.get("metadata", {}).get("model"),
         "created_at": run.get("metadata", {}).get("created_at"),
     }

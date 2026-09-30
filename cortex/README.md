@@ -46,7 +46,11 @@ python -m app.main --file data\inputs\sample_01.txt
 # 3) 인상 라벨 일관성 테스트 (같은 글을 5번 분석)
 python -m scripts.consistency_check data\inputs\sample_01.txt --runs 5
 
-# 4) 사이트용 화면 다시 만들기 (AI 호출 없음)
+# 4) 화면용 짧은 글 만들기 (편집자, 결과 1개당 AI 1번 · 평가 결과는 바꾸지 않음)
+python -m app.editor                                     # 아직 없는 결과 모두
+python -m app.editor data\runs\20260930_103907_001.json  # 특정 결과
+
+# 4-1) 사이트용 화면 다시 만들기 (AI 호출 없음)
 #    demo\index.html 한 페이지: 글 넣기 → 심의(채팅 애니메이션) → 결과(대시보드). 샘플마다 가장 최근 결과가 들어갑니다.
 python -m app.report --demo
 
