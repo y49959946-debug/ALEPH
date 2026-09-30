@@ -33,7 +33,8 @@
           "project/**",
           "slime_project/**",
           "spell_project/**",
-          "contracts/**"
+          "contracts/**",
+          "cortex/demo/**"
         ]
       }
     }
