@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <meta name="description" content="자기소개서를 넣으면 분석가·세 평가자·의장 AI가 심의하는 과정을 보여주고, 결과를 한 화면에 정리합니다.">
 <style>
 :root {
@@ -104,7 +104,7 @@ button { cursor: pointer; }
 /* ============ 1. 글 넣기 ============ */
 .hero { padding: 20px 0 22px; }
 .eyebrow { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
-.hero h1 { font-family: var(--serif); font-weight: 800; font-size: clamp(26px, 5vw, 38px); line-height: 1.3; letter-spacing: -.025em; margin: 8px 0 12px; }
+.hero h1 { font-family: var(--serif); font-weight: 800; letter-spacing: -.03em; text-wrap: balance; font-size: clamp(26px, 5vw, 36px); line-height: 1.3; letter-spacing: -.025em; margin: 8px 0 12px; }
 .hero p { color: var(--ink-2); margin: 0; }
 .cast { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
 .cast span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px 4px 4px; }
@@ -166,7 +166,7 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 @keyframes leave { to { opacity: 0; transform: translateY(-16px) scale(.98); } }
 
 /* ============ 3. 결과: 한 장씩 넘겨 읽기 (짧은 글 카드) ============ */
-:root { --serif: "Nanum Myeongjo", "Noto Serif KR", "AppleMyungjo", "Batang", serif; --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace; --rule: color-mix(in srgb, var(--ink) 12%, transparent); --rule-strong: color-mix(in srgb, var(--ink) 30%, transparent); }
+:root { --serif: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace; --rule: color-mix(in srgb, var(--ink) 12%, transparent); --rule-strong: color-mix(in srgb, var(--ink) 30%, transparent); }
 .book { max-width: 660px; margin: 0 auto; padding: 16px 20px 150px; }
 .book-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 .book-head select, .btn { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; max-width: 100%; }
@@ -185,7 +185,7 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .who { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; margin-bottom: 16px; }
 .who .av { width: 40px; height: 40px; font-size: 15px; }
 .who small { display: block; font-weight: 500; color: var(--ink-3); font-size: 13px; }
-.pg h1 { font-family: var(--serif); font-weight: 800; font-size: clamp(27px, 6.4vw, 38px); line-height: 1.4; letter-spacing: -.02em; margin: 0 0 12px; }
+.pg h1 { font-family: var(--serif); font-weight: 800; font-size: clamp(24px, 4.2vw, 32px); line-height: 1.35; letter-spacing: -.03em; margin: 0 0 14px; text-wrap: balance; }
 .pg .sub { font-size: 17.5px; color: var(--ink-2); margin: 0 0 26px; line-height: 1.65; }
 .pg h3 { font-size: 15px; margin: 28px 0 10px; }
 .sid { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink-3); }
@@ -233,7 +233,7 @@ details.more[open] > summary { margin-bottom: 8px; }
 
 /* 고칠 것 */
 .fixes .card { display: flex; gap: 14px; align-items: flex-start; }
-.fixes .n { font-family: var(--serif); font-size: 30px; font-weight: 800; color: var(--accent); line-height: 1; flex: none; width: 24px; }
+.fixes .n { font-family: var(--serif); font-size: 26px; font-weight: 800; color: var(--accent); line-height: 1; flex: none; width: 24px; }
 .fixes .body { flex: 1; min-width: 0; }
 .fixes .meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .prio { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 1px 9px; }
@@ -277,6 +277,26 @@ details.info summary { cursor: pointer; font-weight: 700; }
 details.info dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0; }
 details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 
+/* 넓은 화면: 왼쪽 세로 메뉴 + 넓은 본문 */
+.toc .num { display: none; }
+@media (min-width: 960px) {
+  .book { max-width: 1080px; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 0 52px; align-items: start; padding-top: 28px; }
+  .side { position: sticky; top: 84px; }
+  .side .book-head { flex-direction: column; align-items: stretch; margin-bottom: 22px; }
+  .side .book-head select, .side .btn { width: 100%; text-align: left; }
+  .toc { flex-direction: column; gap: 2px; margin: 0; }
+  .toc button { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; font-size: 14.5px; color: var(--ink-2); white-space: normal; }
+  .toc button::before { display: none; }
+  .toc .num { display: inline; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink-3); }
+  .toc button:hover { background: color-mix(in srgb, var(--panel) 70%, transparent); }
+  .toc button.done { color: var(--ink-2); }
+  .toc button[aria-current="step"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+  .toc button[aria-current="step"] .num { color: var(--accent); }
+  .main { max-width: 760px; }
+  .pager .in { max-width: 1080px !important; padding-left: 292px; }
+  .card .h { font-size: 19px; }
+}
+
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
 .pager .in { max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
@@ -299,7 +319,7 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 <main class="page screen" id="write" hidden>
   <section class="hero">
     <div class="eyebrow">AI 심의위원회</div>
-    <h1>내 자기소개서,<br>세 사람은 어떻게 읽을까요?</h1>
+    <h1>내 자기소개서, 세 사람은 어떻게 읽을까요?</h1>
     <p>글을 넣으면 분석가가 첫인상을 읽고, 세 평가자가 각자의 기준으로 평가한 뒤, 의장이 무엇부터 고칠지 정리해요.</p>
     <div class="cast" aria-label="참여하는 AI">
       <span><i class="av sm analyst">분</i>분석가</span><span><i class="av sm">채</i>채용 담당자</span><span><i class="av sm">기</i>기술 전문가</span><span><i class="av sm">독</i>일반 독자</span><span><i class="av sm chair">의</i>의장</span>
@@ -592,9 +612,11 @@ function openDash(key, startPage = 0) {
   M = model(R);
   pages = buildPages(M);
   $("#dash").innerHTML = `
-    <div class="book-head"><select id="sel" aria-label="다른 결과 보기">${pickerOptions(key)}</select><button class="btn" id="replay">▶ 심의 다시 보기</button></div>
-    <nav class="toc" id="toc" aria-label="결과 순서">${pages.map((p, i) => `<button data-page="${i}"><span>${esc(p.tab)}</span></button>`).join("")}</nav>
-    <div id="pgwrap"></div>`;
+    <aside class="side">
+      <div class="book-head"><select id="sel" aria-label="다른 결과 보기">${pickerOptions(key)}</select><button class="btn" id="replay">▶ 심의 다시 보기</button></div>
+      <nav class="toc" id="toc" aria-label="결과 순서">${pages.map((p, i) => `<button data-page="${i}"><b class="num">${String(i + 1).padStart(2, "0")}</b><span>${esc(p.tab)}</span></button>`).join("")}</nav>
+    </aside>
+    <div class="main" id="pgwrap"></div>`;
   show("dash");
   $("#pager").hidden = false;
   $("#sel").addEventListener("change", (e) => openDash(e.target.value));
@@ -727,7 +749,7 @@ function buildPages(M) {
     }).join("");
     P.push({ id: "clash", tab: "갈린 판정", html: `
       ${who("judge", "의장", "판정이 갈린 문장")}
-      <h1>같은 문장,<br>다른 판정</h1>
+      <h1>같은 문장, 다른 판정</h1>
       <p class="quote">${esc(S[sid].text)}${sref([sid])}</p>
       <div class="vs">${rows}</div>
       ${clashes.length > 1 ? `<p class="fine" style="margin-top:12px">판정이 갈린 문장이 ${clashes.length - 1}개 더 있어요 ${sref(clashes.slice(1))}</p>` : ""}` });
@@ -735,7 +757,7 @@ function buildPages(M) {
     const d = (J.disagreements || [])[0];
     P.push({ id: "clash", tab: "갈린 판정", html: `
       ${who("judge", "의장", "판정이 갈린 문장")}
-      <h1>판정이 갈린<br>문장은 없었어요</h1>
+      <h1>판정이 갈린 문장은 없었어요</h1>
       ${d ? `<p class="sub">다만 <b>${esc(d.topic)}</b>에서는 관점이 달랐어요.</p><div class="vs">${(d.positions || []).map((x) => `<div class="card">${av(x.persona_id, true)}<div class="body"><div class="who2">${esc(pname(x.persona_id))}</div><div class="h long">${esc(x.position)}</div></div></div>`).join("")}</div>` : `<p class="sub">세 평가자가 같은 문장을 보고 다르게 판단한 경우가 없었어요.</p>`}` });
   }
 
@@ -744,14 +766,14 @@ function buildPages(M) {
   const keeps = (J.keep || []).map((k, i) => T(R, `judge.k${i}`, k));
   P.push({ id: "fix", tab: "고칠 것", html: `
     ${who("judge", "의장", "세 평가를 모아서")}
-    <h1>${issues.length ? `이 ${issues.length}가지부터<br>고쳐 보세요` : "크게 고칠 점은<br>없었어요"}</h1>
+    <h1>${issues.length ? `이 ${issues.length}가지부터 고쳐 보세요` : "크게 고칠 점은 없었어요"}</h1>
     <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => av(r, true)).join("")}${sref(x.evidence_ids)}</div>${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
     ${keeps.length ? `<p class="keepline"><span class="mark good">✓ 그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
 
   // 7. 원문
   P.push({ id: "orig", tab: "원문", html: `
     ${who("analyst", "원문", "문장을 누르면 메모가 붙어요")}
-    <h1>문장을<br>눌러 보세요</h1>
+    <h1>문장을 눌러 보세요</h1>
     <div class="legend" style="margin:0 0 14px">${["자신감", "열정", "망설임", "방어적"].map((l) => `<span class="lab ${l}">${l}</span>`).join("")}<span class="fine">밑줄 색 = 어조</span></div>
     <div class="ms" id="origMs">${R.sentences.map((s) => { const n = Object.keys(M.byS[s.id] || {}).length; return `<div class="line" data-sid="${s.id}" tabindex="0" role="button"><span class="sid">${s.id}${n ? ` · 평가자 ${n}명 언급` : ""}${R.roles[s.p] ? ` · ${esc(R.roles[s.p])}` : ""}</span><span class="t ${esc((SIG[s.id] || {}).label || "")}">${esc(s.text)}</span></div><div class="notes"></div>`; }).join("")}</div>` });
 
