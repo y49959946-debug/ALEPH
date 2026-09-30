@@ -49,23 +49,35 @@ python -m scripts.consistency_check data\inputs\sample_01.txt --runs 5
 # 4) 결과 화면 다시 만들기 (AI 호출 없음)
 python -m app.report                                        # 가장 최근 결과
 python -m app.report data\runs\20260930_103907_001.json     # 특정 결과
+python -m app.report --demo data\runs\20260930_103907_001.json   # 사이트용 데모 (demo\index.html)
+
+# 5) 샘플의 객관 항목 확인 (숫자·긴 문장·상투어 등, AI 호출 없음)
+python -m scripts.objective_check
 ```
 
 실행이 끝나면 `data\reports\실행ID.html` 결과 화면이 자동으로 만들어집니다. 파일 탐색기에서 더블클릭하면 브라우저로 열립니다.
 
 다음에 실행할 때는 `cd D:\Aleph\cortex` → `.venv\Scripts\activate` 만 하면 됩니다.
 
-## 샘플 자기소개서
+## 샘플 자기소개서 (10개)
 
 모두 지어낸 글입니다. 무료 티어에 보낸 내용은 Google 제품 개선에 쓰일 수 있으니 **실제 개인정보가 담긴 글은 넣지 마세요.**
 
 | 파일 | 특징 |
 |---|---|
-| sample_01.txt | 잘 쓴 글: 문제→해결→수치 결과가 분명함 |
-| sample_02.txt | 추상적인 글: 상투어가 많고 변명조 문단이 있음 |
-| sample_03.txt | 기술만 나열한 글: 본인 역할과 결과가 없음 |
+| sample_01 | 잘 쓴 글: 문제→해결→수치 결과가 분명함 (백엔드) |
+| sample_02 | 상투어가 많고 변명조 (직무 불명) |
+| sample_03 | 기술만 나열, 본인 역할과 결과 없음 (인프라) |
+| sample_04 | 경험은 많지만 결과가 없음 (프론트엔드) |
+| sample_05 | 결과 수치는 있지만 과정이 없음 (데이터) |
+| sample_06 | 감정 표현이 강함 (모바일) |
+| sample_07 | 지나치게 겸손함 (QA) |
+| sample_08 | 문장이 장황함 (인프라) |
+| sample_09 | 짧고 간결함 (백엔드) |
+| sample_10 | 장점과 약점이 섞임 (풀스택) |
 
-세 샘플의 결과가 서로 다르게 나오는지가 V0의 첫 번째 확인 포인트입니다.
+- `data/inputs/samples.md`: 샘플마다 평가자가 짚어야 할 점을 적은 **채점용 정답지**. AI에게 보내지 않습니다. 항목마다 [객관]/[주관]과 근거 출처가 표시돼 있고, 샘플과 정답지 모두 AI가 작성했다는 한계를 적어 두었습니다.
+- `data/inputs/review_sheet.md`: 사람에게 샘플 4편을 보여주고 의견을 받는 **블라인드 질문지**. 정답지 없이 이 파일만 전달하세요.
 
 ## 폴더 구조
 
