@@ -203,6 +203,7 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
   </section>
   <section class="composer">
     <div class="notice" id="env" hidden style="margin:0 0 14px"></div>
+    <div class="notice" id="demoNote" style="margin:0 0 14px">공개 데모에서는 <b>미리 분석해 둔 샘플</b>만 볼 수 있어요. 무료 AI 한도가 작고, 넣은 글이 외부 AI 서비스로 전송되기 때문이에요. 내 글은 <a class="repo" target="_blank" rel="noopener">코드</a>를 받아 내 컴퓨터에서 분석할 수 있어요.</div>
     <label for="text">자기소개서</label>
     <textarea id="text" placeholder="여기에 붙여 넣거나, 아래 샘플을 골라 보세요."></textarea>
     <div class="row"><span class="count" id="count">0자</span><div class="actions" id="actions"></div></div>
@@ -232,7 +233,7 @@ const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const MAX = 3000, MIN = 50;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 $$(".repo").forEach((a) => (a.href = D.repo));
-if (D.local) $("#back").hidden = true;
+if (D.local) { $("#back").hidden = true; $("#demoNote").hidden = true; }
 
 const INITIAL = { recruiter: "채", technical: "기", reader: "독" };
 const pname = (id) => id === "judge" ? "의장" : id === "analyst" ? "분석가" : (D.personas[id] || {}).name || id;
@@ -364,7 +365,6 @@ function lines(M) {
   const imp = R.impression || {};
   const conf = Object.values(SIG).length;
   L.push(["analyst", [`<p>문장 ${R.sentences.length}개를 읽었어요. 이 글은 <b>“${esc(imp.archetype)}”</b>처럼 읽혀요.</p>`], "첫인상을 정리하고 있어요"]);
-  L.push(["note", "세 평가자는 서로의 평가를 보지 않고 각자 읽었어요"]);
   R.personas.forEach((p) => {
     const w = (p.weaknesses || [])[0];
     const html = [`<p>${esc(firstSentence(p.summary))}</p>`];
@@ -400,6 +400,7 @@ async function startTalk(key) {
   show("talk");
   openingLines(essayText(R), key.startsWith("sample_") ? key.replace("sample_", "샘플 ") : "내 글");
   post(bubble("judge", `<p>심의를 시작할게요. 분석가가 먼저 읽고, 세 분은 각자의 기준으로 평가해 주세요.</p>`));
+  post(`<div class="note">실제 토론이 아니라, 세 평가자가 서로 보지 않고 각자 쓴 평가를 순서대로 보여드리는 연출이에요</div>`);
   await sleep(fastForward ? 0 : 600);
   const done = await playLines(lines(model(R)), token);
   if (done && token === talkToken) finishTalk(key);
@@ -435,6 +436,7 @@ async function runLocal() {
   show("talk");
   openingLines(value, picked ? picked.replace("sample_", "샘플 ") : "내 글");
   post(bubble("judge", `<p>심의를 시작할게요. 분석가가 먼저 읽고, 세 분은 각자의 기준으로 평가해 주세요.</p>`));
+  post(`<div class="note">실제 토론이 아니라, 세 평가자가 서로 보지 않고 각자 쓴 평가를 순서대로 보여드리는 연출이에요</div>`);
   $("#skip").textContent = "결과 바로 보기";
   let shownStage = -1;
   while (token === talkToken) {
