@@ -9,7 +9,7 @@ run.json 하나를 읽어서, 브라우저로 더블클릭해 열 수 있는 HTM
 사용법 (프로젝트 폴더에서):
     python -m app.report                          # 가장 최근 결과
     python -m app.report data\\runs\\20260930_103907_001.json
-    python -m app.report --demo data\\runs\\20260930_103907_001.json   # 사이트용 데모 페이지 (demo/index.html)
+    python -m app.report --demo                    # 사이트용 화면 (demo/index.html)
 """
 from __future__ import annotations
 
@@ -49,14 +49,6 @@ def write_report(run: dict, out_dir: Path = REPORTS_DIR) -> Path:
     return path
 
 
-def write_demo(run: dict) -> Path:
-    """사이트 '결과물' 메뉴에서 여는 방문자용 데모 페이지. 지어낸 샘플의 결과만 넣는다."""
-    DEMO_DIR.mkdir(parents=True, exist_ok=True)
-    path = DEMO_DIR / "index.html"
-    path.write_text(build_html(run, demo=True), encoding="utf-8")
-    return path
-
-
 def _latest_run() -> Path | None:
     runs = sorted(p for p in RUNS_DIR.glob("*.json") if not p.name.startswith("consistency_"))
     return runs[-1] if runs else None
@@ -67,12 +59,14 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8")
     args = sys.argv[1:]
     if "--demo" in args:
+        # 사이트용 화면 (demo/index.html: 글 넣기 → 심의 → 결과). 샘플마다 가장 최근 결과를 넣는다.
+        from . import web
         args.remove("--demo")
-        src = Path(args[0]) if args else _latest_run()
-        if not src:
-            print("data/runs 폴더에 결과 파일이 없습니다.")
-            return 1
-        print(f"데모 페이지: {write_demo(json.loads(src.read_text(encoding='utf-8')))}")
+        runs = [json.loads(Path(a).read_text(encoding="utf-8")) for a in args] or None
+        paths = web.write_demo(runs)
+        names = sorted(web.latest_per_sample(runs if runs is not None else web.all_runs()))
+        print(f"데모 화면: {', '.join(str(p) for p in paths)}")
+        print(f"들어간 샘플: {', '.join(names) or '없음'}")
         return 0
     targets = [Path(a) for a in args] or [p for p in [_latest_run()] if p]
     if not targets:

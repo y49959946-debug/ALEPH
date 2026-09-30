@@ -1,0 +1,85 @@
+:root {
+  color-scheme: light;
+  --bg-top: #f8fbff; --bg-bottom: #edf6f4;
+  --panel: #ffffff; --panel-2: #f3f7f8; --line: #dfeae6;
+  --ink: #1c2a35; --ink-2: #5d7284; --ink-3: #798b9a;
+  --accent: #2b6f8a; --accent-soft: #e3f0f4; --on-accent: #ffffff;
+  --me: #1c2a35; --on-me: #f4f8fa;
+  --c-conf: #2a78d6; --c-pass: #eb6834; --c-hes: #1baf7a; --hatch: #8a8f94;
+  --good: #1b6e33; --good-soft: #e3f4e8; --warn: #9a5b00; --warn-soft: #fdf0dc;
+  --shadow: 0 10px 24px rgba(85, 108, 121, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-top: #141a1f; --bg-bottom: #111816;
+    --panel: #1b2329; --panel-2: #222c33; --line: #2e3a41;
+    --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
+    --accent: #7ab8d0; --accent-soft: #1f3540; --on-accent: #0f1a20;
+    --me: #d9e6ec; --on-me: #14202a;
+    --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+    --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-top: #141a1f; --bg-bottom: #111816;
+  --panel: #1b2329; --panel-2: #222c33; --line: #2e3a41;
+  --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
+  --accent: #7ab8d0; --accent-soft: #1f3540; --on-accent: #0f1a20;
+  --me: #d9e6ec; --on-me: #14202a;
+  --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+  --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-bottom) 100%); background-attachment: fixed; }
+body {
+  margin: 0; min-height: 100vh; color: var(--ink); background: transparent;
+  font-family: "Pretendard", "Inter", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: anywhere;
+}
+a { color: var(--accent); }
+button, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 상단 바: 두 화면 공통 */
+.top {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; background: color-mix(in srgb, var(--bg-top) 82%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+}
+.top .back { font-size: 14px; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+.top .brand { font-size: 12px; font-weight: 800; letter-spacing: .14em; color: var(--ink-3); }
+.tabs { display: inline-flex; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.tabs a {
+  padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--ink-2); text-decoration: none; white-space: nowrap;
+}
+.tabs a[aria-current="page"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.top-side { display: flex; align-items: center; gap: 10px; min-width: 0; }
+@media (max-width: 560px) { .top .brand { display: none; } .tabs a { padding: 6px 11px; } }
+
+.page { max-width: 760px; margin: 0 auto; padding: 28px 16px 96px; }
+.fine { font-size: 13px; color: var(--ink-3); }
+
+/* 아바타 (색이 아니라 글자로 구분) */
+.av {
+  flex: none; width: 38px; height: 38px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 15px; font-weight: 800;
+  background: var(--accent-soft); color: var(--accent); border: 1px solid var(--line); font-style: normal;
+}
+.av.chair { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.av.analyst { background: var(--panel); color: var(--ink-2); border-style: dashed; }
+.av.sm { width: 24px; height: 24px; font-size: 11px; }
+
+/* 인상 라벨 (3색 + 빗금 + 무색) */
+.lab { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.lab::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--line); }
+.lab.자신감::before { background: var(--c-conf); }
+.lab.열정::before { background: var(--c-pass); }
+.lab.망설임::before { background: var(--c-hes); }
+.lab.방어적::before { background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, transparent 2px 4px); border: 1px solid var(--hatch); }
+.lab.중립::before { background: transparent; border: 1px solid var(--ink-3); }

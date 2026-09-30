@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CORTEX 글 넣기</title>
+<meta name="description" content="자기소개서를 넣으면 분석가·세 평가자·의장 AI가 각자의 시선으로 읽어 줍니다.">
+<style>
+/*__CSS__*/
+.hero { padding: 20px 0 22px; }
+.hero .eyebrow { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
+.hero h1 { font-size: clamp(26px, 5vw, 38px); line-height: 1.3; letter-spacing: -.025em; margin: 8px 0 12px; }
+.hero p { color: var(--ink-2); margin: 0; }
+
+.cast { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.cast span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px 4px 4px; }
+
+.composer { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); padding: 18px; }
+.composer label { display: block; font-size: 14px; font-weight: 700; margin: 0 4px 10px; }
+textarea {
+  width: 100%; min-height: 240px; resize: vertical; border: 1px solid var(--line); border-radius: 16px;
+  background: var(--panel-2); padding: 14px 16px; line-height: 1.75; font-size: 15.5px;
+}
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.count { font-size: 13px; color: var(--ink-3); }
+.count.over { color: var(--warn); font-weight: 700; }
+.go {
+  border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 15px;
+  background: var(--accent); color: var(--on-accent);
+}
+.go:disabled { opacity: .45; cursor: not-allowed; }
+.go.alt { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.samples-h { display: flex; align-items: baseline; justify-content: space-between; margin: 34px 4px 12px; gap: 12px; }
+.samples-h h2 { font-size: 17px; margin: 0; }
+.chips { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+@media (max-width: 560px) { .chips { grid-template-columns: 1fr; } }
+.chip {
+  text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 2px; transition: border-color .15s, transform .15s;
+}
+.chip:hover { border-color: var(--accent); transform: translateY(-1px); }
+.chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.chip b { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.chip small { font-size: 13px; color: var(--ink-2); }
+.tag { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
+.tag.ready { background: var(--good-soft); color: var(--good); }
+.tag.wait { background: var(--panel-2); color: var(--ink-3); }
+
+.notice { margin-top: 14px; border-radius: 16px; padding: 14px 16px; font-size: 14.5px; background: var(--accent-soft); color: var(--ink); display: none; }
+.notice.show { display: block; }
+.notice.warn { background: var(--warn-soft); }
+.notice code { font-size: 13px; background: var(--panel); border-radius: 6px; padding: 1px 6px; }
+.notice ol { margin: 8px 0 0; padding-left: 20px; }
+
+/* 진행 상황: 누가 읽고 있는지 */
+.progress { margin-top: 18px; display: none; }
+.progress.show { display: block; }
+.step { display: flex; align-items: center; gap: 10px; padding: 8px 4px; color: var(--ink-3); font-size: 14.5px; }
+.step .st { margin-left: auto; font-size: 13px; }
+.step.now { color: var(--ink); font-weight: 600; }
+.step.now .st::after { content: "읽는 중"; animation: blink 1.2s infinite; }
+.step.done { color: var(--ink-2); }
+.step.done .st::after { content: "완료 ✓"; color: var(--good); }
+@keyframes blink { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .step.now .st::after { animation: none; } .chip { transition: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-side"><a class="back" href="../../Plan_page.html" id="back">← 행로</a><span class="brand">CORTEX</span></div>
+  <nav class="tabs" aria-label="화면"><a href="index.html" aria-current="page">글 넣기</a><a href="view.html" id="viewTab">심의 보기</a></nav>
+</header>
+
+<main class="page">
+  <section class="hero">
+    <div class="eyebrow">AI 심의위원회</div>
+    <h1>내 자기소개서,<br>세 사람은 어떻게 읽을까요?</h1>
+    <p>글을 넣으면 분석가가 첫인상을 읽고, 세 평가자가 각자의 기준으로 평가한 뒤, 의장이 무엇부터 고칠지 정리해요.</p>
+    <div class="cast" aria-label="참여하는 AI">
+      <span><i class="av sm analyst">분</i>분석가</span>
+      <span><i class="av sm">채</i>채용 담당자</span>
+      <span><i class="av sm">기</i>기술 전문가</span>
+      <span><i class="av sm">독</i>일반 독자</span>
+      <span><i class="av sm chair">의</i>의장</span>
+    </div>
+  </section>
+
+  <section class="composer">
+    <div class="notice" id="env" style="margin:0 0 14px"></div>
+    <label for="text">자기소개서</label>
+    <textarea id="text" placeholder="여기에 붙여 넣거나, 아래 샘플을 골라 보세요."></textarea>
+    <div class="row">
+      <span class="count" id="count">0자</span>
+      <div class="actions" id="actions"></div>
+    </div>
+    <div class="notice" id="notice" role="status"></div>
+    <div class="progress" id="progress" aria-live="polite"></div>
+  </section>
+
+  <div class="samples-h"><h2>샘플로 해보기</h2><span class="fine">모두 지어낸 글이에요</span></div>
+  <div class="chips" id="chips"></div>
+
+  <p class="fine" style="margin-top:28px">분석 결과는 글이 이렇게 읽힌다는 인상이지, 작성자의 역량이나 성격을 판단한 것이 아니에요. · <a id="repo" target="_blank" rel="noopener">코드 보기</a></p>
+</main>
+
+<script>
+const D = __DATA__;
+const MAX = 3000;
+const $ = (s) => document.querySelector(s);
+const text = $("#text"), count = $("#count"), actions = $("#actions"), notice = $("#notice"), progress = $("#progress");
+$("#repo").href = D.repo;
+if (D.local) $("#back").hidden = true;
+let picked = null;       // 고른 샘플 id
+let health = null;       // 로컬 서버 정보
+
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// 샘플 칩
+$("#chips").innerHTML = D.samples.map((s) => {
+  const ready = D.ready.includes(s.id);
+  return `<button class="chip" data-id="${s.id}" aria-pressed="false">
+    <b>${s.id.replace("sample_", "샘플 ")} <span class="tag ${ready ? "ready" : "wait"}">${ready ? "결과 있음" : "준비 중"}</span></b>
+    <small>${esc(s.note)}</small></button>`;
+}).join("");
+document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {
+  const s = D.samples.find((x) => x.id === b.dataset.id);
+  text.value = s.text; picked = s.id; update();
+  text.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+}));
+
+text.addEventListener("input", () => {
+  // 샘플을 고친 순간 더 이상 샘플이 아니다
+  if (picked && text.value.trim() !== D.samples.find((x) => x.id === picked).text) picked = null;
+  update();
+});
+
+function update() {
+  document.querySelectorAll(".chip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.id === picked)));
+  const n = text.value.trim().length;
+  count.textContent = `${n.toLocaleString()}자` + (n > MAX ? ` · ${MAX.toLocaleString()}자까지 넣을 수 있어요` : "");
+  count.classList.toggle("over", n > MAX);
+  notice.className = "notice"; notice.innerHTML = "";
+
+  const ready = picked && D.ready.includes(picked);
+  const btns = [];
+  if (ready) btns.push(`<button class="go" data-act="view">심의 보기</button>`);
+  if (health) btns.push(`<button class="go ${ready ? "alt" : ""}" data-act="run" ${n < 50 || n > MAX ? "disabled" : ""}>${ready ? "새로 분석하기" : "분석 시작"}</button>`);
+  else if (!ready) btns.push(`<button class="go" data-act="explain" ${n === 0 ? "disabled" : ""}>분석 시작</button>`);
+  actions.innerHTML = btns.join("");
+  actions.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => act(b.dataset.act)));
+}
+
+function act(a) {
+  if (a === "view") location.href = `view.html?sample=${picked}`;
+  if (a === "explain") explain();
+  if (a === "run") run();
+}
+
+function explain() {
+  notice.className = "notice show";
+  notice.innerHTML = picked
+    ? `이 샘플은 아직 결과를 준비 중이에요. <b>결과 있음</b> 표시가 붙은 샘플을 골라 보세요.`
+    : `<b>공개 사이트에서는 미리 돌려 둔 샘플만 볼 수 있어요.</b><br>
+       분석 한 번에 AI를 6번 부르는데 무료 한도가 하루 약 20번이고, 넣은 글이 외부 AI 서비스로 전송되기 때문이에요.
+       내 글은 코드를 받아 내 컴퓨터에서 실행하면 같은 화면으로 분석할 수 있어요.
+       <ol><li><a href="${D.repo}" target="_blank" rel="noopener">코드</a>를 받고 README의 처음 설정을 따라 해요</li>
+       <li>터미널에서 <code>python -m app.server</code> 실행</li>
+       <li>브라우저에서 <code>http://localhost:8765</code> 열기</li></ol>`;
+}
+
+// ---- 로컬 서버일 때만: 실제 분석 ----
+const STAGES = [
+  ["analyst", "분", "분석가", "문장마다 어떤 인상인지 읽어요", /\[3\/5\]/],
+  ["impression", "분", "분석가", "첫인상을 한 줄로 정리해요", /첫인상 완료/],
+  ["recruiter", "채", "채용 담당자", "", /채용 담당자 완료/],
+  ["technical", "기", "기술 전문가", "", /기술 전문가 완료/],
+  ["reader", "독", "일반 독자", "", /일반 독자 완료/],
+  ["judge", "의", "의장", "세 평가를 모아 정리해요", /__never__/],
+];
+
+async function detect() {
+  if (!D.local) return;
+  try {
+    const r = await fetch("/api/health");
+    if (r.ok) health = await r.json();
+  } catch (e) { health = null; }
+  if (health) {
+    const warn = health.provider === "gemini";
+    const env = $("#env");
+    env.className = "notice show" + (warn ? " warn" : "");
+    env.innerHTML = `로컬 실행 중 · <b>${esc(health.model)}</b>` + (warn
+      ? `<br>Gemini 무료 티어로 보낸 글은 Google 제품 개선에 쓰일 수 있어요. 실제 개인정보가 담긴 글은 넣지 마세요.`
+      : ` · 글이 내 컴퓨터 밖으로 나가지 않아요.`);
+  }
+  update();
+}
+
+async function run() {
+  actions.querySelectorAll("button").forEach((b) => (b.disabled = true));
+  text.readOnly = true;
+  progress.className = "progress show";
+  progress.innerHTML = STAGES.map(([k, a, name, what]) =>
+    `<div class="step" data-k="${k}"><i class="av sm ${k === "judge" ? "chair" : (k === "analyst" || k === "impression") ? "analyst" : ""}">${a}</i>${name}${what ? ` · <span class="fine">${what}</span>` : ""}<span class="st"></span></div>`).join("");
+  let job;
+  try {
+    const r = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: text.value.trim(), source: picked ? `data/inputs/${picked}.txt` : "" }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "시작하지 못했어요");
+    job = j.job;
+  } catch (e) { return fail(e.message); }
+
+  const poll = async () => {
+    let s;
+    try { s = await (await fetch(`/api/job/${job}`)).json(); } catch (e) { return fail("로컬 서버와 연결이 끊겼어요"); }
+    const logs = (s.logs || []).join("\n");
+    // 어떤 단계가 끝났으면 그 앞 단계도 끝난 것으로 본다 (차례대로 실행되므로)
+    let last = -1;
+    STAGES.forEach(([, , , , re], i) => { if (re.test(logs)) last = i; });
+    if (s.status === "done") last = STAGES.length - 1;
+    progress.querySelectorAll(".step").forEach((el, i) => {
+      el.className = "step" + (i <= last ? " done" : i === last + 1 ? " now" : "");
+    });
+    if (s.status === "done") return (location.href = `view.html?run=${s.run_id}`);
+    if (s.status === "error") return fail(s.error);
+    setTimeout(poll, 1500);
+  };
+  poll();
+}
+
+function fail(msg) {
+  notice.className = "notice show warn";
+  notice.innerHTML = `분석이 멈췄어요: ${esc(msg)}`;
+  text.readOnly = false; update();
+}
+
+update();
+detect();
+</script>
+</body>
+</html>

@@ -46,10 +46,9 @@ python -m app.main --file data\inputs\sample_01.txt
 # 3) 인상 라벨 일관성 테스트 (같은 글을 5번 분석)
 python -m scripts.consistency_check data\inputs\sample_01.txt --runs 5
 
-# 4) 결과 화면 다시 만들기 (AI 호출 없음)
-python -m app.report                                        # 가장 최근 결과
-python -m app.report data\runs\20260930_103907_001.json     # 특정 결과
-python -m app.report --demo data\runs\20260930_103907_001.json   # 사이트용 데모 (demo\index.html)
+# 4) 사이트용 화면 다시 만들기 (AI 호출 없음)
+#    demo\index.html 한 페이지: 글 넣기 → 심의(채팅 애니메이션) → 결과(대시보드). 샘플마다 가장 최근 결과가 들어갑니다.
+python -m app.report --demo
 
 # 5) 샘플의 객관 항목 확인 (숫자·긴 문장·상투어 등, AI 호출 없음)
 python -m scripts.objective_check
@@ -58,7 +57,18 @@ python -m scripts.objective_check
 python -m scripts.grade
 ```
 
-실행이 끝나면 `data\reports\실행ID.html` 결과 화면이 자동으로 만들어집니다. 파일 탐색기에서 더블클릭하면 브라우저로 열립니다.
+## 내 컴퓨터에서 화면으로 실행하기
+
+```powershell
+python -m app.server          # 브라우저가 열리면 글을 붙여 넣고 [분석 시작]
+python -m app.server --mock   # AI 없이 화면만 시험
+```
+
+- 공개 사이트와 같은 화면(글 넣기 → 심의 → 결과)이 `http://localhost:8765`에 열립니다. 내 컴퓨터에서만 접속됩니다.
+- 분석이 도는 동안 채팅 화면에 지금 누가 읽고 있는지 나오고, 끝나면 대화가 이어진 뒤 결과 대시보드로 넘어갑니다.
+- 공개 사이트에서는 분석을 돌리지 않고, 미리 돌려 둔 **샘플 결과만** 보여줍니다. (무료 한도와 개인정보 때문)
+- 직접 넣은 글의 결과는 `data\runs`에만 저장되고 사이트 데모에는 들어가지 않습니다.
+- 끄려면 터미널에서 `Ctrl+C`.
 
 다음에 실행할 때는 `cd D:\Aleph\cortex` → `.venv\Scripts\activate` 만 하면 됩니다.
 
