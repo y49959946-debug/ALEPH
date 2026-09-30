@@ -202,8 +202,15 @@ details.more[open] > summary::after { content: " ↑"; }
 .badge.warn { background: var(--warn-soft); color: var(--warn); }
 .badge.mixed { background: var(--accent-soft); color: var(--accent); }
 .badge.none { background: var(--panel-2); color: var(--none); }
-.verdict p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
-.verdict p + p { margin-top: 6px; }
+.verdict { border-top-width: 4px; }
+.verdict.v-good { border-top-color: var(--good); } .verdict.v-warn { border-top-color: var(--warn); }
+.verdict.v-mixed { border-top-color: var(--accent); } .verdict.v-none { border-top-color: var(--line); }
+.verdict .big { display: flex; align-items: baseline; gap: 8px; margin: 14px 0 8px; }
+.verdict .mk { font-size: 30px; font-weight: 800; line-height: 1; }
+.verdict .word { font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+.v-good .mk, .v-good .word { color: var(--good); } .v-warn .mk, .v-warn .word { color: var(--warn); }
+.v-mixed .mk, .v-mixed .word { color: var(--accent); } .v-none .mk, .v-none .word { color: var(--none); }
+.verdict p { margin: 0; font-size: 13.5px; line-height: 1.65; color: var(--ink-3); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .clash .moral { margin: 22px 0 0; font-weight: 700; text-align: center; }
 .clash .topic { text-align: center; font-size: 14px; color: var(--ink-3); margin-top: 6px; }
 .clash .others { text-align: center; margin-top: 14px; font-size: 13px; color: var(--ink-3); }
@@ -232,7 +239,7 @@ details.more[open] > summary::after { content: " ↑"; }
 .sent.dim { opacity: .3; }
 .sent.flash { animation: flash 1.2s ease-out; }
 @keyframes flash { 0%, 35% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 2px var(--select); } }
-.mark-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); vertical-align: 3px; margin-left: 3px; }
+.sent.mentioned::after { content: "\2022"; color: var(--ink-3); font-size: .85em; margin-left: 2px; }
 
 .panel { position: sticky; top: 16px; padding: 22px; }
 .panel .close { display: none; }
@@ -242,9 +249,15 @@ details.more[open] > summary::after { content: " ↑"; }
 .panel .why { font-size: 14.5px; color: var(--ink-2); margin: 0; }
 .panel .why b { color: var(--ink); }
 .pv { padding: 10px 0; border-top: 1px solid var(--line); }
+.pv > summary { list-style: none; cursor: pointer; }
+.pv > summary::-webkit-details-marker { display: none; }
+.pv > summary .chev { color: var(--ink-3); font-size: 12px; margin-left: 4px; transition: transform .15s; }
+.pv[open] > summary .chev { transform: rotate(180deg); }
+.pv-body { padding: 4px 0 2px 34px; }
 .pv:first-of-type { border-top: 0; }
 .pv .who { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 .pv .badge { margin: 0 0 0 auto; }
+.pv .who .nm { white-space: nowrap; }
 .pv p { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); }
 .pv .fix { color: var(--ink); }
 .pv .fix::before { content: "→ "; color: var(--accent); }
@@ -260,8 +273,11 @@ details.more[open] > summary::after { content: " ↑"; }
 .council { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .pc { padding: 22px; }
 .pc .who { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; }
-.pc .looks { font-size: 13px; color: var(--ink-3); margin: 8px 0 12px; }
-.pc .one { margin: 0; font-size: 15px; }
+.pc .lens { font-size: 16px; font-weight: 600; line-height: 1.6; margin: 14px 0 12px; }
+.pc .crits { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+.pc .crits span { font-size: 12px; color: var(--ink-2); background: var(--panel-2); border-radius: 999px; padding: 2px 9px; }
+.pc .on-this { font-size: 12px; font-weight: 700; color: var(--ink-3); margin: 0 0 2px; }
+.pc .one { margin: 0; font-size: 14.5px; color: var(--ink-2); }
 .pc details.more { margin-top: 16px; }
 .crit { list-style: none; padding: 0; margin: 12px 0 0; }
 .crit li { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; padding: 3px 0; gap: 8px; }
@@ -309,6 +325,7 @@ footer details p { margin: 4px 0; }
   .panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; max-height: 72vh; overflow: auto;
            border-radius: 22px 22px 0 0; transform: translateY(105%); transition: transform .25s ease; box-shadow: 0 -10px 30px rgba(0,0,0,.18); }
   .panel.open { transform: translateY(0); }
+  .panel::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: -10px auto 14px; }
   .panel .close { display: block; position: absolute; top: 12px; right: 14px; border: 0; background: var(--panel-2); width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; }
   .scrim { position: fixed; inset: 0; background: rgba(10, 20, 25, .35); z-index: 19; }
   .scrim.open { display: block; }
@@ -360,6 +377,9 @@ footer details p { margin: 4px 0; }
   });
   const verdictOf = v => !v || (!v.good.length && !v.bad.length) ? "none" : v.good.length && v.bad.length ? "mixed" : v.good.length ? "good" : "warn";
   const BADGE = { good: "✓ 강점으로 봄", warn: "△ 아쉬운 점으로 봄", mixed: "± 강점과 아쉬움 모두", none: "– 언급하지 않음" };
+  const MARK = { good: ["✓", "강점"], warn: ["△", "아쉬움"], mixed: ["±", "강점이자 아쉬움"], none: ["–", "언급 없음"] };
+  // 평가자마다 어떤 렌즈로 글을 보는지 (화면 표시용. personas.yaml은 프롬프트라 건드리지 않는다)
+  const LENS = { recruiter: "무엇을 했고, 어떤 결과를 냈는지를 봐요.", technical: "어떤 문제를 어떤 기술로, 왜 그렇게 풀었는지를 봐요.", reader: "전문 지식이 없어도 쉽게 읽히고 기억에 남는지를 봐요." };
 
   // 한 평가자는 강점, 다른 평가자는 아쉬움으로 본 문장 = 의견이 갈린 문장
   const clashes = Object.entries(byS).map(([id, m]) => {
@@ -393,7 +413,7 @@ footer details p { margin: 4px 0; }
       <p class="fine">글에 쓰인 표현에서 읽히는 인상이에요. 쓴 사람의 성격이나 실제 감정을 판단한 결과가 아니에요.</p>
       <details class="more"><summary>문단마다 인상이 어떻게 달라지는지 보기</summary>
         <div class="flows">${METRICS.map(([k, label, sub]) => flow(k, label, sub)).join("")}</div>
-        ${imp.key_contrast ? `<p class="contrast"><b>어조가 달라지는 곳</b> · ${esc(imp.key_contrast)}</p>` : ""}
+        <p class="contrast"><b>어조가 달라지는 곳</b> · ${imp.key_contrast ? esc(imp.key_contrast) : "뚜렷한 어조 변화는 발견되지 않았어요."}</p>
       </details>
     </div></section>`;
 
@@ -402,13 +422,14 @@ footer details p { margin: 4px 0; }
   if (clashes.length) {
     const c = clashes[0], m = byS[c.id];
     h += `<section class="scene" id="s-clash"><div class="num">02 · 핵심 장면</div><h2>같은 문장인데, 판정이 갈렸어요</h2>
-      <p class="lead">세 평가자는 서로의 의견을 보지 못했어요. 그런데 이 문장 하나를 두고 서로 다른 것을 봤어요.</p>
+      <p class="lead">세 평가자는 서로의 의견을 모른 채 같은 문장을 읽었어요.</p>
       <div class="card clash">
         <p class="target">${chip(c.id)}${esc(byId[c.id].text)}</p>
         <div class="verdicts">${council.map((p, i) => { const v = m[p.persona_id]; const kind = c.vs[i];
-          const lines = !v ? [] : [...v.good.slice(0, 1), ...v.bad.slice(0, 1)];
-          return `<div class="verdict"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}</div>
-            <span class="badge ${kind}">${BADGE[kind]}</span>${lines.length ? lines.map(t => `<p>${esc(t)}</p>`).join("") : `<p>이 문장은 평가 기준과 관련이 적다고 봤어요.</p>`}</div>`; }).join("")}</div>
+          const line = !v ? "" : (kind === "warn" ? v.bad[0] : v.good[0] || v.bad[0]);
+          return `<div class="verdict v-${kind}"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}</div>
+            <div class="big"><span class="mk">${MARK[kind][0]}</span><span class="word">${MARK[kind][1]}</span></div>
+            <p>${line ? esc(line) : "이 문장은 자기 평가 기준과 관련이 적다고 봤어요."}</p></div>`; }).join("")}</div>
         <p class="moral">평가 기준이 다르면, 같은 문장에서도 다른 것이 보여요.</p>
         ${dis[0] ? `<p class="topic">의장이 정리한 쟁점 · ${esc(dis[0].topic)}</p>` : ""}
         <div class="center"><button class="btn" data-go="${c.id}" type="button">원문에서 이 문장 살펴보기 ↓</button></div>
@@ -423,27 +444,28 @@ footer details p { margin: 4px 0; }
   // ---------- 03 원문 탐색 ----------
   const counts = l => Object.values(signals).filter(s => s.label === l).length;
   h += `<section class="scene" id="s-read"><div class="num">03</div><h2>직접 읽어보세요</h2>
-    <p class="lead">문장을 누르면 그 문장이 어떻게 읽혔는지, 세 평가자가 뭐라고 했는지 볼 수 있어요. 점(•)이 붙은 문장은 평가자가 언급한 문장이에요.</p>
+    <p class="lead">색칠된 문장을 눌러보세요. 왜 그런 인상으로 읽혔는지, 세 평가자가 어떻게 봤는지 나와요. 점(•)은 평가자가 언급한 문장이에요.</p>
     <div class="explore">
       <div class="card reader">
         <div class="legend">${LABELS.map(l => `<button class="lg" type="button" data-l="${l}" aria-pressed="true">${swatch(l)}${l}<span class="n">${counts(l)}</span></button>`).join("")}</div>
         ${run.preprocess.paragraphs.map(p => `<p class="para"><span class="role">${esc(roles[p.id] || "")}</span>${p.sentence_ids.map(id => {
           const g = signals[id]; const mentioned = !!byS[id];
-          return `<span class="sent" id="${id}" data-l="${esc(g ? g.label : "중립")}" style="--a:${g ? ALPHA[g.intensity] || "18%" : "0%"}" tabindex="0" role="button">${esc(byId[id].text)}${mentioned ? '<span class="mark-dot" aria-hidden="true"></span>' : ""}</span> `;
+          return `<span class="sent${mentioned ? " mentioned" : ""}" id="${id}" data-l="${esc(g ? g.label : "중립")}" style="--a:${g ? ALPHA[g.intensity] || "18%" : "0%"}" tabindex="0" role="button">${esc(byId[id].text)}</span> `;
         }).join("")}</p>`).join("")}
       </div>
       <aside class="card panel" id="panel" aria-live="polite"></aside>
     </div></section>`;
 
   // ---------- 04 세 평가자 ----------
-  h += `<section class="scene" id="s-council"><div class="num">04</div><h2>세 평가자는 무엇을 봤을까요?</h2>
-    <p class="lead">같은 글을 읽었지만, 보는 기준이 달랐어요.</p>
+  h += `<section class="scene" id="s-council"><div class="num">04</div><h2>판정이 갈린 이유는, 보는 렌즈가 달라서예요</h2>
+    <p class="lead">세 평가자는 같은 글을 서로 다른 기준으로 읽도록 설계됐어요.</p>
     <div class="council">${council.map(p => {
       const crit = (PMETA[p.persona_id] && PMETA[p.persona_id].criteria) || p.scores.map(s => s.criterion);
       const list = (t, arr, f) => arr.length ? `<h6>${t}</h6><ul class="items">${arr.map(f).join("")}</ul>` : "";
       return `<div class="card pc"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}</div>
-        <div class="looks">보는 기준 · ${crit.slice(0, 3).map(esc).join(", ")}${crit.length > 3 ? " 등" : ""}</div>
-        <p class="one">${esc(p.summary)}</p>
+        <p class="lens">${esc(LENS[p.persona_id] || crit.join(", "))}</p>
+        <div class="crits">${crit.map(c => `<span>${esc(c)}</span>`).join("")}</div>
+        <p class="on-this">이 글에 대해</p><p class="one">${esc(p.summary)}</p>
         <details class="more"><summary>자세히 보기</summary>
           <ul class="crit">${p.scores.map(s => `<li>${esc(s.criterion)}<span class="dots" title="5점 중 ${s.score}점" aria-label="5점 중 ${s.score}점">${[1,2,3,4,5].map(i => `<i class="${i <= s.score ? "on" : ""}"></i>`).join("")}</span></li>`).join("")}</ul>
           ${list("좋았던 점", p.strengths, x => `<li>${esc(x.claim)} ${x.evidence_ids.map(chip).join(" ")}</li>`)}
@@ -490,9 +512,11 @@ footer details p { margin: 4px 0; }
       ${g ? `<h5>왜 이렇게 읽혔을까요?</h5><p class="why">${g.quote ? `<b>“${quoteHtml}”</b> ` : ""}${esc(g.reason)}</p>` : ""}
       <h5>세 평가자는</h5>
       ${council.map(p => { const v = m[p.persona_id], kind = verdictOf(v);
-        return `<div class="pv"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}<span class="badge ${kind}">${BADGE[kind]}</span></div>
-          ${v ? [...v.good.slice(0, 1), ...v.bad.slice(0, 1)].map(t => `<p>${esc(t)}</p>`).join("") + v.fix.slice(0, 1).map(t => `<p class="fix">${esc(t)}</p>`).join("") : ""}</div>`; }).join("")}
-      <p class="hint desk">다른 문장을 눌러보세요.</p>`;
+        const who = `<span class="av">${esc(nameOf(p.persona_id)[0])}</span><span class="nm">${esc(nameOf(p.persona_id))}</span><span class="badge ${kind}">${BADGE[kind]}</span>`;
+        if (!v) return `<div class="pv"><div class="who">${who}</div></div>`;
+        return `<details class="pv"><summary class="who">${who}<span class="chev" aria-hidden="true">▾</span></summary><div class="pv-body">
+          ${[...v.good.slice(0, 1), ...v.bad.slice(0, 1)].map(t => `<p>${esc(t)}</p>`).join("")}${v.fix.slice(0, 1).map(t => `<p class="fix">${esc(t)}</p>`).join("")}</div></details>`; }).join("")}
+      <p class="hint">평가자를 누르면 이유가 펼쳐져요.</p>`;
   }
   function select(id, { scroll = false, open = false } = {}) {
     if (!byId[id]) return;
@@ -504,6 +528,9 @@ footer details p { margin: 4px 0; }
     if (open && mobile()) { panel.classList.add("open"); scrim.classList.add("open"); panel.scrollTop = 0; }
   }
   const closeSheet = () => { panel.classList.remove("open"); scrim.classList.remove("open"); };
+  let y0 = null;
+  panel.addEventListener("touchstart", e => { y0 = panel.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
+  panel.addEventListener("touchend", e => { if (y0 !== null && e.changedTouches[0].clientY - y0 > 70) closeSheet(); y0 = null; }, { passive: true });
   select(focus);
 
   // ---------- 그래프 ----------
