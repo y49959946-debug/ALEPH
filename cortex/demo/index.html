@@ -3,416 +3,468 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CORTEX · AI 심의위원회 데모</title>
+<title>CORTEX · AI 심의위원회</title>
 <style>
 :root {
   color-scheme: light;
-  --bg: #f6f5f2;
-  --surface: #fcfcfb;
-  --surface-2: #f0efec;
-  --line: #e2e0da;
-  --text: #1a1917;
-  --text-2: #52514e;
-  --text-3: #7a7873;
-  --accent: #1c5cab;
-  --c-conf: #2a78d6;   /* 자신감 */
-  --c-pass: #eb6834;   /* 열정 */
-  --c-hes:  #1baf7a;   /* 망설임 */
-  --hatch:  #8a8780;   /* 방어적 (무늬) */
-  --series: #2a78d6;
-  --st-high: #d03b3b;
-  --st-mid:  #c98500;
-  --st-low:  #7a7873;
-  --flash: #fff1c2;
-  --shadow: 0 1px 2px rgba(20,20,10,.06), 0 4px 16px rgba(20,20,10,.05);
+  --bg-top: #f8fbff; --bg-bottom: #edf6f4;
+  --panel: #ffffff; --panel-2: #f4f8f8; --line: #dfeae6;
+  --ink: #1c2a35; --ink-2: #5d7284; --ink-3: #798b9a;
+  --accent: #2b6f8a; --accent-soft: #e3f0f4;
+  --c-conf: #2a78d6; --c-pass: #eb6834; --c-hes: #1baf7a; --hatch: #8a8f94;
+  --good: #1b6e33; --good-soft: #e3f4e8; --warn: #9a5b00; --warn-soft: #fdf0dc; --none: #798b9a;
+  --shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
+  --select: #1c2a35;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --bg: #121211; --surface: #1a1a19; --surface-2: #232321; --line: #33332f;
-    --text: #f4f3ef; --text-2: #c3c2b7; --text-3: #8f8d85; --accent: #6da7ec;
-    --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9a978e;
-    --series: #3987e5; --st-high: #e66767; --st-mid: #e0a52a; --st-low: #8f8d85;
-    --flash: #4a3f1a; --shadow: none;
+    --bg-top: #141a1f; --bg-bottom: #111816;
+    --panel: #1b2329; --panel-2: #222c33; --line: #2e3a41;
+    --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
+    --accent: #7ab8d0; --accent-soft: #1f3540;
+    --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+    --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16; --none: #8b9ba7;
+    --shadow: none; --select: #eef3f6;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #121211; --surface: #1a1a19; --surface-2: #232321; --line: #33332f;
-  --text: #f4f3ef; --text-2: #c3c2b7; --text-3: #8f8d85; --accent: #6da7ec;
-  --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9a978e;
-  --series: #3987e5; --st-high: #e66767; --st-mid: #e0a52a; --st-low: #8f8d85;
-  --flash: #4a3f1a; --shadow: none;
+  --bg-top: #141a1f; --bg-bottom: #111816;
+  --panel: #1b2329; --panel-2: #222c33; --line: #2e3a41;
+  --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
+  --accent: #7ab8d0; --accent-soft: #1f3540;
+  --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+  --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16; --none: #8b9ba7;
+  --shadow: none; --select: #eef3f6;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; min-height: 100%; background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-bottom) 100%); }
 body {
-  margin: 0; background: var(--bg); color: var(--text);
-  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
-  font-size: 15px; line-height: 1.65; -webkit-font-smoothing: antialiased;
+  margin: 0; color: var(--ink); min-height: 100vh; background: transparent;
+  font-family: "Pretendard", "Inter", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; word-break: keep-all;
 }
-.wrap { max-width: 880px; margin: 0 auto; padding: 32px 16px 80px; }
-header.top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
-.brand { font-weight: 800; letter-spacing: .08em; font-size: 13px; color: var(--text-2); }
-.brand b { color: var(--text); }
-.meta { font-size: 12px; color: var(--text-3); }
-.theme-btn { font: inherit; font-size: 12px; color: var(--text-2); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+a { color: var(--accent); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 96px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); }
+button { font: inherit; color: inherit; }
 
-section { margin-top: 44px; }
-.step { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
-h2 { font-size: 21px; margin: 4px 0 6px; line-height: 1.35; letter-spacing: -.01em; }
-.lead { color: var(--text-2); margin: 0 0 18px; font-size: 14px; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
+/* 상단 */
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 36px; }
+.back { font-size: 14px; color: var(--ink-2); text-decoration: none; }
+.back:hover { color: var(--ink); }
+.brand { font-size: 13px; font-weight: 800; letter-spacing: .12em; color: var(--ink-2); }
+.ghost { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
 
-/* ① 첫인상 */
-.hero { padding: 28px 24px; }
-.hero .kicker { font-size: 13px; color: var(--text-3); margin-bottom: 8px; }
-.hero .archetype { font-size: 26px; font-weight: 800; line-height: 1.35; letter-spacing: -.02em; margin: 0 0 10px; }
-.hero .summary { color: var(--text-2); margin: 0; }
-.contrast { margin-top: 14px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; font-size: 14px; }
-.contrast b { font-size: 12px; color: var(--text-3); display: block; }
-.evid { margin-top: 12px; font-size: 12px; color: var(--text-3); }
-.meters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px 24px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
-.meter .name { font-size: 13px; color: var(--text-2); display: flex; justify-content: space-between; }
-.meter .name span { color: var(--text); font-weight: 600; }
-.segs { display: flex; gap: 3px; margin-top: 6px; }
-.segs i { flex: 1; height: 8px; border-radius: 4px; background: var(--surface-2); }
-.segs i.on { background: var(--series); }
-.note { font-size: 12px; color: var(--text-3); margin-top: 14px; }
+.hero { text-align: center; padding: 8px 0 12px; }
+.hero .eyebrow { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
+.hero h1 { font-size: clamp(26px, 4.4vw, 40px); line-height: 1.3; letter-spacing: -.025em; margin: 10px 0 16px; }
+.hero .sub { color: var(--ink-2); margin: 0 auto; max-width: 560px; }
+.samples { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 24px 0 10px; }
+.sample { border: 1px solid var(--ink); background: var(--ink); color: var(--panel); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 600; }
+.sample small { font-weight: 500; opacity: .75; margin-left: 4px; }
+.pipeline { font-size: 13px; color: var(--ink-3); margin-top: 8px; }
+.pipeline a { margin-left: 6px; }
 
-/* 문장 ID 칩 */
-.sid { display: inline-block; font-size: 11px; font-weight: 600; font-family: ui-monospace, Consolas, monospace; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 0 5px; margin: 0 2px; cursor: pointer; line-height: 18px; }
-.sid:hover { color: var(--accent); border-color: var(--accent); }
+/* 섹션 */
+section.scene { margin-top: 88px; scroll-margin-top: 16px; }
+.num { font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: .06em; }
+.scene h2 { font-size: clamp(22px, 3vw, 28px); line-height: 1.35; letter-spacing: -.02em; margin: 6px 0 8px; }
+.scene .lead { color: var(--ink-2); margin: 0 0 22px; max-width: 640px; }
 
-/* ② 원문 색칠 */
-.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.lg { font: inherit; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; }
-.lg[aria-pressed="false"] { opacity: .45; }
-.lg .n { color: var(--text-3); font-size: 12px; }
-.sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.doc p { margin: 0 0 18px; }
-.role { display: inline-block; font-size: 11px; font-weight: 700; color: var(--text-3); margin-right: 6px; }
-.sent { border-radius: 4px; padding: 1px 2px; cursor: pointer; transition: opacity .15s, background-color .15s; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.sent[data-l="자신감"] { background: color-mix(in srgb, var(--c-conf) var(--a), transparent); border-bottom: 2px solid var(--c-conf); }
-.sent[data-l="열정"]   { background: color-mix(in srgb, var(--c-pass) var(--a), transparent); border-bottom: 2px solid var(--c-pass); }
-.sent[data-l="망설임"] { background: color-mix(in srgb, var(--c-hes)  var(--a), transparent); border-bottom: 2px solid var(--c-hes); }
-.sent[data-l="방어적"] { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--hatch) var(--a), transparent) 0 2px, transparent 2px 6px); border-bottom: 2px dashed var(--hatch); }
-.sent[data-l="중립"]   { border-bottom: 1px dotted var(--line); }
-.sent.dim { opacity: .28; }
-.sent .q { font-weight: 700; }
-.tag { font-size: 10.5px; font-weight: 700; color: var(--text-2); vertical-align: 2px; margin: 0 4px 0 2px; white-space: nowrap; }
-.sent.flash { animation: flash 1.4s ease-out; }
-@keyframes flash { 0%, 40% { box-shadow: 0 0 0 4px var(--flash); } 100% { box-shadow: 0 0 0 0 transparent; } }
-
-/* ③ 인상 흐름 */
-.flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
-.flow { padding: 14px 14px 8px; }
-.flow h3 { font-size: 14px; margin: 0; }
-.flow .sub { font-size: 11.5px; color: var(--text-3); margin: 0 0 4px; }
+/* 01 첫인상 */
+.impression { padding: 36px 32px 28px; }
+.quote { font-size: clamp(22px, 3.4vw, 30px); font-weight: 800; line-height: 1.45; letter-spacing: -.02em; margin: 0 0 14px; }
+.quote::before { content: "“"; color: var(--accent); margin-right: 2px; }
+.quote::after { content: "”"; color: var(--accent); margin-left: 2px; }
+.impression .summary { color: var(--ink-2); margin: 0; }
+.meters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 28px; }
+.meter { background: var(--panel-2); border-radius: 16px; padding: 14px 16px; }
+.meter .k { font-size: 13px; color: var(--ink-2); }
+.meter .v { font-size: 18px; font-weight: 800; margin: 2px 0 8px; }
+.segs { display: flex; gap: 3px; }
+.segs i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.segs i.on { background: var(--accent); }
+.fine { font-size: 13px; color: var(--ink-3); margin-top: 18px; }
+details.more { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+details.more > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--ink-2); list-style: none; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::after { content: " ↓"; }
+details.more[open] > summary::after { content: " ↑"; }
+.flows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+.flow { background: var(--panel-2); border-radius: 16px; padding: 12px 12px 6px; }
+.flow h4 { margin: 0; font-size: 13px; }
+.flow .sub2 { font-size: 11.5px; color: var(--ink-3); }
 .flow svg { width: 100%; height: auto; display: block; overflow: visible; }
-.flow .grid { stroke: var(--line); stroke-width: 1; }
-.flow .axis { fill: var(--text-3); font-size: 12px; }
-.flow .ln { fill: none; stroke: var(--series); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.flow .dot { fill: var(--series); stroke: var(--surface); stroke-width: 2; pointer-events: none; }
+.flow .grid { stroke: var(--line); }
+.flow .axis { fill: var(--ink-3); font-size: 12px; }
+.flow .ln { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.flow .dot { fill: var(--accent); stroke: var(--panel-2); stroke-width: 2; pointer-events: none; }
 .flow .hit { fill: transparent; cursor: pointer; }
-.flow .hit:hover + .dot, .flow .dot.hl { r: 6; }
+.contrast { margin-top: 10px; font-size: 14.5px; color: var(--ink-2); }
 
-/* ④ 위원회 */
-.council { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
-.pc h3 { display: flex; align-items: center; gap: 10px; font-size: 16px; margin: 0 0 6px; }
-.av { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--line); display: grid; place-items: center; font-size: 13px; font-weight: 800; color: var(--text-2); flex: none; }
-.pc .one { font-size: 13.5px; color: var(--text-2); margin: 0 0 12px; }
-.crit { list-style: none; padding: 0; margin: 0 0 14px; }
-.crit li { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 3px 0; }
-.dots { display: inline-flex; gap: 3px; }
-.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--line); }
-.dots i.on { background: var(--text-2); border-color: var(--text-2); }
-.pc h4 { font-size: 12px; color: var(--text-3); margin: 12px 0 4px; font-weight: 700; }
-.pc ul.items { margin: 0; padding-left: 16px; font-size: 13.5px; }
+/* 02 같은 문장, 다른 판정 */
+.clash { padding: 32px; }
+.clash .target { font-size: clamp(18px, 2.4vw, 21px); font-weight: 700; line-height: 1.6; padding: 18px 22px; background: var(--panel-2); border-radius: 16px; margin: 0 0 22px; }
+.clash .target .sid { vertical-align: 3px; margin-right: 8px; }
+.verdicts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.verdict { border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; }
+.verdict .who { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 2px 10px; margin: 10px 0 8px; }
+.badge.good { background: var(--good-soft); color: var(--good); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.mixed { background: var(--accent-soft); color: var(--accent); }
+.badge.none { background: var(--panel-2); color: var(--none); }
+.verdict p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
+.verdict p + p { margin-top: 6px; }
+.clash .moral { margin: 22px 0 0; font-weight: 700; text-align: center; }
+.clash .topic { text-align: center; font-size: 14px; color: var(--ink-3); margin-top: 6px; }
+.clash .others { text-align: center; margin-top: 14px; font-size: 13px; color: var(--ink-3); }
+.btn { display: inline-block; margin-top: 18px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.center { text-align: center; }
+
+/* 03 원문 탐색 */
+.explore { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+.reader { padding: 24px 28px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.lg { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); cursor: pointer; }
+.lg[aria-pressed="false"] { opacity: .4; }
+.lg .n { color: var(--ink-3); }
+.sw { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.para { margin: 0 0 22px; font-size: 16.5px; line-height: 2; }
+.para:last-child { margin-bottom: 0; }
+.role { display: block; font-size: 12px; font-weight: 700; color: var(--ink-3); line-height: 1.4; margin-bottom: 2px; }
+.sent { cursor: pointer; border-radius: 6px; padding: 2px 1px; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: opacity .15s, box-shadow .15s; }
+.sent[data-l="자신감"] { background: color-mix(in srgb, var(--c-conf) var(--a), transparent); }
+.sent[data-l="열정"] { background: color-mix(in srgb, var(--c-pass) var(--a), transparent); }
+.sent[data-l="망설임"] { background: color-mix(in srgb, var(--c-hes) var(--a), transparent); }
+.sent[data-l="방어적"] { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--hatch) var(--a), transparent) 0 2px, transparent 2px 6px); }
+.sent:hover { box-shadow: 0 0 0 2px var(--line); }
+.sent.sel { box-shadow: 0 0 0 2px var(--select); }
+.sent.dim { opacity: .3; }
+.sent.flash { animation: flash 1.2s ease-out; }
+@keyframes flash { 0%, 35% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 2px var(--select); } }
+.mark-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); vertical-align: 3px; margin-left: 3px; }
+
+.panel { position: sticky; top: 16px; padding: 22px; }
+.panel .close { display: none; }
+.panel .head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.panel .stext { font-size: 15px; line-height: 1.7; margin: 12px 0 14px; }
+.panel h5 { font-size: 12.5px; color: var(--ink-3); margin: 16px 0 6px; font-weight: 700; }
+.panel .why { font-size: 14.5px; color: var(--ink-2); margin: 0; }
+.panel .why b { color: var(--ink); }
+.pv { padding: 10px 0; border-top: 1px solid var(--line); }
+.pv:first-of-type { border-top: 0; }
+.pv .who { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.pv .badge { margin: 0 0 0 auto; }
+.pv p { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); }
+.pv .fix { color: var(--ink); }
+.pv .fix::before { content: "→ "; color: var(--accent); }
+.hint { font-size: 13px; color: var(--ink-3); margin-top: 14px; }
+.scrim { display: none; }
+
+.lab { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; border-radius: 999px; padding: 2px 10px; background: var(--panel-2); }
+.sid { display: inline-block; font: 600 12px/20px ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--ink-2); background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 0 6px; cursor: pointer; }
+.sid:hover { color: var(--accent); border-color: var(--accent); }
+.av { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: inline-grid; place-items: center; font-size: 13px; font-weight: 800; flex: none; }
+
+/* 04 세 평가자 */
+.council { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.pc { padding: 22px; }
+.pc .who { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; }
+.pc .looks { font-size: 13px; color: var(--ink-3); margin: 8px 0 12px; }
+.pc .one { margin: 0; font-size: 15px; }
+.pc details.more { margin-top: 16px; }
+.crit { list-style: none; padding: 0; margin: 12px 0 0; }
+.crit li { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; padding: 3px 0; gap: 8px; }
+.dots { display: inline-flex; gap: 3px; flex: none; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.dots i.on { background: var(--ink-2); }
+.pc h6 { font-size: 12.5px; color: var(--ink-3); margin: 16px 0 4px; }
+.pc ul.items { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-2); }
 .pc ul.items li { margin-bottom: 6px; }
-.pc .why { color: var(--text-3); font-size: 12.5px; display: block; }
 
-/* ⑤ 갈린 지점 */
-.split { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch; margin-top: 12px; }
-.split .side { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
-.split .who { font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 4px; }
-.split .vs { align-self: center; font-size: 12px; font-weight: 800; color: var(--text-3); }
-.dis + .dis { margin-top: 16px; }
-.dis h3 { font-size: 15px; margin: 0; }
-.dis .foot { font-size: 12.5px; color: var(--text-3); margin-top: 10px; }
-@media (max-width: 560px) { .split { grid-template-columns: 1fr; } .split .vs { justify-self: center; } }
+/* 05 의장 */
+.chair { padding: 30px 32px; }
+.chair .overall { margin: 0 0 24px; color: var(--ink-2); }
+.cols { display: grid; grid-template-columns: 1fr 1.4fr; gap: 28px; }
+.cols h3 { font-size: 15px; margin: 0 0 10px; }
+.keep { list-style: none; margin: 0; padding: 0; }
+.keep li { background: var(--good-soft); color: var(--ink); border-radius: 14px; padding: 12px 14px; font-size: 14.5px; margin-bottom: 8px; }
+.fixes { list-style: none; margin: 0; padding: 0; counter-reset: fx; }
+.fixes li { counter-increment: fx; display: grid; grid-template-columns: 34px 1fr; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); }
+.fixes li:first-child { border-top: 0; padding-top: 0; }
+.fixes li::before { content: counter(fx, decimal-leading-zero); font-weight: 800; color: var(--accent); }
+.fixes .meta { font-size: 13px; color: var(--ink-3); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pri { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 0 8px; }
+.pri.높음 { background: var(--warn-soft); color: var(--warn); }
+.pri.중간 { background: var(--accent-soft); color: var(--accent); }
+.pri.낮음 { background: var(--panel-2); color: var(--ink-3); }
 
-/* ⑥ 의장 종합 */
-.overall { font-size: 15px; margin: 0 0 16px; }
-.issue { display: grid; grid-template-columns: 64px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
-.pri { font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
-.pri::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.pri.높음 { color: var(--st-high); } .pri.중간 { color: var(--st-mid); } .pri.낮음 { color: var(--st-low); }
-.issue .by { font-size: 12px; color: var(--text-3); margin-top: 4px; }
-.keep { margin-top: 18px; font-size: 14px; }
-.keep ul { margin: 6px 0 0; padding-left: 18px; }
+footer { margin-top: 72px; text-align: center; color: var(--ink-2); }
+footer .closing { font-size: 17px; font-weight: 700; color: var(--ink); max-width: 560px; margin: 0 auto 8px; }
+footer details { margin-top: 24px; font-size: 13px; color: var(--ink-3); }
+footer details summary { cursor: pointer; }
+footer details p { margin: 4px 0; }
 
-.intro-wrap { padding-bottom: 0; }
-.back { display: inline-block; font-size: 13px; color: var(--text-2); text-decoration: none; margin-bottom: 14px; }
-.back:hover { color: var(--accent); }
-.intro h1 { font-size: 24px; margin: 4px 0 10px; letter-spacing: -.01em; }
-.intro p { margin: 0 0 12px; color: var(--text-2); font-size: 14.5px; }
-.intro p b { color: var(--text); }
-.flowline { list-style: none; padding: 0; margin: 16px 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: f; }
-.flowline li { counter-increment: f; font-size: 13px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; display: flex; align-items: baseline; gap: 6px; }
-.flowline li::before { content: counter(f); font-size: 11px; color: var(--accent); font-weight: 800; }
-.flowline small { font-size: 11px; color: var(--text-3); font-weight: 500; }
-.demo-note { font-size: 13px !important; padding-top: 12px; border-top: 1px solid var(--line); margin-bottom: 0 !important; }
-.demo-note a { color: var(--accent); white-space: nowrap; }
-.intro-wrap + .wrap { padding-top: 28px; }
-footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text-3); }
-footer p { margin: 4px 0; }
-
-#tip { position: fixed; z-index: 10; max-width: 300px; pointer-events: none; background: var(--text); color: var(--bg); font-size: 12.5px; line-height: 1.5; padding: 9px 11px; border-radius: 8px; opacity: 0; transition: opacity .1s; box-shadow: 0 6px 20px rgba(0,0,0,.18); }
+#tip { position: fixed; z-index: 30; max-width: 260px; pointer-events: none; background: var(--ink); color: var(--panel); font-size: 12.5px; line-height: 1.5; padding: 8px 10px; border-radius: 8px; opacity: 0; transition: opacity .1s; }
 #tip.show { opacity: 1; }
-#tip b { display: block; font-size: 13px; }
-#tip .mute { opacity: .75; }
+
+@media (max-width: 860px) {
+  .meters, .flows { grid-template-columns: repeat(2, 1fr); }
+  .verdicts, .council { grid-template-columns: 1fr; }
+  .cols { grid-template-columns: 1fr; }
+  .explore { grid-template-columns: 1fr; }
+  .impression, .clash, .chair { padding: 24px 20px; }
+  .reader { padding: 20px; }
+  /* 휴대폰: 문장 상세는 아래에서 올라오는 시트 */
+  .panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; max-height: 72vh; overflow: auto;
+           border-radius: 22px 22px 0 0; transform: translateY(105%); transition: transform .25s ease; box-shadow: 0 -10px 30px rgba(0,0,0,.18); }
+  .panel.open { transform: translateY(0); }
+  .panel .close { display: block; position: absolute; top: 12px; right: 14px; border: 0; background: var(--panel-2); width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+  .scrim { position: fixed; inset: 0; background: rgba(10, 20, 25, .35); z-index: 19; }
+  .scrim.open { display: block; }
+  .hint.desk { display: none; }
+}
+@media (min-width: 861px) { .hint.mob { display: none; } }
 </style>
 </head>
 <body>
-
-<div class="wrap intro-wrap">
-  <a class="back" href="../../index.html">← 행로로 돌아가기</a>
-  <div class="intro card">
-    <div class="step">결과물 · 실험 프로젝트</div>
-    <h1>CORTEX · AI 심의위원회</h1>
-    <p>자기소개서를 AI 분석기가 먼저 <b>어떤 인상으로 읽히는지</b> 살펴보고, 채용 담당자·기술 전문가·일반 독자 역할의 AI 세 명이
-    <b>서로의 의견을 보지 않고 각자 평가</b>한 뒤, 의장 AI가 종합합니다. 여러 관점으로 읽는 것이 한 번의 평가보다 더 유용한 피드백을 만드는지 검증하는 것이 목표예요.</p>
-    <ol class="flowline">
-      <li>문장 나누기<small>코드</small></li><li>인상 분석<small>AI</small></li><li>세 명의 독립 평가<small>AI</small></li><li>근거 검증<small>코드</small></li><li>의장 종합<small>AI</small></li>
-    </ol>
-    <p class="demo-note">아래는 <b>지어낸 샘플 자기소개서</b>로 실제 실행한 결과예요. 모든 지적은 원문 문장 번호로 근거가 연결되어 있고, 원문에 없는 근거는 코드가 자동으로 걸러냅니다.
-    <a href="https://github.com/y49959946-debug/ALEPH/tree/main/cortex" target="_blank" rel="noopener">코드와 설계 문서 보기 ↗</a></p>
-  </div>
-</div>
-
 <div class="wrap" id="app"></div>
+<div class="scrim" id="scrim"></div>
 <div id="tip" role="tooltip"></div>
-<script id="data" type="application/json">{"run": {"run_id": "20260930_103907_001", "version": "v0", "document": {"type": "self_introduction", "source": "data\\inputs\\sample_01.txt", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다. 대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다.\n\n저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다. 기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다.\n\n그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다. 도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다.\n\n입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다. 특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다.\n"}, "preprocess": {"sentences": [{"id": "s01", "paragraph_id": "p01", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다.", "length": 36, "has_number": false}, {"id": "s02", "paragraph_id": "p01", "text": "대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다.", "length": 87, "has_number": true}, {"id": "s03", "paragraph_id": "p02", "text": "저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다.", "length": 47, "has_number": false}, {"id": "s04", "paragraph_id": "p02", "text": "기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다.", "length": 101, "has_number": true}, {"id": "s05", "paragraph_id": "p03", "text": "그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다.", "length": 79, "has_number": true}, {"id": "s06", "paragraph_id": "p03", "text": "도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다.", "length": 35, "has_number": false}, {"id": "s07", "paragraph_id": "p04", "text": "입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다.", "length": 41, "has_number": false}, {"id": "s08", "paragraph_id": "p04", "text": "특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다.", "length": 49, "has_number": false}], "paragraphs": [{"id": "p01", "sentence_ids": ["s01", "s02"]}, {"id": "p02", "sentence_ids": ["s03", "s04"]}, {"id": "p03", "sentence_ids": ["s05", "s06"]}, {"id": "p04", "sentence_ids": ["s07", "s08"]}]}, "analyzer": {"observations": {"paragraph_roles": [{"paragraph_id": "p01", "role": "도입"}, {"paragraph_id": "p02", "role": "경험"}, {"paragraph_id": "p03", "role": "결과"}, {"paragraph_id": "p04", "role": "포부"}], "tech_mentions": [{"sentence_id": "s03", "terms": ["Spring Boot", "Redis"]}, {"sentence_id": "s04", "terms": ["Redis", "Sorted Set"]}]}, "signals": {"sentence_signals": [{"sentence_id": "s01", "label": "자신감", "intensity": 2, "quote": "끝까지 파고드는 개발자입니다", "reason": "자신의 개발 성향과 역량을 단정적인 어조로 선언하고 있습니다."}, {"sentence_id": "s02", "label": "중립", "intensity": 1, "quote": "대기열 기반 예약 서비스를 만들었습니다", "reason": "프로젝트를 시작하게 된 계기와 행동을 객관적으로 서술하고 있습니다."}, {"sentence_id": "s03", "label": "자신감", "intensity": 2, "quote": "선착순 대기열을 구현했습니다", "reason": "자신이 담당한 역할과 사용한 기술을 명확하고 주도적으로 밝히고 있습니다."}, {"sentence_id": "s04", "label": "자신감", "intensity": 2, "quote": "초당 50건씩 처리하도록 바꿨습니다", "reason": "기존의 기술적 문제를 분석하고 이를 해결하기 위해 취한 구체적인 조치를 확신 있게 설명합니다."}, {"sentence_id": "s05", "label": "자신감", "intensity": 3, "quote": "12초에서 0.8초로 줄었고", "reason": "정량적인 수치를 통해 자신의 기여로 이뤄낸 성과를 당당하게 제시하고 있습니다."}, {"sentence_id": "s06", "label": "자신감", "intensity": 3, "quote": "학교 공식 시스템에 통합되었습니다", "reason": "외부 기관으로부터 성과의 가치를 공식적으로 인정받았음을 단정적으로 서술합니다."}, {"sentence_id": "s07", "label": "열정", "intensity": 2, "quote": "개선을 만드는 개발자가 되고 싶습니다", "reason": "입사 후 지향하는 개발자상과 성장에 대한 의지를 드러내고 있습니다."}, {"sentence_id": "s08", "label": "열정", "intensity": 2, "quote": "안정성을 높이는 일에 기여하고 싶습니다", "reason": "관심 있는 분야와 기여하고 싶은 직무 영역을 구체적으로 밝히며 열정을 나타냅니다."}], "paragraph_scores": [{"paragraph_id": "p01", "confidence": 4, "passion": 3, "tension": 1, "concreteness": 3}, {"paragraph_id": "p02", "confidence": 4, "passion": 4, "tension": 1, "concreteness": 5}, {"paragraph_id": "p03", "confidence": 5, "passion": 3, "tension": 1, "concreteness": 5}, {"paragraph_id": "p04", "confidence": 3, "passion": 4, "tension": 1, "concreteness": 3}]}}, "impression": {"archetype": "구체적인 수치로 성과를 당당하게 증명하면서도 미래의 계획 앞에서는 차분하게 포부를 밝히는 증명가", "summary": "자신의 기술적 해결 과정과 정량적 성과를 명확한 수치로 당당하게 제시하여 강한 신뢰감을 주는 글입니다.", "key_contrast": "구체적인 수치와 기술명을 활용해 과거 성과를 확신에 찬 어조로 서술한 부분에 비해, 입사 후 포부를 밝히는 문단에서는 상대적으로 차분하고 희망적인 어조로 전환됩니다.", "evidence_sentence_ids": ["s04", "s05", "s08"]}, "rounds": {"round_0": [{"summary": "구체적인 수치와 기술적 해결 과정을 통해 백엔드 개발자로서의 역량과 성과를 확실하게 증명한 우수한 지원서입니다.", "scores": [{"criterion": "구체적 성과", "score": 5}, {"criterion": "직무 적합성", "score": 4}, {"criterion": "차별성", "score": 5}, {"criterion": "주장의 근거", "score": 5}, {"criterion": "본인의 역할과 기여", "score": 4}], "strengths": [{"claim": "정량적인 수치를 활용하여 개선 성과를 명확하게 증명했습니다.", "evidence_ids": ["s05"]}, {"claim": "단순 토이 프로젝트에 그치지 않고 실제 학교 공식 시스템에 도입되는 수준의 차별화된 결과를 만들어냈습니다.", "evidence_ids": ["s06"]}, {"claim": "기존 시스템의 병목 원인(DB Lock)과 이를 해결하기 위한 기술적 접근법(Redis Sorted Set)을 구체적으로 서술하여 설득력을 높였습니다.", "evidence_ids": ["s04"]}], "weaknesses": [{"claim": "포부에서 언급한 '결제 서비스'와 본인이 수행한 '대기열 구현 경험' 사이의 구체적인 연결고리가 부족합니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "대기열 구현을 통해 확보한 트래픽 제어 및 동시성 해결 역량이 결제 서비스의 안정성(예: 중복 결제 방지, 선착순 쿠폰 이벤트 등)에 어떻게 기여할 수 있는지 구체적으로 연결하여 서술하세요.", "reason": "지원자가 희망하는 결제 서비스 팀의 직무 적합성을 한층 더 강조하고, 포부의 설득력을 높이기 위함입니다.", "target_ids": ["s08"]}], "persona_id": "recruiter", "status": "initial"}, {"summary": "기술적 병목을 정확히 인지하고 Redis를 활용해 구체적인 수치 개선을 이끌어낸 우수한 기술적 역량이 돋보입니다.", "scores": [{"criterion": "기술적 구체성", "score": 5}, {"criterion": "문제-해결-결과 구조", "score": 5}, {"criterion": "기술 선택의 근거", "score": 4}, {"criterion": "실제 기여도", "score": 5}], "strengths": [{"claim": "데이터베이스 락 문제를 Redis Sorted Set을 활용한 대기열 방식으로 해결한 기술적 접근 방식이 매우 구체적입니다.", "evidence_ids": ["s04"]}, {"claim": "응답 속도 개선(12초에서 0.8초)과 사용자 수 등 정량적인 지표로 개발 성과를 명확히 증명했습니다.", "evidence_ids": ["s05"]}], "weaknesses": [{"claim": "초당 50건 처리라는 기준을 설정한 기술적 근거(임계치 산정 이유)가 누락되어 있습니다.", "evidence_ids": ["s04"]}, {"claim": "포부에서 언급한 결제 서비스와 앞서 서술한 대기열 구현 경험 간의 기술적 연결고리가 다소 부족합니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "초당 50건씩 처리하도록 설정한 이유(예: 대상 DB의 처리 한계, 커넥션 풀 크기 고려 등)를 1문장 추가하십시오.", "reason": "단순히 임의의 수치로 처리한 것이 아니라, 대상 시스템의 인프라 한계를 고려한 아키텍처 설계였음을 보여주어 기술적 신뢰도를 높일 수 있습니다.", "target_ids": ["s04"]}, {"suggestion": "결제 서비스에서 발생할 수 있는 동시성 이슈나 트래픽 폭주 문제를 본인의 Redis 대기열 경험과 엮어 포부를 보완하십시오.", "reason": "지원 동기와 포부 단계에서 본인의 기술적 강점이 어떻게 실무에 적용될 수 있는지 설득력을 더하기 위함입니다.", "target_ids": ["s08"]}], "persona_id": "technical", "status": "initial"}, {"summary": "도서관 예약 시스템 개선이라는 누구나 공감할 만한 소재를 명확한 수치와 결과로 보여주어 쉽게 읽히고 신뢰가 가는 글입니다.", "scores": [{"criterion": "이해 가능성", "score": 4}, {"criterion": "문장 자연스러움", "score": 5}, {"criterion": "흐름", "score": 5}, {"criterion": "기억에 남는가", "score": 4}], "strengths": [{"claim": "대학생이라면 누구나 겪어봤을 법한 도서관 예약 문제를 다루어 도입부부터 쉽게 몰입하고 공감할 수 있습니다.", "evidence_ids": ["s02"]}, {"claim": "개선 결과를 '12초에서 0.8초', '4,200명'과 같이 구체적인 숫자로 제시하여 대단한 성과를 냈음이 직관적으로 와닿습니다.", "evidence_ids": ["s05"]}, {"claim": "학교 공식 시스템에 통합되었다는 사실을 통해 지원자의 문제 해결 능력이 실제로 인정받았음을 확실히 보여줍니다.", "evidence_ids": ["s06"]}], "weaknesses": [{"claim": "'Redis', 'Sorted Set'과 같은 기술 용어는 비전문가 입장에서 정확히 어떤 원리로 문제를 해결했다는 것인지 이해하기 어렵습니다.", "evidence_ids": ["s03", "s04"]}], "recommendations": [{"suggestion": "'Redis의 Sorted Set으로 요청 순서를 먼저 저장하고' 부분을 '온라인 번호표를 나누어 주어 차례대로 접속하게 만드는 방식'처럼 일반 독자도 직관적으로 이해할 수 있는 비유나 설명을 덧붙여 수정하는 것이 좋습니다.", "reason": "전문 기술을 모르는 면접관이나 평가자가 읽더라도 지원자가 구체적으로 어떤 아이디어를 내어 문제를 해결했는지 쉽게 이해하도록 돕기 위함입니다.", "target_ids": ["s03", "s04"]}], "persona_id": "reader", "status": "initial"}]}, "validation": {"invalid_evidence_count": 0, "warnings": []}, "judge": {"overall_summary": "본 자기소개서는 도서관 예약 시스템 개선이라는 공감대 높은 소재를 바탕으로 구체적인 기술적 접근과 정량적 성과를 명확히 제시하여 우수한 평가를 받았습니다. 다만 희망 직무인 결제 서비스와 본인의 대기열 구현 경험 간의 연결고리를 보완하고, 기술적 근거 및 비전문가를 위한 설명 방식을 다듬을 필요가 있습니다.", "key_issues": [{"issue": "포부에서 언급한 결제 서비스와 본인의 대기열 구현 경험 간의 구체적인 연결고리가 부족합니다.", "raised_by": ["recruiter", "technical"], "evidence_ids": ["s08"], "priority": "높음"}, {"issue": "초당 50건 처리 기준을 설정한 기술적 근거(임계치 산정 이유)가 누락되어 있습니다.", "raised_by": ["technical"], "evidence_ids": ["s04"], "priority": "중간"}, {"issue": "Redis, Sorted Set 등 전문 기술 용어가 비전문가 입장에서 이해하기 어려울 수 있습니다.", "raised_by": ["reader"], "evidence_ids": ["s03", "s04"], "priority": "낮음"}], "disagreements": [{"topic": "기술적 상세 서술의 적절성", "positions": [{"persona_id": "technical", "position": "Redis Sorted Set을 활용한 구체적인 기술적 해결 방식을 강점으로 평가함."}, {"persona_id": "reader", "position": "비전문가 관점에서는 Redis, Sorted Set과 같은 기술 용어가 어떤 원리로 문제를 해결했는지 이해하기 어렵다고 지적함."}]}], "keep": ["정량적인 수치(평균 응답 시간 12초에서 0.8초 단축, 사용자 4,200명)를 활용하여 개선 성과를 명확하게 증명한 점", "단순 프로젝트에 그치지 않고 학교 공식 시스템에 통합되는 실제적인 성과를 낸 점", "기존 시스템의 병목 원인(DB Lock)을 정확히 짚고 기술적 해결책을 제시한 점", "도서관 예약 문제라는 누구나 공감할 수 있는 소재를 활용하여 몰입감을 높인 점"]}, "metadata": {"model": "gemini-3.5-flash", "prompt_hashes": {"analyzer.txt": "30b043408c2d", "impression.txt": "14f936cc315c", "judge.txt": "64c2f8840f53", "persona_base.txt": "d95df04374ef", "personas.yaml": "967734df826d"}, "created_at": "2026-09-30T10:39:07", "duration_ms": 190247}}, "names": {"recruiter": "채용 담당자", "technical": "기술 전문가", "reader": "일반 독자"}}</script>
+<script id="data" type="application/json">{"run": {"run_id": "20260930_103907_001", "version": "v0", "document": {"type": "self_introduction", "source": "data\\inputs\\sample_01.txt", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다. 대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다.\n\n저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다. 기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다.\n\n그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다. 도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다.\n\n입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다. 특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다.\n"}, "preprocess": {"sentences": [{"id": "s01", "paragraph_id": "p01", "text": "저는 사용자가 불편을 느끼는 지점을 끝까지 파고드는 개발자입니다.", "length": 36, "has_number": false}, {"id": "s02", "paragraph_id": "p01", "text": "대학교 3학년 때 교내 도서관 좌석 예약 시스템이 매일 아침 접속 폭주로 멈추는 문제를 보고, 동아리원 3명과 함께 대기열 기반 예약 서비스를 만들었습니다.", "length": 87, "has_number": true}, {"id": "s03", "paragraph_id": "p02", "text": "저는 백엔드를 맡아 Spring Boot와 Redis로 선착순 대기열을 구현했습니다.", "length": 47, "has_number": false}, {"id": "s04", "paragraph_id": "p02", "text": "기존 시스템은 요청이 몰리면 데이터베이스에 직접 쓰기를 시도해 잠금이 발생했는데, Redis의 Sorted Set으로 요청 순서를 먼저 저장하고 초당 50건씩 처리하도록 바꿨습니다.", "length": 101, "has_number": true}, {"id": "s05", "paragraph_id": "p03", "text": "그 결과 오전 9시 피크 시간의 평균 응답 시간이 12초에서 0.8초로 줄었고, 한 학기 동안 약 4,200명의 학생이 서비스를 사용했습니다.", "length": 79, "has_number": true}, {"id": "s06", "paragraph_id": "p03", "text": "도서관 측의 요청으로 현재는 학교 공식 시스템에 통합되었습니다.", "length": 35, "has_number": false}, {"id": "s07", "paragraph_id": "p04", "text": "입사 후에도 숫자로 확인할 수 있는 개선을 만드는 개발자가 되고 싶습니다.", "length": 41, "has_number": false}, {"id": "s08", "paragraph_id": "p04", "text": "특히 대규모 트래픽을 다루는 결제 서비스 팀에서 안정성을 높이는 일에 기여하고 싶습니다.", "length": 49, "has_number": false}], "paragraphs": [{"id": "p01", "sentence_ids": ["s01", "s02"]}, {"id": "p02", "sentence_ids": ["s03", "s04"]}, {"id": "p03", "sentence_ids": ["s05", "s06"]}, {"id": "p04", "sentence_ids": ["s07", "s08"]}]}, "analyzer": {"observations": {"paragraph_roles": [{"paragraph_id": "p01", "role": "도입"}, {"paragraph_id": "p02", "role": "경험"}, {"paragraph_id": "p03", "role": "결과"}, {"paragraph_id": "p04", "role": "포부"}], "tech_mentions": [{"sentence_id": "s03", "terms": ["Spring Boot", "Redis"]}, {"sentence_id": "s04", "terms": ["Redis", "Sorted Set"]}]}, "signals": {"sentence_signals": [{"sentence_id": "s01", "label": "자신감", "intensity": 2, "quote": "끝까지 파고드는 개발자입니다", "reason": "자신의 개발 성향과 역량을 단정적인 어조로 선언하고 있습니다."}, {"sentence_id": "s02", "label": "중립", "intensity": 1, "quote": "대기열 기반 예약 서비스를 만들었습니다", "reason": "프로젝트를 시작하게 된 계기와 행동을 객관적으로 서술하고 있습니다."}, {"sentence_id": "s03", "label": "자신감", "intensity": 2, "quote": "선착순 대기열을 구현했습니다", "reason": "자신이 담당한 역할과 사용한 기술을 명확하고 주도적으로 밝히고 있습니다."}, {"sentence_id": "s04", "label": "자신감", "intensity": 2, "quote": "초당 50건씩 처리하도록 바꿨습니다", "reason": "기존의 기술적 문제를 분석하고 이를 해결하기 위해 취한 구체적인 조치를 확신 있게 설명합니다."}, {"sentence_id": "s05", "label": "자신감", "intensity": 3, "quote": "12초에서 0.8초로 줄었고", "reason": "정량적인 수치를 통해 자신의 기여로 이뤄낸 성과를 당당하게 제시하고 있습니다."}, {"sentence_id": "s06", "label": "자신감", "intensity": 3, "quote": "학교 공식 시스템에 통합되었습니다", "reason": "외부 기관으로부터 성과의 가치를 공식적으로 인정받았음을 단정적으로 서술합니다."}, {"sentence_id": "s07", "label": "열정", "intensity": 2, "quote": "개선을 만드는 개발자가 되고 싶습니다", "reason": "입사 후 지향하는 개발자상과 성장에 대한 의지를 드러내고 있습니다."}, {"sentence_id": "s08", "label": "열정", "intensity": 2, "quote": "안정성을 높이는 일에 기여하고 싶습니다", "reason": "관심 있는 분야와 기여하고 싶은 직무 영역을 구체적으로 밝히며 열정을 나타냅니다."}], "paragraph_scores": [{"paragraph_id": "p01", "confidence": 4, "passion": 3, "tension": 1, "concreteness": 3}, {"paragraph_id": "p02", "confidence": 4, "passion": 4, "tension": 1, "concreteness": 5}, {"paragraph_id": "p03", "confidence": 5, "passion": 3, "tension": 1, "concreteness": 5}, {"paragraph_id": "p04", "confidence": 3, "passion": 4, "tension": 1, "concreteness": 3}]}}, "impression": {"archetype": "구체적인 수치로 성과를 당당하게 증명하면서도 미래의 계획 앞에서는 차분하게 포부를 밝히는 증명가", "summary": "자신의 기술적 해결 과정과 정량적 성과를 명확한 수치로 당당하게 제시하여 강한 신뢰감을 주는 글입니다.", "key_contrast": "구체적인 수치와 기술명을 활용해 과거 성과를 확신에 찬 어조로 서술한 부분에 비해, 입사 후 포부를 밝히는 문단에서는 상대적으로 차분하고 희망적인 어조로 전환됩니다.", "evidence_sentence_ids": ["s04", "s05", "s08"]}, "rounds": {"round_0": [{"summary": "구체적인 수치와 기술적 해결 과정을 통해 백엔드 개발자로서의 역량과 성과를 확실하게 증명한 우수한 지원서입니다.", "scores": [{"criterion": "구체적 성과", "score": 5}, {"criterion": "직무 적합성", "score": 4}, {"criterion": "차별성", "score": 5}, {"criterion": "주장의 근거", "score": 5}, {"criterion": "본인의 역할과 기여", "score": 4}], "strengths": [{"claim": "정량적인 수치를 활용하여 개선 성과를 명확하게 증명했습니다.", "evidence_ids": ["s05"]}, {"claim": "단순 토이 프로젝트에 그치지 않고 실제 학교 공식 시스템에 도입되는 수준의 차별화된 결과를 만들어냈습니다.", "evidence_ids": ["s06"]}, {"claim": "기존 시스템의 병목 원인(DB Lock)과 이를 해결하기 위한 기술적 접근법(Redis Sorted Set)을 구체적으로 서술하여 설득력을 높였습니다.", "evidence_ids": ["s04"]}], "weaknesses": [{"claim": "포부에서 언급한 '결제 서비스'와 본인이 수행한 '대기열 구현 경험' 사이의 구체적인 연결고리가 부족합니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "대기열 구현을 통해 확보한 트래픽 제어 및 동시성 해결 역량이 결제 서비스의 안정성(예: 중복 결제 방지, 선착순 쿠폰 이벤트 등)에 어떻게 기여할 수 있는지 구체적으로 연결하여 서술하세요.", "reason": "지원자가 희망하는 결제 서비스 팀의 직무 적합성을 한층 더 강조하고, 포부의 설득력을 높이기 위함입니다.", "target_ids": ["s08"]}], "persona_id": "recruiter", "status": "initial"}, {"summary": "기술적 병목을 정확히 인지하고 Redis를 활용해 구체적인 수치 개선을 이끌어낸 우수한 기술적 역량이 돋보입니다.", "scores": [{"criterion": "기술적 구체성", "score": 5}, {"criterion": "문제-해결-결과 구조", "score": 5}, {"criterion": "기술 선택의 근거", "score": 4}, {"criterion": "실제 기여도", "score": 5}], "strengths": [{"claim": "데이터베이스 락 문제를 Redis Sorted Set을 활용한 대기열 방식으로 해결한 기술적 접근 방식이 매우 구체적입니다.", "evidence_ids": ["s04"]}, {"claim": "응답 속도 개선(12초에서 0.8초)과 사용자 수 등 정량적인 지표로 개발 성과를 명확히 증명했습니다.", "evidence_ids": ["s05"]}], "weaknesses": [{"claim": "초당 50건 처리라는 기준을 설정한 기술적 근거(임계치 산정 이유)가 누락되어 있습니다.", "evidence_ids": ["s04"]}, {"claim": "포부에서 언급한 결제 서비스와 앞서 서술한 대기열 구현 경험 간의 기술적 연결고리가 다소 부족합니다.", "evidence_ids": ["s08"]}], "recommendations": [{"suggestion": "초당 50건씩 처리하도록 설정한 이유(예: 대상 DB의 처리 한계, 커넥션 풀 크기 고려 등)를 1문장 추가하십시오.", "reason": "단순히 임의의 수치로 처리한 것이 아니라, 대상 시스템의 인프라 한계를 고려한 아키텍처 설계였음을 보여주어 기술적 신뢰도를 높일 수 있습니다.", "target_ids": ["s04"]}, {"suggestion": "결제 서비스에서 발생할 수 있는 동시성 이슈나 트래픽 폭주 문제를 본인의 Redis 대기열 경험과 엮어 포부를 보완하십시오.", "reason": "지원 동기와 포부 단계에서 본인의 기술적 강점이 어떻게 실무에 적용될 수 있는지 설득력을 더하기 위함입니다.", "target_ids": ["s08"]}], "persona_id": "technical", "status": "initial"}, {"summary": "도서관 예약 시스템 개선이라는 누구나 공감할 만한 소재를 명확한 수치와 결과로 보여주어 쉽게 읽히고 신뢰가 가는 글입니다.", "scores": [{"criterion": "이해 가능성", "score": 4}, {"criterion": "문장 자연스러움", "score": 5}, {"criterion": "흐름", "score": 5}, {"criterion": "기억에 남는가", "score": 4}], "strengths": [{"claim": "대학생이라면 누구나 겪어봤을 법한 도서관 예약 문제를 다루어 도입부부터 쉽게 몰입하고 공감할 수 있습니다.", "evidence_ids": ["s02"]}, {"claim": "개선 결과를 '12초에서 0.8초', '4,200명'과 같이 구체적인 숫자로 제시하여 대단한 성과를 냈음이 직관적으로 와닿습니다.", "evidence_ids": ["s05"]}, {"claim": "학교 공식 시스템에 통합되었다는 사실을 통해 지원자의 문제 해결 능력이 실제로 인정받았음을 확실히 보여줍니다.", "evidence_ids": ["s06"]}], "weaknesses": [{"claim": "'Redis', 'Sorted Set'과 같은 기술 용어는 비전문가 입장에서 정확히 어떤 원리로 문제를 해결했다는 것인지 이해하기 어렵습니다.", "evidence_ids": ["s03", "s04"]}], "recommendations": [{"suggestion": "'Redis의 Sorted Set으로 요청 순서를 먼저 저장하고' 부분을 '온라인 번호표를 나누어 주어 차례대로 접속하게 만드는 방식'처럼 일반 독자도 직관적으로 이해할 수 있는 비유나 설명을 덧붙여 수정하는 것이 좋습니다.", "reason": "전문 기술을 모르는 면접관이나 평가자가 읽더라도 지원자가 구체적으로 어떤 아이디어를 내어 문제를 해결했는지 쉽게 이해하도록 돕기 위함입니다.", "target_ids": ["s03", "s04"]}], "persona_id": "reader", "status": "initial"}]}, "validation": {"invalid_evidence_count": 0, "warnings": []}, "judge": {"overall_summary": "본 자기소개서는 도서관 예약 시스템 개선이라는 공감대 높은 소재를 바탕으로 구체적인 기술적 접근과 정량적 성과를 명확히 제시하여 우수한 평가를 받았습니다. 다만 희망 직무인 결제 서비스와 본인의 대기열 구현 경험 간의 연결고리를 보완하고, 기술적 근거 및 비전문가를 위한 설명 방식을 다듬을 필요가 있습니다.", "key_issues": [{"issue": "포부에서 언급한 결제 서비스와 본인의 대기열 구현 경험 간의 구체적인 연결고리가 부족합니다.", "raised_by": ["recruiter", "technical"], "evidence_ids": ["s08"], "priority": "높음"}, {"issue": "초당 50건 처리 기준을 설정한 기술적 근거(임계치 산정 이유)가 누락되어 있습니다.", "raised_by": ["technical"], "evidence_ids": ["s04"], "priority": "중간"}, {"issue": "Redis, Sorted Set 등 전문 기술 용어가 비전문가 입장에서 이해하기 어려울 수 있습니다.", "raised_by": ["reader"], "evidence_ids": ["s03", "s04"], "priority": "낮음"}], "disagreements": [{"topic": "기술적 상세 서술의 적절성", "positions": [{"persona_id": "technical", "position": "Redis Sorted Set을 활용한 구체적인 기술적 해결 방식을 강점으로 평가함."}, {"persona_id": "reader", "position": "비전문가 관점에서는 Redis, Sorted Set과 같은 기술 용어가 어떤 원리로 문제를 해결했는지 이해하기 어렵다고 지적함."}]}], "keep": ["정량적인 수치(평균 응답 시간 12초에서 0.8초 단축, 사용자 4,200명)를 활용하여 개선 성과를 명확하게 증명한 점", "단순 프로젝트에 그치지 않고 학교 공식 시스템에 통합되는 실제적인 성과를 낸 점", "기존 시스템의 병목 원인(DB Lock)을 정확히 짚고 기술적 해결책을 제시한 점", "도서관 예약 문제라는 누구나 공감할 수 있는 소재를 활용하여 몰입감을 높인 점"]}, "metadata": {"model": "gemini-3.5-flash", "prompt_hashes": {"analyzer.txt": "30b043408c2d", "impression.txt": "14f936cc315c", "judge.txt": "64c2f8840f53", "persona_base.txt": "d95df04374ef", "personas.yaml": "967734df826d"}, "created_at": "2026-09-30T10:39:07", "duration_ms": 190247}}, "personas": {"recruiter": {"name": "채용 담당자", "criteria": ["구체적 성과", "직무 적합성", "차별성", "주장의 근거", "본인의 역할과 기여"]}, "technical": {"name": "기술 전문가", "criteria": ["기술적 구체성", "문제-해결-결과 구조", "기술 선택의 근거", "실제 기여도"]}, "reader": {"name": "일반 독자", "criteria": ["이해 가능성", "문장 자연스러움", "흐름", "기억에 남는가"]}}, "demo": true, "repo": "https://github.com/y49959946-debug/ALEPH/tree/main/cortex"}</script>
 <script>
 (function () {
-  const { run, names } = JSON.parse(document.getElementById("data").textContent);
-  const app = document.getElementById("app");
-  const tip = document.getElementById("tip");
+  const { run, personas: PMETA, demo, repo } = JSON.parse(document.getElementById("data").textContent);
+  const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const nameOf = id => names[id] || id;
+  const nameOf = id => (PMETA[id] && PMETA[id].name) || id;
+  const chip = id => `<span class="sid" data-go="${esc(id)}">${esc(id)}</span>`;
+
   const sentences = run.preprocess.sentences;
   const byId = Object.fromEntries(sentences.map(s => [s.id, s]));
   const signals = Object.fromEntries((run.analyzer.signals.sentence_signals || []).map(s => [s.sentence_id, s]));
   const roles = Object.fromEntries((run.analyzer.observations.paragraph_roles || []).map(r => [r.paragraph_id, r.role]));
-  const personas = run.rounds.round_0 || [];
-  const LABELS = ["자신감", "열정", "망설임", "방어적", "중립"];
-  const SW = { "자신감": "var(--c-conf)", "열정": "var(--c-pass)", "망설임": "var(--c-hes)", "중립": "var(--surface-2)" };
-  const INT = { 1: "은은함", 2: "뚜렷함", 3: "두드러짐" };
-  const ALPHA = { 1: "14%", 2: "24%", 3: "36%" };
-  const LEVEL = v => ["", "매우 약함", "약함", "보통", "강함", "매우 강함"][Math.round(v)] || "";
-  const chip = id => `<span class="sid" data-go="${esc(id)}">${esc(id)}</span>`;
-
-  // 문장별로 위원회가 언급한 내용 모으기
-  const mentions = {};
-  personas.forEach(p => {
-    const add = (ids, kind, text) => (ids || []).forEach(id => (mentions[id] ||= []).push({ who: nameOf(p.persona_id), kind, text }));
-    p.strengths.forEach(x => add(x.evidence_ids, "강점", x.claim));
-    p.weaknesses.forEach(x => add(x.evidence_ids, "약점", x.claim));
-    p.recommendations.forEach(x => add(x.target_ids, "제안", x.suggestion));
-  });
-
-  const imp = run.impression;
   const ps = run.analyzer.signals.paragraph_scores || [];
-  const METRICS = [["confidence", "자신감"], ["passion", "열정·몰입"], ["tension", "긴장감"], ["concreteness", "구체성"]];
+  const council = run.rounds.round_0 || [];
+  const imp = run.impression;
+  const judge = run.judge;
+
+  const LABELS = ["자신감", "열정", "망설임", "방어적", "중립"];
+  const SW = { "자신감": "var(--c-conf)", "열정": "var(--c-pass)", "망설임": "var(--c-hes)" };
+  const ALPHA = { 1: "13%", 2: "22%", 3: "32%" };
+  const INT = { 1: "은은하게", 2: "뚜렷하게", 3: "두드러지게" };
+  const LEVEL = v => ["", "매우 약함", "약함", "보통", "강함", "매우 강함"][Math.round(v)] || "";
+  const METRICS = [["confidence", "자신감", "망설임 ↔ 확신"], ["passion", "열정·몰입", "건조함 ↔ 몰입"], ["tension", "긴장감", "여유 ↔ 방어적"], ["concreteness", "구체성", "추상적 ↔ 구체적"]];
   const avg = k => ps.length ? ps.reduce((a, p) => a + p[k], 0) / ps.length : 0;
+  const swatch = l => l === "방어적"
+    ? `<span class="sw" style="background:repeating-linear-gradient(45deg,var(--hatch) 0 2px,transparent 2px 5px);border:1px solid var(--hatch)"></span>`
+    : l === "중립" ? `<span class="sw" style="border:1px dashed var(--ink-3)"></span>` : `<span class="sw" style="background:${SW[l]}"></span>`;
+
+  // 문장별로 평가자가 무엇이라고 했는지 모으기 (같은 문장, 다른 판정을 찾는 데이터)
+  const byS = {};
+  council.forEach(p => {
+    const slot = id => ((byS[id] ||= {})[p.persona_id] ||= { good: [], bad: [], fix: [] });
+    p.strengths.forEach(x => x.evidence_ids.forEach(id => slot(id).good.push(x.claim)));
+    p.weaknesses.forEach(x => x.evidence_ids.forEach(id => slot(id).bad.push(x.claim)));
+    p.recommendations.forEach(x => x.target_ids.forEach(id => slot(id).fix.push(x.suggestion)));
+  });
+  const verdictOf = v => !v || (!v.good.length && !v.bad.length) ? "none" : v.good.length && v.bad.length ? "mixed" : v.good.length ? "good" : "warn";
+  const BADGE = { good: "✓ 강점으로 봄", warn: "△ 아쉬운 점으로 봄", mixed: "± 강점과 아쉬움 모두", none: "– 언급하지 않음" };
+
+  // 한 평가자는 강점, 다른 평가자는 아쉬움으로 본 문장 = 의견이 갈린 문장
+  const clashes = Object.entries(byS).map(([id, m]) => {
+    const vs = council.map(p => verdictOf(m[p.persona_id]));
+    const pos = vs.some(v => v === "good" || v === "mixed"), neg = vs.some(v => v === "warn" || v === "mixed");
+    const distinct = council.some((a, i) => council.some((b, j) => i !== j && ["good", "mixed"].includes(vs[i]) && ["warn", "mixed"].includes(vs[j])));
+    return { id, vs, score: (distinct ? 10 : 0) + vs.filter(v => v !== "none").length + (pos && neg ? 1 : 0), distinct };
+  }).filter(c => c.distinct).sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+  const focus = clashes[0] ? clashes[0].id : (sentences[0] && sentences[0].id);
+
   const source = (run.document.source || "").split(/[\\/]/).pop();
-  const created = (run.metadata.created_at || "").replace("T", " ").slice(0, 16);
+  let h = "";
 
-  let html = `
-  <header class="top">
-    <div class="brand"><b>CORTEX</b> · AI 심의위원회</div>
-    <div class="meta">${esc(source)} · ${esc(created)} <button class="theme-btn" id="theme">밝기 전환</button></div>
-  </header>
+  // ---------- 상단 ----------
+  h += `<div class="topbar">${demo ? `<a class="back" href="../../index.html">← 행로로 돌아가기</a>` : `<span class="brand">CORTEX</span>`}
+    <button class="ghost" id="theme" type="button">밝기 전환</button></div>
+  <header class="hero">
+    <div class="eyebrow">CORTEX · AI 심의위원회</div>
+    <h1>하나의 자기소개서를<br>세 가지 시선으로 읽으면<br>무엇이 다르게 보일까요?</h1>
+    <p class="sub">채용 담당자, 기술 전문가, 일반 독자 역할의 AI가 서로의 의견을 모른 채 같은 글을 따로 평가했어요.</p>
+    <div class="samples"><span class="sample">${demo ? "샘플 1 · 백엔드 개발자 자기소개서" : esc(source || run.run_id)}${demo ? "<small>지어낸 글</small>" : ""}</span></div>
+    <div class="pipeline">인상 분석 → 세 평가자의 독립 평가 → 근거 확인 → 의장 정리${demo ? `<a href="${esc(repo)}" target="_blank" rel="noopener">코드 보기 ↗</a>` : ""}</div>
+  </header>`;
 
-  <section style="margin-top:0">
-    <div class="step">① 첫인상</div>
-    <h2>이 글은 이렇게 읽혀요</h2>
-    <div class="card hero">
-      <div class="kicker">이 글에서 떠오르는 작성자</div>
-      <p class="archetype">${esc(imp.archetype)}</p>
+  // ---------- 01 첫인상 ----------
+  h += `<section class="scene" id="s-imp"><div class="num">01</div><h2>이 글은 이렇게 읽혀요</h2>
+    <div class="card impression">
+      <p class="quote">${esc(imp.archetype)}</p>
       <p class="summary">${esc(imp.summary)}</p>
-      ${imp.key_contrast ? `<div class="contrast"><b>글 안에서 어조가 달라지는 곳</b>${esc(imp.key_contrast)}</div>` : ""}
-      <div class="evid">근거 문장 ${(imp.evidence_sentence_ids || []).map(chip).join("")}</div>
-      <div class="meters">
-        ${METRICS.map(([k, label]) => {
-          const v = avg(k);
-          return `<div class="meter"><div class="name">${label}<span>${LEVEL(v)}</span></div>
-            <div class="segs" aria-label="${label} 5단계 중 ${Math.round(v)}">${[1,2,3,4,5].map(i => `<i class="${i <= Math.round(v) ? "on" : ""}"></i>`).join("")}</div></div>`;
-        }).join("")}
-      </div>
-      <div class="note">글에 쓰인 표현과 구조에서 읽히는 인상이에요. 작성자의 성격이나 실제 감정을 판단한 결과가 아니에요.</div>
-    </div>
-  </section>
+      <div class="meters">${METRICS.map(([k, label]) => { const v = avg(k); return `<div class="meter"><div class="k">${label}</div><div class="v">${LEVEL(v)}</div><div class="segs" aria-label="${label} 5단계 중 ${Math.round(v)}">${[1,2,3,4,5].map(i => `<i class="${i <= Math.round(v) ? "on" : ""}"></i>`).join("")}</div></div>`; }).join("")}</div>
+      <p class="fine">글에 쓰인 표현에서 읽히는 인상이에요. 쓴 사람의 성격이나 실제 감정을 판단한 결과가 아니에요.</p>
+      <details class="more"><summary>문단마다 인상이 어떻게 달라지는지 보기</summary>
+        <div class="flows">${METRICS.map(([k, label, sub]) => flow(k, label, sub)).join("")}</div>
+        ${imp.key_contrast ? `<p class="contrast"><b>어조가 달라지는 곳</b> · ${esc(imp.key_contrast)}</p>` : ""}
+      </details>
+    </div></section>`;
 
-  <section>
-    <div class="step">② 이유</div>
-    <h2>어떤 문장이 그렇게 보이게 했을까?</h2>
-    <p class="lead">문장에 마우스를 올리면(휴대폰은 누르면) 왜 그렇게 읽혔는지 보여줘요. 굵은 글씨는 그 인상을 만든 표현이에요. 아래 버튼으로 한 종류만 볼 수 있어요.</p>
-    <div class="card">
-      <div class="legend" id="legend">
-        ${LABELS.map(l => {
-          const n = Object.values(signals).filter(s => s.label === l).length;
-          const sw = l === "방어적"
-            ? `<span class="sw" style="background:repeating-linear-gradient(45deg,var(--hatch) 0 2px,transparent 2px 5px);border:1px solid var(--hatch)"></span>`
-            : `<span class="sw" style="background:${SW[l]};${l === "중립" ? "border:1px dotted var(--text-3)" : ""}"></span>`;
-          return `<button class="lg" data-l="${l}" aria-pressed="true">${sw}${l}<span class="n">${n}</span></button>`;
-        }).join("")}
-      </div>
-      <div class="doc">
-        ${run.preprocess.paragraphs.map(p => `<p><span class="role">${esc(roles[p.id] || p.id)}</span>${
-          p.sentence_ids.map(id => {
-            const s = byId[id], g = signals[id];
-            if (!g) return `<span class="sent" id="${id}" data-l="중립">${esc(s.text)}</span> `;
-            let body = esc(s.text);
-            const q = esc(g.quote);
-            if (q && body.includes(q)) body = body.replace(q, `<span class="q">${q}</span>`);
-            return `<span class="sent" id="${id}" data-l="${esc(g.label)}" style="--a:${ALPHA[g.intensity] || "20%"}">${body}</span><span class="tag">${esc(g.label)}${g.label !== "중립" ? "·" + INT[g.intensity] : ""}</span> `;
-          }).join("")
-        }</p>`).join("")}
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="step">③ 흐름</div>
-    <h2>글에서 느껴지는 인상은 문단마다 어떻게 달라질까?</h2>
-    <p class="lead">문단마다 네 가지 인상이 얼마나 강하게 읽히는지 5단계로 나타냈어요. 점을 가리키면 자세히 보여요.</p>
-    <div class="flows">${METRICS.map(([k, label]) => flowChart(k, label)).join("")}</div>
-  </section>
-
-  <section>
-    <div class="step">④ 세 명의 시선</div>
-    <h2>세 평가자는 이 글을 어떻게 봤을까?</h2>
-    <p class="lead">세 평가자는 서로의 의견을 보지 않고, 각자 다른 기준으로 따로 평가했어요. 문장 번호를 누르면 원문의 그 문장으로 이동해요.</p>
-    <div class="council">${personas.map(personaCard).join("")}</div>
-  </section>`;
-
-  const dis = run.judge.disagreements || [];
-  if (dis.length) {
-    html += `
-  <section>
-    <div class="step">⑤ 갈린 지점</div>
-    <h2>같은 글, 다른 시선</h2>
-    <p class="lead">평가 기준이 다르면 같은 부분도 다르게 보여요. 이 차이가 여러 관점으로 읽어보는 이유예요.</p>
-    <div class="card">${dis.map(d => `
-      <div class="dis"><h3>${esc(d.topic)}</h3>
-        <div class="split">${d.positions.map((p, i) => `${i ? '<div class="vs">VS</div>' : ""}<div class="side"><div class="who">${esc(nameOf(p.persona_id))}</div>${esc(p.position)}</div>`).join("")}</div>
-      </div>`).join("")}
-      <div class="dis foot">어느 쪽이 맞다기보다, 이 글을 누가 읽을지에 따라 무엇을 먼저 고칠지가 달라져요.</div>
-    </div>
-  </section>`;
+  // ---------- 02 같은 문장, 다른 판정 ----------
+  const dis = judge.disagreements || [];
+  if (clashes.length) {
+    const c = clashes[0], m = byS[c.id];
+    h += `<section class="scene" id="s-clash"><div class="num">02 · 핵심 장면</div><h2>같은 문장인데, 판정이 갈렸어요</h2>
+      <p class="lead">세 평가자는 서로의 의견을 보지 못했어요. 그런데 이 문장 하나를 두고 서로 다른 것을 봤어요.</p>
+      <div class="card clash">
+        <p class="target">${chip(c.id)}${esc(byId[c.id].text)}</p>
+        <div class="verdicts">${council.map((p, i) => { const v = m[p.persona_id]; const kind = c.vs[i];
+          const lines = !v ? [] : [...v.good.slice(0, 1), ...v.bad.slice(0, 1)];
+          return `<div class="verdict"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}</div>
+            <span class="badge ${kind}">${BADGE[kind]}</span>${lines.length ? lines.map(t => `<p>${esc(t)}</p>`).join("") : `<p>이 문장은 평가 기준과 관련이 적다고 봤어요.</p>`}</div>`; }).join("")}</div>
+        <p class="moral">평가 기준이 다르면, 같은 문장에서도 다른 것이 보여요.</p>
+        ${dis[0] ? `<p class="topic">의장이 정리한 쟁점 · ${esc(dis[0].topic)}</p>` : ""}
+        <div class="center"><button class="btn" data-go="${c.id}" type="button">원문에서 이 문장 살펴보기 ↓</button></div>
+        ${clashes.length > 1 ? `<p class="others">판정이 갈린 문장이 ${clashes.length - 1}개 더 있어요 ${clashes.slice(1, 4).map(x => chip(x.id)).join(" ")}</p>` : ""}
+      </div></section>`;
+  } else if (dis.length) {
+    h += `<section class="scene" id="s-clash"><div class="num">02 · 핵심 장면</div><h2>여기서 의견이 갈렸어요</h2>
+      <div class="card clash"><div class="verdicts">${dis[0].positions.map(p => `<div class="verdict"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}</div><p style="margin-top:10px">${esc(p.position)}</p></div>`).join("")}</div>
+      <p class="moral">${esc(dis[0].topic)}</p></div></section>`;
   }
 
-  const issues = run.judge.key_issues || [];
+  // ---------- 03 원문 탐색 ----------
+  const counts = l => Object.values(signals).filter(s => s.label === l).length;
+  h += `<section class="scene" id="s-read"><div class="num">03</div><h2>직접 읽어보세요</h2>
+    <p class="lead">문장을 누르면 그 문장이 어떻게 읽혔는지, 세 평가자가 뭐라고 했는지 볼 수 있어요. 점(•)이 붙은 문장은 평가자가 언급한 문장이에요.</p>
+    <div class="explore">
+      <div class="card reader">
+        <div class="legend">${LABELS.map(l => `<button class="lg" type="button" data-l="${l}" aria-pressed="true">${swatch(l)}${l}<span class="n">${counts(l)}</span></button>`).join("")}</div>
+        ${run.preprocess.paragraphs.map(p => `<p class="para"><span class="role">${esc(roles[p.id] || "")}</span>${p.sentence_ids.map(id => {
+          const g = signals[id]; const mentioned = !!byS[id];
+          return `<span class="sent" id="${id}" data-l="${esc(g ? g.label : "중립")}" style="--a:${g ? ALPHA[g.intensity] || "18%" : "0%"}" tabindex="0" role="button">${esc(byId[id].text)}${mentioned ? '<span class="mark-dot" aria-hidden="true"></span>' : ""}</span> `;
+        }).join("")}</p>`).join("")}
+      </div>
+      <aside class="card panel" id="panel" aria-live="polite"></aside>
+    </div></section>`;
+
+  // ---------- 04 세 평가자 ----------
+  h += `<section class="scene" id="s-council"><div class="num">04</div><h2>세 평가자는 무엇을 봤을까요?</h2>
+    <p class="lead">같은 글을 읽었지만, 보는 기준이 달랐어요.</p>
+    <div class="council">${council.map(p => {
+      const crit = (PMETA[p.persona_id] && PMETA[p.persona_id].criteria) || p.scores.map(s => s.criterion);
+      const list = (t, arr, f) => arr.length ? `<h6>${t}</h6><ul class="items">${arr.map(f).join("")}</ul>` : "";
+      return `<div class="card pc"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}</div>
+        <div class="looks">보는 기준 · ${crit.slice(0, 3).map(esc).join(", ")}${crit.length > 3 ? " 등" : ""}</div>
+        <p class="one">${esc(p.summary)}</p>
+        <details class="more"><summary>자세히 보기</summary>
+          <ul class="crit">${p.scores.map(s => `<li>${esc(s.criterion)}<span class="dots" title="5점 중 ${s.score}점" aria-label="5점 중 ${s.score}점">${[1,2,3,4,5].map(i => `<i class="${i <= s.score ? "on" : ""}"></i>`).join("")}</span></li>`).join("")}</ul>
+          ${list("좋았던 점", p.strengths, x => `<li>${esc(x.claim)} ${x.evidence_ids.map(chip).join(" ")}</li>`)}
+          ${list("아쉬운 점", p.weaknesses, x => `<li>${esc(x.claim)} ${x.evidence_ids.map(chip).join(" ")}</li>`)}
+          ${list("이렇게 고쳐보면", p.recommendations, x => `<li>${esc(x.suggestion)} ${x.target_ids.map(chip).join(" ")}</li>`)}
+        </details></div>`;
+    }).join("")}</div></section>`;
+
+  // ---------- 05 의장 정리 ----------
   const order = { "높음": 0, "중간": 1, "낮음": 2 };
-  html += `
-  <section>
-    <div class="step">${dis.length ? "⑥" : "⑤"} 정리</div>
-    <h2>그래서 무엇을 먼저 고치면 좋을까?</h2>
-    <div class="card">
-      <p class="overall">${esc(run.judge.overall_summary)}</p>
-      ${issues.slice().sort((a, b) => order[a.priority] - order[b.priority]).map(i => `
-        <div class="issue"><div><span class="pri ${esc(i.priority)}">${esc(i.priority)}</span></div>
-          <div>${esc(i.issue)}<div class="by">${i.raised_by.map(nameOf).map(esc).join(" · ")} 지적 ${(i.evidence_ids || []).map(chip).join("")}</div></div></div>`).join("")}
-      ${(run.judge.keep || []).length ? `<div class="keep"><b>그대로 두면 좋은 점</b><ul>${run.judge.keep.map(k => `<li>${esc(k)}</li>`).join("")}</ul></div>` : ""}
-    </div>
-  </section>
+  const issues = (judge.key_issues || []).slice().sort((a, b) => order[a.priority] - order[b.priority]);
+  const keep = judge.keep || [];
+  h += `<section class="scene" id="s-chair"><div class="num">05</div><h2>세 시선을 합치면</h2>
+    <div class="card chair"><p class="overall">${esc(judge.overall_summary)}</p>
+      <div class="cols">
+        <div><h3>그대로 두세요</h3><ul class="keep">${keep.slice(0, 3).map(k => `<li>${esc(k)}</li>`).join("")}</ul>
+          ${keep.length > 3 ? `<details class="more"><summary>${keep.length - 3}개 더 보기</summary><ul class="keep" style="margin-top:10px">${keep.slice(3).map(k => `<li>${esc(k)}</li>`).join("")}</ul></details>` : ""}</div>
+        <div><h3>먼저 고치면 좋은 점</h3><ol class="fixes">${issues.map(i => `<li><div>${esc(i.issue)}
+          <div class="meta"><span class="pri ${esc(i.priority)}">${esc(i.priority)}</span>${i.raised_by.map(nameOf).map(esc).join(" · ")} ${(i.evidence_ids || []).map(chip).join(" ")}</div></div></li>`).join("")}</ol></div>
+      </div></div></section>`;
 
-  <footer>
-    <p>이 결과는 자기소개서의 품질이나 지원자의 역량을 객관적으로 측정한 것이 아니라, 입력된 글을 여러 관점에서 읽어본 결과예요.</p>
-    <p>근거 검증: 원문에 없는 근거 ${run.validation.invalid_evidence_count}건 제외 · 경고 ${run.validation.warnings.length}건</p>
-    <p>모델 ${esc(run.metadata.model)} · 실행 ${esc(run.run_id)} · ${Math.round(run.metadata.duration_ms / 1000)}초 · 프롬프트 ${Object.entries(run.metadata.prompt_hashes || {}).map(([f, h]) => esc(f.replace(/\.(txt|yaml)$/, "")) + " " + esc(h.slice(0, 6))).join(", ")}</p>
-  </footer>`;
+  // ---------- 마무리 ----------
+  const hashes = Object.entries(run.metadata.prompt_hashes || {}).map(([f, x]) => esc(f.replace(/\.(txt|yaml)$/, "")) + " " + esc(String(x).slice(0, 6))).join(", ");
+  h += `<footer><p class="closing">CORTEX는 점수를 매기려는 게 아니라, 한 사람의 시선이 놓치는 부분을 여러 시선으로 찾아보려는 실험이에요.</p>
+    <p style="font-size:14px">이 결과는 글의 품질이나 지원자의 역량을 객관적으로 측정한 것이 아니에요.</p>
+    <details><summary>실험 정보</summary>
+      <p>모델 ${esc(run.metadata.model)} · ${Math.round(run.metadata.duration_ms / 1000)}초 · 실행 ${esc(run.run_id)}</p>
+      <p>근거 검증: 원문에 없는 근거 ${run.validation.invalid_evidence_count}건 제외 · 경고 ${run.validation.warnings.length}건</p>
+      <p>프롬프트 버전 ${hashes}</p>
+    </details></footer>`;
 
-  app.innerHTML = html;
+  $("#app").innerHTML = h;
 
-  function flowChart(key, label) {
-    const W = 240, H = 130, L = 22, R = 14, T = 12, B = 28;
-    const n = ps.length;
+  // ---------- 상세 패널 ----------
+  const panel = $("#panel"), scrim = $("#scrim");
+  const mobile = () => matchMedia("(max-width: 860px)").matches;
+  function renderPanel(id) {
+    const s = byId[id], g = signals[id], m = byS[id] || {};
+    const lab = g ? `<span class="lab">${swatch(g.label)}${esc(g.label)}${g.label !== "중립" ? " · " + INT[g.intensity] : ""}</span>` : "";
+    let quoteHtml = esc(g && g.quote ? g.quote : "");
+    panel.innerHTML = `<button class="close" type="button" aria-label="닫기">×</button>
+      <div class="head">${chip(id)} ${lab}</div>
+      <p class="stext">${esc(s.text)}</p>
+      ${g ? `<h5>왜 이렇게 읽혔을까요?</h5><p class="why">${g.quote ? `<b>“${quoteHtml}”</b> ` : ""}${esc(g.reason)}</p>` : ""}
+      <h5>세 평가자는</h5>
+      ${council.map(p => { const v = m[p.persona_id], kind = verdictOf(v);
+        return `<div class="pv"><div class="who"><span class="av">${esc(nameOf(p.persona_id)[0])}</span>${esc(nameOf(p.persona_id))}<span class="badge ${kind}">${BADGE[kind]}</span></div>
+          ${v ? [...v.good.slice(0, 1), ...v.bad.slice(0, 1)].map(t => `<p>${esc(t)}</p>`).join("") + v.fix.slice(0, 1).map(t => `<p class="fix">${esc(t)}</p>`).join("") : ""}</div>`; }).join("")}
+      <p class="hint desk">다른 문장을 눌러보세요.</p>`;
+  }
+  function select(id, { scroll = false, open = false } = {}) {
+    if (!byId[id]) return;
+    document.querySelectorAll(".sent.sel").forEach(e => e.classList.remove("sel"));
+    const el = document.getElementById(id);
+    el.classList.add("sel");
+    renderPanel(id);
+    if (scroll) { el.scrollIntoView({ block: "center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+    if (open && mobile()) { panel.classList.add("open"); scrim.classList.add("open"); panel.scrollTop = 0; }
+  }
+  const closeSheet = () => { panel.classList.remove("open"); scrim.classList.remove("open"); };
+  select(focus);
+
+  // ---------- 그래프 ----------
+  function flow(key, label, sub) {
+    const W = 220, H = 120, L = 20, R = 12, T = 10, B = 26, n = ps.length;
     const x = i => n <= 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (n - 1);
     const y = v => T + (5 - v) * (H - T - B) / 4;
-    const pts = ps.map((p, i) => [x(i), y(p[key])]);
-    const path = pts.map((q, i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" ");
-    const sub = { confidence: "망설임 ↔ 확신", passion: "건조함 ↔ 몰입", tension: "여유 ↔ 방어적", concreteness: "추상적 ↔ 구체적" }[key];
-    return `<div class="card flow"><h3>${label}</h3><p class="sub">${sub}</p>
-      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${label} 문단별 흐름: ${ps.map(p => (roles[p.paragraph_id] || p.paragraph_id) + " " + p[key]).join(", ")}">
-        ${[1, 3, 5].map(v => `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`).join("")}
-        <path class="ln" d="${path}"/>
-        ${ps.map((p, i) => `<g data-tip="<b>${esc(roles[p.paragraph_id] || p.paragraph_id)} 문단 · ${label}</b>${LEVEL(p[key])} (5단계 중 ${p[key]})"><circle class="hit" cx="${x(i)}" cy="${y(p[key])}" r="14"/><circle class="dot" cx="${x(i)}" cy="${y(p[key])}" r="4.5"/></g>
-          <text class="axis" x="${x(i)}" y="${H - 8}" text-anchor="middle">${esc(roles[p.paragraph_id] || p.paragraph_id)}</text>`).join("")}
+    const d = ps.map((p, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p[key]).toFixed(1)).join(" ");
+    return `<div class="flow"><h4>${label}</h4><div class="sub2">${sub}</div>
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}: ${ps.map(p => (roles[p.paragraph_id] || p.paragraph_id) + " " + p[key]).join(", ")}">
+      ${[1, 3, 5].map(v => `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join("")}
+      <path class="ln" d="${d}"/>
+      ${ps.map((p, i) => `<g data-tip="${esc(roles[p.paragraph_id] || p.paragraph_id)} 문단 · ${LEVEL(p[key])}"><circle class="hit" cx="${x(i)}" cy="${y(p[key])}" r="13"/><circle class="dot" cx="${x(i)}" cy="${y(p[key])}" r="4.5"/></g><text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(roles[p.paragraph_id] || "")}</text>`).join("")}
       </svg></div>`;
   }
 
-  function personaCard(p) {
-    const nm = nameOf(p.persona_id);
-    const list = (title, items, fmt) => items.length ? `<h4>${title}</h4><ul class="items">${items.map(fmt).join("")}</ul>` : "";
-    return `<div class="card pc">
-      <h3><span class="av">${esc(nm.slice(0, 1))}</span>${esc(nm)}</h3>
-      <p class="one">${esc(p.summary)}</p>
-      <ul class="crit">${p.scores.map(c => `<li>${esc(c.criterion)}<span class="dots" aria-label="5점 중 ${c.score}점" title="5점 중 ${c.score}점">${[1,2,3,4,5].map(i => `<i class="${i <= c.score ? "on" : ""}"></i>`).join("")}</span></li>`).join("")}</ul>
-      ${list("좋았던 점", p.strengths, x => `<li>${esc(x.claim)} ${x.evidence_ids.map(chip).join("")}</li>`)}
-      ${list("아쉬운 점", p.weaknesses, x => `<li>${esc(x.claim)} ${x.evidence_ids.map(chip).join("")}</li>`)}
-      ${list("이렇게 고쳐보면", p.recommendations, x => `<li>${esc(x.suggestion)} ${x.target_ids.map(chip).join("")}<span class="why">${esc(x.reason)}</span></li>`)}
-    </div>`;
-  }
-
-  // 툴팁
-  function showTip(html, ev) {
-    tip.innerHTML = html; tip.classList.add("show");
-    const r = tip.getBoundingClientRect(), pad = 12;
-    let left = ev.clientX + 14, top = ev.clientY + 16;
-    if (left + r.width > innerWidth - pad) left = ev.clientX - r.width - 14;
-    if (top + r.height > innerHeight - pad) top = ev.clientY - r.height - 14;
-    tip.style.left = Math.max(pad, left) + "px"; tip.style.top = Math.max(pad, top) + "px";
-  }
-  const hideTip = () => tip.classList.remove("show");
-  function sentTip(id) {
-    const g = signals[id], m = mentions[id] || [];
-    let h = g ? `<b>${esc(g.label)} · ${INT[g.intensity] || ""}</b>${esc(g.reason)}` : `<b>인상 신호 없음</b>`;
-    if (m.length) h += `<div class="mute" style="margin-top:6px">평가자 언급</div>` + m.slice(0, 4).map(x => `<div>· ${esc(x.who)} (${x.kind})</div>`).join("");
-    return h;
-  }
-  app.addEventListener("mousemove", e => {
-    const s = e.target.closest(".sent"), h = e.target.closest("[data-tip]");
-    if (s) showTip(sentTip(s.id), e); else if (h) showTip(h.dataset.tip, e); else hideTip();
+  // ---------- 상호작용 ----------
+  const tip = $("#tip");
+  document.addEventListener("mousemove", e => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (!t) return tip.classList.remove("show");
+    tip.textContent = t.dataset.tip; tip.classList.add("show");
+    tip.style.left = Math.min(innerWidth - tip.offsetWidth - 10, e.clientX + 12) + "px"; tip.style.top = (e.clientY + 14) + "px";
   });
-  app.addEventListener("mouseleave", hideTip);
-  app.addEventListener("click", e => {
+  document.addEventListener("click", e => {
     const go = e.target.closest("[data-go]");
-    if (go) {
-      const el = document.getElementById(go.dataset.go);
-      if (el) { el.scrollIntoView({ block: "center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
-      return;
-    }
+    if (go) { e.preventDefault(); select(go.dataset.go, { scroll: true, open: true }); return; }
     const s = e.target.closest(".sent");
-    if (s && matchMedia("(hover: none)").matches) { const r = s.getBoundingClientRect(); showTip(sentTip(s.id), { clientX: r.left, clientY: r.bottom }); }
+    if (s) { select(s.id, { open: true }); return; }
+    if (e.target.closest(".close") || e.target === scrim) { closeSheet(); return; }
     const lg = e.target.closest(".lg");
     if (lg) {
       const btns = [...document.querySelectorAll(".lg")];
-      const onlyThis = btns.every(b => b === lg ? b.getAttribute("aria-pressed") === "true" : b.getAttribute("aria-pressed") === "false");
-      btns.forEach(b => b.setAttribute("aria-pressed", onlyThis ? "true" : String(b === lg)));
-      const active = new Set(btns.filter(b => b.getAttribute("aria-pressed") === "true").map(b => b.dataset.l));
-      document.querySelectorAll(".sent").forEach(el => el.classList.toggle("dim", !active.has(el.dataset.l)));
+      const only = btns.every(b => (b === lg) === (b.getAttribute("aria-pressed") === "true"));
+      btns.forEach(b => b.setAttribute("aria-pressed", only ? "true" : String(b === lg)));
+      const on = new Set(btns.filter(b => b.getAttribute("aria-pressed") === "true").map(b => b.dataset.l));
+      document.querySelectorAll(".sent").forEach(el => el.classList.toggle("dim", !on.has(el.dataset.l)));
     }
   });
-  addEventListener("scroll", hideTip, { passive: true });
-
-  // 밝기 전환
-  document.getElementById("theme").addEventListener("click", () => {
-    const root = document.documentElement;
-    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    root.dataset.theme = dark ? "light" : "dark";
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeSheet();
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("sent")) { e.preventDefault(); select(e.target.id, { open: true }); }
+  });
+  $("#theme").addEventListener("click", () => {
+    const r = document.documentElement;
+    const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    r.dataset.theme = dark ? "light" : "dark";
   });
 })();
 </script>
