@@ -23,7 +23,7 @@
   --ink: #2b2622; --ink-2: #5b534b; --ink-3: #6f665c;  /* 따뜻한 먹색 */
   --accent: #2b6f8a; --accent-soft: #e6eff2; --on-accent: #ffffff;
   --me: #2b2622; --on-me: #f7f4ee;
-  --c-conf: #2a78d6; --c-pass: #eb6834; --c-hes: #1baf7a; --hatch: #8a8f94;
+  --c-conf: #3d6fa3; --c-pass: #d4703f; --c-hes: #3f9580;  /* 그림 속 파랑·청록에 맞춘 차분한 색 */ --hatch: #8a8f94;
   --good: #1b6e33; --good-soft: #e3f4e8; --warn: #9a5b00; --warn-soft: #fdf0dc;
   --shadow: 0 1px 2px rgba(60, 50, 30, .06), 0 8px 20px rgba(60, 50, 30, .06);
 }
@@ -35,7 +35,7 @@
     --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
     --accent: #7ab8d0; --accent-soft: #1f3540; --on-accent: #0f1a20;
     --me: #d9e6ec; --on-me: #14202a;
-    --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+    --c-conf: #6b9bd0; --c-pass: #e08758; --c-hes: #5fb39d; --hatch: #9aa3a9;
     --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16;
     --shadow: none;
   }
@@ -47,7 +47,7 @@
   --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
   --accent: #7ab8d0; --accent-soft: #1f3540; --on-accent: #0f1a20;
   --me: #d9e6ec; --on-me: #14202a;
-  --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+  --c-conf: #6b9bd0; --c-pass: #e08758; --c-hes: #5fb39d; --hatch: #9aa3a9;
   --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16;
   --shadow: none;
 }
@@ -326,7 +326,14 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 .who .av-img { width: 48px; height: 48px; }
 .msg .av-img { width: 44px; height: 44px; }
 .cast .av-img.sm { width: 28px; height: 28px; }
-.hero-img { display: block; width: 100%; height: auto; border-radius: 24px; margin: 0 0 22px; box-shadow: var(--shadow); }
+/* 그림 바탕을 종이색(#f7f4ee)에 맞춰 두었다. 상자·그림자 없이 종이 위에 바로 그린 것처럼 보이게 한다 */
+.hero-img { display: block; width: 100%; height: auto; margin: -8px 0 14px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 90%, transparent); -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 90%, transparent); mask-composite: intersect; }
+
+/* 어두운 화면에서는 종이색 그림이 빛나는 상자처럼 보이므로, 일부러 놓은 종이 카드로 보이게 한다 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hero-img { -webkit-mask-image: none; mask-image: none; border-radius: 20px; margin-top: 0; } }
+:root[data-theme="dark"] .hero-img { -webkit-mask-image: none; mask-image: none; border-radius: 20px; margin-top: 0; }
 
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }

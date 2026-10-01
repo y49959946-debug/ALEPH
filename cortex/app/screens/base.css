@@ -6,7 +6,7 @@
   --ink: #2b2622; --ink-2: #5b534b; --ink-3: #6f665c;  /* 따뜻한 먹색 */
   --accent: #2b6f8a; --accent-soft: #e6eff2; --on-accent: #ffffff;
   --me: #2b2622; --on-me: #f7f4ee;
-  --c-conf: #2a78d6; --c-pass: #eb6834; --c-hes: #1baf7a; --hatch: #8a8f94;
+  --c-conf: #3d6fa3; --c-pass: #d4703f; --c-hes: #3f9580;  /* 그림 속 파랑·청록에 맞춘 차분한 색 */ --hatch: #8a8f94;
   --good: #1b6e33; --good-soft: #e3f4e8; --warn: #9a5b00; --warn-soft: #fdf0dc;
   --shadow: 0 1px 2px rgba(60, 50, 30, .06), 0 8px 20px rgba(60, 50, 30, .06);
 }
@@ -18,7 +18,7 @@
     --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
     --accent: #7ab8d0; --accent-soft: #1f3540; --on-accent: #0f1a20;
     --me: #d9e6ec; --on-me: #14202a;
-    --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+    --c-conf: #6b9bd0; --c-pass: #e08758; --c-hes: #5fb39d; --hatch: #9aa3a9;
     --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16;
     --shadow: none;
   }
@@ -30,7 +30,7 @@
   --ink: #eef3f6; --ink-2: #b3c1cb; --ink-3: #8b9ba7;
   --accent: #7ab8d0; --accent-soft: #1f3540; --on-accent: #0f1a20;
   --me: #d9e6ec; --on-me: #14202a;
-  --c-conf: #3987e5; --c-pass: #d95926; --c-hes: #199e70; --hatch: #9aa3a9;
+  --c-conf: #6b9bd0; --c-pass: #e08758; --c-hes: #5fb39d; --hatch: #9aa3a9;
   --good: #7fd49a; --good-soft: #1d3325; --warn: #f0b861; --warn-soft: #3a2c16;
   --shadow: none;
 }
