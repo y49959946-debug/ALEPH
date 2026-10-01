@@ -197,6 +197,8 @@ details.more[open] > summary { margin-bottom: 8px; }
 .matrix td.s .tx { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
 .matrix td.s .sid { margin-right: 8px; }
 .matrix td.c, .matrix th.c { width: 54px; }
+.matrix th.c img.av-img.sm { width: 38px; height: 38px; display: block; margin: 0 auto; }
+.matrix th.c .hn { display: block; font-size: 11.5px; font-weight: 700; color: var(--ink-2); margin-top: 2px; white-space: nowrap; }
 @media (max-width: 560px) { .matrix td.c, .matrix th.c { width: 42px; } }
 .matrix .chip2 { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; font-weight: 800; }
 .matrix .chip2.good { background: var(--good-soft); color: var(--good); } .matrix .chip2.warn { background: var(--warn-soft); color: var(--warn); } .matrix .chip2.mixed { background: var(--accent-soft); color: var(--accent); } .matrix .chip2.none { color: var(--line); }
@@ -419,6 +421,7 @@ const avM = (id, mood, sm) => {
 const VWORD = { good: "강점", warn: "아쉬움", mixed: "둘 다", none: "–" };
 const ico = (cls) => `<img class="vi" src="assets/icon/${cls}.png" alt="" aria-hidden="true">`;
 const vpill = (cls, label) => `<span class="vp ${cls}">${cls === "none" ? "" : ico(cls)}${esc(label || VWORD[cls])}</span>`;
+const SHORT = { recruiter: "채용", technical: "기술", reader: "비개발" };
 const verdictMood = (v) => v === "good" ? "pos" : v === "warn" ? "neg" : v === "mixed" ? "think" : "";
 const shiftMood = (t) => t === "maintained" ? "pos" : t === "changed_with_valid_evidence" ? "wow" : t === "changed_without_evidence" ? "think" : "think";
 
@@ -916,7 +919,7 @@ function buildPages(M) {
     <p class="sub">${esc(osum.h)}</p>
     <h3>심의 표 <span class="fine">행을 누르면 원문으로</span></h3>
     <div class="vlegend">${vpill("good")}${vpill("warn")}${vpill("mixed", "강점+아쉬움")}<span class="fine">· 언급 없음</span></div>
-    <table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = M.verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : ico(v[0])}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>
+    <table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}<small class="hn">${esc(SHORT[p.persona_id] || pname(p.persona_id))}</small></th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = M.verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : ico(v[0])}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>
     <h3>먼저 고칠 것</h3>
     ${issues.map((x, n) => `<div class="card"><div class="h" style="font-size:16px">${n + 1}. ${esc(T(R, `judge.i${n}`, x.issue).h)} <span class="prio ${esc(x.priority)}">${esc(x.priority)}</span></div></div>`).join("")}
     <section class="closing">
