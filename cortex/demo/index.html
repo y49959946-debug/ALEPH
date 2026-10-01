@@ -180,9 +180,9 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .pvc b { display: block; font-size: 15px; padding: 10px 14px 0; }
 .pvc span { display: block; font-size: 13px; color: var(--ink-2); padding: 0 14px 12px; }
 @media (min-width: 960px) {
-  #write .intro { display: grid; grid-template-columns: 1.08fr 1fr; grid-template-rows: auto 1fr; column-gap: 36px; align-items: start; }
+  #write .intro { display: grid; grid-template-columns: 1.08fr 1fr; grid-template-rows: auto 1fr; column-gap: 32px; align-items: start; }
   #write .hero { grid-column: 1; grid-row: 1; padding-bottom: 0; }
-  #write .side-r { grid-column: 2; grid-row: 1 / span 2; }
+  #write .side-r { grid-column: 2; grid-row: 1 / span 2; align-self: stretch; border-left: 1px solid var(--line); padding-left: 32px; }
   #write .preview { grid-column: 1; grid-row: 2; margin-top: 18px; }
   #write .preview .samples-h { margin: 0 0 8px; }
   #write .pv { grid-template-columns: 1fr; gap: 8px; }
