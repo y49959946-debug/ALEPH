@@ -25,7 +25,10 @@
 .eyebrow { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
 .hero h1 { font-family: var(--serif); font-weight: 800; letter-spacing: -.03em; text-wrap: balance; font-size: clamp(26px, 5vw, 36px); line-height: 1.3; letter-spacing: -.025em; margin: 8px 0 12px; }
 .hero p { color: var(--ink-2); margin: 0; }
-.cast { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.cast { display: flex; gap: 10px 18px; margin-top: 18px; flex-wrap: wrap; align-items: flex-end; }
+.cast .grp { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; position: relative; padding-top: 20px; }
+.cast .grp small { position: absolute; top: 0; left: 2px; font-size: 11.5px; font-weight: 700; color: var(--ink-3); letter-spacing: .01em; }
+.cast .grp.main small { color: var(--accent); }
 .cast span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px 4px 4px; }
 .composer { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); padding: 18px; }
 .composer label { display: block; font-size: 14px; font-weight: 700; margin: 0 4px 10px; }
@@ -239,13 +242,32 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 .msg .av-img { width: 44px; height: 44px; }
 .cast .av-img.sm { width: 28px; height: 28px; }
 /* 그림 바탕을 종이색(#f7f4ee)에 맞춰 두었다. 상자·그림자 없이 종이 위에 바로 그린 것처럼 보이게 한다 */
-.hero-img { display: block; width: 100%; height: auto; margin: -8px 0 14px;
+.hero-img, .ill { display: block; width: 100%; height: auto; margin: -8px 0 14px;
   -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 90%, transparent); -webkit-mask-composite: source-in;
   mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 90%, transparent); mask-composite: intersect; }
 
 /* 어두운 화면에서는 종이색 그림이 빛나는 상자처럼 보이므로, 일부러 놓은 종이 카드로 보이게 한다 */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hero-img { -webkit-mask-image: none; mask-image: none; border-radius: 20px; margin-top: 0; } }
-:root[data-theme="dark"] .hero-img { -webkit-mask-image: none; mask-image: none; border-radius: 20px; margin-top: 0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.hero-img, .ill) { -webkit-mask-image: none; mask-image: none; border-radius: 20px; margin-top: 0; } }
+:root[data-theme="dark"] :is(.hero-img, .ill) { -webkit-mask-image: none; mask-image: none; border-radius: 20px; margin-top: 0; }
+/* 설명용 그림: 결과를 대신하지 않도록 장식으로만 (스크린리더에서 숨김) */
+.ill.debate-ill { margin: -6px 0 18px; }
+.ill { -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5%, #000 97.5%, transparent), linear-gradient(to bottom, transparent, #000 3%, #000 94%, transparent); mask-image: linear-gradient(to right, transparent, #000 2.5%, #000 97.5%, transparent), linear-gradient(to bottom, transparent, #000 3%, #000 94%, transparent); }
+figure.imp-ill { margin: 30px 0 0; max-width: 560px; }
+figure.imp-ill .ill { margin: 0; }
+figure.imp-ill figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
+.state { display: flex; gap: 14px; align-items: center; }
+.state img { width: 92px; height: auto; flex: none; }
+.state > div { min-width: 0; }
+@media (max-width: 560px) { .state img { width: 72px; } }
+
+/* 복사 버튼 · 고칠 것 카드 안의 고칠 방법 */
+.copy { margin-left: auto; font-size: 12.5px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 999px; padding: 3px 11px; }
+.copy.done { color: var(--good); background: var(--good-soft); }
+.tag:has(.copy) { display: flex; align-items: center; gap: 8px; }
+.howto { margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: var(--panel-2); }
+.howto .tag { margin: 0 0 4px; }
+.howto .hh { font-weight: 700; line-height: 1.5; }
+.howto .d { margin-top: 2px; }
 
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
@@ -258,11 +280,18 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
   .screen, .msg, .note, .pg, .leaving { animation: none; } .dots i { animation: none; } .chip { transition: none; }
 }
 </style>
+<script>try { const t = localStorage.getItem("hanneun-theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
 <body>
 <header class="top">
-  <div class="top-side"><a class="back" href="../../Plan_page.html" id="back">← 행로</a><span class="brand"><img src="assets/hanneun-mark.svg" alt="" width="22" height="22">한눈</span></div>
-  <nav class="tabs" aria-label="단계"><a href="#" data-go="write" id="tabWrite">글 넣기</a><a href="#" data-go="dash" id="tabDash">결과</a></nav>
+  <div class="top-side"><a class="brand" href="#" data-go="write" aria-label="한눈 처음 화면으로"><img src="assets/hanneun-mark.svg" alt="" width="32" height="32">한눈</a></div>
+  <div class="top-side">
+    <nav class="tabs" aria-label="단계"><a href="#" data-go="write" id="tabWrite">글 넣기</a><a href="#" data-go="dash" id="tabDash">결과</a></nav>
+    <button class="theme" id="theme" type="button" aria-label="어두운 화면으로 바꾸기" title="밝게 / 어둡게">
+      <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
 </header>
 
 <!-- 1. 글 넣기 -->
@@ -273,7 +302,9 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
     <h1>내 자기소개서, 세 사람은 어떻게 읽을까요?</h1>
     <p>글을 넣으면 분석가가 첫인상을 읽고, 세 평가자가 각자의 기준으로 평가한 뒤, 의장이 무엇부터 고칠지 정리해요.</p>
     <div class="cast" aria-label="참여하는 AI">
-      <span><img class="av av-img sm" src="assets/char-analyst.png" alt="">분석가</span><span><img class="av av-img sm" src="assets/char-recruiter.png" alt="">채용 담당자</span><span><img class="av av-img sm" src="assets/char-technical.png" alt="">기술 전문가</span><span><img class="av av-img sm" src="assets/char-reader.png" alt="">비개발 직군 면접관</span><span><img class="av av-img sm" src="assets/char-chair.png" alt="">의장</span>
+      <div class="grp"><small>① 첫인상</small><span><img class="av av-img sm" src="assets/char-analyst.png" alt="">분석가</span></div>
+      <div class="grp main"><small>② 평가자 3명</small><span><img class="av av-img sm" src="assets/char-recruiter.png" alt="">채용 담당자</span><span><img class="av av-img sm" src="assets/char-technical.png" alt="">기술 전문가</span><span><img class="av av-img sm" src="assets/char-reader.png" alt="">비개발 직군 면접관</span></div>
+      <div class="grp"><small>③ 정리</small><span><img class="av av-img sm" src="assets/char-chair.png" alt="">의장</span></div>
     </div>
   </section>
   <section class="composer">
@@ -308,7 +339,19 @@ const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const MAX = 3000, MIN = 50;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 $$(".repo").forEach((a) => (a.href = D.repo));
-if (D.local) { $("#back").hidden = true; $("#demoNote").hidden = true; }
+if (D.local) { $("#demoNote").hidden = true; }
+
+// 밝게/어둡게: 처음에는 기기 설정을 따르고, 버튼을 누르면 그 선택을 기억한다
+const darkNow = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+function syncTheme() { const d = darkNow(); $("#theme").setAttribute("aria-label", d ? "밝은 화면으로 바꾸기" : "어두운 화면으로 바꾸기"); $("#theme").classList.toggle("is-dark", d); }
+$("#theme").addEventListener("click", () => {
+  const next = darkNow() ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("hanneun-theme", next); } catch (e) {}
+  syncTheme();
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", syncTheme);
+syncTheme();
 
 const INITIAL = { recruiter: "채", technical: "기", reader: "면" };
 const pname = (id) => id === "judge" ? "의장" : id === "analyst" ? "분석가" : (D.personas[id] || {}).name || id;
@@ -332,7 +375,21 @@ function setURL(params) {
   const q = new URLSearchParams(params).toString();
   history.replaceState(null, "", location.pathname + (q ? "?" + q : ""));
 }
-$("#tabWrite").addEventListener("click", (e) => { e.preventDefault(); stopTalk(); setURL({}); show("write"); });
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest(".copy"); if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const text = b.dataset.copy || "";
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (err) {
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand("copy"); } catch (e2) {} ta.remove();
+  }
+  b.textContent = ok ? "복사했어요" : "복사 안 됨"; b.classList.toggle("done", ok);
+  setTimeout(() => { b.textContent = "복사"; b.classList.remove("done"); }, 1600);
+});
+const goWrite = (e) => { e.preventDefault(); stopTalk(); setURL({}); show("write"); };
+$("#tabWrite").addEventListener("click", goWrite);
+$(".top .brand").addEventListener("click", goWrite);
 $("#tabDash").addEventListener("click", (e) => {
   e.preventDefault();
   const k = current || firstKey();
@@ -374,12 +431,14 @@ function refresh() {
     if (x.dataset.act === "run") runLocal();
   }));
 }
+const CHAIR_THINK = `<img src="assets/ill-chair-think.png" alt="" aria-hidden="true" width="240" height="231">`;
+const stateBox = (html) => `<div class="state">${CHAIR_THINK}<div>${html}</div></div>`;
 function explain() {
   const n = $("#notice"); n.hidden = false; n.className = "notice";
-  n.innerHTML = picked
+  n.innerHTML = stateBox(picked
     ? `이 샘플은 아직 결과를 준비 중이에요. <b>결과 있음</b> 표시가 붙은 샘플을 골라 보세요.`
     : `<b>공개 사이트에서는 미리 돌려 둔 샘플만 볼 수 있어요.</b><br>분석 한 번에 AI를 6번 부르는데 무료 한도가 하루 약 20번이고, 넣은 글이 외부 AI 서비스로 전송되기 때문이에요. 내 글은 코드를 받아 내 컴퓨터에서 실행하면 같은 화면으로 분석할 수 있어요.
-       <ol><li><a href="${D.repo}" target="_blank" rel="noopener">코드</a>를 받고 README의 처음 설정을 따라 해요</li><li>터미널에서 <code>python -m app.server</code> 실행</li><li>브라우저에서 <code>http://localhost:8765</code> 열기</li></ol>`;
+       <ol><li><a href="${D.repo}" target="_blank" rel="noopener">코드</a>를 받고 README의 처음 설정을 따라 해요</li><li>터미널에서 <code>python -m app.server</code> 실행</li><li>브라우저에서 <code>http://localhost:8765</code> 열기</li></ol>`);
 }
 async function detect() {
   if (!D.local) return;
@@ -567,7 +626,7 @@ async function runLocal() {
 }
 function localFail(msg) {
   show("write");
-  const n = $("#notice"); n.hidden = false; n.className = "notice warn"; n.innerHTML = `분석이 멈췄어요: ${esc(msg)}`;
+  const n = $("#notice"); n.hidden = false; n.className = "notice warn"; n.innerHTML = stateBox(`<b>분석이 멈췄어요.</b><br>${esc(msg)}<br><span class="fine">무료 한도가 끝났다면 오후 4시 이후에 다시 해 보세요. 이미 끝난 단계는 저장돼 있어서 이어서 해요.</span>`);
 }
 
 // ================= 3. 결과: 한 장씩 넘겨 읽기 =================
@@ -668,7 +727,19 @@ function buildPages(M) {
   const imp = R.impression || {}, J = R.judge || {};
   const sref = (ids) => (ids || []).filter((i) => S[i]).map((i) => `<button class="sid" data-sid="${i}">${i}</button>`).join("");
   const who = (id, name, small) => `<div class="who">${av(id)}<div>${esc(name)}<small>${esc(small)}</small></div></div>`;
-  const card = (tag, cls, t, ids) => `<div class="card"><div class="tag ${cls}">${tag}</div><div class="h ${t.short ? "" : "long"}">${esc(t.h)}${sref(ids)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div>`;
+  const copyBtn = (text) => `<button class="copy" type="button" data-copy="${esc(text)}" aria-label="고칠 방법 복사">복사</button>`;
+  const card = (tag, cls, t, ids) => `<div class="card"><div class="tag ${cls}">${tag}${cls === "fix" ? copyBtn(t.o) : ""}</div><div class="h ${t.short ? "" : "long"}">${esc(t.h)}${sref(ids)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div>`;
+  // 의장이 꼽은 문제에 맞는 고칠 방법: 그 문제를 낸 평가자의 제안 중 같은 문장을 가리키는 것
+  const fixFor = (issue) => {
+    const ev = new Set(issue.evidence_ids || []);
+    const cand = [];
+    R.personas.forEach((p) => (p.recommendations || []).forEach((x, i) => {
+      const hit = (x.target_ids || []).filter((t) => ev.has(t)).length;
+      if (hit) cand.push({ score: hit + ((issue.raised_by || []).includes(p.persona_id) ? 10 : 0), t: T(R, `${p.persona_id}.r${i}`, x.suggestion) });
+    }));
+    cand.sort((a, b) => b.score - a.score);
+    return cand[0] ? cand[0].t : null;
+  };
   const P = [];
 
   // 1. 첫인상
@@ -685,7 +756,8 @@ function buildPages(M) {
     <div class="legend">${used.map((l) => `<span class="lab ${l}">${l} <b>${counts[l]}</b></span>`).join("")}</div>
     ${(imp.evidence_sentence_ids || []).filter((i) => S[i]).length ? `<h3>이 인상을 만든 문장</h3>${(imp.evidence_sentence_ids || []).filter((i) => S[i]).map((i) => { const sg = SIG[i]; return `<div class="card"><div class="tag plain">${sg ? `<span class="lab ${esc(sg.label)}">${esc(sg.label)}</span>` : ""}${sref([i])}</div><div class="h long">${esc(S[i].text)}</div></div>`; }).join("")}` : ""}
     ${imp.key_contrast ? `<details class="more" style="margin-top:18px"><summary>어조가 바뀌는 곳</summary><p class="sub" style="font-size:15px;margin:0">${esc(imp.key_contrast)}</p></details>` : ""}
-    ${title.short ? `<details class="orig" style="margin-top:16px"><summary>분석가의 원래 표현</summary><p>“${esc(imp.archetype)}” ${esc(imp.summary)}</p></details>` : ""}` });
+    ${title.short ? `<details class="orig" style="margin-top:16px"><summary>분석가의 원래 표현</summary><p>“${esc(imp.archetype)}” ${esc(imp.summary)}</p></details>` : ""}
+    <figure class="imp-ill" aria-hidden="true"><img class="ill" src="assets/ill-impression.jpg" alt="" width="924" height="298"><figcaption>그림 속 메모는 예시예요. 실제 분석 결과는 위에 있어요.</figcaption></figure>` });
 
   // 2~4. 평가자
   R.personas.forEach((p) => {
@@ -724,6 +796,7 @@ function buildPages(M) {
         ${r.kept_reason ? `<div class="step2"><span class="k">유지한 이유</span><div><span class="reason clamp">${esc(r.kept_reason)}</span></div></div>` : ""}</div>`;
     }).join("");
     P.push({ id: "debate", tab: "토론", html: `
+      <img class="ill debate-ill" src="assets/ill-debate.jpg" alt="" aria-hidden="true" width="1400" height="333">
       ${who("judge", "토론", "서로의 첫 평가를 이름을 가린 채 읽고, 한 번 더 답했어요")}
       <h1>토론 뒤, 판단은 이렇게 됐어요</h1>
       <p class="sub"><span class="shift-badge maintained">유지 ${cnt.maintained}</span> <span class="shift-badge changed_with_valid_evidence">근거 있는 변경 ${cnt.changed_with_valid_evidence}</span> <span class="shift-badge changed_without_evidence">근거 없는 변경 ${cnt.changed_without_evidence}</span></p>
@@ -760,7 +833,7 @@ function buildPages(M) {
   P.push({ id: "fix", tab: "고칠 것", html: `
     ${who("judge", "의장", "세 평가를 모아서")}
     <h1>${issues.length ? `이 ${issues.length}가지부터 고쳐 보세요` : "크게 고칠 점은 없었어요"}</h1>
-    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => av(r, true)).join("")}${sref(x.evidence_ids)}</div>${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
+    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); const f = fixFor(x); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => av(r, true)).join("")}${sref(x.evidence_ids)}</div>${f ? `<div class="howto"><div class="tag fix">→ 이렇게 고쳐보면${copyBtn(f.o)}</div><div class="hh">${esc(f.h)}</div>${f.d ? `<div class="d">${esc(f.d)}</div>` : ""}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
     ${keeps.length ? `<p class="keepline"><span class="mark good">✓ 그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
 
   // 7. 원문
