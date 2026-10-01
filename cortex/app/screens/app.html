@@ -67,6 +67,54 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .notice code { font-size: 13px; background: var(--panel); border-radius: 6px; padding: 1px 6px; }
 .notice ol { margin: 8px 0 0; padding-left: 20px; }
 
+
+/* 첫 화면 넓게: PC에서는 왼쪽 소개 / 오른쪽 입력, 아래 결과 미리보기와 샘플 3열 */
+.page.wide { max-width: 1120px; }
+.steps-h { font-size: 14px; font-weight: 800; color: var(--ink-3); margin: 18px 0 8px; letter-spacing: .02em; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.steps li { display: flex; gap: 12px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 8px 14px 8px 8px; }
+.steps li.main { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.steps li > div { min-width: 0; }
+.steps b { display: block; font-size: 15px; }
+.steps span { font-size: 13px; color: var(--ink-2); }
+.steps .av-img { width: 44px; height: 44px; flex: none; }
+.steps .trio { display: flex; flex: none; }
+.steps .trio .av-img { width: 36px; height: 36px; margin-right: -8px; }
+.steps .trio .av-img:last-child { margin-right: 0; }
+.preview { margin-top: 12px; }
+.pv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pvc { text-align: left; padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; box-shadow: var(--shadow); transition: transform .15s, border-color .15s; }
+.pvc:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.pvc img { display: block; width: 100%; height: auto; aspect-ratio: 640 / 396; object-fit: cover; object-position: top; border-bottom: 1px solid var(--line); }
+.pvc b { display: block; font-size: 15px; padding: 10px 14px 0; }
+.pvc span { display: block; font-size: 13px; color: var(--ink-2); padding: 0 14px 12px; }
+@media (min-width: 960px) {
+  #write .intro { display: grid; grid-template-columns: 1.08fr 1fr; grid-template-rows: auto 1fr; column-gap: 36px; align-items: start; }
+  #write .hero { grid-column: 1; grid-row: 1; padding-bottom: 0; }
+  #write .side-r { grid-column: 2; grid-row: 1 / span 2; }
+  #write .preview { grid-column: 1; grid-row: 2; margin-top: 18px; }
+  #write .preview .samples-h { margin: 0 0 8px; }
+  #write .pv { grid-template-columns: 1fr; gap: 8px; }
+  #write .pvc { display: grid; grid-template-columns: 168px 1fr; grid-template-rows: auto 1fr; align-items: start; box-shadow: none; }
+  #write .pvc img { grid-row: 1 / span 2; height: 100%; aspect-ratio: auto; border-bottom: 0; border-right: 1px solid var(--line); }
+  #write .pvc b { padding: 12px 14px 0; } #write .pvc span { padding: 2px 14px 12px; }
+  #write .hero { padding-top: 4px; }
+  #write .hero-img { margin-bottom: 6px; }
+  #write .side-r { margin-top: 8px; }
+  #write .side-r .samples-h { margin-top: 22px; }
+  #write .chip { padding: 10px 12px; }
+  #write .chip small { font-size: 12.5px; }
+}
+@media (max-width: 700px) {
+  .pv { grid-template-columns: 1fr; gap: 8px; }
+  .pvc { display: grid; grid-template-columns: 116px 1fr; align-items: center; box-shadow: none; }
+  .pvc img { grid-row: 1 / span 2; height: 100%; aspect-ratio: auto; border-bottom: 0; border-right: 1px solid var(--line); }
+  .pvc b { padding: 10px 12px 0; } .pvc span { padding: 0 12px 10px; }
+  #write .chips { grid-template-columns: 1fr 1fr; gap: 6px; }
+  #write .chip { padding: 9px 10px; } #write .chip small { font-size: 12px; line-height: 1.4; }
+  #write .chip b { font-size: 13.5px; gap: 5px; flex-wrap: wrap; }
+  #write .chip[aria-pressed="true"]::after { display: none; }
+}
 /* ============ 2. 심의 (채팅) ============ */
 .chat { display: flex; flex-direction: column; gap: 14px; min-height: 60vh; }
 .msg { display: flex; gap: 10px; align-items: flex-start; animation: rise .3s ease-out both; }
@@ -342,18 +390,20 @@ section.closing .again { margin-top: 14px; }
 </header>
 
 <!-- 1. 글 넣기 -->
-<main class="page screen" id="write" hidden>
+<main class="page wide screen" id="write" hidden>
+  <div class="intro">
   <section class="hero">
     <img class="hero-img" src="assets/hero.jpg" alt="세 사람이 한 장의 자기소개서를 각자의 방식으로 함께 읽는 그림" width="1200" height="388">
     <div class="eyebrow">한눈 · 한 글을 여러 눈으로 읽어봅니다</div>
     <h1>내 자기소개서, 세 사람은 어떻게 읽을까요?</h1>
-    <p>글을 넣으면 분석가가 첫인상을 읽고, 세 평가자가 각자의 기준으로 평가한 뒤, 의장이 무엇부터 고칠지 정리해요.</p>
-    <div class="cast" aria-label="참여하는 AI">
-      <div class="grp"><small>① 첫인상</small><span><img class="av av-img sm" src="assets/char-analyst.png" alt="">분석가</span></div>
-      <div class="grp main"><small>② 평가자 3명</small><span><img class="av av-img sm" src="assets/char-recruiter.png" alt="">채용 담당자</span><span><img class="av av-img sm" src="assets/char-technical.png" alt="">기술 전문가</span><span><img class="av av-img sm" src="assets/char-reader.png" alt="">비개발 직군 면접관</span></div>
-      <div class="grp"><small>③ 정리</small><span><img class="av av-img sm" src="assets/char-chair.png" alt="">의장</span></div>
-    </div>
+    <h2 class="steps-h">이렇게 진행돼요</h2>
+    <ol class="steps" aria-label="진행 순서">
+      <li><img class="av av-img" src="assets/char-analyst.png" alt=""><div><b>분석가가 첫인상을 읽어요</b><span>어떤 어조로 읽히는지, 그 인상을 만든 문장은 무엇인지</span></div></li>
+      <li class="main"><span class="trio"><img class="av av-img" src="assets/char-recruiter.png" alt=""><img class="av av-img" src="assets/char-technical.png" alt=""><img class="av av-img" src="assets/char-reader.png" alt=""></span><div><b>평가자 3명이 각자 평가해요</b><span>채용 담당자 · 기술 전문가 · 비개발 직군 면접관이 서로 보지 않고 읽어요</span></div></li>
+      <li><img class="av av-img" src="assets/char-chair.png" alt=""><div><b>의장이 무엇부터 고칠지 정리해요</b><span>판정이 갈린 문장과 고칠 방법까지</span></div></li>
+    </ol>
   </section>
+  <div class="side-r">
   <section class="composer">
     <div class="notice" id="env" hidden style="margin:0 0 14px"></div>
     <div class="notice" id="demoNote" style="margin:0 0 14px">공개 데모에서는 <b>미리 분석해 둔 샘플</b>만 볼 수 있어요. 무료 AI 한도가 작고, 넣은 글이 외부 AI 서비스로 전송되기 때문이에요. 내 글은 <a class="repo" target="_blank" rel="noopener">코드</a>를 받아 내 컴퓨터에서 분석할 수 있어요.</div>
@@ -362,8 +412,19 @@ section.closing .again { margin-top: 14px; }
     <div class="row"><span class="count" id="count">0자</span><div class="actions" id="actions"></div></div>
     <div class="notice" id="notice" hidden role="status"></div>
   </section>
-  <div class="samples-h"><h2>샘플로 해보기</h2><span class="fine">모두 지어낸 글이에요</span></div>
-  <div class="chips" id="chips"></div>
+    <div class="samples-h"><h2>샘플로 해보기</h2><span class="fine">모두 지어낸 글이에요</span></div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <section class="preview" aria-label="결과 미리보기">
+    <div class="samples-h"><h2>이런 결과를 받아요</h2><span class="fine">샘플 01 결과 · 누르면 그 장으로</span></div>
+    <div class="pv">
+      <button class="pvc" data-pv="imp"><img src="assets/preview-imp.jpg" alt="" loading="lazy" width="640" height="396"><b>첫인상</b><span>어떤 어조로 읽히는지</span></button>
+      <button class="pvc" data-pv="clash"><img src="assets/preview-clash.jpg" alt="" loading="lazy" width="640" height="396"><b>갈린 판정</b><span>같은 문장, 평가자마다 다른 판단</span></button>
+      <button class="pvc" data-pv="fix"><img src="assets/preview-fix.jpg" alt="" loading="lazy" width="640" height="396"><b>고칠 것</b><span>무엇부터, 어떻게 고칠지</span></button>
+    </div>
+  </section>
+  </div>
+
   <p class="fine" style="margin-top:28px">분석 결과는 글이 이렇게 읽힌다는 인상이지, 작성자의 역량이나 성격을 판단한 것이 아니에요. · <a class="repo" target="_blank" rel="noopener">코드 보기</a><span id="home"> · <a href="../../Plan_page.html">만든 사람의 포트폴리오(행로)</a></span></p>
 </main>
 
@@ -387,6 +448,13 @@ const MAX = 3000, MIN = 50;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 $$(".repo").forEach((a) => (a.href = D.repo));
 if (D.local) { $("#demoNote").hidden = true; $("#home").hidden = true; }
+else { $("#text").style.minHeight = "150px"; }
+// 결과 미리보기: 누르면 결과가 있는 첫 샘플의 그 장으로
+$$(".pvc").forEach((b) => b.addEventListener("click", () => {
+  const k = firstKey(); if (!k) return;
+  openDash(k); const i = pages.findIndex((p) => p.id === b.dataset.pv); if (i > 0) go(i);
+}));
+if (!Object.keys(D.runs).length) $(".preview").hidden = true;
 
 // 밝게/어둡게: 처음에는 기기 설정을 따르고, 버튼을 누르면 그 선택을 기억한다
 const darkNow = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
