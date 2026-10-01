@@ -74,7 +74,7 @@ button { cursor: pointer; }
 .top {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px 16px; background: color-mix(in srgb, var(--bg-top) 82%, transparent);
+  padding: 12px 32px; background: color-mix(in srgb, var(--bg-top) 82%, transparent);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
 }
 .top .brand { display: inline-flex; align-items: center; gap: 9px; font-size: 21px; font-weight: 800; letter-spacing: -.02em; color: #2c576d; text-decoration: none; }
@@ -90,7 +90,7 @@ button { cursor: pointer; }
 }
 .tabs a[aria-current="page"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .top-side { display: flex; align-items: center; gap: 10px; min-width: 0; }
-@media (max-width: 560px) { .top .brand { font-size: 18px; gap: 7px; } .top .brand img { width: 28px; height: 28px; } .theme { width: 34px; height: 34px; } .top-side { gap: 8px; } .tabs a { padding: 6px 10px; font-size: 13.5px; } }
+@media (max-width: 560px) { .top { padding: 10px 18px; } .top .brand { font-size: 18px; gap: 7px; } .top .brand img { width: 28px; height: 28px; } .theme { width: 34px; height: 34px; } .top-side { gap: 8px; } .tabs a { padding: 6px 10px; font-size: 13.5px; } }
 
 .page { max-width: 760px; margin: 0 auto; padding: 28px 16px 96px; }
 .fine { font-size: 13px; color: var(--ink-3); }
@@ -144,14 +144,16 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .chips { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 @media (max-width: 560px) { .chips { grid-template-columns: 1fr; } }
 .chip { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; transition: border-color .15s, transform .15s; }
-.chip:hover { border-color: var(--accent); transform: translateY(-1px); }
-.chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.chip:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); transform: translateY(-1px); }
+.chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); position: relative; }
+.chip[aria-pressed="true"]::after { content: "선택함"; position: absolute; top: 10px; right: 12px; font-size: 11.5px; font-weight: 800; color: var(--accent); }
 .chip b { font-size: 14px; display: flex; align-items: center; gap: 8px; }
 .chip small { font-size: 13px; color: var(--ink-2); }
 .tag { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
 .tag.ready { background: var(--good-soft); color: var(--good); }
 .tag.wait { background: var(--panel-2); color: var(--ink-3); }
-.notice { margin-top: 14px; border-radius: 16px; padding: 14px 16px; font-size: 14.5px; background: var(--accent-soft); }
+.notice { margin-top: 14px; border-radius: 16px; padding: 14px 16px; font-size: 15px; line-height: 1.6; background: var(--accent-soft); }
+.state b:first-child { font-size: 16px; }
 .notice.warn { background: var(--warn-soft); }
 .notice code { font-size: 13px; background: var(--panel); border-radius: 6px; padding: 1px 6px; }
 .notice ol { margin: 8px 0 0; padding-left: 20px; }
@@ -287,7 +289,7 @@ details.more[open] > summary { margin-bottom: 8px; }
 .matrix td.s .sid { margin-right: 8px; }
 .matrix td.c, .matrix th.c { width: 54px; }
 @media (max-width: 560px) { .matrix td.c, .matrix th.c { width: 42px; } }
-.matrix .chip2 { display: inline-grid; place-items: center; width: 30px; height: 28px; border-radius: 8px; font-weight: 800; }
+.matrix .chip2 { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; font-weight: 800; }
 .matrix .chip2.good { background: var(--good-soft); color: var(--good); } .matrix .chip2.warn { background: var(--warn-soft); color: var(--warn); } .matrix .chip2.mixed { background: var(--accent-soft); color: var(--accent); } .matrix .chip2.none { color: var(--line); }
 .matrix tr.mrow { cursor: pointer; } .matrix tr.mrow:hover td { background: color-mix(in srgb, var(--accent) 5%, transparent); }
 .matrix tr.clash td.s .tx { color: var(--ink); font-weight: 700; }
@@ -360,11 +362,22 @@ figure.imp-ill { margin: 30px 0 0; max-width: 560px; }
 figure.imp-ill .ill { margin: 0; }
 figure.imp-ill figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
 /* 표정이 보이도록: 판정이 갈린 문장 · 토론 카드에서는 얼굴을 크게 */
-.card > .v + img.av-img.sm, .vs .card > img.av-img.sm { width: 46px; height: 46px; flex: none; }
+.vcard > img.av-img.sm, .vs .card > img.av-img.sm { width: 46px; height: 46px; flex: none; }
+.vcard { border-left: 4px solid var(--line); } .vcard.good { border-left-color: var(--good); } .vcard.warn { border-left-color: var(--warn); } .vcard.mixed { border-left-color: var(--accent); }
+.vi { width: 1.35em; height: 1.35em; vertical-align: -0.33em; margin-right: 4px; }
+.card .tag .vi, .mark .vi { width: 20px; height: 20px; vertical-align: -5px; margin-right: 5px; }
+.vp .vi { width: 18px; height: 18px; vertical-align: -4px; margin: 0 3px 0 -4px; }
+.matrix .chip2 .vi { width: 22px; height: 22px; margin: 0; vertical-align: middle; }
+.vlegend { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: -4px 0 10px; }
+.vp { display: inline-block; font-size: 12px; font-weight: 800; line-height: 1.5; padding: 1px 9px; border-radius: 999px; margin: 0 2px; vertical-align: 1px; white-space: nowrap; }
+.vp.good { background: var(--good-soft); color: var(--good); } .vp.warn { background: var(--warn-soft); color: var(--warn); } .vp.mixed { background: var(--accent-soft); color: var(--accent); }
 .card.debate .head img.av-img.sm { width: 40px; height: 40px; }
-figure.closing { margin: 34px auto 6px; max-width: 260px; text-align: center; }
-figure.closing .ill { margin: 0; }
-figure.closing figcaption { font-size: 14px; font-weight: 700; color: var(--ink-2); margin-top: 6px; }
+section.closing { display: grid; grid-template-columns: 220px 1fr; gap: 22px; align-items: center; margin: 34px 0 8px; padding: 18px 22px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); box-shadow: var(--shadow); }
+section.closing .ill { margin: 0; border-radius: 14px; -webkit-mask-image: none; mask-image: none; }
+section.closing .txt > b { font-size: 19px; }
+section.closing p { margin: 4px 0 0; color: var(--ink-2); font-size: 15px; }
+section.closing .again { margin-top: 14px; }
+@media (max-width: 560px) { section.closing { grid-template-columns: 1fr; text-align: center; padding: 16px; } section.closing .ill { max-width: 220px; margin: 0 auto; } section.closing .again { justify-content: center; } }
 @media (max-width: 560px) {
   .cast { gap: 8px 10px; margin-top: 14px; }
   .cast .grp { padding-top: 0; gap: 5px; }
@@ -488,6 +501,10 @@ const avM = (id, mood, sm) => {
   const f = (MOOD[mood] || {})[id] || mood;
   return `<img class="av av-img ${sm ? "sm" : ""}" src="assets/face/${CHAR[id]}-${f}.png" alt="${esc(pname(id))}" title="${esc(pname(id))}">`;
 };
+// 판정은 기호만 쓰지 않고 말로 보여준다 (✓ ± △ 만으로는 뜻이 바로 안 읽힘)
+const VWORD = { good: "강점", warn: "아쉬움", mixed: "둘 다", none: "–" };
+const ico = (cls) => `<img class="vi" src="assets/icon/${cls}.png" alt="" aria-hidden="true">`;
+const vpill = (cls, label) => `<span class="vp ${cls}">${cls === "none" ? "" : ico(cls)}${esc(label || VWORD[cls])}</span>`;
 const verdictMood = (v) => v === "good" ? "pos" : v === "warn" ? "neg" : v === "mixed" ? "think" : "";
 const shiftMood = (t) => t === "maintained" ? "pos" : t === "changed_with_valid_evidence" ? "wow" : t === "changed_without_evidence" ? "think" : "think";
 
@@ -569,7 +586,7 @@ const stateBox = (html) => `<div class="state">${CHAIR_THINK}<div>${html}</div><
 function explain() {
   const n = $("#notice"); n.hidden = false; n.className = "notice";
   n.innerHTML = stateBox(picked
-    ? `이 샘플은 아직 결과를 준비 중이에요. <b>결과 있음</b> 표시가 붙은 샘플을 골라 보세요.`
+    ? `<b>이 샘플은 아직 결과를 준비 중이에요.</b><br>지금은 <b>결과 있음</b> 표시가 붙은 샘플을 볼 수 있어요.`
     : `<b>공개 사이트에서는 미리 돌려 둔 샘플만 볼 수 있어요.</b><br>분석 한 번에 AI를 6번 부르는데 무료 한도가 하루 약 20번이고, 넣은 글이 외부 AI 서비스로 전송되기 때문이에요. 내 글은 코드를 받아 내 컴퓨터에서 실행하면 같은 화면으로 분석할 수 있어요.
        <ol><li><a href="${D.repo}" target="_blank" rel="noopener">코드</a>를 받고 README의 처음 설정을 따라 해요</li><li>터미널에서 <code>python -m app.server</code> 실행</li><li>브라우저에서 <code>http://localhost:8765</code> 열기</li></ol>`);
 }
@@ -598,7 +615,7 @@ function model(R) {
   const verdict = (sid, pid) => {
     const v = (byS[sid] || {})[pid];
     if (!v) return ["none", "–", "언급 없음", ""];
-    if (v.good.length && v.warn.length) return ["mixed", "±", "강점이자 아쉬움", [...v.good, ...v.warn].join(" ")];
+    if (v.good.length && v.warn.length) return ["mixed", "±", "강점+아쉬움", [...v.good, ...v.warn].join(" ")];
     if (v.good.length) return ["good", "✓", "강점", v.good.join(" ")];
     return ["warn", "△", "아쉬움", v.warn.join(" ")];
   };
@@ -649,7 +666,7 @@ function lines(M) {
   R.personas.forEach((p) => {
     const pid = p.persona_id, w = (p.weaknesses || [])[0];
     const html = [`<p>${esc(T(R, `${pid}.summary`, firstSentence(p.summary)).h)}</p>`];
-    if (w) html.push(`<p><span class="mark warn">△</span> ${esc(T(R, `${pid}.w0`, w.claim).h)}</p>`);
+    if (w) html.push(`<p>${vpill("warn", "아쉬움")} ${esc(T(R, `${pid}.w0`, w.claim).h)}</p>`);
     const avg = (p.scores || []).reduce((a, x) => a + x.score, 0) / Math.max(1, (p.scores || []).length);
     L.push([pid, html, `${pname(pid)} 기준으로 읽는 중`, avg >= 4 ? "pos" : avg && avg <= 2.5 ? "neg" : ""]);
   });
@@ -668,7 +685,7 @@ function lines(M) {
   if (clashes.length) {
     const sid = clashes[0];
     const parts = R.personas.map((p) => [p.persona_id, M.verdict(sid, p.persona_id)]).filter(([, v]) => v[0] !== "none")
-      .map(([pid, v]) => `${esc(pname(pid))} <span class="mark ${v[0]}">${v[1]}</span>`).join(" · ");
+      .map(([pid, v]) => `${esc(pname(pid))} ${vpill(v[0], v[2])}`).join(" · ");
     L.push(["judge", [`<p>같은 문장(<b>${sid}</b>)에서 판정이 갈렸어요. ${parts}</p>`], "평가를 맞춰 보는 중", "think"]);
   }
   const J = R.judge || {};
@@ -772,7 +789,7 @@ function openDash(key, startPage = 0) {
   pages = buildPages(M);
   $("#dash").innerHTML = `
     <aside class="side">
-      <div class="book-head"><select id="sel" aria-label="다른 결과 보기">${pickerOptions(key)}</select><span class="fine sel-note">${esc(key.startsWith("sample_") ? D.notes[key] || "" : "직접 넣은 글")}</span><button class="btn" id="replay">▶ 심의 다시 보기</button></div>
+      <div class="book-head"><select id="sel" aria-label="다른 결과 보기">${pickerOptions(key)}</select><span class="fine sel-note">${esc(key.startsWith("sample_") ? D.notes[key] || "" : "직접 넣은 글")}</span><button class="btn" id="replay">▶ 심의 과정 다시 보기</button></div>
       <nav class="toc" id="toc" aria-label="결과 순서">${pages.map((p, i) => `<button data-page="${i}"><b class="num">${String(i + 1).padStart(2, "0")}</b><span>${esc(p.tab)}</span></button>`).join("")}</nav>
     </aside>
     <div class="main" id="pgwrap"></div>`;
@@ -842,7 +859,7 @@ function pickSentence(sid) {
     const cl = M.claimsFor(sid, p.persona_id);
     if (!cl.length) return;
     const fx = M.fixesFor(sid, p.persona_id)[0];
-    memos.push(cl.map((c) => `<div class="memo ${c.cls}"><div class="by">${avM(p.persona_id, verdictMood(c.cls), true)}${esc(pname(p.persona_id))} <span class="mark ${c.cls}">${c.cls === "good" ? "✓ 좋았던 점" : "△ 아쉬운 점"}</span></div>${esc(c.t.h)}${fx && c.cls === "warn" ? `<span class="fix">${esc(fx.h)}</span>` : ""}</div>`).join(""));
+    memos.push(cl.map((c) => `<div class="memo ${c.cls}"><div class="by">${avM(p.persona_id, verdictMood(c.cls), true)}${esc(pname(p.persona_id))} <span class="mark ${c.cls}">${c.cls === "good" ? ico("good") + "좋았던 점" : ico("warn") + "아쉬운 점"}</span></div>${esc(c.t.h)}${fx && c.cls === "warn" ? `<span class="fix">${esc(fx.h)}</span>` : ""}</div>`).join(""));
   });
   if (memos.length === 1) memos.push(`<p class="fine" style="margin:0">세 평가자 모두 이 문장은 언급하지 않았어요.</p>`);
   line.nextElementSibling.innerHTML = memos.join("");
@@ -900,14 +917,14 @@ function buildPages(M) {
     const w = (p.weaknesses || []).map((x, i) => [T(R, `${pid}.w${i}`, x.claim), x.evidence_ids]);
     const r = (p.recommendations || []).map((x, i) => [T(R, `${pid}.r${i}`, x.suggestion), x.target_ids]);
     const sum = T(R, `${pid}.summary`, firstSentence(p.summary));
-    const rest = [...g.slice(1).map(([t, ids]) => card("✓ 좋았던 점", "good", t, ids)), ...w.slice(1).map(([t, ids]) => card("△ 아쉬운 점", "warn", t, ids)), ...r.slice(1).map(([t, ids]) => card("→ 이렇게 고쳐보면", "fix", t, ids))];
+    const rest = [...g.slice(1).map(([t, ids]) => card(ico("good") + "좋았던 점", "good", t, ids)), ...w.slice(1).map(([t, ids]) => card(ico("warn") + "아쉬운 점", "warn", t, ids)), ...r.slice(1).map(([t, ids]) => card(ico("fix") + "이렇게 고쳐보면", "fix", t, ids))];
     const scores = (p.scores || []).map((s) => `<div class="srow2"><span>${esc(s.criterion)}</span><span class="pips" aria-label="${s.score}점 / 5점">${"●".repeat(s.score)}<span class="off">${"●".repeat(5 - s.score)}</span><b>${s.score}</b></span></div>`).join("");
     P.push({ id: pid, tab: pname(pid), html: `
       ${who(pid, pname(pid), meta.lens || "")}
       <h1>${esc(sum.h)}</h1>
-      ${g[0] ? card("✓ 좋았던 점", "good", g[0][0], g[0][1]) : ""}
-      ${w[0] ? card("△ 아쉬운 점", "warn", w[0][0], w[0][1]) : ""}
-      ${r[0] ? card("→ 이렇게 고쳐보면", "fix", r[0][0], r[0][1]) : ""}
+      ${g[0] ? card(ico("good") + "좋았던 점", "good", g[0][0], g[0][1]) : ""}
+      ${w[0] ? card(ico("warn") + "아쉬운 점", "warn", w[0][0], w[0][1]) : ""}
+      ${r[0] ? card(ico("fix") + "이렇게 고쳐보면", "fix", r[0][0], r[0][1]) : ""}
       ${rest.length ? `<details class="more"><summary>${rest.length}개 더 보기</summary>${rest.join("")}</details>` : ""}
       <details class="more"><summary>기준별 점수</summary><div class="card scores">${scores}</div></details>` });
   });
@@ -945,7 +962,7 @@ function buildPages(M) {
       const cl = M.claimsFor(sid, p.persona_id);
       const v = M.verdict(sid, p.persona_id);
       const text = cl.length ? cl.map((c) => esc(c.t.h)).join("<br>") : `<span class="fine">이 문장은 언급하지 않았어요.</span>`;
-      return `<div class="card"><span class="v mark ${v[0]}">${v[0] === "none" ? "–" : v[1]}</span>${avM(p.persona_id, verdictMood(v[0]), true)}<div class="body"><div class="who2">${esc(pname(p.persona_id))} · ${v[2]}</div><div class="h">${text}</div></div></div>`;
+      return `<div class="card vcard ${v[0]}">${avM(p.persona_id, verdictMood(v[0]), true)}<div class="body"><div class="who2">${esc(pname(p.persona_id))} ${v[0] === "none" ? `<span class="fine">언급 없음</span>` : vpill(v[0], v[2])}</div><div class="h">${text}</div></div></div>`;
     }).join("");
     P.push({ id: "clash", tab: "갈린 판정", html: `
       ${who("judge", "의장", "판정이 갈린 문장")}
@@ -967,8 +984,8 @@ function buildPages(M) {
   P.push({ id: "fix", tab: "고칠 것", html: `
     ${who("judge", "의장", "세 평가를 모아서")}
     <h1>${issues.length ? `이 ${issues.length}가지부터 고쳐 보세요` : "크게 고칠 점은 없었어요"}</h1>
-    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); const f = fixFor(x); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => avM(r, "neg", true)).join("")}${sref(x.evidence_ids)}</div>${f ? `<div class="howto"><div class="tag fix">→ 이렇게 고쳐보면${copyBtn(f.o)}</div><div class="hh">${esc(f.h)}</div>${f.d ? `<div class="d">${esc(f.d)}</div>` : ""}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
-    ${keeps.length ? `<p class="keepline"><span class="mark good">✓ 그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
+    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); const f = fixFor(x); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => avM(r, "neg", true)).join("")}${sref(x.evidence_ids)}</div>${f ? `<div class="howto"><div class="tag fix">${ico("fix")}이렇게 고쳐보면${copyBtn(f.o)}</div><div class="hh">${esc(f.h)}</div>${f.d ? `<div class="d">${esc(f.d)}</div>` : ""}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
+    ${keeps.length ? `<p class="keepline"><span class="mark good">${ico("good")}그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
 
   // 7. 원문
   P.push({ id: "orig", tab: "원문", html: `
@@ -984,11 +1001,15 @@ function buildPages(M) {
     <h1>${esc(title.h)}</h1>
     <p class="sub">${esc(osum.h)}</p>
     <h3>심의 표 <span class="fine">행을 누르면 원문으로</span></h3>
-    <table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = M.verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : v[1]}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>
+    <div class="vlegend">${vpill("good")}${vpill("warn")}${vpill("mixed", "강점+아쉬움")}<span class="fine">· 언급 없음</span></div>
+    <table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = M.verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : ico(v[0])}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>
     <h3>먼저 고칠 것</h3>
     ${issues.map((x, n) => `<div class="card"><div class="h" style="font-size:16px">${n + 1}. ${esc(T(R, `judge.i${n}`, x.issue).h)} <span class="prio ${esc(x.priority)}">${esc(x.priority)}</span></div></div>`).join("")}
-    <figure class="closing" aria-hidden="true"><img class="ill" src="assets/ill-summary.jpg" alt="" width="496" height="280"><figcaption>심의가 끝났어요. 위의 1번부터 하나씩 고쳐 보세요.</figcaption></figure>
-    <div class="again"><button class="btn" id="againFirst">처음 장부터 다시 보기</button><button class="btn" id="againTalk">▶ 심의 다시 보기</button></div>
+    <section class="closing">
+      <img class="ill" src="assets/ill-summary.jpg" alt="" aria-hidden="true" width="496" height="280">
+      <div class="txt"><b>심의가 끝났어요</b><p>위의 <b>1번</b>부터 하나씩 고쳐 보세요. 고친 글을 다시 넣으면 달라진 점을 볼 수 있어요.</p>
+        <div class="again"><button class="btn" id="againFirst">결과 처음부터 보기</button><button class="btn" id="againTalk">▶ 심의 과정 다시 보기</button></div></div>
+    </section>
     <details class="info"><summary>실험 정보</summary><dl>
       <dt>평가 모델</dt><dd>${esc(R.model)}</dd><dt>실행</dt><dd>${esc(R.run_id)} · ${esc(R.created_at)}</dd>
       <dt>근거 검증</dt><dd>원문에 없는 근거 ${R.invalid}건 제외</dd>
