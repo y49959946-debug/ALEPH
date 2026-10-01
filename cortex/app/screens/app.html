@@ -1026,10 +1026,14 @@ function buildSections(id) {
   (root.querySelector("h1") || root.firstElementChild).insertAdjacentElement("afterend", bar);
   list.forEach((x) => x.el.classList.add("sec-target"));
   // 목차 윗선 = 첫 묶음(카드)의 윗선
-  rail.style.marginTop = "0px";
+  rail.style.marginTop = "0px"; rail.style.top = "";
   requestAnimationFrame(() => {
     const first = list[0].el.getBoundingClientRect().top, me = rail.getBoundingClientRect().top;
     rail.style.marginTop = Math.max(0, first - me) + "px";
+    // 스크롤해도 목차가 처음 자리(첫 카드 윗선 높이)에 그대로 따라 내려온다.
+    // 목차가 길어 아래 넘김 막대에 가려질 만큼이면 그만큼 위로 올린다
+    const h = rail.offsetHeight, pagerH = ($("#pager")?.offsetHeight || 76) + 16;
+    rail.style.top = Math.max(92, Math.min(first, window.innerHeight - pagerH - h)) + "px";
   });
   const jump = (i) => {
     const el = list[i].el; el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
