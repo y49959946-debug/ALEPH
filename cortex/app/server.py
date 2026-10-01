@@ -88,9 +88,11 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/", "/index.html", "/view.html"):
             return self._send(200, _page())
         if path.startswith("/assets/"):
-            f = (web.DEMO_DIR / "assets" / path.rsplit("/", 1)[-1])
+            # assets 폴더 안(하위 폴더 포함)만 허용한다. ../ 로 밖을 읽지 못하게 막는다.
+            base = (web.DEMO_DIR / "assets").resolve()
+            f = (base / path[len("/assets/"):]).resolve()
             types = {".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon", ".jpg": "image/jpeg"}
-            if f.suffix in types and f.exists():
+            if base in f.parents and f.suffix in types and f.exists():
                 return self._send(200, f.read_bytes(), types[f.suffix])
             return self._send(404, "없는 파일이에요")
         if path.startswith("/api/run/"):

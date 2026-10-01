@@ -9,6 +9,13 @@
 <link rel="icon" href="assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta property="og:title" content="한눈 · 한 글을 여러 눈으로 읽어봅니다">
+<meta property="og:description" content="자기소개서 한 편을 AI 평가자 세 명이 각자의 기준으로 읽고, 의장이 무엇부터 고칠지 정리해요.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aleph-flame.vercel.app/cortex/demo/">
+<meta property="og:image" content="https://aleph-flame.vercel.app/cortex/demo/assets/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -346,6 +353,20 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 figure.imp-ill { margin: 30px 0 0; max-width: 560px; }
 figure.imp-ill .ill { margin: 0; }
 figure.imp-ill figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
+/* 표정이 보이도록: 판정이 갈린 문장 · 토론 카드에서는 얼굴을 크게 */
+.card > .v + img.av-img.sm, .vs .card > img.av-img.sm { width: 46px; height: 46px; flex: none; }
+.card.debate .head img.av-img.sm { width: 40px; height: 40px; }
+figure.closing { margin: 34px auto 6px; max-width: 260px; text-align: center; }
+figure.closing .ill { margin: 0; }
+figure.closing figcaption { font-size: 14px; font-weight: 700; color: var(--ink-2); margin-top: 6px; }
+@media (max-width: 560px) {
+  .cast { gap: 8px 10px; margin-top: 14px; }
+  .cast .grp { padding-top: 0; gap: 5px; }
+  .cast .grp small { position: static; margin-right: 2px; }
+  .cast span { font-size: 12.5px; padding: 3px 10px 3px 3px; }
+  .cast .av-img.sm { width: 24px; height: 24px; }
+}
+.empty-dash { grid-column: 1 / -1; width: min(560px, 100%); margin: 56px auto; padding: 0 16px; }
 .state { display: flex; gap: 14px; align-items: center; }
 .state img { width: 92px; height: auto; flex: none; }
 .state > div { min-width: 0; }
@@ -408,7 +429,7 @@ figure.imp-ill figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 
   </section>
   <div class="samples-h"><h2>샘플로 해보기</h2><span class="fine">모두 지어낸 글이에요</span></div>
   <div class="chips" id="chips"></div>
-  <p class="fine" style="margin-top:28px">분석 결과는 글이 이렇게 읽힌다는 인상이지, 작성자의 역량이나 성격을 판단한 것이 아니에요. · <a class="repo" target="_blank" rel="noopener">코드 보기</a></p>
+  <p class="fine" style="margin-top:28px">분석 결과는 글이 이렇게 읽힌다는 인상이지, 작성자의 역량이나 성격을 판단한 것이 아니에요. · <a class="repo" target="_blank" rel="noopener">코드 보기</a><span id="home"> · <a href="../../Plan_page.html">만든 사람의 포트폴리오(행로)</a></span></p>
 </main>
 
 <!-- 2. 심의 중 (채팅) -->
@@ -430,7 +451,7 @@ const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const MAX = 3000, MIN = 50;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 $$(".repo").forEach((a) => (a.href = D.repo));
-if (D.local) { $("#demoNote").hidden = true; }
+if (D.local) { $("#demoNote").hidden = true; $("#home").hidden = true; }
 
 // 밝게/어둡게: 처음에는 기기 설정을 따르고, 버튼을 누르면 그 선택을 기억한다
 const darkNow = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -450,6 +471,19 @@ const CHAR = { analyst: "analyst", recruiter: "recruiter", technical: "technical
 const av = (id, sm) => CHAR[id]
   ? `<img class="av av-img ${sm ? "sm" : ""}" src="assets/char-${CHAR[id]}.png" alt="${esc(pname(id))}" title="${esc(pname(id))}">`
   : `<i class="av ${sm ? "sm " : ""}" title="${esc(pname(id))}">${INITIAL[id] || "?"}</i>`;
+// 표정: 판정이나 상황에 맞는 얼굴 (긍정 pos · 아쉬움 neg · 고민 think · 일하는 중 work · 놀람 wow · 발견 find)
+const MOOD = {
+  pos:  { analyst: "find", recruiter: "pos", technical: "pos", reader: "pos", judge: "pos" },
+  neg:  { analyst: "think", recruiter: "neg", technical: "think", reader: "neg", judge: "think" },
+  work: { analyst: "work", recruiter: "memo", technical: "work", reader: "memo", judge: "work" },
+};
+const avM = (id, mood, sm) => {
+  if (!CHAR[id] || !mood) return av(id, sm);
+  const f = (MOOD[mood] || {})[id] || mood;
+  return `<img class="av av-img ${sm ? "sm" : ""}" src="assets/face/${CHAR[id]}-${f}.png" alt="${esc(pname(id))}" title="${esc(pname(id))}">`;
+};
+const verdictMood = (v) => v === "good" ? "pos" : v === "warn" ? "neg" : v === "mixed" ? "think" : "";
+const shiftMood = (t) => t === "maintained" ? "pos" : t === "changed_with_valid_evidence" ? "wow" : t === "changed_without_evidence" ? "think" : "think";
 
 // ================= 화면 전환 =================
 let current = null;   // 지금 보고 있는 결과 key
@@ -484,7 +518,9 @@ $(".top .brand").addEventListener("click", goWrite);
 $("#tabDash").addEventListener("click", (e) => {
   e.preventDefault();
   const k = current || firstKey();
-  if (k) { stopTalk(); openDash(k); } else show("write");
+  if (k) { stopTalk(); openDash(k); return; }
+  stopTalk(); show("dash"); $("#pager").hidden = true;
+  $("#dash").innerHTML = `<div class="empty-dash"><div class="notice">${stateBox(`<b>아직 볼 결과가 없어요.</b><br>글 넣기에서 샘플을 고르거나 글을 넣고 심의를 시작해 주세요.`)}</div></div>`;
 });
 const firstKey = () => Object.keys(D.runs).filter((k) => k.startsWith("sample_")).sort()[0] || Object.keys(D.runs)[0];
 
@@ -581,13 +617,13 @@ const firstSentence = (t) => { const m = String(t || "").match(/^.+?[.!?](\s|$)/
 let talkToken = 0, fastForward = false;
 function stopTalk() { talkToken++; }
 const chat = $("#chat");
-function bubble(who, html, lens) {
+function bubble(who, html, lens, mood) {
   const cls = who === "judge" ? "chair" : "";
-  return `<div class="msg ${cls}">${av(who)}<div class="body"><div class="who">${esc(pname(who))}${lens ? `<span class="lens">${esc(lens)}</span>` : ""}</div>${[].concat(html).map((h) => `<div class="bubble">${h}</div>`).join("")}</div></div>`;
+  return `<div class="msg ${cls}">${avM(who, mood)}<div class="body"><div class="who">${esc(pname(who))}${lens ? `<span class="lens">${esc(lens)}</span>` : ""}</div>${[].concat(html).map((h) => `<div class="bubble">${h}</div>`).join("")}</div></div>`;
 }
 function typing(who, what) {
   $("#typing")?.remove();
-  chat.insertAdjacentHTML("beforeend", `<div class="typing" id="typing">${av(who)}<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>${what ? `<span class="what">${esc(what)}</span>` : ""}</div>`);
+  chat.insertAdjacentHTML("beforeend", `<div class="typing" id="typing">${avM(who, "work")}<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>${what ? `<span class="what">${esc(what)}</span>` : ""}</div>`);
   follow();
 }
 function follow() { if (!REDUCED) window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }
@@ -603,12 +639,13 @@ function lines(M) {
   const { R, clashes } = M;
   const L = [];
   const imp = R.impression || {};
-  L.push(["analyst", [`<p>문장 ${R.sentences.length}개를 읽었어요. <b>“${esc(T(R, "impression.title", imp.archetype).h)}”</b>로 읽혀요.</p>`], "첫인상을 정리하고 있어요"]);
+  L.push(["analyst", [`<p>문장 ${R.sentences.length}개를 읽었어요. <b>“${esc(T(R, "impression.title", imp.archetype).h)}”</b>로 읽혀요.</p>`], "첫인상을 정리하고 있어요", "find"]);
   R.personas.forEach((p) => {
     const pid = p.persona_id, w = (p.weaknesses || [])[0];
     const html = [`<p>${esc(T(R, `${pid}.summary`, firstSentence(p.summary)).h)}</p>`];
     if (w) html.push(`<p><span class="mark warn">△</span> ${esc(T(R, `${pid}.w0`, w.claim).h)}</p>`);
-    L.push([pid, html, `${pname(pid)} 기준으로 읽는 중`]);
+    const avg = (p.scores || []).reduce((a, x) => a + x.score, 0) / Math.max(1, (p.scores || []).length);
+    L.push([pid, html, `${pname(pid)} 기준으로 읽는 중`, avg >= 4 ? "pos" : avg && avg <= 2.5 ? "neg" : ""]);
   });
   if ((R.round1 || []).length) {
     L.push(["note", "이제 서로의 첫 평가를 이름을 가린 채 읽고, 한 번 더 답해요"]);
@@ -619,27 +656,27 @@ function lines(M) {
       if (x) html.push(`<p><span class="stance ${esc(String(x.stance).split(" ")[0])}">${esc(x.stance)}</span>평가자 ${esc(x.to)}의 지적 · ${esc(firstSentence(x.about))}</p>`);
       const sc = Object.entries(s.score_changes || {}).map(([c, [a, b]]) => `${esc(c)} ${a}→${b}`).join(", ");
       html.push(`<p><span class="shift-badge ${esc(s.type || "")}">${SHIFT_LABEL[s.type] || ""}</span> ${sc ? esc(sc) : "첫 판단을 유지해요"}</p>`);
-      L.push([r.persona_id, html, "다른 평가를 읽는 중"]);
+      L.push([r.persona_id, html, "다른 평가를 읽는 중", shiftMood(s.type)]);
     });
   }
   if (clashes.length) {
     const sid = clashes[0];
     const parts = R.personas.map((p) => [p.persona_id, M.verdict(sid, p.persona_id)]).filter(([, v]) => v[0] !== "none")
       .map(([pid, v]) => `${esc(pname(pid))} <span class="mark ${v[0]}">${v[1]}</span>`).join(" · ");
-    L.push(["judge", [`<p>같은 문장(<b>${sid}</b>)에서 판정이 갈렸어요. ${parts}</p>`], "평가를 맞춰 보는 중"]);
+    L.push(["judge", [`<p>같은 문장(<b>${sid}</b>)에서 판정이 갈렸어요. ${parts}</p>`], "평가를 맞춰 보는 중", "think"]);
   }
   const J = R.judge || {};
-  L.push(["judge", [`<p>정리했어요. 먼저 고칠 것 <b>${(J.key_issues || []).length}가지</b>. 한 장씩 보여드릴게요.</p>`], "종합하는 중"]);
+  L.push(["judge", [`<p>정리했어요. 먼저 고칠 것 <b>${(J.key_issues || []).length}가지</b>. 한 장씩 보여드릴게요.</p>`], "종합하는 중", "pos"]);
   return L;
 }
 
 async function playLines(L, token) {
-  for (const [who, html, what] of L) {
+  for (const [who, html, what, mood] of L) {
     if (token !== talkToken) return false;
     if (who === "note") { post(`<div class="note">${esc(html)}</div>`); if (!fastForward) await sleep(500); continue; }
     if (!fastForward) { typing(who, what); await sleep(Math.min(1700, 750 + html.join("").length * 4)); }
     if (token !== talkToken) return false;
-    post(bubble(who, html));
+    post(bubble(who, html, "", mood));
     if (!fastForward) await sleep(350);
   }
   return true;
@@ -794,12 +831,12 @@ function pickSentence(sid) {
   if (already) return;
   line.classList.add("sel");
   const sig = M.SIG[sid];
-  const memos = [`<div class="memo plain"><div class="by">${av("analyst", true)}분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`];
+  const memos = [`<div class="memo plain"><div class="by">${avM("analyst", "find", true)}분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`];
   M.R.personas.forEach((p) => {
     const cl = M.claimsFor(sid, p.persona_id);
     if (!cl.length) return;
     const fx = M.fixesFor(sid, p.persona_id)[0];
-    memos.push(cl.map((c) => `<div class="memo ${c.cls}"><div class="by">${av(p.persona_id, true)}${esc(pname(p.persona_id))} <span class="mark ${c.cls}">${c.cls === "good" ? "✓ 좋았던 점" : "△ 아쉬운 점"}</span></div>${esc(c.t.h)}${fx && c.cls === "warn" ? `<span class="fix">${esc(fx.h)}</span>` : ""}</div>`).join(""));
+    memos.push(cl.map((c) => `<div class="memo ${c.cls}"><div class="by">${avM(p.persona_id, verdictMood(c.cls), true)}${esc(pname(p.persona_id))} <span class="mark ${c.cls}">${c.cls === "good" ? "✓ 좋았던 점" : "△ 아쉬운 점"}</span></div>${esc(c.t.h)}${fx && c.cls === "warn" ? `<span class="fix">${esc(fx.h)}</span>` : ""}</div>`).join(""));
   });
   if (memos.length === 1) memos.push(`<p class="fine" style="margin:0">세 평가자 모두 이 문장은 언급하지 않았어요.</p>`);
   line.nextElementSibling.innerHTML = memos.join("");
@@ -880,7 +917,7 @@ function buildPages(M) {
       const sc = Object.entries(s.score_changes || {}).map(([c, [a, b]]) => `${esc(c)} <span class="score-chg">${a ?? "–"}→${b ?? "–"}</span>`).join(" · ");
       const chg = (r.changes || []).map((x) => `<div class="step2"><span class="k">바꾼 것</span><div><b>${esc(x.what)}</b>${sref(x.evidence_ids)}<span class="reason clamp">${esc(x.reason)}</span></div></div>`);
       const adopted = Object.entries(s.adopted_from || {}).map(([k, v]) => `${esc(k.split(":")[1])}(${v.map((o) => esc(pname(o))).join(", ")}의 첫 평가에 있던 문장)`).join(", ");
-      return `<div class="card debate"><div class="head">${av(pid, true)}<b>${esc(pname(pid))}</b><span class="shift-badge ${esc(s.type || "")}">${SHIFT_LABEL[s.type] || ""}</span>${sc ? `<span class="fine">${sc}</span>` : ""}${s.self_report_mismatch ? `<span class="fine">· 실제 변화와 스스로 밝힌 변경이 달라요</span>` : ""}</div>
+      return `<div class="card debate"><div class="head">${avM(pid, shiftMood(s.type), true)}<b>${esc(pname(pid))}</b><span class="shift-badge ${esc(s.type || "")}">${SHIFT_LABEL[s.type] || ""}</span>${sc ? `<span class="fine">${sc}</span>` : ""}${s.self_report_mismatch ? `<span class="fine">· 실제 변화와 스스로 밝힌 변경이 달라요</span>` : ""}</div>
         ${resp.slice(0, 2).join("")}${resp.length > 2 ? `<details class="more"><summary>응답 ${resp.length - 2}개 더 보기</summary>${resp.slice(2).join("")}</details>` : ""}
         ${chg.join("")}
         ${adopted ? `<div class="step2"><span class="k">따라간 흔적</span><div class="fine">${adopted}</div></div>` : ""}
@@ -902,7 +939,7 @@ function buildPages(M) {
       const cl = M.claimsFor(sid, p.persona_id);
       const v = M.verdict(sid, p.persona_id);
       const text = cl.length ? cl.map((c) => esc(c.t.h)).join("<br>") : `<span class="fine">이 문장은 언급하지 않았어요.</span>`;
-      return `<div class="card"><span class="v mark ${v[0]}">${v[0] === "none" ? "–" : v[1]}</span>${av(p.persona_id, true)}<div class="body"><div class="who2">${esc(pname(p.persona_id))} · ${v[2]}</div><div class="h">${text}</div></div></div>`;
+      return `<div class="card"><span class="v mark ${v[0]}">${v[0] === "none" ? "–" : v[1]}</span>${avM(p.persona_id, verdictMood(v[0]), true)}<div class="body"><div class="who2">${esc(pname(p.persona_id))} · ${v[2]}</div><div class="h">${text}</div></div></div>`;
     }).join("");
     P.push({ id: "clash", tab: "갈린 판정", html: `
       ${who("judge", "의장", "판정이 갈린 문장")}
@@ -915,7 +952,7 @@ function buildPages(M) {
     P.push({ id: "clash", tab: "갈린 판정", html: `
       ${who("judge", "의장", "판정이 갈린 문장")}
       <h1>판정이 갈린 문장은 없었어요</h1>
-      ${d ? `<p class="sub">다만 <b>${esc(d.topic)}</b>에서는 관점이 달랐어요.</p><div class="vs">${(d.positions || []).map((x) => `<div class="card">${av(x.persona_id, true)}<div class="body"><div class="who2">${esc(pname(x.persona_id))}</div><div class="h long">${esc(x.position)}</div></div></div>`).join("")}</div>` : `<p class="sub">세 평가자가 같은 문장을 보고 다르게 판단한 경우가 없었어요.</p>`}` });
+      ${d ? `<p class="sub">다만 <b>${esc(d.topic)}</b>에서는 관점이 달랐어요.</p><div class="vs">${(d.positions || []).map((x) => `<div class="card">${avM(x.persona_id, "think", true)}<div class="body"><div class="who2">${esc(pname(x.persona_id))}</div><div class="h long">${esc(x.position)}</div></div></div>`).join("")}</div>` : `<p class="sub">세 평가자가 같은 문장을 보고 다르게 판단한 경우가 없었어요.</p>`}` });
   }
 
   // 6. 고칠 것
@@ -924,7 +961,7 @@ function buildPages(M) {
   P.push({ id: "fix", tab: "고칠 것", html: `
     ${who("judge", "의장", "세 평가를 모아서")}
     <h1>${issues.length ? `이 ${issues.length}가지부터 고쳐 보세요` : "크게 고칠 점은 없었어요"}</h1>
-    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); const f = fixFor(x); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => av(r, true)).join("")}${sref(x.evidence_ids)}</div>${f ? `<div class="howto"><div class="tag fix">→ 이렇게 고쳐보면${copyBtn(f.o)}</div><div class="hh">${esc(f.h)}</div>${f.d ? `<div class="d">${esc(f.d)}</div>` : ""}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
+    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); const f = fixFor(x); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => avM(r, "neg", true)).join("")}${sref(x.evidence_ids)}</div>${f ? `<div class="howto"><div class="tag fix">→ 이렇게 고쳐보면${copyBtn(f.o)}</div><div class="hh">${esc(f.h)}</div>${f.d ? `<div class="d">${esc(f.d)}</div>` : ""}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
     ${keeps.length ? `<p class="keepline"><span class="mark good">✓ 그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
 
   // 7. 원문
@@ -944,6 +981,7 @@ function buildPages(M) {
     <table class="matrix"><thead><tr><th>문장</th>${R.personas.map((p) => `<th class="c">${av(p.persona_id, true)}</th>`).join("")}</tr></thead><tbody>${R.sentences.map((s) => `<tr class="mrow ${clashes.includes(s.id) ? "clash" : ""}" data-sid="${s.id}"><td class="s"><span class="tx"><span class="sid">${s.id}</span>${esc(s.text)}</span></td>${R.personas.map((p) => { const v = M.verdict(s.id, p.persona_id); return `<td class="c"><span class="chip2 ${v[0]}" aria-label="${esc(pname(p.persona_id))} ${v[2]}">${v[0] === "none" ? "·" : v[1]}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table>
     <h3>먼저 고칠 것</h3>
     ${issues.map((x, n) => `<div class="card"><div class="h" style="font-size:16px">${n + 1}. ${esc(T(R, `judge.i${n}`, x.issue).h)} <span class="prio ${esc(x.priority)}">${esc(x.priority)}</span></div></div>`).join("")}
+    <figure class="closing" aria-hidden="true"><img class="ill" src="assets/ill-summary.jpg" alt="" width="496" height="280"><figcaption>심의가 끝났어요. 위의 1번부터 하나씩 고쳐 보세요.</figcaption></figure>
     <div class="again"><button class="btn" id="againFirst">처음 장부터 다시 보기</button><button class="btn" id="againTalk">▶ 심의 다시 보기</button></div>
     <details class="info"><summary>실험 정보</summary><dl>
       <dt>평가 모델</dt><dd>${esc(R.model)}</dd><dt>실행</dt><dd>${esc(R.run_id)} · ${esc(R.created_at)}</dd>
