@@ -232,6 +232,14 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 .debate .reason { display: block; color: var(--ink-2); font-size: 14.5px; }
 .score-chg { font-family: var(--mono); font-size: 13px; }
 
+/* 캐릭터 그림 */
+.av-img { background: none !important; border: 0 !important; object-fit: contain; padding: 0; }
+.av-img.sm { width: 30px; height: 30px; }
+.who .av-img { width: 48px; height: 48px; }
+.msg .av-img { width: 44px; height: 44px; }
+.cast .av-img.sm { width: 28px; height: 28px; }
+.hero-img { display: block; width: 100%; height: auto; border-radius: 24px; margin: 0 0 22px; box-shadow: var(--shadow); }
+
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
 .pager .in { max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
@@ -253,11 +261,12 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 <!-- 1. 글 넣기 -->
 <main class="page screen" id="write" hidden>
   <section class="hero">
+    <img class="hero-img" src="assets/hero.jpg" alt="세 사람이 한 장의 자기소개서를 각자의 방식으로 함께 읽는 그림" width="1200" height="388">
     <div class="eyebrow">한눈 · 한 글을 여러 눈으로 읽어봅니다</div>
     <h1>내 자기소개서, 세 사람은 어떻게 읽을까요?</h1>
     <p>글을 넣으면 분석가가 첫인상을 읽고, 세 평가자가 각자의 기준으로 평가한 뒤, 의장이 무엇부터 고칠지 정리해요.</p>
     <div class="cast" aria-label="참여하는 AI">
-      <span><i class="av sm analyst">분</i>분석가</span><span><i class="av sm">채</i>채용 담당자</span><span><i class="av sm">기</i>기술 전문가</span><span><i class="av sm">면</i>비개발 직군 면접관</span><span><i class="av sm chair">의</i>의장</span>
+      <span><img class="av av-img sm" src="assets/char-analyst.png" alt="">분석가</span><span><img class="av av-img sm" src="assets/char-recruiter.png" alt="">채용 담당자</span><span><img class="av av-img sm" src="assets/char-technical.png" alt="">기술 전문가</span><span><img class="av av-img sm" src="assets/char-reader.png" alt="">비개발 직군 면접관</span><span><img class="av av-img sm" src="assets/char-chair.png" alt="">의장</span>
     </div>
   </section>
   <section class="composer">
@@ -296,7 +305,10 @@ if (D.local) { $("#back").hidden = true; $("#demoNote").hidden = true; }
 
 const INITIAL = { recruiter: "채", technical: "기", reader: "면" };
 const pname = (id) => id === "judge" ? "의장" : id === "analyst" ? "분석가" : (D.personas[id] || {}).name || id;
-const av = (id, sm) => `<i class="av ${sm ? "sm " : ""}${id === "judge" ? "chair" : id === "analyst" ? "analyst" : ""}" title="${esc(pname(id))}">${id === "judge" ? "의" : id === "analyst" ? "분" : INITIAL[id] || "?"}</i>`;
+const CHAR = { analyst: "analyst", recruiter: "recruiter", technical: "technical", reader: "reader", judge: "chair" };
+const av = (id, sm) => CHAR[id]
+  ? `<img class="av av-img ${sm ? "sm" : ""}" src="assets/char-${CHAR[id]}.png" alt="${esc(pname(id))}" title="${esc(pname(id))}">`
+  : `<i class="av ${sm ? "sm " : ""}" title="${esc(pname(id))}">${INITIAL[id] || "?"}</i>`;
 
 // ================= 화면 전환 =================
 let current = null;   // 지금 보고 있는 결과 key
@@ -625,7 +637,7 @@ function pickSentence(sid) {
   if (already) return;
   line.classList.add("sel");
   const sig = M.SIG[sid];
-  const memos = [`<div class="memo plain"><div class="by"><i class="av sm analyst">분</i>분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`];
+  const memos = [`<div class="memo plain"><div class="by">${av("analyst", true)}분석가 ${sig ? `<span class="lab ${esc(sig.label)}">${esc(sig.label)}</span>` : ""}</div>${sig ? esc(sig.reason) : "뚜렷한 인상 신호가 없는 문장이에요."}</div>`];
   M.R.personas.forEach((p) => {
     const cl = M.claimsFor(sid, p.persona_id);
     if (!cl.length) return;

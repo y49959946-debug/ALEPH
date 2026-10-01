@@ -89,7 +89,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, _page())
         if path.startswith("/assets/"):
             f = (web.DEMO_DIR / "assets" / path.rsplit("/", 1)[-1])
-            types = {".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon"}
+            types = {".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon", ".jpg": "image/jpeg"}
             if f.suffix in types and f.exists():
                 return self._send(200, f.read_bytes(), types[f.suffix])
             return self._send(404, "없는 파일이에요")
