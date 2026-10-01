@@ -271,6 +271,11 @@ figure.imp-ill { margin: 30px 0 0; max-width: 560px; }
 figure.imp-ill .ill { margin: 0; }
 figure.imp-ill figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
 /* 표정이 보이도록: 판정이 갈린 문장 · 토론 카드에서는 얼굴을 크게 */
+.fixes .meta { gap: 8px 10px; }
+.raiser { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: 999px; background: var(--panel-2); }
+.raiser img.av-img.sm { width: 44px; height: 44px; }
+.raiser small { font-size: 12.5px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+@media (max-width: 560px) { .raiser img.av-img.sm { width: 38px; height: 38px; } }
 .vcard > img.av-img.sm, .vs .card > img.av-img.sm { width: 46px; height: 46px; flex: none; }
 .vcard { border-left: 4px solid var(--line); } .vcard.good { border-left-color: var(--good); } .vcard.warn { border-left-color: var(--warn); } .vcard.mixed { border-left-color: var(--accent); }
 .vi { width: 1.35em; height: 1.35em; vertical-align: -0.33em; margin-right: 4px; }
@@ -893,7 +898,7 @@ function buildPages(M) {
   P.push({ id: "fix", tab: "고칠 것", html: `
     ${who("judge", "의장", "세 평가를 모아서")}
     <h1>${issues.length ? `이 ${issues.length}가지부터 고쳐 보세요` : "크게 고칠 점은 없었어요"}</h1>
-    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); const f = fixFor(x); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => avM(r, "neg", true)).join("")}${sref(x.evidence_ids)}</div>${f ? `<div class="howto"><div class="tag fix">${ico("fix")}이렇게 고쳐보면${copyBtn(f.o)}</div><div class="hh">${esc(f.h)}</div>${f.d ? `<div class="d">${esc(f.d)}</div>` : ""}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
+    <div class="fixes">${issues.map((x, n) => { const t = T(R, `judge.i${n}`, x.issue); const f = fixFor(x); return `<div class="card"><span class="n">${n + 1}</span><div class="body"><div class="h ${t.short ? "" : "long"}">${esc(t.h)}</div>${t.d ? `<div class="d">${esc(t.d)}</div>` : ""}<div class="meta"><span class="prio ${esc(x.priority)}">${esc(x.priority)}</span>${(x.raised_by || []).map((r) => `<span class="raiser">${avM(r, "neg", true)}<small>${esc(pname(r))}</small></span>`).join("")}${sref(x.evidence_ids)}</div>${f ? `<div class="howto"><div class="tag fix">${ico("fix")}이렇게 고쳐보면${copyBtn(f.o)}</div><div class="hh">${esc(f.h)}</div>${f.d ? `<div class="d">${esc(f.d)}</div>` : ""}</div>` : ""}${t.short ? `<details class="orig"><summary>원래 평가</summary><p>${esc(t.o)}</p></details>` : ""}</div></div>`; }).join("")}</div>
     ${keeps.length ? `<p class="keepline"><span class="mark good">${ico("good")}그대로 두세요</span><br>${keeps.map((k) => esc(k.h)).join("<br>")}</p>` : ""}` });
 
   // 7. 원문
