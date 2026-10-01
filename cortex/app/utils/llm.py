@@ -77,6 +77,12 @@ class GeminiClient(LLMClient):
         self.model_name = model or os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
         self.max_retries = max_retries
         self.limiter = _RateLimiter(float(os.getenv("GEMINI_MIN_INTERVAL", "5")))
+        # 한 번 실행에서 실제로 보내는 요청 수 상한 (재시도 포함).
+        # 무료 하루 한도가 작고, 서버 혼잡(5xx)으로 거절된 요청도 한도에 포함되는 것으로 보이기 때문.
+        # 상한에 걸려도 끝난 단계는 저장돼 있어서 같은 명령으로 이어서 할 수 있다.
+        self.max_requests = int(os.getenv("GEMINI_MAX_REQUESTS", "14"))
+        self.max_busy_retries = int(os.getenv("GEMINI_BUSY_RETRIES", "2"))
+        self.requests = 0
 
     def generate(self, *, system: str, user: str, schema: Type[T], temperature: float) -> T:
         from google.genai import errors, types
@@ -90,8 +96,16 @@ class GeminiClient(LLMClient):
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
         last_err: Exception | None = None
+        busy = 0
         for attempt in range(self.max_retries):
+            if self.requests >= self.max_requests:
+                raise LLMError(
+                    f"이번 실행에서 보낼 수 있는 요청 {self.max_requests}번을 다 썼어요 (재시도 포함). "
+                    "하루 한도를 지키려고 여기서 멈춥니다. 끝난 단계는 저장돼 있으니 잠시 뒤 같은 명령으로 이어서 실행하세요. "
+                    "(상한은 .env의 GEMINI_MAX_REQUESTS로 바꿀 수 있어요)"
+                )
             self.limiter.wait()
+            self.requests += 1
             try:
                 resp = self.client.models.generate_content(
                     model=self.model_name, contents=user, config=config
@@ -118,13 +132,21 @@ class GeminiClient(LLMClient):
                     if attempt == 0 and quota_id:
                         print(f"    · 걸린 한도: {quota_id}{limit_txt}")
                 # 429(분당 한도)와 5xx(서버 혼잡)만 재시도한다.
+                if isinstance(code, int) and code >= 500:
+                    busy += 1
+                    if busy > self.max_busy_retries:
+                        raise LLMError(
+                            f"'{self.model_name}' 서버가 계속 혼잡해서 재시도를 {self.max_busy_retries}번에서 멈췄어요 "
+                            "(거절된 요청도 하루 한도에 들어가는 것으로 보여서). 끝난 단계는 저장돼 있으니 "
+                            "10~20분 뒤 같은 명령으로 이어서 실행하세요."
+                        ) from e
                 if code == 429 or (isinstance(code, int) and code >= 500):
                     m = _RETRY_DELAY.search(msg)  # 서버가 알려준 대기 시간이 있으면 따른다
                     # 서버 혼잡(5xx)은 거절된 요청도 하루 한도에 포함되는 것으로 보여서, 짧게 여러 번보다 길게 기다린다
-                    base = float(m.group(1)) if m else (2 ** attempt * 3 if code == 429 else 15 * (attempt + 1))
+                    base = float(m.group(1)) if m else (2 ** attempt * 3 if code == 429 else 30 * busy)
                     wait = min(65, base) + random.uniform(0.5, 2.0)
                     reason = "호출 한도 초과" if code == 429 else "서버 혼잡"
-                    print(f"    ! {reason}({code}) — {wait:.0f}초 후 재시도 ({attempt + 1}/{self.max_retries})")
+                    print(f"    ! {reason}({code}) — {wait:.0f}초 후 재시도 (이번 실행 요청 {self.requests}/{self.max_requests})")
                     time.sleep(wait)
                     continue
                 raise LLMError(f"Gemini API 오류 ({code}): {e}") from e
