@@ -50,7 +50,7 @@ button { cursor: pointer; }
 .top {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px 32px; background: color-mix(in srgb, var(--bg-top) 82%, transparent);
+  padding: 12px 64px; background: color-mix(in srgb, var(--bg-top) 82%, transparent);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
 }
 .top .brand { display: inline-flex; align-items: center; gap: 9px; font-size: 21px; font-weight: 800; letter-spacing: -.02em; color: #2c576d; text-decoration: none; }
@@ -66,6 +66,7 @@ button { cursor: pointer; }
 }
 .tabs a[aria-current="page"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .top-side { display: flex; align-items: center; gap: 10px; min-width: 0; }
+@media (max-width: 900px) { .top { padding-left: 36px; padding-right: 36px; } }
 @media (max-width: 560px) { .top { padding: 10px 18px; } .top .brand { font-size: 18px; gap: 7px; } .top .brand img { width: 28px; height: 28px; } .theme { width: 34px; height: 34px; } .top-side { gap: 8px; } .tabs a { padding: 6px 10px; font-size: 13.5px; } }
 
 .page { max-width: 760px; margin: 0 auto; padding: 28px 16px 96px; }
