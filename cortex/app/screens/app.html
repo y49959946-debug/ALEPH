@@ -430,9 +430,9 @@ section.closing .again { margin-top: 14px; }
 .secbar small { font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
 @media (min-width: 1240px) {
   .book { max-width: 1380px; grid-template-columns: 230px minmax(0, 1fr) 240px; gap: 0 44px; }
-  /* 화면 높이(상단 막대~아래 넘김 막대 사이)를 차지하고, 그 안에서 세로 가운데에 놓는다 */
-  .rail { display: flex; flex-direction: column; justify-content: center; position: sticky; top: 68px; height: calc(100vh - 68px - 76px); padding: 0 0 0 18px; }
-  .rail .rail-in { border-left: 1px solid var(--line); padding: 4px 0 4px 18px; margin-left: -18px; max-height: 100%; overflow-y: auto; }
+  /* 윗선을 그 장의 첫 카드 윗선에 맞추고(코드가 margin-top 계산), 내려 읽을 때는 위쪽에 붙어 따라온다 */
+  .rail { display: block; position: sticky; top: 92px; }
+  .rail .rail-in { border-left: 1px solid var(--line); padding: 0 0 4px 18px; max-height: calc(100vh - 92px - 96px); overflow-y: auto; }
   .rail[hidden] { display: block !important; visibility: hidden; }
   .rail-h { display: block; font-size: 12.5px; color: var(--ink-3); margin: 0 0 8px; letter-spacing: .02em; }
   .rail button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 6px 10px; margin: 0 0 2px -11px; border-left: 2px solid transparent; border-radius: 0 10px 10px 0; font-size: 14px; font-weight: 600; color: var(--ink-2); line-height: 1.4; }
@@ -990,7 +990,7 @@ function sectionList(id, root) {
     root.querySelectorAll("h3").forEach((h) => add(h, h.textContent));
     add(root.querySelector("figure.imp-ill"), "분석가 메모");
   } else if (D.personas[id]) {
-    root.querySelectorAll(":scope > .card").forEach((c) => add(c, clip(c.querySelector(".tag")?.textContent || "")));
+    root.querySelectorAll(":scope > .card").forEach((c) => { const t = c.querySelector(".tag")?.cloneNode(true); t?.querySelector(".copy")?.remove(); add(c, clip(t?.textContent || "")); });
     root.querySelectorAll(":scope > details.more").forEach((d) => add(d, clip(d.querySelector("summary").textContent)));
   } else if (id === "debate") {
     add(root.querySelector("p.sub"), "토론 결과 요약");
@@ -1025,6 +1025,12 @@ function buildSections(id) {
   bar.innerHTML = list.map(item).join("");
   (root.querySelector("h1") || root.firstElementChild).insertAdjacentElement("afterend", bar);
   list.forEach((x) => x.el.classList.add("sec-target"));
+  // 목차 윗선 = 첫 묶음(카드)의 윗선
+  rail.style.marginTop = "0px";
+  requestAnimationFrame(() => {
+    const first = list[0].el.getBoundingClientRect().top, me = rail.getBoundingClientRect().top;
+    rail.style.marginTop = Math.max(0, first - me) + "px";
+  });
   const jump = (i) => {
     const el = list[i].el; el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
     el.classList.remove("sec-flash"); void el.offsetWidth; el.classList.add("sec-flash");
