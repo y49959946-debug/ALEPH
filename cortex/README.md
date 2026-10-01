@@ -43,7 +43,9 @@ notepad .env
 python -m app.main --file data\inputs\sample_01.txt --mock
 
 # 2) 실제 Gemini로 실행
-python -m app.main --file data\inputs\sample_01.txt
+python -m app.main --file data\inputs\sample_01.txt              # V0: 각자 평가 (AI 6번)
+python -m app.main --file data\inputs\sample_01.txt --v1         # V1: + 토론 라운드 (AI 9번)
+python -m app.main --file data\inputs\sample_01.txt --v1 --single ab   # + 단일 AI 비교 A·B (AI 11번)
 
 # 3) 인상 라벨 일관성 테스트 (같은 글을 5번 분석)
 python -m scripts.consistency_check data\inputs\sample_01.txt --runs 5

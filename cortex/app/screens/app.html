@@ -217,6 +217,21 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
   .card .h { font-size: 19px; }
 }
 
+/* 토론 장 */
+.shift-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 800; border-radius: 999px; padding: 2px 10px; }
+.shift-badge.maintained { background: var(--panel-2); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+.shift-badge.changed_with_valid_evidence { background: var(--accent-soft); color: var(--accent); }
+.shift-badge.changed_without_evidence { background: var(--warn-soft); color: var(--warn); }
+.debate .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.debate .head b { font-size: 16px; }
+.debate .step2 { display: grid; grid-template-columns: 74px 1fr; gap: 10px; padding: 10px 0; border-top: 1px dashed var(--line); font-size: 15px; line-height: 1.6; }
+.debate .step2 .k { font-size: 12.5px; font-weight: 800; color: var(--ink-3); padding-top: 2px; }
+.stance { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 1px 8px; margin-right: 4px; }
+.stance.동의 { background: var(--good-soft); color: var(--good); } .stance.반대 { background: var(--warn-soft); color: var(--warn); } .stance.부분 { background: var(--accent-soft); color: var(--accent); }
+.debate .who3 { font-weight: 700; }
+.debate .reason { display: block; color: var(--ink-2); font-size: 14.5px; }
+.score-chg { font-family: var(--mono); font-size: 13px; }
+
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
 .pager .in { max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
@@ -426,6 +441,18 @@ function lines(M) {
     if (w) html.push(`<p><span class="mark warn">△</span> ${esc(T(R, `${pid}.w0`, w.claim).h)}</p>`);
     L.push([pid, html, `${pname(pid)} 기준으로 읽는 중`]);
   });
+  if ((R.round1 || []).length) {
+    L.push(["note", "이제 서로의 첫 평가를 이름을 가린 채 읽고, 한 번 더 답해요"]);
+    const SH = Object.fromEntries((R.shift || []).map((s) => [s.persona_id, s]));
+    R.round1.forEach((r) => {
+      const s = SH[r.persona_id] || {}, al = (R.aliases || {})[r.persona_id] || {}, x = (r.responses || [])[0];
+      const html = [];
+      if (x) html.push(`<p><span class="stance ${esc(String(x.stance).split(" ")[0])}">${esc(x.stance)}</span>평가자 ${esc(x.to)}의 지적 · ${esc(firstSentence(x.about))}</p>`);
+      const sc = Object.entries(s.score_changes || {}).map(([c, [a, b]]) => `${esc(c)} ${a}→${b}`).join(", ");
+      html.push(`<p><span class="shift-badge ${esc(s.type || "")}">${SHIFT_LABEL[s.type] || ""}</span> ${sc ? esc(sc) : "첫 판단을 유지해요"}</p>`);
+      L.push([r.persona_id, html, "다른 평가를 읽는 중"]);
+    });
+  }
   if (clashes.length) {
     const sid = clashes[0];
     const parts = R.personas.map((p) => [p.persona_id, M.verdict(sid, p.persona_id)]).filter(([, v]) => v[0] !== "none")
@@ -455,7 +482,7 @@ async function startTalk(key) {
   show("talk");
   openingLines(essayText(R), key.startsWith("sample_") ? key.replace("sample_", "샘플 ") : "내 글");
   post(bubble("judge", `<p>심의를 시작할게요. 분석가가 먼저 읽고, 세 분은 각자의 기준으로 평가해 주세요.</p>`));
-  post(`<div class="note">실제 토론이 아니라, 세 평가자가 서로 보지 않고 각자 쓴 평가를 순서대로 보여드리는 연출이에요</div>`);
+  post(`<div class="note">${(D.runs[current] || {}).round1 && D.runs[current].round1.length ? "첫 평가는 서로 보지 않고 각자 썼어요. 그다음 실제로 서로의 첫 평가를 읽고 답해요" : "실제 토론이 아니라, 세 평가자가 서로 보지 않고 각자 쓴 평가를 순서대로 보여드리는 연출이에요"}</div>`);
   await sleep(fastForward ? 0 : 600);
   const done = await playLines(lines(model(R)), token);
   if (done && token === talkToken) finishTalk(key);
@@ -491,7 +518,7 @@ async function runLocal() {
   show("talk");
   openingLines(value, picked ? picked.replace("sample_", "샘플 ") : "내 글");
   post(bubble("judge", `<p>심의를 시작할게요. 분석가가 먼저 읽고, 세 분은 각자의 기준으로 평가해 주세요.</p>`));
-  post(`<div class="note">실제 토론이 아니라, 세 평가자가 서로 보지 않고 각자 쓴 평가를 순서대로 보여드리는 연출이에요</div>`);
+  post(`<div class="note">${(D.runs[current] || {}).round1 && D.runs[current].round1.length ? "첫 평가는 서로 보지 않고 각자 썼어요. 그다음 실제로 서로의 첫 평가를 읽고 답해요" : "실제 토론이 아니라, 세 평가자가 서로 보지 않고 각자 쓴 평가를 순서대로 보여드리는 연출이에요"}</div>`);
   $("#skip").textContent = "결과 바로 보기";
   let shownStage = -1;
   while (token === talkToken) {
@@ -611,6 +638,7 @@ function pickSentence(sid) {
 }
 
 // 화면용 짧은 글 (편집자 결과). 없거나 검증에 실패한 항목은 원래 평가 글.
+const SHIFT_LABEL = { maintained: "유지", changed_with_valid_evidence: "근거 있는 변경", changed_without_evidence: "근거 없는 변경" };
 function T(R, ref, orig) {
   const d = (R.display || {})[ref];
   return d ? { h: d.headline, d: d.detail || "", o: orig, short: true } : { h: orig || "", d: "", o: orig || "", short: false };
@@ -658,6 +686,31 @@ function buildPages(M) {
       ${rest.length ? `<details class="more"><summary>${rest.length}개 더 보기</summary>${rest.join("")}</details>` : ""}
       <details class="more"><summary>기준별 점수</summary><div class="card scores">${scores}</div></details>` });
   });
+
+  // 토론 (V1에서만)
+  if ((R.round1 || []).length) {
+    const SH = Object.fromEntries((R.shift || []).map((s) => [s.persona_id, s]));
+    const cnt = { maintained: 0, changed_with_valid_evidence: 0, changed_without_evidence: 0 };
+    (R.shift || []).forEach((s) => cnt[s.type]++);
+    const blocks = R.round1.map((r) => {
+      const pid = r.persona_id, s = SH[pid] || {}, al = (R.aliases || {})[pid] || {};
+      const resp = (r.responses || []).map((x) => `<div class="step2"><span class="k">응답</span><div><span class="stance ${esc(String(x.stance).split(" ")[0])}">${esc(x.stance)}</span><span class="who3">${al[x.to] ? esc(pname(al[x.to])) : "평가자 " + esc(x.to)}</span> · ${esc(x.about)}${sref(x.evidence_ids)}<span class="reason clamp">${esc(x.reason)}</span></div></div>`);
+      const sc = Object.entries(s.score_changes || {}).map(([c, [a, b]]) => `${esc(c)} <span class="score-chg">${a ?? "–"}→${b ?? "–"}</span>`).join(" · ");
+      const chg = (r.changes || []).map((x) => `<div class="step2"><span class="k">바꾼 것</span><div><b>${esc(x.what)}</b>${sref(x.evidence_ids)}<span class="reason clamp">${esc(x.reason)}</span></div></div>`);
+      const adopted = Object.entries(s.adopted_from || {}).map(([k, v]) => `${esc(k.split(":")[1])}(${v.map((o) => esc(pname(o))).join(", ")}의 첫 평가에 있던 문장)`).join(", ");
+      return `<div class="card debate"><div class="head">${av(pid, true)}<b>${esc(pname(pid))}</b><span class="shift-badge ${esc(s.type || "")}">${SHIFT_LABEL[s.type] || ""}</span>${sc ? `<span class="fine">${sc}</span>` : ""}${s.self_report_mismatch ? `<span class="fine">· 실제 변화와 스스로 밝힌 변경이 달라요</span>` : ""}</div>
+        ${resp.slice(0, 2).join("")}${resp.length > 2 ? `<details class="more"><summary>응답 ${resp.length - 2}개 더 보기</summary>${resp.slice(2).join("")}</details>` : ""}
+        ${chg.join("")}
+        ${adopted ? `<div class="step2"><span class="k">따라간 흔적</span><div class="fine">${adopted}</div></div>` : ""}
+        ${r.kept_reason ? `<div class="step2"><span class="k">유지한 이유</span><div><span class="reason clamp">${esc(r.kept_reason)}</span></div></div>` : ""}</div>`;
+    }).join("");
+    P.push({ id: "debate", tab: "토론", html: `
+      ${who("judge", "토론", "서로의 첫 평가를 이름을 가린 채 읽고, 한 번 더 답했어요")}
+      <h1>토론 뒤, 판단은 이렇게 됐어요</h1>
+      <p class="sub"><span class="shift-badge maintained">유지 ${cnt.maintained}</span> <span class="shift-badge changed_with_valid_evidence">근거 있는 변경 ${cnt.changed_with_valid_evidence}</span> <span class="shift-badge changed_without_evidence">근거 없는 변경 ${cnt.changed_without_evidence}</span></p>
+      ${blocks}
+      <p class="fine" style="margin-top:14px">"근거 있는 변경"은 바꾼 이유에 원문에 실제로 있는 문장을 댔다는 뜻이에요. 그 근거가 변경을 정말 뒷받침하는지까지 코드가 판단하지는 않아요. 다른 평가자의 이름은 토론 중에는 가려졌고, 여기서만 공개해요.</p>` });
+  }
 
   // 5. 갈린 판정
   if (clashes.length) {
@@ -713,7 +766,7 @@ function buildPages(M) {
       <dt>평가 모델</dt><dd>${esc(R.model)}</dd><dt>실행</dt><dd>${esc(R.run_id)} · ${esc(R.created_at)}</dd>
       <dt>근거 검증</dt><dd>원문에 없는 근거 ${R.invalid}건 제외</dd>
       <dt>화면용 글</dt><dd>${R.display_model ? `편집자 AI(${esc(R.display_model)})가 평가를 짧게 옮김 · 핵심어 빠짐 경고 ${R.display_warn}건 · 카드마다 "원래 평가"로 원문 확인` : "원래 평가 글을 그대로 표시"}</dd>
-      <dt>방식</dt><dd>분석가 → 첫인상 → 평가자 3명 각자 평가 → 의장 종합. 평가자들은 서로의 평가를 보지 않았고, 심의 대화는 결과를 순서대로 보여주는 연출이에요. 판정이 갈린 문장은 코드가 근거 데이터에서 찾았어요.</dd>
+      <dt>방식</dt><dd>${(R.round1 || []).length ? "분석가 → 첫인상 → 평가자 3명 첫 평가(서로 보지 않음) → 토론(서로의 첫 평가를 익명으로 읽고 동시에 답함) → 의장 종합 (AI 9번). 토론 뒤 변화는 코드가 유지·근거 있는 변경·근거 없는 변경으로 나눴어요." : "분석가 → 첫인상 → 평가자 3명 각자 평가 → 의장 종합. 평가자들은 서로의 평가를 보지 않았고, 심의 대화는 결과를 순서대로 보여주는 연출이에요."} 판정이 갈린 문장은 코드가 첫 평가의 근거 데이터에서 찾았어요.</dd>
       <dt>코드</dt><dd><a href="${D.repo}" target="_blank" rel="noopener">GitHub</a></dd></dl></details>
     <p class="fine" style="margin-top:16px">글이 이렇게 읽힌다는 인상과 AI 평가자들의 의견이에요. 작성자의 역량이나 성격을 판단한 것이 아니에요.</p>`,
     after: () => {

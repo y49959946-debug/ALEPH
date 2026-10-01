@@ -153,6 +153,19 @@ class Validator:
             self.report.warn(where, f"정의되지 않은 평가 기준: {unknown}", invalid=False)
         return res
 
+    # -- 토론 (V1) ----------------------------------------------------------
+    def debate(self, res, criteria: list[str]):
+        """최종 입장은 첫 평가와 같은 규칙으로 검증한다. responses·changes의 문장 ID는
+        Shift Log가 '근거 있는 변경'을 판정할 때 원래 값으로 봐야 하므로 지우지 않고, 원문에 없는 것만 기록한다."""
+        res = self.persona(res, criteria)
+        where = f"debate.{res.persona_id}"
+        for group in ("responses", "changes"):
+            for x in getattr(res, group):
+                for sid in x.evidence_ids:
+                    if sid not in self.sentences:
+                        self.report.warn(f"{where}.{group}", f"존재하지 않는 문장 ID '{sid}' (기록만, Shift Log에서 근거 없음으로 처리)")
+        return res
+
     # -- Judge --------------------------------------------------------------
     def judge(self, out: JudgeOutput, persona_ids: list[str]) -> JudgeOutput:
         for issue in out.key_issues:

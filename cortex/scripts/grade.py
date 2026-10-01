@@ -49,14 +49,27 @@ def findings(run: dict) -> list[dict]:
             add(pid, "fix", x.get("target_ids"), f"{x.get('suggestion', '')} {x.get('reason', '')}")
     for i in (run.get("judge") or {}).get("key_issues", []):
         add("judge", "issue", i.get("evidence_ids"), i.get("issue"))
-    single = run.get("single")  # V1: 단일 AI 결과를 같은 스키마로 저장할 예정
-    if single:
-        for x in single.get("strengths", []):
-            add("single", "strength", x.get("evidence_ids"), x.get("claim"))
-        for x in single.get("weaknesses", []):
-            add("single", "weakness", x.get("evidence_ids"), x.get("claim"))
-        for x in single.get("recommendations", []):
-            add("single", "fix", x.get("target_ids"), f"{x.get('suggestion', '')} {x.get('reason', '')}")
+    # V1 토론 후 최종 입장: 출처 이름에 "@토론후"를 붙인다
+    for p in run.get("rounds", {}).get("round_1", []):
+        pid = p["persona_id"] + "@토론후"
+        for x in p.get("strengths", []):
+            add(pid, "strength", x.get("evidence_ids"), x.get("claim"))
+        for x in p.get("weaknesses", []):
+            add(pid, "weakness", x.get("evidence_ids"), x.get("claim"))
+        for x in p.get("recommendations", []):
+            add(pid, "fix", x.get("target_ids"), f"{x.get('suggestion', '')} {x.get('reason', '')}")
+    # 단일 AI 비교: {"a": {...}, "b": {...}} (예전 형식 {...} 하나도 허용)
+    single = run.get("single") or {}
+    if single and "strengths" in single:
+        single = {"a": single}
+    for k, s in single.items():
+        src = f"single_{k}"
+        for x in s.get("strengths", []):
+            add(src, "strength", x.get("evidence_ids"), x.get("claim"))
+        for x in s.get("weaknesses", []):
+            add(src, "weakness", x.get("evidence_ids"), x.get("claim"))
+        for x in s.get("recommendations", []):
+            add(src, "fix", x.get("target_ids"), f"{x.get('suggestion', '')} {x.get('reason', '')}")
     return out
 
 
@@ -85,7 +98,9 @@ def grade(run: dict, key: dict) -> dict:
     name = sample_name(run)
     fs = findings(run)
     personas = [p["persona_id"] for p in run.get("rounds", {}).get("round_0", [])]
-    sources = personas + (["judge"] if run.get("judge") else []) + (["single"] if run.get("single") else [])
+    r1 = [p["persona_id"] + "@토론후" for p in run.get("rounds", {}).get("round_1", [])]
+    singles = sorted({f["source"] for f in fs if f["source"].startswith("single_")})
+    sources = personas + r1 + (["judge"] if run.get("judge") else []) + singles
     sents = run["preprocess"]["sentences"]
     roles = {r["paragraph_id"]: r["role"] for r in run["analyzer"]["observations"].get("paragraph_roles", [])}
     g: dict = {"run_id": run["run_id"], "sample": name, "model": run["metadata"].get("model")}
@@ -103,6 +118,8 @@ def grade(run: dict, key: dict) -> dict:
         for s in sources:
             per_source[s] = round(sum(1 for i in items if s in i["found_by"]) / len(items), 2) if items else None
         per_source["평가자 합계"] = round(sum(1 for i in items if set(i["found_by"]) & set(personas)) / len(items), 2) if items else None
+        if r1:
+            per_source["토론후 합계"] = round(sum(1 for i in items if set(i["found_by"]) & set(r1)) / len(items), 2) if items else None
         g["recall"] = per_source
         g["recall_by_type"] = {t: _recall_type(items, t, personas) for t in ("objective", "subjective", "ai_judgment")}
         strong = set(spec.get("strengths", []))
@@ -125,11 +142,16 @@ def grade(run: dict, key: dict) -> dict:
     # C5 숫자 없는 결과 문장, C6 상투어 문장
     # 주의: C5는 오탐이 있다. "학교 공식 시스템에 통합되었습니다"처럼 숫자 없이도 좋은 결과 문장이 대상에 들어간다.
     #       그래서 C5는 통과/탈락이 아니라 '대상 중 몇 개를 짚었는가'만 기록하고, 해석은 사람이 한다.
-    neg_ids = {i for f in fs if f["kind"] in NEG_KINDS and f["source"] != "single" for i in f["ids"]}
+    neg_ids = {i for f in fs if f["kind"] in NEG_KINDS and not f["source"].startswith("single_") for i in f["ids"]}
     c5 = [s["id"] for s in sents if roles.get(s["paragraph_id"]) == "결과" and not s["has_number"]]
     c6 = [s["id"] for s in sents if any(w in s["text"] for w in CLICHES)]
     g["C5_numberless_result"] = {"targets": c5, "flagged": sorted(set(c5) & neg_ids)} if c5 else "해당 없음"
     g["C6_cliche"] = {"targets": c6, "flagged": sorted(set(c6) & neg_ids)} if c6 else "해당 없음"
+
+    # V1 Shift Log 요약 (기록만)
+    if run.get("shift_log"):
+        g["shift"] = {s["persona_id"]: s["type"] for s in run["shift_log"]}
+        g["calls"] = run.get("metadata", {}).get("calls")
 
     # 다양성 (기록만)
     wsets = {pid: {i for f in fs if f["source"] == pid and f["kind"] == "weakness" for i in f["ids"]} for pid in personas}
@@ -168,6 +190,8 @@ def show(g: dict) -> None:
         print("  (정답지에 없는 샘플 — 적중률 생략)")
     print(f"  C1 원문에 없는 근거 {g['C1_invalid_evidence']}건 · C3 약점→수정제안 {g['C3_weakness_has_fix']}")
     print(f"  C5 숫자 없는 결과 문장 {g['C5_numberless_result']} · C6 상투어 문장 {g['C6_cliche']}")
+    if g.get("shift"):
+        print(f"  토론(Shift Log) {g['shift']} · 호출 {g.get('calls')}")
     print(f"  다양성(기록만) 약점 겹침 {g['diversity_weakness_overlap']} · 판정 갈린 문장 {g['diversity_clash_sentences'] or '-'}")
 
 

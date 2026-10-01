@@ -79,12 +79,14 @@ def main() -> int:
     parser.add_argument("--file", help="자기소개서 텍스트 파일 경로")
     parser.add_argument("--mock", action="store_true", help="API 없이 가짜 응답으로 파이프라인만 시험")
     parser.add_argument("--model", help="모델 이름 (기본: .env의 GEMINI_MODEL)")
+    parser.add_argument("--v1", action="store_true", help="토론 라운드까지 실행 (AI 9번)")
+    parser.add_argument("--single", default="", help="단일 AI 비교도 함께: a, b, ab (각 +1번)")
     parser.add_argument("--out", default=str(ROOT / "data" / "runs"), help="결과 JSON 저장 폴더")
     args = parser.parse_args()
 
     load_dotenv(ROOT / ".env")
 
-    print(f"{LINE}\n CORTEX V0 · AI 심의위원회\n{LINE}")
+    print(f"{LINE}\n 한눈 · {'V1 토론' if args.v1 else 'V0'}{' + 단일 AI 비교 ' + args.single.upper() if args.single else ''}\n{LINE}")
     path_str = args.file or input("자기소개서 파일 경로: ").strip().strip('"')
     path = Path(path_str)
     if not path.exists():
@@ -94,7 +96,7 @@ def main() -> int:
 
     try:
         client = make_client(mock=args.mock, model=args.model)
-        run, out_path = run_pipeline(text, client, Path(args.out), source=str(path))
+        run, out_path = run_pipeline(text, client, Path(args.out), source=str(path), v1=args.v1, single_modes=args.single.lower())
     except LLMError as e:
         print(f"\n오류: {e}")
         return 1

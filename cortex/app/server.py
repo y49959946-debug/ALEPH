@@ -36,7 +36,7 @@ MAX_CHARS = 3000
 MIN_CHARS = 50
 JOBS: dict[str, dict] = {}
 BUSY = threading.Lock()
-OPTS = {"mock": False, "model": None}
+OPTS = {"mock": False, "model": None, "v1": False}
 
 
 def _page() -> str:
@@ -51,7 +51,7 @@ def _worker(job_id: str, text: str, source: str) -> None:
     job = JOBS[job_id]
     try:
         client = make_client(mock=OPTS["mock"], model=OPTS["model"])
-        run, path = run_pipeline(text, client, web.RUNS_DIR, source=source, log=job["logs"].append)
+        run, path = run_pipeline(text, client, web.RUNS_DIR, source=source, log=job["logs"].append, v1=OPTS["v1"])
         # 화면용 짧은 글 (AI 1번 더). 실패해도 원래 평가 글로 보여주므로 분석은 성공으로 둔다.
         job["logs"].append("[편집자] 화면용 짧은 글 만드는 중")
         try:
@@ -142,11 +142,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="CORTEX 로컬 화면")
     parser.add_argument("--mock", action="store_true", help="AI 없이 가짜 응답으로 시험")
     parser.add_argument("--model", help="모델 이름 (기본: .env 설정)")
+    parser.add_argument("--v1", action="store_true", help="토론 라운드까지 (AI 9번)")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true", help="브라우저를 자동으로 열지 않음")
     args = parser.parse_args()
     load_dotenv(ROOT / ".env")
-    OPTS.update(mock=args.mock, model=args.model)
+    OPTS.update(mock=args.mock, model=args.model, v1=args.v1)
 
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     url = f"http://localhost:{args.port}"

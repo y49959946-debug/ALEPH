@@ -180,3 +180,34 @@ class DisplayLine(BaseModel):
 
 class EditorOutput(BaseModel):
     lines: List[DisplayLine]
+
+
+# ---------------------------------------------------------------------------
+# V1 토론 (Round 1)
+# ---------------------------------------------------------------------------
+
+
+class DebateResponse(BaseModel):
+    to: str = Field(description="응답하는 상대 평가자 이름표 (A 또는 B)")
+    about: str = Field(description="상대의 어떤 지적에 대한 응답인지 한 줄로")
+    stance: Literal["동의", "반대", "부분 동의"]
+    reason: str = Field(description="그렇게 본 이유. 네 평가 기준에서")
+    evidence_ids: List[str] = Field(description="근거 문장 ID")
+
+
+class DebateChange(BaseModel):
+    what: str = Field(description="무엇을 바꿨는지 (예: '기술 선택의 근거 점수 4→3', 's04 약점 추가')")
+    reason: str = Field(description="바꾼 이유")
+    evidence_ids: List[str] = Field(description="근거 문장 ID")
+
+
+class DebateLLMOutput(PersonaLLMOutput):
+    """최종 입장(Round 0와 같은 모양) + 다른 평가자에 대한 응답 + 스스로 밝힌 변경."""
+    responses: List[DebateResponse]
+    changes: List[DebateChange] = Field(description="첫 평가에서 바꾼 것. 바꾸지 않았으면 빈 목록")
+    kept_reason: str = Field(description="첫 평가에서 유지한 부분과, 반대 의견을 보고도 유지한 이유")
+
+
+class DebateResult(DebateLLMOutput):
+    persona_id: str
+    status: str = "round1"
