@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<meta name="description" content="한눈: 자기소개서 한 편을 채용 담당자·기술 전문가·일반 독자 AI가 각자 읽고, 의장이 무엇부터 고칠지 정리합니다.">
+<meta name="description" content="한눈: 자기소개서 한 편을 채용 담당자·기술 전문가·비개발 직군 면접관 AI가 각자 읽고, 의장이 무엇부터 고칠지 정리합니다.">
 <style>
 /*__CSS__*/
 [hidden] { display: none !important; }
@@ -108,8 +108,8 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .pg .sub { font-size: 17.5px; color: var(--ink-2); margin: 0 0 26px; line-height: 1.65; }
 .pg h3 { font-size: 15px; margin: 28px 0 10px; }
 .sid { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink-3); }
-button.sid { border: 0; background: none; padding: 0 0 0 4px; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
-button.sid:hover { color: var(--accent); }
+button.sid { border: 1px solid var(--line); background: var(--accent-soft); color: var(--accent); padding: 0 8px; margin-left: 6px; border-radius: 999px; font-size: 12px; line-height: 20px; vertical-align: 2px; cursor: pointer; }
+button.sid:hover { border-color: var(--accent); }
 
 .card { background: var(--panel); border-radius: 20px; padding: 16px 20px; box-shadow: var(--shadow); border: 1px solid var(--line); margin-bottom: 12px; }
 .card .tag { font-size: 13px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
@@ -117,7 +117,7 @@ button.sid:hover { color: var(--accent); }
 .card .h { font-size: 18.5px; font-weight: 800; line-height: 1.5; }
 .card .h.long { font-size: 16px; font-weight: 600; }
 .card .d { font-size: 15px; color: var(--ink-2); margin-top: 4px; }
-details.orig { margin-top: 8px; font-size: 13.5px; color: var(--ink-3); }
+details.orig { margin-top: 8px; font-size: 14px; color: var(--ink-2); }
 details.orig summary { cursor: pointer; font-weight: 700; list-style: none; display: inline; }
 details.orig summary::-webkit-details-marker { display: none; }
 details.orig summary::after { content: " ↓"; } details.orig[open] summary::after { content: " ↑"; }
@@ -203,13 +203,14 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
   .side { position: sticky; top: 84px; }
   .side .book-head { flex-direction: column; align-items: stretch; margin-bottom: 22px; }
   .side .book-head select, .side .btn { width: 100%; text-align: left; }
+  .side .sel-note { margin: -4px 4px 4px; }
   .toc { flex-direction: column; gap: 2px; margin: 0; }
   .toc button { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; font-size: 14.5px; color: var(--ink-2); white-space: normal; }
   .toc button::before { display: none; }
   .toc .num { display: inline; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink-3); }
   .toc button:hover { background: color-mix(in srgb, var(--panel) 70%, transparent); }
   .toc button.done { color: var(--ink-2); }
-  .toc button[aria-current="step"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+  .toc button[aria-current="step"] { background: var(--panel); color: var(--ink); font-weight: 800; box-shadow: var(--shadow); border-left: 3px solid var(--accent); border-radius: 4px 12px 12px 4px; }
   .toc button[aria-current="step"] .num { color: var(--accent); }
   .main { max-width: 760px; }
   .pager .in { max-width: 1080px !important; padding-left: 292px; }
@@ -241,7 +242,7 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
     <h1>내 자기소개서, 세 사람은 어떻게 읽을까요?</h1>
     <p>글을 넣으면 분석가가 첫인상을 읽고, 세 평가자가 각자의 기준으로 평가한 뒤, 의장이 무엇부터 고칠지 정리해요.</p>
     <div class="cast" aria-label="참여하는 AI">
-      <span><i class="av sm analyst">분</i>분석가</span><span><i class="av sm">채</i>채용 담당자</span><span><i class="av sm">기</i>기술 전문가</span><span><i class="av sm">독</i>일반 독자</span><span><i class="av sm chair">의</i>의장</span>
+      <span><i class="av sm analyst">분</i>분석가</span><span><i class="av sm">채</i>채용 담당자</span><span><i class="av sm">기</i>기술 전문가</span><span><i class="av sm">면</i>비개발 직군 면접관</span><span><i class="av sm chair">의</i>의장</span>
     </div>
   </section>
   <section class="composer">
@@ -278,7 +279,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 $$(".repo").forEach((a) => (a.href = D.repo));
 if (D.local) { $("#back").hidden = true; $("#demoNote").hidden = true; }
 
-const INITIAL = { recruiter: "채", technical: "기", reader: "독" };
+const INITIAL = { recruiter: "채", technical: "기", reader: "면" };
 const pname = (id) => id === "judge" ? "의장" : id === "analyst" ? "분석가" : (D.personas[id] || {}).name || id;
 const av = (id, sm) => `<i class="av ${sm ? "sm " : ""}${id === "judge" ? "chair" : id === "analyst" ? "analyst" : ""}" title="${esc(pname(id))}">${id === "judge" ? "의" : id === "analyst" ? "분" : INITIAL[id] || "?"}</i>`;
 
@@ -475,7 +476,7 @@ const STAGES = [
   ["analyst", "문장마다 어떤 인상인지 읽는 중", /\[3\/5\]/],
   ["recruiter", "", /채용 담당자 완료/],
   ["technical", "", /기술 전문가 완료/],
-  ["reader", "", /일반 독자 완료/],
+  ["reader", "", /(일반 독자|비개발 직군 면접관) 완료/],
   ["judge", "세 평가를 모으는 중", /__never__/],
 ];
 async function runLocal() {
@@ -532,7 +533,7 @@ function openDash(key, startPage = 0) {
   pages = buildPages(M);
   $("#dash").innerHTML = `
     <aside class="side">
-      <div class="book-head"><select id="sel" aria-label="다른 결과 보기">${pickerOptions(key)}</select><button class="btn" id="replay">▶ 심의 다시 보기</button></div>
+      <div class="book-head"><select id="sel" aria-label="다른 결과 보기">${pickerOptions(key)}</select><span class="fine sel-note">${esc(key.startsWith("sample_") ? D.notes[key] || "" : "직접 넣은 글")}</span><button class="btn" id="replay">▶ 심의 다시 보기</button></div>
       <nav class="toc" id="toc" aria-label="결과 순서">${pages.map((p, i) => `<button data-page="${i}"><b class="num">${String(i + 1).padStart(2, "0")}</b><span>${esc(p.tab)}</span></button>`).join("")}</nav>
     </aside>
     <div class="main" id="pgwrap"></div>`;
@@ -545,7 +546,7 @@ function openDash(key, startPage = 0) {
 }
 function pickerOptions(key) {
   const sk = Object.keys(D.runs).filter((k) => k.startsWith("sample_")).sort();
-  const o = sk.map((k) => `<option value="${k}" ${k === key ? "selected" : ""}>${k.replace("sample_", "샘플 ")} · ${esc(D.notes[k] || "")}</option>`);
+  const o = sk.map((k) => `<option value="${k}" ${k === key ? "selected" : ""} title="${esc(D.notes[k] || "")}">${k.replace("sample_", "샘플 ")}</option>`);
   if (!key.startsWith("sample_")) o.unshift(`<option value="${esc(key)}" selected>내 글 · ${esc(key)}</option>`);
   return o.join("");
 }
@@ -632,9 +633,10 @@ function buildPages(M) {
   P.push({ id: "imp", tab: "첫인상", html: `
     ${who("analyst", "분석가", "글의 첫인상")}
     <h1>${esc(title.h)}</h1>
-    <p class="sub">${esc(isum.h)}${isum.d ? ` ${esc(isum.d)}` : ""}</p>
+    <p class="sub">${esc(isum.h)}${isum.d ? `<br><span style="font-size:15.5px">${esc(isum.d)}</span>` : ""}</p>
     <div class="tone" role="img" aria-label="${used.map((l) => `${l} ${counts[l]}문장`).join(", ")}">${used.map((l) => `<i class="t-${l}" style="flex:${counts[l]}"></i>`).join("")}</div>
     <div class="legend">${used.map((l) => `<span class="lab ${l}">${l} <b>${counts[l]}</b></span>`).join("")}</div>
+    ${(imp.evidence_sentence_ids || []).filter((i) => S[i]).length ? `<h3>이 인상을 만든 문장</h3>${(imp.evidence_sentence_ids || []).filter((i) => S[i]).map((i) => { const sg = SIG[i]; return `<div class="card"><div class="tag plain">${sg ? `<span class="lab ${esc(sg.label)}">${esc(sg.label)}</span>` : ""}${sref([i])}</div><div class="h long">${esc(S[i].text)}</div></div>`; }).join("")}` : ""}
     ${imp.key_contrast ? `<details class="more" style="margin-top:18px"><summary>어조가 바뀌는 곳</summary><p class="sub" style="font-size:15px;margin:0">${esc(imp.key_contrast)}</p></details>` : ""}
     ${title.short ? `<details class="orig" style="margin-top:16px"><summary>분석가의 원래 표현</summary><p>“${esc(imp.archetype)}” ${esc(imp.summary)}</p></details>` : ""}` });
 
