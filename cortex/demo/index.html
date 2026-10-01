@@ -337,8 +337,14 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 .av-img { background: none !important; border: 0 !important; object-fit: contain; padding: 0; }
 .av-img.sm { width: 30px; height: 30px; }
 .who .av-img { width: 48px; height: 48px; }
-.msg .av-img { width: 44px; height: 44px; }
-.cast .av-img.sm { width: 28px; height: 28px; }
+/* 심의 화면: 누가 말하는지 표정까지 보이게 크게 */
+.msg .av-img { width: 64px; height: 64px; flex: none; }
+.msg { gap: 12px; }
+.msg .body { padding-top: 6px; }
+.typing .av-img { width: 56px; height: 56px; flex: none; }
+.cast .av-img.sm { width: 38px; height: 38px; }
+.cast span { padding-right: 14px; font-size: 13.5px; }
+@media (max-width: 560px) { .msg .av-img { width: 50px; height: 50px; } .typing .av-img { width: 46px; height: 46px; } .msg { gap: 9px; } .msg .body { padding-top: 2px; } }
 /* 그림 바탕을 종이색(#f7f4ee)에 맞춰 두었다. 상자·그림자 없이 종이 위에 바로 그린 것처럼 보이게 한다 */
 .hero-img, .ill { display: block; width: 100%; height: auto; margin: -8px 0 14px;
   -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 90%, transparent); -webkit-mask-composite: source-in;
@@ -364,7 +370,7 @@ figure.closing figcaption { font-size: 14px; font-weight: 700; color: var(--ink-
   .cast .grp { padding-top: 0; gap: 5px; }
   .cast .grp small { position: static; margin-right: 2px; }
   .cast span { font-size: 12.5px; padding: 3px 10px 3px 3px; }
-  .cast .av-img.sm { width: 24px; height: 24px; }
+  .cast .av-img.sm { width: 32px; height: 32px; }
 }
 .empty-dash { grid-column: 1 / -1; width: min(560px, 100%); margin: 56px auto; padding: 0 16px; }
 .state { display: flex; gap: 14px; align-items: center; }
