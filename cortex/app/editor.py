@@ -37,6 +37,8 @@ ROOT = Path(__file__).resolve().parent.parent
 RUNS_DIR = ROOT / "data" / "runs"
 TEMPERATURE = 0.2
 MAX_HEAD, MAX_DETAIL = 32, 70
+# 토론 대사는 말하듯 쓰므로 조금 더 길어도 된다
+LIMITS = {"reply": (48, 80), "change": (48, 80), "kept": (48, 80)}  # *_sum은 기본 길이(32, 70)
 _KEY = re.compile(r"\d[\d,.]*|[A-Za-z][A-Za-z+#.]{1,}")
 
 
@@ -66,6 +68,25 @@ def sources(run: dict) -> list[dict]:
         add(f"judge.i{i}", "issue", x.get("issue"))
     for i, k in enumerate(j.get("keep", [])):
         add(f"judge.k{i}", "keep", k)
+    # 토론 (V1): 서로에게 말하듯 옮긴다. 토론 중에는 이름이 A·B로 가려졌으므로, 화면용 글에서는 실제 역할 이름으로 부른다
+    names = {"recruiter": "채용 담당자", "technical": "기술 전문가", "reader": "비개발 직군 면접관"}
+    aliases = run.get("round_1_aliases", {})
+    for p in run.get("rounds", {}).get("round_1", []):
+        pid = p["persona_id"]
+        al = {a: names.get(o, o) for a, o in aliases.get(pid, {}).items()}
+        who = names.get(pid, pid)
+        for i, x in enumerate(p.get("responses", [])):
+            to = al.get(x.get("to"), x.get("to"))
+            ctx = f"말하는 사람: {who} / 듣는 사람: {to} / 입장: {x.get('stance')} / 무엇에 대해: {x.get('about')}"
+            add(f"debate.{pid}.r{i}", "reply", x.get("reason"), ctx)          # 토론 장면용: 말하듯
+            add(f"debate.{pid}.r{i}.sum", "reply_sum", x.get("reason"), ctx)  # 결과 화면용: 담백한 요약
+        for i, c in enumerate(p.get("changes", [])):
+            ctx = f"말하는 사람: {who} / 이름표: {json.dumps(al, ensure_ascii=False)}"
+            add(f"debate.{pid}.c{i}", "change", f"{c.get('what')}. {c.get('reason')}", ctx)
+            add(f"debate.{pid}.c{i}.sum", "change_sum", c.get("reason"), ctx)
+        ctx = f"말하는 사람: {who} / 이름표: {json.dumps(al, ensure_ascii=False)}"
+        add(f"debate.{pid}.k", "kept", p.get("kept_reason"), ctx)
+        add(f"debate.{pid}.k.sum", "kept_sum", p.get("kept_reason"), ctx)
     return out
 
 
@@ -80,7 +101,8 @@ def validate(src: list[dict], out: EditorOutput) -> dict:
         if ln.ref not in by_ref or ln.ref in lines:
             continue
         head, detail = ln.headline.strip(), (ln.detail or "").strip()
-        if not head or len(head) > MAX_HEAD or len(detail) > MAX_DETAIL:
+        mh, md = LIMITS.get(by_ref[ln.ref]["kind"], (MAX_HEAD, MAX_DETAIL))
+        if not head or len(head) > mh or len(detail) > md:
             fallback.append(ln.ref)
             warnings.append({"ref": ln.ref, "type": "length"})
             continue

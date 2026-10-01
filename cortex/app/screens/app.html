@@ -294,6 +294,9 @@ details.info dt { color: var(--ink-3); } details.info dd { margin: 0; }
 .stance.동의 { background: var(--good-soft); color: var(--good); } .stance.반대 { background: var(--warn-soft); color: var(--warn); } .stance.부분 { background: var(--accent-soft); color: var(--accent); }
 .debate .who3 { font-weight: 700; }
 .debate .reason { display: block; color: var(--ink-2); font-size: 14.5px; }
+.debate .reason.talk { color: var(--ink); font-size: 15px; font-weight: 600; margin-top: 2px; }
+.debate .reason.talk .d2 { display: block; font-weight: 400; color: var(--ink-2); font-size: 14.5px; }
+.debate details.orig { margin-top: 2px; }
 .score-chg { font-family: var(--mono); font-size: 13px; }
 
 /* 캐릭터 그림 */
@@ -755,10 +758,13 @@ const seatSrc = (id, mood) => `assets/seat/${CHAR[id]}-${SEAT_MOOD[mood] || "bas
 const faceSrc = (id, mood) => `assets/face/${CHAR[id]}-${(MOOD[mood] || {})[id] || mood || "base"}.png`;
 // 말풍선에는 첫 문장만, 그래도 길면 자른다
 const cut = (t, n = 70) => { t = String(t || "").trim(); const m = t.match(/^.+?[.!?。](\s|$)/); if (m && m[0].length >= 15) t = m[0].trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
+// 토론 대사: 편집자가 말하듯 옮긴 글이 있으면 그것을, 없으면 원래 글의 첫 문장
+const say = (R, ref, raw, n) => { const d = (R.display || {})[ref]; return d ? (d.headline + (d.detail ? " " + d.detail : "")) : cut(raw, n); };
+const ko = (w, a, b) => (/[가-힣]$/.test(w) && (w.charCodeAt(w.length - 1) - 0xac00) % 28 ? a : b);  // 받침에 따라 을/를 등
 function sceneScript(R) {
   const steps = [];
   const al = R.aliases || {};
-  steps.push({ who: "judge", mood: "base", motion: "m-lean", text: "서로의 첫 평가를 이름을 가린 채 읽고, 한 번씩 답해 주세요." });
+  steps.push({ who: "judge", mood: "base", motion: "m-lean", text: "서로의 첫 평가, 이름은 가리고 읽어 보셨죠? 생각을 한 번씩 들려주세요." });
   const byTarget = {};
   (R.round1 || []).forEach((r) => (r.responses || []).forEach((x) => {
     const target = (al[r.persona_id] || {})[x.to]; if (!target) return;
@@ -767,10 +773,12 @@ function sceneScript(R) {
   R.personas.map((p) => p.persona_id).filter((pid) => byTarget[pid]).forEach((target) => {
     const list = byTarget[target];
     // 주제는 의장이 꺼낸다 (about은 답한 사람이 요약한 표현이라, 당사자의 말처럼 보이면 어색함)
-    steps.push({ who: "judge", also: target, mood: "base", motion: "m-lean", tag: "주제", text: `${pname(target)}의 첫 평가 · ${cut(list[0].x.about, 50)}`, sid: (list[0].x.evidence_ids || [])[0] });
+    const tn = pname(target);
+    steps.push({ who: "judge", also: target, mood: "base", motion: "m-lean", tag: "주제", text: `${tn}님이 짚은 부분부터 볼게요. "${cut(list[0].x.about, 46)}"`, sid: (list[0].x.evidence_ids || [])[0] });
     list.forEach(({ from, x }) => {
       const st = STANCE[x.stance] || STANCE["부분 동의"];
-      steps.push({ who: from, toWho: target, mood: st[1], motion: st[2], stance: x.stance, stCls: st[0], text: cut(x.reason), sid: (x.evidence_ids || [])[0] });
+      const i = (R.round1.find((r) => r.persona_id === from).responses || []).indexOf(x);
+      steps.push({ who: from, toWho: target, mood: st[1], motion: st[2], stance: x.stance, stCls: st[0], text: say(R, `debate.${from}.r${i}`, x.reason, 90), sid: (x.evidence_ids || [])[0] });
     });
   });
   const SH = Object.fromEntries((R.shift || []).map((x) => [x.persona_id, x]));
@@ -780,11 +788,14 @@ function sceneScript(R) {
     const sc = Object.entries(sh.score_changes || {}).map(([c, [a, b]]) => `${c} ${a}→${b}`).join(", ");
     const what = (r.changes || [])[0];
     steps.push({ who: r.persona_id, mood: changed ? (sh.type === "changed_with_valid_evidence" ? "wow" : "think") : "pos", motion: changed ? "m-pop" : "m-lean",
-      tag: SHIFT_LABEL[sh.type] || "정리", text: changed ? cut(sc || (what && what.what) || "판단을 바꿨어요", 60) : cut(r.kept_reason || "첫 판단을 유지해요", 60) });
+      tag: SHIFT_LABEL[sh.type] || "정리",
+      text: changed ? (what ? say(R, `debate.${r.persona_id}.c0`, sc ? `${sc}로 바꿀게요.` : what.what, 80) : "판단을 바꿀게요.")
+                    : (r.kept_reason ? say(R, `debate.${r.persona_id}.k`, r.kept_reason, 80) : "저는 첫 판단 그대로 둘게요.") });
   });
   const cnt = { maintained: 0, changed_with_valid_evidence: 0, changed_without_evidence: 0 };
   (R.shift || []).forEach((x) => cnt[x.type]++);
-  steps.push({ who: "judge", mood: "pos", motion: "m-nod", text: `토론 뒤 유지 ${cnt.maintained}명 · 근거 있는 변경 ${cnt.changed_with_valid_evidence}명 · 근거 없는 변경 ${cnt.changed_without_evidence}명이에요.` });
+  const parts = [cnt.maintained && `${cnt.maintained}분은 처음 판단을 지키셨고`, cnt.changed_with_valid_evidence && `${cnt.changed_with_valid_evidence}분은 근거를 대고 바꾸셨어요`, cnt.changed_without_evidence && `${cnt.changed_without_evidence}분은 근거 없이 바꾸셨어요`].filter(Boolean);
+  steps.push({ who: "judge", mood: "pos", motion: "m-nod", text: `좋아요, 정리할게요. ${parts.join(", ")}${/요$/.test(parts[parts.length - 1] || "") ? "." : "요."}` });
   return steps;
 }
 function preloadSeats() { ["chair", "recruiter", "technical", "reader"].forEach((c) => ["base", "agree", "disagree", "think"].forEach((m) => { const i = new Image(); i.src = `assets/seat/${c}-${m}.png`; })); }
@@ -1187,15 +1198,17 @@ function buildPages(M) {
     (R.shift || []).forEach((s) => cnt[s.type]++);
     const blocks = R.round1.map((r) => {
       const pid = r.persona_id, s = SH[pid] || {}, al = (R.aliases || {})[pid] || {};
-      const resp = (r.responses || []).map((x) => `<div class="step2"><span class="k">응답</span><div><span class="stance ${esc(String(x.stance).split(" ")[0])}">${esc(x.stance)}</span><span class="who3">${al[x.to] ? esc(pname(al[x.to])) : "평가자 " + esc(x.to)}</span> · ${esc(x.about)}${sref(x.evidence_ids)}<span class="reason clamp">${esc(x.reason)}</span></div></div>`);
+      // 결과 화면은 대화체가 아니라 담백한 요약(.sum). 대화체는 토론 장면에서만 쓴다
+      const talk = (ref, raw) => { const t = T(R, ref + ".sum", raw); return t.short ? `<span class="reason talk">${esc(t.h)}${t.d ? `<span class="d2">${esc(t.d)}</span>` : ""}</span><details class="orig"><summary>원래 평가</summary><p>${esc(raw)}</p></details>` : `<span class="reason clamp">${esc(raw)}</span>`; };
+      const resp = (r.responses || []).map((x, i) => `<div class="step2"><span class="k">응답</span><div><span class="stance ${esc(String(x.stance).split(" ")[0])}">${esc(x.stance)}</span><span class="who3">${al[x.to] ? esc(pname(al[x.to])) : "평가자 " + esc(x.to)}</span> · ${esc(x.about)}${sref(x.evidence_ids)}${talk(`debate.${pid}.r${i}`, x.reason)}</div></div>`);
       const sc = Object.entries(s.score_changes || {}).map(([c, [a, b]]) => `${esc(c)} <span class="score-chg">${a ?? "–"}→${b ?? "–"}</span>`).join(" · ");
-      const chg = (r.changes || []).map((x) => `<div class="step2"><span class="k">바꾼 것</span><div><b>${esc(x.what)}</b>${sref(x.evidence_ids)}<span class="reason clamp">${esc(x.reason)}</span></div></div>`);
+      const chg = (r.changes || []).map((x, i) => `<div class="step2"><span class="k">바꾼 것</span><div><b>${esc(x.what)}</b>${sref(x.evidence_ids)}${talk(`debate.${pid}.c${i}`, x.reason)}</div></div>`);
       const adopted = Object.entries(s.adopted_from || {}).map(([k, v]) => `${esc(k.split(":")[1])}(${v.map((o) => esc(pname(o))).join(", ")}의 첫 평가에 있던 문장)`).join(", ");
       return `<div class="card debate"><div class="head">${avM(pid, shiftMood(s.type), true)}<b>${esc(pname(pid))}</b><span class="shift-badge ${esc(s.type || "")}">${SHIFT_LABEL[s.type] || ""}</span>${sc ? `<span class="fine">${sc}</span>` : ""}${s.self_report_mismatch ? `<span class="fine">· 실제 변화와 스스로 밝힌 변경이 달라요</span>` : ""}</div>
         ${resp.slice(0, 2).join("")}${resp.length > 2 ? `<details class="more"><summary>응답 ${resp.length - 2}개 더 보기</summary>${resp.slice(2).join("")}</details>` : ""}
         ${chg.join("")}
         ${adopted ? `<div class="step2"><span class="k">따라간 흔적</span><div class="fine">${adopted}</div></div>` : ""}
-        ${r.kept_reason ? `<div class="step2"><span class="k">유지한 이유</span><div><span class="reason clamp">${esc(r.kept_reason)}</span></div></div>` : ""}</div>`;
+        ${r.kept_reason ? `<div class="step2"><span class="k">유지한 이유</span><div>${talk(`debate.${pid}.k`, r.kept_reason)}</div></div>` : ""}</div>`;
     }).join("");
     P.push({ id: "debate", tab: "토론", html: `
       <img class="ill debate-ill" src="assets/ill-debate.jpg" alt="" aria-hidden="true" width="1400" height="333">
