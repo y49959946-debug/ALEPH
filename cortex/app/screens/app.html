@@ -729,7 +729,8 @@ const STANCE = { "동의": ["agree", "pos", "m-nod"], "반대": ["disagree", "ne
 const SEAT_MOOD = { base: "base", memo: "base", pos: "agree", neg: "disagree", think: "think", wow: "think" };
 const seatSrc = (id, mood) => `assets/seat/${CHAR[id]}-${SEAT_MOOD[mood] || "base"}.png`;
 const faceSrc = (id, mood) => `assets/face/${CHAR[id]}-${(MOOD[mood] || {})[id] || mood || "base"}.png`;
-const cut = (t, n = 70) => { t = String(t || "").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
+// 말풍선에는 첫 문장만, 그래도 길면 자른다
+const cut = (t, n = 70) => { t = String(t || "").trim(); const m = t.match(/^.+?[.!?。](\s|$)/); if (m && m[0].length >= 15) t = m[0].trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
 function sceneScript(R) {
   const steps = [];
   const al = R.aliases || {};
