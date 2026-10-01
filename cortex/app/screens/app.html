@@ -229,7 +229,9 @@ details.more[open] > summary { margin-bottom: 8px; }
 .ms .line .t.망설임 { text-decoration: underline 3px var(--c-hes); text-underline-offset: 6px; }
 .ms .line .t.방어적 { text-decoration: underline 3px dashed var(--hatch); text-underline-offset: 6px; }
 .ms .notes:empty { display: none; }
-.ms .notes { padding: 0 0 12px; }
+.ms .notes { padding: 0 0 12px; overflow: hidden; transition: max-height .32s ease; }
+.ms .notes .memo { animation: memodrop .32s ease-out both; }
+@keyframes memodrop { from { opacity: 0; transform: translateY(-6px); } }
 .memo { padding: 8px 12px 8px 14px; border-left: 2px solid var(--accent); background: var(--panel); border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.6; margin-bottom: 8px; }
 .memo.good { border-left-color: var(--good); } .memo.warn { border-left-color: var(--warn); } .memo.mixed { border-left-color: var(--accent); } .memo.plain { border-left-color: var(--ink-3); }
 .memo .by { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; margin-bottom: 2px; flex-wrap: wrap; }
@@ -417,6 +419,26 @@ section.closing .again { margin-top: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .seat > img:first-child { animation: none !important; } .sbub { transition: none; } }
 
+
+/* 이 장의 내용 (오른쪽 목차 / 좁은 화면은 위쪽 가로 목록) */
+.sec-target { scroll-margin-top: 92px; }
+.sec-flash { animation: secflash 1.2s ease-out 1; }
+@keyframes secflash { 0% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent); } 100% { box-shadow: 0 0 0 3px transparent; } }
+.rail { display: none; }
+.secbar { display: flex; gap: 6px; overflow-x: auto; margin: -2px 0 16px; padding-bottom: 4px; scrollbar-width: thin; }
+.secbar button { flex: none; display: inline-flex; gap: 6px; align-items: baseline; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.secbar small { font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+@media (min-width: 1240px) {
+  .book { max-width: 1340px; grid-template-columns: 230px minmax(0, 1fr) 210px; gap: 0 44px; }
+  .rail { display: block; position: sticky; top: 92px; border-left: 1px solid var(--line); padding: 4px 0 4px 18px; }
+  .rail[hidden] { display: block !important; visibility: hidden; }
+  .rail-h { display: block; font-size: 12.5px; color: var(--ink-3); margin: 0 0 8px; letter-spacing: .02em; }
+  .rail button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 6px 10px; margin: 0 0 2px -11px; border-left: 2px solid transparent; border-radius: 0 10px 10px 0; font-size: 14px; font-weight: 600; color: var(--ink-2); line-height: 1.4; }
+  .rail button small { display: block; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+  .rail button:hover { color: var(--ink); background: var(--panel-2); }
+  .rail button.on { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+  .secbar { display: none; }
+}
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
 .pager .in { max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
@@ -922,7 +944,8 @@ function openDash(key, startPage = 0) {
       <div class="book-head"><select id="sel" aria-label="다른 결과 보기">${pickerOptions(key)}</select><span class="fine sel-note">${esc(key.startsWith("sample_") ? D.notes[key] || "" : "직접 넣은 글")}</span><button class="btn" id="replay">▶ 심의 과정 다시 보기</button></div>
       <nav class="toc" id="toc" aria-label="결과 순서">${pages.map((p, i) => `<button data-page="${i}"><b class="num">${String(i + 1).padStart(2, "0")}</b><span>${esc(p.tab)}</span></button>`).join("")}</nav>
     </aside>
-    <div class="main" id="pgwrap"></div>`;
+    <div class="main" id="pgwrap"></div>
+    <nav class="rail" id="rail" aria-label="이 장의 내용"></nav>`;
   show("dash");
   $("#pager").hidden = false;
   $("#sel").addEventListener("change", (e) => openDash(e.target.value));
@@ -950,6 +973,69 @@ function go(n, first) {
   setURL({ ...q, view: "result", p: n + 1 });
   window.scrollTo(0, 0);
   if (p.after) p.after();
+  buildSections(p.id);
+}
+
+// ================= 이 장의 내용: 긴 장을 큰 묶음으로 나눠 오른쪽(좁은 화면은 위쪽)에 목차 =================
+let secObs = null;
+const clip = (t, n = 26) => { t = String(t || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
+function sectionList(id, root) {
+  const out = [];
+  const add = (el, label, sub) => el && out.push({ el, label, sub });
+  if (id === "imp") {
+    add(root.querySelector(".tone"), "어조 분포");
+    root.querySelectorAll("h3").forEach((h) => add(h, h.textContent));
+    add(root.querySelector("figure.imp-ill"), "분석가 메모");
+  } else if (D.personas[id]) {
+    root.querySelectorAll(":scope > .card").forEach((c) => add(c, clip(c.querySelector(".tag")?.textContent || "")));
+    root.querySelectorAll(":scope > details.more").forEach((d) => add(d, clip(d.querySelector("summary").textContent)));
+  } else if (id === "debate") {
+    add(root.querySelector("p.sub"), "토론 결과 요약");
+    root.querySelectorAll(".card.debate").forEach((c) => add(c, c.querySelector(".head b")?.textContent, c.querySelector(".shift-badge")?.textContent));
+  } else if (id === "clash") {
+    root.querySelectorAll(".vcard").forEach((c) => add(c, c.querySelector(".who2")?.childNodes[0]?.textContent, c.querySelector(".vp")?.textContent));
+  } else if (id === "fix") {
+    root.querySelectorAll(".fixes > .card").forEach((c, i) => add(c, `${i + 1}. ${clip(c.querySelector(".h")?.textContent, 22)}`, c.querySelector(".prio")?.textContent));
+    add(root.querySelector(".keepline"), "그대로 두세요");
+  } else if (id === "orig") {
+    const R = D.runs[current]; let last = null, k = 0;
+    root.querySelectorAll("#origMs .line").forEach((l) => {
+      const s = R.sentences.find((x) => x.id === l.dataset.sid); if (!s || s.p === last) return;
+      last = s.p; k++; add(l, `문단 ${k}`, R.roles[s.p] || "");
+    });
+  } else if (id === "sum") {
+    root.querySelectorAll("h3").forEach((h) => add(h, clip(h.childNodes[0]?.textContent || h.textContent)));
+    add(root.querySelector("section.closing"), "마무리");
+    add(root.querySelector("details.info"), "실험 정보");
+  }
+  return out.filter((x) => x.label);
+}
+function buildSections(id) {
+  const root = $("#pgwrap section.pg"), rail = $("#rail");
+  secObs?.disconnect(); rail.innerHTML = "";
+  const list = sectionList(id, root);
+  if (list.length < 3) { rail.hidden = true; return; }
+  rail.hidden = false;
+  const item = (x, i) => `<button type="button" data-i="${i}"><span>${esc(x.label)}</span>${x.sub ? `<small>${esc(x.sub)}</small>` : ""}</button>`;
+  rail.innerHTML = `<b class="rail-h">이 장의 내용</b>${list.map(item).join("")}`;
+  const bar = document.createElement("nav"); bar.className = "secbar"; bar.setAttribute("aria-label", "이 장의 내용");
+  bar.innerHTML = list.map(item).join("");
+  (root.querySelector("h1") || root.firstElementChild).insertAdjacentElement("afterend", bar);
+  list.forEach((x) => x.el.classList.add("sec-target"));
+  const jump = (i) => {
+    const el = list[i].el; el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+    el.classList.remove("sec-flash"); void el.offsetWidth; el.classList.add("sec-flash");
+    if (el.tagName === "DETAILS") el.open = true;
+  };
+  // rail은 장이 바뀌어도 같은 요소라, 이전 장의 목록을 쥔 리스너가 쌓이지 않게 onclick으로 바꿔 끼운다
+  [rail, bar].forEach((n) => (n.onclick = (e) => { const b = e.target.closest("button[data-i]"); if (b && list[+b.dataset.i]) jump(+b.dataset.i); }));
+  const mark = (i) => rail.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i));
+  mark(0);
+  secObs = new IntersectionObserver((ents) => {
+    const vis = ents.filter((e) => e.isIntersecting).map((e) => list.findIndex((x) => x.el === e.target)).filter((i) => i >= 0);
+    if (vis.length) mark(Math.min(...vis));
+  }, { rootMargin: "-90px 0px -55% 0px" });
+  list.forEach((x) => secObs.observe(x.el));
 }
 $("#prev").addEventListener("click", () => go(pageNo - 1));
 $("#next").addEventListener("click", () => { if (pageNo === pages.length - 1) { setURL({}); show("write"); } else go(pageNo + 1); });
@@ -971,16 +1057,22 @@ $("#dash").addEventListener("click", (e) => {
   if (e.target.closest("summary")) return;
   const t = e.target.closest("[data-sid]"); if (!t) return;
   const orig = pages.findIndex((p) => p.id === "orig");
-  if (pageNo !== orig) go(orig);
-  pickSentence(t.dataset.sid);
+  const fromOther = pageNo !== orig;
+  if (fromOther) go(orig);
+  pickSentence(t.dataset.sid, fromOther);
 });
 $("#dash").addEventListener("keydown", (e) => { const t = e.target.closest(".line"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pickSentence(t.dataset.sid); } });
 
-function pickSentence(sid) {
+// 문장을 누르면 메모가 그 문장 아래로 펼쳐진다. 보던 위치는 그대로 두고,
+// 펼친 메모가 화면 아래로 잘릴 때만 필요한 만큼 내려 준다.
+function pickSentence(sid, fromOther) {
   const line = $(`#origMs .line[data-sid="${sid}"]`); if (!line) return;
   const already = line.classList.contains("sel");
+  const before = line.getBoundingClientRect().top;
   $$("#origMs .line").forEach((l) => l.classList.remove("sel"));
-  $$("#origMs .notes").forEach((n) => (n.innerHTML = ""));
+  $$("#origMs .notes").forEach((n) => { n.innerHTML = ""; n.style.maxHeight = ""; });
+  // 위쪽에서 열려 있던 메모가 닫히면 문장이 위로 당겨지므로, 누른 문장이 같은 자리에 있게 되돌린다
+  if (!fromOther) window.scrollBy(0, line.getBoundingClientRect().top - before);
   if (already) return;
   line.classList.add("sel");
   const sig = M.SIG[sid];
@@ -992,8 +1084,24 @@ function pickSentence(sid) {
     memos.push(cl.map((c) => `<div class="memo ${c.cls}"><div class="by">${avM(p.persona_id, verdictMood(c.cls), true)}${esc(pname(p.persona_id))} <span class="mark ${c.cls}">${c.cls === "good" ? ico("good") + "좋았던 점" : ico("warn") + "아쉬운 점"}</span></div>${esc(c.t.h)}${fx && c.cls === "warn" ? `<span class="fix">${esc(fx.h)}</span>` : ""}</div>`).join(""));
   });
   if (memos.length === 1) memos.push(`<p class="fine" style="margin:0">세 평가자 모두 이 문장은 언급하지 않았어요.</p>`);
-  line.nextElementSibling.innerHTML = memos.join("");
-  line.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+  const notes = line.nextElementSibling;
+  notes.innerHTML = memos.join("");
+  const full = notes.scrollHeight;
+  if (fromOther) line.scrollIntoView({ block: "center" });
+  if (!REDUCED) {
+    notes.style.maxHeight = "0px";
+    requestAnimationFrame(() => { notes.style.maxHeight = full + "px"; });
+    notes.addEventListener("transitionend", () => (notes.style.maxHeight = ""), { once: true });
+  }
+  // 펼친 메모의 끝이 아래 넘김 막대에 가려지면 그만큼만 내려 준다 (문장이 상단 막대 밑으로 숨지 않는 선까지)
+  const pager = $("#pager"), bottomEdge = window.innerHeight - (pager && !pager.hidden ? pager.offsetHeight : 0) - 12;
+  const lr = line.getBoundingClientRect(), endY = lr.bottom + full;
+  if (endY > bottomEdge) {
+    // 문장은 화면 위쪽 30% 아래에 머물게 한다 (위로 딱 붙으면 읽던 흐름이 끊김). 메모가 더 길면 나머지는 직접 내려 읽는다
+    const room = lr.top - Math.max(96, window.innerHeight * 0.3);
+    const dy = Math.min(endY - bottomEdge, Math.max(0, room));
+    if (dy > 0) window.scrollBy({ top: dy, behavior: REDUCED ? "auto" : "smooth" });
+  }
 }
 
 // 화면용 짧은 글 (편집자 결과). 없거나 검증에 실패한 항목은 원래 평가 글.

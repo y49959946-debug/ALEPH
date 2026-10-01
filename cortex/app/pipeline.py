@@ -166,8 +166,11 @@ def run_pipeline(
             "prompt_hashes": prompt_hashes(),
             "created_at": datetime.now().isoformat(timespec="seconds"),
             "duration_ms": int((time.perf_counter() - started) * 1000),
-            # 이어서 실행한 경우 이번 실행에서 부른 횟수만 센다
-            "calls": {"multi_round0": calls_multi_r0, "multi_total": calls_multi, "single": counter.calls - calls_multi},
+            # 방식별 호출 수 (보고용). 단계마다 AI 1번이므로 단계 수로 센다 — 이어서 실행해도 정확하다
+            "calls": {"multi_round0": 2 + len(personas), "multi_total": 2 + len(personas) + (len(personas) + 1 if v1 else 1),
+                      "single": len(singles)},
+            # 이번 실행에서 실제로 부른 횟수 (이어서 실행이면 앞에서 끝난 단계는 빠짐, 재시도는 포함 안 됨)
+            "calls_this_run": {"multi": calls_multi, "single": counter.calls - calls_multi},
         },
     }
     path = save_run(run, runs_dir)
