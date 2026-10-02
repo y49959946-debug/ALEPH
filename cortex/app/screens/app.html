@@ -83,8 +83,8 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .steps .trio .av-img:last-child { margin-right: 0; }
 .preview { margin-top: 12px; }
 .pv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.pvc { text-align: left; padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; box-shadow: var(--shadow); transition: transform .15s, border-color .15s; }
-.pvc:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.pvc { text-align: left; padding: 0; cursor: default; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; box-shadow: var(--shadow); }
+/* 미리보기는 보여주기만 한다 (눌러도 이동하지 않음) */
 .pvc img { display: block; width: 100%; height: auto; aspect-ratio: 640 / 396; object-fit: cover; object-position: top; border-bottom: 1px solid var(--line); }
 .pvc b { display: block; font-size: 15px; padding: 10px 14px 0; }
 .pvc span { display: block; font-size: 13px; color: var(--ink-2); padding: 0 14px 12px; }
@@ -522,11 +522,11 @@ table.cm tbody th { font-weight: 600; width: 38%; }
     <div class="chips" id="chips"></div>
   </div>
   <section class="preview" aria-label="결과 미리보기">
-    <div class="samples-h"><h2>이런 결과를 받아요</h2><span class="fine">샘플 01 결과 · 누르면 그 장으로</span></div>
+    <div class="samples-h"><h2>이런 결과를 받아요</h2><span class="fine">샘플 01 결과</span></div>
     <div class="pv">
-      <button class="pvc" data-pv="imp"><img src="assets/preview-imp.jpg" alt="" loading="lazy" width="640" height="396"><b>첫인상</b><span>어떤 어조로 읽히는지</span></button>
-      <button class="pvc" data-pv="clash"><img src="assets/preview-clash.jpg" alt="" loading="lazy" width="640" height="396"><b>갈린 판정</b><span>같은 문장, 평가자마다 다른 판단</span></button>
-      <button class="pvc" data-pv="fix"><img src="assets/preview-fix.jpg" alt="" loading="lazy" width="640" height="396"><b>고칠 것</b><span>무엇부터, 어떻게 고칠지</span></button>
+      <div class="pvc" data-pv="imp"><img src="assets/preview-imp.jpg" alt="" loading="lazy" width="640" height="396"><b>첫인상</b><span>어떤 어조로 읽히는지</span></div>
+      <div class="pvc" data-pv="clash"><img src="assets/preview-clash.jpg" alt="" loading="lazy" width="640" height="396"><b>갈린 판정</b><span>같은 문장, 평가자마다 다른 판단</span></div>
+      <div class="pvc" data-pv="fix"><img src="assets/preview-fix.jpg" alt="" loading="lazy" width="640" height="396"><b>고칠 것</b><span>무엇부터, 어떻게 고칠지</span></div>
     </div>
   </section>
   </div>
@@ -555,11 +555,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 $$(".repo").forEach((a) => (a.href = D.repo));
 if (D.local) { $("#demoNote").hidden = true; $("#home").hidden = true; }
 else { $("#text").style.minHeight = "150px"; }
-// 결과 미리보기: 누르면 결과가 있는 첫 샘플의 그 장으로
-$$(".pvc").forEach((b) => b.addEventListener("click", () => {
-  const k = firstKey(); if (!k) return;
-  openDash(k); const i = pages.findIndex((p) => p.id === b.dataset.pv); if (i > 0) go(i);
-}));
+// 결과 미리보기는 보여주기만 한다 (눌러도 이동하지 않음)
 if (!Object.keys(D.runs).length) $(".preview").hidden = true;
 
 // 밝게/어둡게: 처음에는 기기 설정을 따르고, 버튼을 누르면 그 선택을 기억한다
