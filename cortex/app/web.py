@@ -60,6 +60,62 @@ def sample_name(run: dict) -> str | None:
     return m.group(1) if m else None
 
 
+KEY_FILE = INPUTS_DIR / "answer_key.json"
+
+
+def _answer_key() -> dict:
+    try:
+        return json.loads(KEY_FILE.read_text(encoding="utf-8")).get("samples", {})
+    except Exception:
+        return {}
+
+
+def compare(run: dict) -> dict | None:
+    """단일 AI 비교 장에 쓸 데이터. 채점 스크립트와 같은 규칙(scripts/grade.py)으로 계산한다.
+    점수 우열이 아니라 '짚어야 할 점을 누가 찾았는가'와 '정답지 밖에서 누가 무엇을 짚었는가'를 보여준다."""
+    if not run.get("single"):
+        return None
+    try:
+        from scripts.grade import findings, hits
+    except Exception:
+        return None
+    fs = findings(run)
+    personas = [p["persona_id"] for p in run.get("rounds", {}).get("round_0", [])]
+    r1 = [pid + "@토론후" for pid in personas] if run.get("rounds", {}).get("round_1") else []
+    multi_src = set(personas) | set(r1) | {"judge"}
+    singles = sorted({f["source"] for f in fs if f["source"].startswith("single_")})
+    spec = _answer_key().get(sample_name(run) or "")
+    items = []
+    if spec:
+        for it in spec["items"]:
+            by = hits(it, fs)
+            items.append({
+                "key": it["key"], "label": it["label"], "ids": it["ids"],
+                "first": sorted(by & set(personas)), "after": sorted(x.split("@")[0] for x in by & set(r1)),
+                "judge": "judge" in by, "single": sorted(x.split("_")[1] for x in by if x.startswith("single_")),
+            })
+    # 정답지 밖 지적: 어떤 짚어야 할 점에도 맞지 않는 아쉬운 점 (평가자는 토론 후 최종 입장 기준)
+    def matched(f):
+        return spec and any(f["source"] in hits(it, [f]) for it in spec["items"])
+    final = r1 or personas
+    extra_multi = [{"by": f["source"].split("@")[0], "ids": f["ids"], "text": f["text"]}
+                   for f in fs if f["source"] in final and f["kind"] == "weakness" and not matched(f)]
+    extra_single = [{"by": f["source"].split("_")[1], "ids": f["ids"], "text": f["text"]}
+                    for f in fs if f["source"] in singles and f["kind"] == "weakness" and not matched(f)]
+    # 문장 단위: 아쉬운 점(약점·고칠 것·이슈)으로 짚은 문장
+    neg = ("weakness", "issue")
+    sm = sorted({i for f in fs if f["source"] in multi_src and f["kind"] in neg for i in f["ids"]})
+    ss = sorted({i for f in fs if f["source"] in singles and f["kind"] in neg for i in f["ids"]})
+    calls = run.get("metadata", {}).get("calls") or {}
+    return {
+        "items": items, "extra_multi": extra_multi, "extra_single": extra_single,
+        "sent_multi": sm, "sent_single": ss,
+        "single": {k: {"summary": v.get("summary", ""), "weaknesses": v.get("weaknesses", []), "strengths": v.get("strengths", [])}
+                   for k, v in run["single"].items()},
+        "calls": {"multi": calls.get("multi_total") or 9, "single": 1},
+    }
+
+
 def slim(run: dict) -> dict:
     """화면에 필요한 것만 남긴다 (프롬프트 해시 등 제외)."""
     obs = run.get("analyzer", {}).get("observations", {})
@@ -79,6 +135,7 @@ def slim(run: dict) -> dict:
         "shift": run.get("shift_log", []),
         "aliases": run.get("round_1_aliases", {}),
         "display": (run.get("display") or {}).get("lines", {}),
+        "compare": compare(run),
         "display_model": (run.get("display") or {}).get("model"),
         "display_warn": len([w for w in (run.get("display") or {}).get("warnings", []) if w.get("type") == "keyword_missing"]),
         "model": run.get("metadata", {}).get("model"),

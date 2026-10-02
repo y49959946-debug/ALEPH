@@ -128,7 +128,7 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .msg.me { flex-direction: row-reverse; }
 .msg.me .bubble { background: var(--me); color: var(--on-me); border-color: var(--me); border-radius: 20px 6px 20px 20px; }
 .msg.me .who { justify-content: flex-end; margin-right: 4px; }
-.essay { white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; font-size: 15px; }
+.essay { white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; font-size: 15px; }
 .msg.chair .bubble { border-color: var(--ink); }
 .note { align-self: center; text-align: center; font-size: 13px; color: var(--ink-3); background: var(--panel-2); border-radius: 999px; padding: 5px 14px; max-width: 92%; animation: rise .3s ease-out both; }
 .typing { display: flex; gap: 10px; align-items: center; }
@@ -444,6 +444,32 @@ section.closing .again { margin-top: 14px; }
   .rail button.on { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
   .secbar { display: none; }
 }
+
+/* 단일 AI 비교 */
+.cm-cond { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cm-cond .card { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; margin: 0; }
+.cm-cond b { font-size: 15px; } .cm-cond span { font-size: 13.5px; color: var(--ink-2); } .cm-cond small { margin-top: 4px; font-size: 12px; font-weight: 800; color: var(--accent); }
+.cm-wrap { overflow-x: auto; }
+table.cm { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+table.cm th, table.cm td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+table.cm thead th { font-size: 12.5px; color: var(--ink-3); font-weight: 800; }
+.cm-sub { display: block; font-weight: 600; }
+table.cm tbody th { font-weight: 600; width: 38%; }
+.cm-y { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; color: var(--good); flex-wrap: wrap; }
+.cm-y .vi { width: 18px; height: 18px; margin: 0; }
+.cm-n { color: var(--ink-3); font-size: 13.5px; }
+.cm-who { display: inline-flex; margin-left: 4px; } .cm-who img.av-img.sm { width: 26px; height: 26px; margin-right: -4px; }
+.cm-note { display: block; font-size: 12px; color: var(--accent); margin-top: 2px; }
+.cm-groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cm-g { border-radius: 16px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--line); }
+.cm-g.both { border-top-color: var(--hatch); } .cm-g.multi { border-top-color: var(--accent); } .cm-g.single { border-top-color: var(--c-pass); }
+.cm-gh { display: flex; justify-content: space-between; align-items: baseline; } .cm-gh span { font-size: 22px; font-weight: 800; }
+.cm-it { font-size: 14px; margin-top: 4px; }
+.cm-extra { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cm-xh { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+.cm-x { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; font-size: 14px; }
+.cm-line { font-size: 14px; margin: 4px 0; }
+@media (max-width: 700px) { .cm-cond, .cm-groups, .cm-extra { grid-template-columns: 1fr; } table.cm { font-size: 13.5px; } }
 /* 아래 넘김 버튼 */
 .pager { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg-bottom) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
 .pager .in { max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
@@ -1017,6 +1043,8 @@ function sectionList(id, root) {
       const s = R.sentences.find((x) => x.id === l.dataset.sid); if (!s || s.p === last) return;
       last = s.p; k++; add(l, `문단 ${k}`, R.roles[s.p] || "");
     });
+  } else if (id === "compare") {
+    root.querySelectorAll("h3").forEach((h) => add(h, h.textContent));
   } else if (id === "sum") {
     root.querySelectorAll("h3").forEach((h) => add(h, clip(h.childNodes[0]?.textContent || h.textContent)));
     add(root.querySelector("section.closing"), "마무리");
@@ -1259,6 +1287,51 @@ function buildPages(M) {
     <h1>문장을 눌러 보세요</h1>
     <div class="legend" style="margin:0 0 14px">${["자신감", "열정", "망설임", "방어적"].map((l) => `<span class="lab ${l}">${l}</span>`).join("")}<span class="fine">밑줄 색 = 어조</span></div>
     <div class="ms" id="origMs">${R.sentences.map((s) => { const n = Object.keys(M.byS[s.id] || {}).length; return `<div class="line" data-sid="${s.id}" tabindex="0" role="button"><span class="sid">${s.id}${n ? ` · 평가자 ${n}명 언급` : ""}${R.roles[s.p] ? ` · ${esc(R.roles[s.p])}` : ""}</span><span class="t ${esc((SIG[s.id] || {}).label || "")}">${esc(s.text)}</span></div><div class="notes"></div>`; }).join("")}</div>` });
+
+  // 7.5 단일 AI 비교 (V1에서 단일 AI도 함께 돌렸을 때만)
+  const C = R.compare;
+  if (C) {
+    const SN = { a: "AI 하나 · 기준 13개", b: "AI 하나 · 단순 질문" };
+    const nItems = C.items.length;
+    const multiN = C.items.filter((x) => x.first.length || x.after.length || x.judge).length;
+    const singleN = (k) => C.items.filter((x) => x.single.includes(k)).length;
+    const common = C.items.filter((x) => (x.first.length || x.after.length || x.judge) && x.single.length);
+    const onlyMulti = C.items.filter((x) => (x.first.length || x.after.length || x.judge) && !x.single.length);
+    const onlySingle = C.items.filter((x) => !(x.first.length || x.after.length || x.judge) && x.single.length);
+    const none = C.items.filter((x) => !(x.first.length || x.after.length || x.judge) && !x.single.length);
+    const yes = (on, extra = "") => on ? `<span class="cm-y">${ico("good")}<span>찾음</span>${extra}</span>` : `<span class="cm-n">못 찾음</span>`;
+    const faces = (ids) => ids.map((r) => av(r, true)).join("");
+    const rows = C.items.map((x) => `<tr class="sec-row"><th><b>${esc(x.key)}</b> ${esc(x.label)}${sref(x.ids)}</th>
+      <td>${yes(x.first.length || x.after.length || x.judge, `<span class="cm-who">${faces([...new Set([...x.first, ...x.after])])}${x.judge ? av("judge", true) : ""}</span>`)}${x.after.length > x.first.length ? `<small class="cm-note">토론 뒤 ${x.after.filter((a) => !x.first.includes(a)).map(pname).join(", ")}도 짚음</small>` : ""}</td>
+      <td>${yes(x.single.includes("a"))}</td><td>${yes(x.single.includes("b"))}</td></tr>`).join("");
+    const group = (title, cls, list, desc) => `<div class="cm-g ${cls}"><div class="cm-gh"><b>${title}</b><span>${list.length}개</span></div><p class="fine" style="margin:0 0 6px">${desc}</p>${list.length ? list.map((x) => `<div class="cm-it"><b>${esc(x.key)}</b> ${esc(x.label)}${sref(x.ids)}</div>`).join("") : `<div class="fine">없어요</div>`}</div>`;
+    const extra = (list, isMulti) => list.length ? list.map((e) => `<div class="card cm-x">${isMulti ? av(e.by, true) : ""}<div class="body"><div class="who2">${esc(isMulti ? pname(e.by) : SN[e.by])}</div><div>${esc(firstSentence(e.text))}${sref(e.ids)}</div></div></div>`).join("") : `<p class="fine" style="margin:0 0 8px">없어요</p>`;
+    const sdet = (k) => { const v = C.single[k]; return `<details class="more"><summary>${esc(SN[k])}의 평가 전체</summary><div class="card"><p style="margin:0 0 8px">${esc(v.summary)}</p>${v.weaknesses.map((w) => `<div class="cm-line">${vpill("warn")} ${esc(w.claim)}${sref(w.evidence_ids)}</div>`).join("")}${v.strengths.map((w) => `<div class="cm-line">${vpill("good")} ${esc(w.claim)}${sref(w.evidence_ids)}</div>`).join("")}</div></details>`; };
+    P.push({ id: "compare", tab: "AI 하나와 비교", html: `
+      ${who("judge", "비교", "같은 글을 AI 하나에게 맡겼을 때")}
+      <h1>짚어야 할 점 ${nItems}개 중, 한눈은 ${multiN}개 · AI 하나는 ${Math.max(singleN("a"), singleN("b"))}개를 찾았어요</h1>
+      <p class="sub">점수가 아니라 <b>무엇을 찾았는지</b>를 비교해요.</p>
+      <h3>같은 글, 세 가지 방식</h3>
+      <div class="cm-cond">
+        <div class="card"><b>한눈</b><span>평가자 3명이 각자 → 토론 → 의장 정리</span><small>AI ${C.calls.multi}번</small></div>
+        <div class="card"><b>${SN.a}</b><span>세 평가자의 기준 13개를 한 번에 줌</span><small>AI 1번</small></div>
+        <div class="card"><b>${SN.b}</b><span>"이 자기소개서를 평가하고 개선점을 알려줘" 한 줄만 줌</span><small>AI 1번</small></div>
+      </div>
+      <h3>짚어야 할 점을 누가 찾았나</h3>
+      <div class="cm-wrap"><table class="cm"><thead><tr><th>짚어야 할 점</th><th>한눈</th><th>AI 하나<small class="cm-sub">기준 13개</small></th><th>AI 하나<small class="cm-sub">단순 질문</small></th></tr></thead><tbody>${rows}</tbody></table></div>
+      <h3>한눈에 보기</h3>
+      <div class="cm-groups">
+        ${group("함께 찾음", "both", common, "두 방식 모두 짚은 점")}
+        ${group("한눈만 찾음", "multi", onlyMulti, "여러 관점에서만 나온 점")}
+        ${group("AI 하나만 찾음", "single", onlySingle, "한눈이 놓친 점")}
+      </div>
+      ${none.length ? `<p class="fine">둘 다 못 찾은 점: ${none.map((x) => esc(x.key + " " + x.label)).join(", ")}</p>` : ""}
+      <h3>짚어야 할 점 밖에서 나온 지적</h3>
+      <p class="fine" style="margin:-4px 0 8px">정답지에 없다고 틀린 건 아니에요. 각 방식이 추가로 짚은 점이에요.</p>
+      <div class="cm-extra"><div><b class="cm-xh">한눈</b>${extra(C.extra_multi, true)}</div><div><b class="cm-xh">AI 하나</b>${extra(C.extra_single, false)}</div></div>
+      ${sdet("a")}${sdet("b")}
+      <p class="fine" style="margin-top:16px">"짚어야 할 점"은 샘플을 만들 때 정해 둔 기준이고, 이 기준도 AI의 도움을 받아 만들었어요. 그래서 결과는 참고용이고, 샘플 하나의 결과만으로 어느 쪽이 낫다고 말할 수 없어요. 한눈은 AI를 ${C.calls.multi}번, AI 하나는 1번 불러요.</p>` });
+  }
 
   // 8. 요약
   const osum = T(R, "judge.summary", firstSentence(J.overall_summary || ""));
