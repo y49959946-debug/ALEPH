@@ -1992,6 +1992,40 @@
 
       /* ---- T01-C23: 거주 지역(DAEGU, KOREA) 비공개 ---- */
       .hero-visual::before { content: none; display: none; }
+
+      /* ---- 홈페이지 기준(예전 설계): 내용이 있는 부분은 모서리가 둥근 박스로 구분, 요약 3개는 균등한 네모 ---- */
+      .summary {
+        gap: clamp(14px, 1.6vw, 24px);
+        padding-top: clamp(26px, 3.6svh, 52px);
+      }
+
+      .summary-title { top: clamp(4px, 1svh, 20px); }
+
+      .summary-card,
+      .summary-card:nth-child(n),
+      .summary-card:first-of-type {
+        padding: clamp(10px, 1.8svh, 22px) clamp(16px, 1.6vw, 24px);
+        border: 1px solid rgba(82, 102, 90, 0.2);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.62);
+        box-shadow: 0 8px 22px rgba(42, 48, 43, 0.06);
+      }
+
+      .summary-card + .summary-card { border-left: 1px solid rgba(82, 102, 90, 0.2); }
+
+      .evidence-toggle,
+      .evidence-toggle:hover { border-radius: 10px; }
+
+      /* 번호(01)와 "강점" 표시를 한 줄로 */
+      .summary-card::before { display: inline-block; margin: 0 10px 0 0; vertical-align: baseline; }
+      .summary-card .card-tag { display: inline-flex; vertical-align: baseline; }
+
+      @media (max-width: 680px) {
+        .summary { gap: 14px; }
+        .summary-card,
+        .summary-card:nth-child(n),
+        .summary-card:first-of-type { padding: 18px; border-top: 1px solid rgba(82, 102, 90, 0.2); }
+      }
     </style>
   </head>
   <body>
