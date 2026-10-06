@@ -1800,6 +1800,83 @@
       @media (max-width: 680px) {
         .page-shell::before { opacity: 0.72; }
       }
+
+      /* ---- T01-C10/C11: 1366x768, 1920x1080 첫 화면에 소개(히어로)·활동/근거(요약 카드)가 함께 보이도록 압축 ---- */
+      .hero {
+        min-height: 0;
+        margin-top: 0;
+        padding: clamp(10px, 2.4svh, 36px) 0 clamp(6px, 1.6svh, 24px);
+        align-items: center;
+        gap: clamp(40px, 7vw, 120px);
+      }
+
+      .hero-copy .eyebrow { margin-bottom: clamp(10px, 1.6svh, 20px); }
+
+      .hero-copy h1 { font-size: clamp(40px, min(5.6vw, 7svh), 84px); }
+
+      .route-def { margin-top: clamp(10px, 2.2svh, 26px); }
+
+      .route-text { margin-top: 8px; font-size: 15px; line-height: 1.7; }
+
+      .hero-visual { justify-self: end; width: fit-content; max-width: 100%; padding: 18px 0; }
+
+      @media (min-width: 681px) {
+        /* 사진 폭이 줄어도 위쪽 라벨 두 개가 겹치지 않도록 위치 라벨을 아래 오른쪽으로 */
+        .hero-visual::before { top: auto; bottom: 2px; right: 0; }
+      }
+
+      .feature-frame {
+        width: auto;
+        height: clamp(220px, calc(100svh - 480px), 470px);
+        max-width: 100%;
+        aspect-ratio: 0.88 / 1;
+        transform: rotate(0.65deg);
+      }
+
+      .summary {
+        margin-top: 0;
+        padding-top: clamp(20px, 3.2svh, 48px);
+        padding-bottom: 56px;
+      }
+
+      .summary::before { top: clamp(4px, 1.4svh, 24px); }
+
+      .summary-card::before { margin-bottom: 8px; }
+
+      .summary-card h3 { margin: 8px 0 8px; line-height: 1.28; }
+
+      .summary-card p { line-height: 1.7; }
+
+      @media (max-width: 680px) {
+        .hero { padding-top: 28px; }
+        .hero-copy h1 { font-size: clamp(40px, 11vw, 56px); }
+        .hero-visual { justify-self: stretch; width: auto; }
+        .feature-frame { width: min(82%, 340px); height: auto; }
+        .summary { padding-top: 64px; }
+      }
+
+      /* ---- T01-C15: 제목 단계 h1 → h2 → h3. 요약 영역 라벨을 CSS 장식(::before)에서 실제 h2로 교체(모양은 동일) ---- */
+      .summary::before { content: none; display: none; }
+
+      .summary-title {
+        position: absolute;
+        top: clamp(4px, 1.4svh, 24px);
+        left: var(--chapter-inset);
+        margin: 0;
+        color: #52665a;
+        font-family: Arial, "Helvetica Neue", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.1em;
+      }
+
+      /* h2가 .summary의 첫 자식이 되면서 기존 .summary-card:first-child 규칙이 빠지므로 같은 규칙을 first-of-type으로 복원 */
+      .summary-card:first-of-type { padding-left: 0; }
+
+      @media (max-width: 680px) {
+        .summary-card:first-of-type { padding-top: 8px; border-top: 0; }
+      }
     </style>
   </head>
   <body>
@@ -1822,8 +1899,8 @@
             </div>
 
             <div class="nav-item">
-              <button class="nav-button" type="button">행로 <span class="caret">▼</span></button>
-              <div class="dropdown-menu">
+              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-route">행로 <span class="caret" aria-hidden="true">▼</span></button>
+              <div class="dropdown-menu" id="menu-route">
                 <a href="Strength_page.html">강점</a>
                 <a href="Preference_page.html">취향</a>
                 <a href="Plan_page.html">앞으로의 계획</a>
@@ -1831,8 +1908,8 @@
             </div>
 
             <div class="nav-item">
-              <button class="nav-button" type="button">결과물 <span class="caret">▼</span></button>
-              <div class="dropdown-menu">
+              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-works">결과물 <span class="caret" aria-hidden="true">▼</span></button>
+              <div class="dropdown-menu" id="menu-works">
                 <a href="minigame/name_entry.html">미니게임</a>
                 <a href="studio/studiohomepage.html">짤 스튜디오</a>
                 <a href="Weather/weatherhomepage.html">오늘의 날씨</a>
@@ -1868,7 +1945,8 @@
         </section>
       </main>
 
-      <section class="summary" aria-label="핵심 요약">
+      <section class="summary" aria-labelledby="summary-title">
+        <h2 class="summary-title" id="summary-title">A PERSONAL JOURNEY</h2>
         <article class="summary-card clickable" id="strength-card" role="link" tabindex="0">
           <div class="card-tag">강점</div>
           <h3><span class="topic-highlight">나는<br /><span class="line">칼 같은 사람입니다.</span></span></h3>
@@ -1950,30 +2028,48 @@
     <script>
       const navItems = document.querySelectorAll('.nav-item');
 
+      // T01-C14: 드롭다운 열림 상태를 aria-expanded로 알리고, Esc·바깥 클릭·포커스 이탈 시 닫습니다.
+      function setMenuOpen(item, open) {
+        const button = item.querySelector('.nav-button');
+        item.classList.toggle('open', open);
+        button.classList.toggle('active', open);
+        if (button.hasAttribute('aria-expanded')) {
+          button.setAttribute('aria-expanded', String(open));
+        }
+      }
+
+      function closeAllMenus(except) {
+        navItems.forEach((item) => {
+          if (item !== except) setMenuOpen(item, false);
+        });
+      }
+
       navItems.forEach((item) => {
         if (!item.querySelector('.dropdown-menu')) return;
         const button = item.querySelector('.nav-button');
+
         button.addEventListener('click', () => {
           const isOpen = item.classList.contains('open');
-          navItems.forEach((other) => {
-            other.classList.remove('open');
-            other.querySelector('.nav-button').classList.remove('active');
-          });
+          closeAllMenus(item);
+          setMenuOpen(item, !isOpen);
+        });
 
-          if (!isOpen) {
-            item.classList.add('open');
-            button.classList.add('active');
+        // Esc: 메뉴를 닫고 포커스를 메뉴 버튼으로 돌려놓음
+        item.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && item.classList.contains('open')) {
+            setMenuOpen(item, false);
+            button.focus();
           }
+        });
+
+        // Tab으로 메뉴 밖으로 나가면 닫힘
+        item.addEventListener('focusout', (event) => {
+          if (!item.contains(event.relatedTarget)) setMenuOpen(item, false);
         });
       });
 
       document.addEventListener('click', (event) => {
-        if (!event.target.closest('.nav-item')) {
-          navItems.forEach((item) => {
-            item.classList.remove('open');
-            item.querySelector('.nav-button').classList.remove('active');
-          });
-        }
+        if (!event.target.closest('.nav-item')) closeAllMenus();
       });
 
       const strengthCard = document.getElementById('strength-card');
