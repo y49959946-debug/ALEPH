@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>메인 - 행로</title>
     <style>
       :root {
         --bg-top: #f8fbff;
@@ -2152,13 +2153,25 @@
 
       // "누구 것"을 보여줄지는 서버가 세션 쿠키 안의 accountId로만 판단하므로, 다른 계정으로
       // 로그인하면 이 목록 자체가 그 계정 것으로 통째로 바뀝니다(절대 섞이지 않음).
+      // T01-C18: 로그인 전에는 비공개 API를 아예 호출하지 않습니다.
+      // (호출하면 서버가 401로 막아주긴 하지만, 브라우저가 그 401을 콘솔에 빨간 오류로 남깁니다.)
+      // 실제 접근 차단은 여전히 서버가 세션으로 판단합니다.
+      function showPrivateLocked() {
+        privateContentEl.innerHTML = '<p class="private-placeholder">🔒 로그인이 필요합니다. 로그인하면 이 영역에 내 비공개 메모가 표시돼요.</p>';
+        privateNoteAddBlock.hidden = true;
+      }
+
       async function loadPrivateContent() {
+        if (!isAuthenticated) {
+          showPrivateLocked();
+          return;
+        }
+
         try {
           const response = await fetch('/api/private/items', { credentials: 'include' });
 
           if (response.status === 401 || response.status === 403) {
-            privateContentEl.innerHTML = '<p class="private-placeholder">🔒 로그인이 필요합니다. 로그인하면 이 영역에 내 비공개 메모가 표시돼요.</p>';
-            privateNoteAddBlock.hidden = true;
+            showPrivateLocked();
             return;
           }
 
@@ -2179,7 +2192,7 @@
         }
       }
 
-      loadPrivateContent();
+      // 첫 로딩 때의 비공개 영역 불러오기는 refreshAuthStatus()가 로그인 상태를 확인한 뒤에 합니다.
 
       // 새 메모 추가 — 저장되면 위 목록을 다시 불러와서 새 카드가 보이게 합니다.
       privateNoteSaveButton.addEventListener('click', async () => {
@@ -2479,6 +2492,7 @@
           console.error('로그인 상태 확인 실패', error);
           applyAuthUi(false);
         }
+        loadPrivateContent(); // 로그인 상태를 안 다음에만 비공개 영역을 그림
       }
 
       passkeyLoginButton.addEventListener('click', async () => {
