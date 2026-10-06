@@ -3,7 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Pixel Meadow</title>
+	<title>LUMORIA</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
 	<style>
 		:root {
 			background: #142b2a;
@@ -39,13 +40,30 @@
 	</style>
 </head>
 <body>
-	<canvas id="game" width="1920" height="1080" aria-label="픽셀풍 초원 게임 화면"></canvas>
+	<canvas id="game" width="1920" height="1080" aria-label="LUMORIA 게임 화면: 마법사를 WASD로 움직여 몰려오는 슬라임을 피하며 자동 마법으로 처치"></canvas>
 
 	<script>
 		// Require a name before playing - if someone lands here directly
 		// without going through name_entry.html, send them back there.
-		const playerName = localStorage.getItem('playerName');
-		if (!playerName) {
+		// ===== 저장값 (T02 카드 4) =====
+		// 현재 판 값(체력·시간·레벨·슬라임)은 메모리에만 두고 새 판마다 처음부터.
+		// 보존 기록은 localStorage의 이름·랭킹·설정·플레이 기록 4가지뿐.
+		// 저장소가 막혀 있거나 값이 깨져 있어도 게임은 멈추지 않고 기본값으로 시작.
+		const store = {
+			get(key) { try { return window.localStorage.getItem(key); } catch (e) { return null; } },
+			set(key, value) { try { window.localStorage.setItem(key, value); return true; } catch (e) { return false; } },
+			json(key, fallback) {
+				try { const v = JSON.parse(this.get(key)); return v === null || v === undefined ? fallback : v; } catch (e) { return fallback; }
+			},
+		};
+		const session = {
+			set(key, value) { try { window.sessionStorage.setItem(key, value); } catch (e) {} },
+		};
+		const storageOk = store.set('__lumoria_test', '1');
+
+		const rawName = store.get('playerName');
+		const playerName = (typeof rawName === 'string' && rawName.trim()) ? rawName.trim().slice(0, 10) : '플레이어';
+		if (storageOk && !(typeof rawName === 'string' && rawName.trim())) {
 			window.location.href = 'name_entry.html';
 		}
 
@@ -61,95 +79,198 @@
 			ctx.fillRect(x, y, width, height);
 		}
 
-		function pixelTree(x, y, scale = 1) {
-			const s = scale;
-			// Shadow and trunk.
-			rect(x - 52 * s, y + 130 * s, 220 * s, 34 * s, '#407245');
-			rect(x + 40 * s, y + 14 * s, 58 * s, 152 * s, '#70452d');
-			rect(x + 54 * s, y + 18 * s, 22 * s, 148 * s, '#9a6138');
-			rect(x + 80 * s, y + 86 * s, 18 * s, 80 * s, '#4e352b');
+		// ===== 디자인 팔레트 (리디자인 시안 기준) =====
+		const UI = {
+			out: '#06080f', navy: '#0f1729', navy2: '#18233c', navy3: '#22304f',
+			gold: '#d9a54a', goldHi: '#f6d784', goldDk: '#7a4a12',
+			violet: '#8f5cf0', violetHi: '#d6b4ff', violetDk: '#4a2588',
+			cream: '#f6e6bf', red: '#c93a4a', redHi: '#ff7b86', redDk: '#7a1c2a',
+		};
+		const FONT = '"Galmuri11", "Courier New", monospace';
+		// ===== 효과 설정 (T02 카드 5) =====
+		// 선언한 효과 사건: "플레이어가 피격되어 체력이 깎이는 순간" 하나뿐.
+		//   → 피격음 + 화면 흔들림(0.22초) + 붉은 번쩍임(0.18초). 다른 사건에서는 실행되지 않음.
+		// 메뉴의 "효과음"·"움직임 줄이기" 또는 M 키로 즉시 끄거나 줄일 수 있고, 선택은 보존 기록에 저장.
+		const SETTINGS_KEY = 'lumoriaSettings';
+		const systemReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const savedSettings = store.json(SETTINGS_KEY, {});
+		const settings = {
+			sound: typeof savedSettings.sound === 'boolean' ? savedSettings.sound : true,
+			reduceMotion: typeof savedSettings.reduceMotion === 'boolean' ? savedSettings.reduceMotion : systemReduce,
+		};
+		let reduceMotion = settings.reduceMotion;
+		function saveSettings() { store.set(SETTINGS_KEY, JSON.stringify(settings)); }
 
-			// Blocky canopy outline, highlights, and shadow.
-			rect(x - 26 * s, y - 70 * s, 194 * s, 56 * s, '#1f5943');
-			rect(x - 70 * s, y - 20 * s, 282 * s, 92 * s, '#1f5943');
-			rect(x - 30 * s, y - 74 * s, 92 * s, 38 * s, '#337e4a');
-			rect(x + 52 * s, y - 112 * s, 76 * s, 50 * s, '#337e4a');
-			rect(x + 116 * s, y - 55 * s, 82 * s, 52 * s, '#2a7045');
-			rect(x - 42 * s, y + 8 * s, 92 * s, 58 * s, '#2a7045');
-			rect(x + 46 * s, y - 26 * s, 126 * s, 112 * s, '#2a7045');
-			rect(x + 76 * s, y - 66 * s, 54 * s, 34 * s, '#57a955');
-			rect(x - 8 * s, y - 24 * s, 50 * s, 34 * s, '#57a955');
-			rect(x + 128 * s, y + 10 * s, 42 * s, 34 * s, '#1c513b');
-			rect(x + 12 * s, y + 45 * s, 58 * s, 35 * s, '#1c513b');
+		let audioCtx = null;
+		let masterGain = null;
+		function ensureAudio() {
+			if (audioCtx) return;
+			try {
+				audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+				masterGain = audioCtx.createGain();
+				masterGain.gain.value = settings.sound ? 0.25 : 0;
+				masterGain.connect(audioCtx.destination);
+			} catch (e) { audioCtx = null; }
 		}
-
-		function drawMeadow() {
-			// A single flat base color across the whole field, no top/bottom split.
-			rect(0, 0, W, H, '#69a94c');
-
-			// Tiny grass clusters keep the pixel texture detailed but unobtrusive.
-			// Covers the full canvas height so the top band isn't left flat.
-			for (let i = 0; i < 260; i += 1) {
-				const x = (i * 137) % W;
-				const y = (i * 83) % (H - 20);
-				const color = i % 4 === 0 ? '#8bc65c' : i % 3 === 0 ? '#4e9148' : '#5d9c48';
-				rect(x, y, 4, 12, color);
-				rect(x - 4, y + 6, 4, 5, color);
-				if (i % 5 === 0) rect(x + 5, y + 3, 3, 8, color);
+		function setSound(on) {
+			settings.sound = on;
+			saveSettings();
+			if (masterGain) {
+				masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+				masterGain.gain.value = on ? 0.25 : 0; // 재생 중인 소리도 즉시 0
 			}
-
+		}
+		function setReduceMotion(on) {
+			settings.reduceMotion = on;
+			reduceMotion = on;
+			saveSettings();
+			if (on) { shakeMs = 0; } // 진행 중인 흔들림도 즉시 멈춤
 		}
 
-		function drawFlowers() {
-			const flowers = [
-				[280, 650, '#f6d76b'], [410, 520, '#f3f0cf'], [1530, 650, '#f5c8d3'],
-				[1660, 480, '#f6d76b'], [730, 850, '#f3f0cf'], [1410, 900, '#f5c8d3'],
-				[535, 760, '#f5c8d3'], [1760, 790, '#f3f0cf']
-			];
-			flowers.forEach(([x, y, color]) => {
-				rect(x, y + 10, 7, 25, '#3e8142');
-				rect(x - 13, y, 14, 14, color);
-				rect(x + 7, y, 14, 14, color);
-				rect(x - 3, y - 11, 14, 14, color);
-				rect(x - 3, y + 10, 14, 14, color);
-				rect(x, y, 8, 8, '#e9ac45');
+		let shakeMs = 0;
+		let flashMs = 0;
+		function playEffect(kind) {
+			if (kind !== 'hit') return; // 선언한 사건(피격) 외에는 효과 없음
+			if (settings.sound && audioCtx && masterGain) {
+				const t = audioCtx.currentTime;
+				const osc = audioCtx.createOscillator();
+				const g = audioCtx.createGain();
+				osc.type = 'square';
+				osc.frequency.setValueAtTime(330, t);
+				osc.frequency.exponentialRampToValueAtTime(90, t + 0.14);
+				g.gain.setValueAtTime(0.6, t);
+				g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+				osc.connect(g); g.connect(masterGain);
+				osc.start(t); osc.stop(t + 0.17);
+			}
+			flashMs = 180;
+			shakeMs = reduceMotion ? 0 : 220;
+		}
+
+		// 고정 시드 난수 (떠다니는 입자 위치용)
+		function seeded(seed) {
+			let s = seed;
+			return () => (s = (s * 9301 + 49297) % 233280) / 233280;
+		}
+
+		// 배경: 밤의 숲 이미지 (assets/bg_forest.png)
+		const bgImage = new Image();
+		bgImage.src = 'assets/bg_forest.png';
+
+		// ===== 시안 스타일 UI 프레임 =====
+		// 모서리를 깎은 사각형(픽셀풍)
+		function cutRect(x, y, w, h, color, cut) {
+			rect(x + cut, y, w - cut * 2, h, color);
+			rect(x, y + cut, w, h - cut * 2, color);
+			if (cut >= 4) rect(x + cut / 2, y + cut / 2, w - cut, h - cut, color);
+		}
+
+		// 계단식 마름모: 바깥 어두운 선 → 금 테 → 보라 보석 → 밝은 반짝임
+		function drawDiamond(cx, cy, r, gem = true) {
+			const layer = (rr, color) => {
+				for (let dy = -rr; dy < rr; dy += 2) {
+					const half = rr - Math.abs(dy + 1);
+					if (half > 0) rect(cx - half, cy + dy, half * 2, 2, color);
+				}
+			};
+			layer(r + 3, UI.out);
+			layer(r, UI.gold);
+			if (gem) {
+				layer(r - 3, UI.violetDk);
+				layer(r - 5, UI.violet);
+				rect(cx - 2, cy - r + 6, 2, 2, UI.violetHi);
+				rect(cx - 4, cy - r + 8, 2, 2, UI.violetHi);
+			}
+		}
+
+		// 금색 덩굴 장식(가운데 보석 양옆)
+		function drawFiligree(cx, cy, dir) {
+			rect(cx + dir * 8, cy - 1, dir * 22, 2, UI.gold);
+			rect(cx + dir * 30, cy - 4, dir * 4, 4, UI.gold);
+			rect(cx + dir * 34, cy - 6, dir * 6, 2, UI.goldDk);
+		}
+
+		function drawGem(cx, cy, s = 1) { drawDiamond(cx, cy, 8 * s); }
+
+		function drawFrame(x, y, w, h, opts = {}) {
+			const { fill = UI.navy, caps = true, centerGems = false, cornerGems = false, glow = false } = opts;
+			cutRect(x - 6, y - 6, w + 12, h + 12, UI.out, 8);
+			cutRect(x - 4, y - 4, w + 8, h + 8, UI.gold, 6);
+			rect(x + 2, y - 4, w - 4, 1, UI.goldHi);
+			cutRect(x - 2, y - 2, w + 4, h + 4, UI.out, 4);
+			cutRect(x, y, w, h, glow ? '#3a1d6e' : fill, 3);
+			rect(x + 3, y, w - 6, 2, glow ? UI.violet : UI.navy3);
+			if (caps) {
+				const r = Math.min(14, Math.round(h / 2) + 2);
+				rect(x - 12, y + h / 2 - 2, 8, 4, UI.gold);
+				rect(x + w + 4, y + h / 2 - 2, 8, 4, UI.gold);
+				drawDiamond(x - 16, y + h / 2, r);
+				drawDiamond(x + w + 16, y + h / 2, r);
+			}
+			if (centerGems) {
+				[y - 4, y + h + 4].forEach((gy) => {
+					drawFiligree(x + w / 2, gy, -1);
+					drawFiligree(x + w / 2, gy, 1);
+					drawDiamond(x + w / 2, gy, 10);
+				});
+			}
+			if (cornerGems) {
+				[[x - 3, y - 3], [x + w + 3, y - 3], [x - 3, y + h + 3], [x + w + 3, y + h + 3]].forEach(([gx, gy]) => drawDiamond(gx, gy, 8));
+			}
+		}
+
+		// 타이머 양옆 보라 반짝이
+		function drawSparkle(cx, cy, s = 1) {
+			const arm = (len, thick, color) => {
+				rect(cx - thick / 2, cy - len, thick, len * 2, color);
+				rect(cx - len, cy - thick / 2, len * 2, thick, color);
+			};
+			arm(18 * s, 2, UI.violet);
+			arm(11 * s, 4, UI.violet);
+			arm(6 * s, 6, UI.violetHi);
+			rect(cx - 2, cy - 2, 4, 4, '#ffffff');
+			[[-14, -14], [14, -14], [-14, 14], [14, 14]].forEach(([dx, dy], i) => {
+				if (i % 3 === 0) return;
+				const px = cx + dx * s, py = cy + dy * s;
+				rect(px - 1, py - 4, 2, 8, UI.goldHi);
+				rect(px - 4, py - 1, 8, 2, UI.goldHi);
 			});
+		}
+
+		function shadowText(text, x, y, size, color = UI.cream, align = 'center') {
+			ctx.font = `700 ${size}px ${FONT}`;
+			ctx.textAlign = align;
+			ctx.textBaseline = 'middle';
+			ctx.fillStyle = UI.out;
+			ctx.fillText(text, x + 2, y + 2);
+			ctx.fillStyle = color;
+			ctx.fillText(text, x, y);
+		}
+
+		function drawHeart(x, y, s = 3) {
+			const rows = ['01100110', '11111111', '11111111', '01111110', '00111100', '00011000'];
+			rows.forEach((row, ry) => [...row].forEach((c, rx) => {
+				if (c === '1') rect(x + rx * s, y + ry * s, s, s, ry < 2 && rx < 3 ? '#d9a6ff' : '#9b4dff');
+			}));
+			rect(x + s, y + s, s, s, '#f3e0ff');
 		}
 
 		const health = { current: 100, max: 100 };
 
 		function drawHealthBar() {
-			const x = 42;
-			const y = 38;
-			const w = 320;
-			const h = 40;
+			const x = 46, y = 40, w = 340, h = 34;
 			const pct = Math.max(0, Math.min(1, health.current / health.max));
-			const fillW = Math.round(w * pct);
-
-			// Chunky dark pixel frame around the whole bar.
-			rect(x - 6, y - 6, w + 12, h + 12, '#0b1210');
-			rect(x - 3, y - 3, w + 6, h + 6, '#2c3a33');
-
-			// Empty track underneath the fill.
-			rect(x, y, w, h, '#3a1518');
-
-			// Filled portion with a glossy highlight on top and a shaded strip on the bottom.
-			rect(x, y, fillW, h, '#c93a3a');
-			rect(x, y, fillW, Math.round(h * 0.4), '#e8615c');
-			rect(x, y + h - Math.round(h * 0.22), fillW, Math.round(h * 0.22), '#8f2424');
-
-			// Gold corner rivets, matching the rest of the pixel-UI palette.
-			[[x - 6, y - 6], [x + w, y - 6], [x - 6, y + h], [x + w, y + h]].forEach(([cx, cy]) => {
-				rect(cx, cy, 6, 6, '#d8c98a');
-			});
-
-			ctx.fillStyle = '#0b1210';
-			ctx.font = 'bold 22px Courier New, monospace';
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText(`${health.current}/${health.max}`, x + w / 2 + 1, y + h / 2 + 2);
-			ctx.fillStyle = '#ffffff';
-			ctx.fillText(`${health.current}/${health.max}`, x + w / 2, y + h / 2 + 1);
+			drawFrame(x, y, w, h, { centerGems: true });
+			const fx = x + 4, fw = w - 8, fy = y + 4, fh = h - 8;
+			cutRect(fx, fy, fw, fh, '#2a0f18', 3);
+			const fill = Math.round(fw * pct);
+			if (fill > 0) {
+				cutRect(fx, fy, fill, fh, UI.red, 3);
+				rect(fx + 3, fy + 2, Math.max(0, fill - 6), 6, UI.redHi);
+				rect(fx + 3, fy + fh - 5, Math.max(0, fill - 6), 3, UI.redDk);
+			}
+			drawHeart(x + 12, y + 6, 3);
+			shadowText(`${health.current}/${health.max}`, x + w / 2 + 10, y + h / 2 + 1, 22);
 		}
 
 		function formatClock(ms) {
@@ -161,182 +282,162 @@
 		}
 
 		function drawTimer() {
-			const text = formatClock(elapsedMs);
-			const w = 240;
-			const h = 56;
-			const x = W / 2 - w / 2;
-			const y = 32;
-
-			rect(x - 6, y - 6, w + 12, h + 12, '#0b1210');
-			rect(x - 3, y - 3, w + 6, h + 6, '#2c3a33');
-			rect(x, y, w, h, '#1f2d2b');
-			[[x - 6, y - 6], [x + w, y - 6], [x - 6, y + h], [x + w, y + h]].forEach(([cx, cy]) => {
-				rect(cx, cy, 6, 6, '#d8c98a');
-			});
-
-			ctx.fillStyle = '#0b1210';
-			ctx.font = 'bold 26px Courier New, monospace';
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText(text, x + w / 2 + 1, y + h / 2 + 2);
-			ctx.fillStyle = '#f4e8b5';
-			ctx.fillText(text, x + w / 2, y + h / 2 + 1);
+			const w = 250, h = 58, x = W / 2 - w / 2, y = 28;
+			drawFrame(x, y, w, h, { caps: false, centerGems: true });
+			drawSparkle(x - 42, y + h / 2, 1);
+			drawSparkle(x + w + 42, y + h / 2, 1);
+			shadowText(formatClock(elapsedMs), W / 2, y + h / 2 + 1, 28, UI.cream);
 		}
 
 		function drawXpBar() {
-			const w = 760;
-			const h = 34;
-			const x = W / 2 - w / 2;
-			const y = H - 76;
+			const w = 780, h = 30, x = W / 2 - w / 2, y = H - 74;
 			const needed = playerLevel >= MAX_LEVEL ? 1 : xpToClearLevel(playerLevel);
 			const pct = playerLevel >= MAX_LEVEL ? 1 : Math.max(0, Math.min(1, xpIntoLevel / needed));
-			const fillW = Math.round(w * pct);
-
-			rect(x - 6, y - 6, w + 12, h + 12, '#0b1210');
-			rect(x - 3, y - 3, w + 6, h + 6, '#2c3a33');
-			rect(x, y, w, h, '#1a2a26');
-			rect(x, y, fillW, h, '#6fb3e0');
-			rect(x, y, fillW, Math.round(h * 0.4), '#9ed4f2');
-			[[x - 6, y - 6], [x + w, y - 6], [x - 6, y + h], [x + w, y + h]].forEach(([cx, cy]) => {
-				rect(cx, cy, 6, 6, '#d8c98a');
-			});
-
-			ctx.textBaseline = 'middle';
-			ctx.fillStyle = '#f4e8b5';
-			ctx.font = 'bold 20px Courier New, monospace';
-			ctx.textAlign = 'right';
-			ctx.fillText(`Lv. ${playerLevel}  TOTAL EXP ${totalXP}`, x + w + 4, y - 20);
-
-			const label = playerLevel >= MAX_LEVEL ? 'MAX LEVEL' : `${xpIntoLevel} / ${needed}`;
-			ctx.textAlign = 'center';
-			ctx.font = 'bold 16px Courier New, monospace';
-			ctx.fillStyle = '#0b1210';
-			ctx.fillText(label, x + w / 2 + 1, y + h / 2 + 2);
-			ctx.fillStyle = '#ffffff';
-			ctx.fillText(label, x + w / 2, y + h / 2 + 1);
+			drawFrame(x, y, w, h, { centerGems: true, fill: '#140b28' });
+			const fill = Math.round((w - 8) * pct);
+			if (fill > 0) {
+				cutRect(x + 4, y + 4, fill, h - 8, '#6b36c6', 2);
+				rect(x + 6, y + 6, Math.max(0, fill - 4), 4, '#b57bff');
+			}
+			shadowText(playerLevel >= MAX_LEVEL ? 'MAX LEVEL' : `${xpIntoLevel} / ${needed}`, W / 2, y + h / 2 + 1, 18);
+			shadowText(`Lv. ${playerLevel}   TOTAL EXP ${totalXP}`, x + w - 10, y - 30, 18, UI.goldHi, 'right');
 		}
 
 		function drawPlayerName() {
-			ctx.fillStyle = '#f4e8b5';
-			ctx.font = 'bold 16px Courier New, monospace';
-			ctx.textAlign = 'left';
-			ctx.textBaseline = 'top';
-			ctx.fillText(playerName, 42, 92);
+			shadowText(playerName, 50, 100, 16, UI.cream, 'left');
+		}
+
+		// 현재 게임 상태 한 줄 (T02 C05)
+		function statusText() {
+			if (!started) return '시작 대기';
+			if (settingsOpen) return pausedByBlur ? '일시정지 — 창을 벗어났어요' : '일시정지';
+			if (cardFrame) return '레벨업 — 카드를 고르세요';
+			if (finalWaveSpawned) return `마지막 보스! 남은 적 ${slimes.length} — 모두 처치하면 클리어`;
+			return `진행 중 — 마지막 보스까지 ${Math.max(0, Math.ceil((FINAL_WAVE_MS - elapsedMs) / 1000))}초`;
+		}
+
+		function drawStatus() {
+			const text = statusText();
+			ctx.font = `700 18px ${FONT}`;
+			const w = Math.ceil(ctx.measureText(text).width) + 36;
+			const x = W / 2 - w / 2, y = 112;
+			cutRect(x, y, w, 32, 'rgba(10, 14, 28, .82)', 3);
+			rect(x, y + 30, w, 2, finalWaveSpawned ? UI.red : UI.violet);
+			shadowText(text, W / 2, y + 16, 18, finalWaveSpawned ? '#ffd0d6' : UI.cream);
+		}
+
+		// 조작 안내 (항상 보임, T02 C04)
+		function drawControlsHint() {
+			const text = 'WASD 이동 · 공격 자동 · ESC 메뉴 · M 소리';
+			ctx.font = `700 16px ${FONT}`;
+			const w = Math.ceil(ctx.measureText(text).width) + 28;
+			cutRect(24, H - 52, w, 30, 'rgba(10, 14, 28, .78)', 3);
+			shadowText(text, 24 + w / 2, H - 37, 16, '#cbbbe6');
+		}
+
+		const START_BTN = { key: 'start', label: '시작하기  (Enter)', x: W / 2 - 190, y: 778, w: 380, h: 68 };
+		function drawStartPanel() {
+			ctx.fillStyle = 'rgba(4, 6, 16, 0.70)';
+			ctx.fillRect(0, 0, W, H);
+			const x = 500, y = 170, w = 920, h = 720;
+			drawFrame(x, y, w, h, { caps: false, centerGems: true, cornerGems: true, fill: '#0d1424' });
+			shadowText('LUMORIA', W / 2, y + 70, 54, UI.goldHi);
+			shadowText(`${playerName}님, 30초 판을 시작합니다`, W / 2, y + 130, 22, UI.cream);
+			const lines = [
+				['규칙', ''],
+				['', '· 사방에서 슬라임이 몰려와요. 닿으면 체력이 깎여요.'],
+				['', '· 마법은 가장 가까운 적에게 자동으로 날아가요.'],
+				['', '· 0:07 보스 등장, 0:15 마지막 보스 등장.'],
+				['', '· 마지막 보스 뒤엔 새 슬라임이 멈추고 남은 적이 돌진해요.'],
+				['', '· 남은 적을 모두 처치하면 클리어, 체력이 0이 되면 실패.'],
+				['조작', ''],
+				['', '· WASD 이동   · ESC 일시정지/메뉴   · M 소리 끄기·켜기'],
+				['', '· 레벨업 카드: 클릭 또는 숫자 1·2·3'],
+			];
+			let ly = y + 190;
+			lines.forEach(([head, body]) => {
+				if (head) { shadowText(head, x + 90, ly, 24, UI.goldHi, 'left'); ly += 40; }
+				else { shadowText(body, x + 110, ly, 21, UI.cream, 'left'); ly += 38; }
+			});
+			drawFrame(START_BTN.x, START_BTN.y, START_BTN.w, START_BTN.h, { glow: true });
+			shadowText(START_BTN.label, W / 2, START_BTN.y + START_BTN.h / 2 + 1, 26, '#ffffff');
 		}
 
 		function drawHud() {
 			drawHealthBar();
 			drawPlayerName();
 			drawTimer();
+			drawStatus();
 			drawXpBar();
+			drawControlsHint();
 			drawSettingsButton();
 			if (settingsOpen) drawSettingsPanel();
+			if (!started) drawStartPanel();
 		}
 
 		let settingsOpen = false;
 		let settingsView = 'menu';
+		let hoverKey = null;
 
-		// Builds an actual circular cog silhouette out of a chunky pixel grid
-		// (radius test per cell + a cosine tooth wave), instead of an abstract
-		// block pattern, so it reads clearly as a gear at a glance.
-		function drawPixelGear(x, y, size = 56, cell = 4) {
-			const dark = '#17252b';
-			const face = '#e8e0b8';
-			const rim = '#b8a878';
-			const cells = size / cell;
-			const cx = cells / 2;
-			const cyc = cells / 2;
-			const bodyR = cells / 2 - 1.6;
-			const toothR = cells / 2 - 0.4;
-			const holeR = cells * 0.16;
-			const teeth = 8;
+		// 메뉴 버튼(☰) 위치 — 그리기와 클릭 판정이 같은 값을 씀
+		const MENU_BTN = { x: W - 112, y: 34, w: 72, h: 72 };
 
-			for (let iy = 0; iy < cells; iy += 1) {
-				for (let ix = 0; ix < cells; ix += 1) {
-					const dx = ix - cx + 0.5;
-					const dy = iy - cyc + 0.5;
-					const dist = Math.sqrt(dx * dx + dy * dy);
-					const angle = Math.atan2(dy, dx);
-					const toothBump = Math.cos(angle * teeth) > 0.2;
-					const outer = toothBump ? toothR : bodyR;
-
-					let color = null;
-					if (dist <= holeR) {
-						color = dark;
-					} else if (dist <= outer) {
-						color = dist > outer - 1.3 ? rim : face;
-					}
-					if (color) rect(x + ix * cell, y + iy * cell, cell, cell, color);
-				}
+		function drawSettingsButton() {
+			const { x, y, w, h } = MENU_BTN;
+			drawFrame(x, y, w, h, { caps: false, cornerGems: true, glow: settingsOpen || hoverKey === 'menuBtn' });
+			for (let i = 0; i < 3; i += 1) {
+				rect(x + 16, y + 20 + i * 13, w - 32, 7, UI.goldHi);
+				rect(x + 16, y + 25 + i * 13, w - 32, 2, UI.goldDk);
 			}
 		}
 
-		function drawSettingsButton() {
-			const x = W - 112;
-			const y = 42;
-			rect(x + 8, y, 64, 8, '#17252b');
-			rect(x, y + 8, 8, 64, '#17252b');
-			rect(x + 72, y + 8, 8, 64, '#17252b');
-			rect(x + 8, y + 72, 64, 8, '#17252b');
-			rect(x + 8, y + 8, 64, 64, settingsOpen ? '#d8c98a' : '#f0e5ba');
-			drawPixelGear(x + 12, y + 12, 56, 4);
+		// 패널 안 버튼 배치 (그리기·클릭 판정 공용)
+		const PANEL = { x: 660, w: 600 };
+		function panelLayout() {
+			if (settingsView === 'ranking') {
+				const y = 260, h = 470;
+				return { y, h, buttons: [{ key: 'back', label: '돌아가기', x: PANEL.x + 175, y: y + 360, w: 250, h: 62 }] };
+			}
+			const y = 150, h = 790;
+			const labels = [
+				['resume', '게임 재개'],
+				['restart', '다시하기'],
+				['sound', `효과음: ${settings.sound ? '켜짐' : '꺼짐'}`],
+				['motion', `움직임 줄이기: ${settings.reduceMotion ? '켜짐' : '꺼짐'}`],
+				['ranking', '랭킹'],
+				['exit', '나가기'],
+			];
+			return { y, h, buttons: labels.map(([key, label], i) => ({ key, label, x: PANEL.x + 110, y: y + 130 + i * 92, w: 380, h: 60 })) };
 		}
 
-		function drawButton(x, y, width, height, label, selected = false) {
-			rect(x + 6, y, width - 12, 6, '#17252b');
-			rect(x, y + 6, 6, height - 12, '#17252b');
-			rect(x + width - 6, y + 6, 6, height - 12, '#17252b');
-			rect(x + 6, y + height - 6, width - 12, 6, '#17252b');
-			rect(x + 12, y + 12, width - 24, height - 24, selected ? '#e8d995' : '#c9bd87');
-			ctx.fillStyle = '#202d2d';
-			ctx.font = 'bold 26px Courier New, monospace';
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText(label, x + width / 2, y + height / 2 + 2);
+		function drawButton(b) {
+			const active = hoverKey === b.key;
+			drawFrame(b.x, b.y, b.w, b.h, { glow: active });
+			shadowText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 1, 24, active ? '#ffffff' : UI.cream);
 		}
 
 		function drawSettingsPanel() {
-			const panelX = 650;
-			const panelY = 230;
-			const panelW = 620;
-			const panelH = settingsView === 'ranking' ? 500 : 640;
-			rect(0, 0, W, H, 'rgba(10, 22, 20, 0.42)');
-			rect(panelX + 12, panelY, panelW - 24, 12, '#17252b');
-			rect(panelX, panelY + 12, panelW, panelH - 24, '#17252b');
-			rect(panelX + 12, panelY + panelH - 12, panelW - 24, 12, '#17252b');
-			rect(panelX + 22, panelY + 22, panelW - 44, panelH - 44, '#87906c');
-			rect(panelX + 34, panelY + 34, panelW - 68, 72, '#263734');
-			ctx.fillStyle = '#f4e8b5';
-			ctx.font = 'bold 34px Courier New, monospace';
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText(settingsView === 'ranking' ? 'RANKING' : 'SETTING', panelX + panelW / 2, panelY + 70);
+			const { y, h, buttons } = panelLayout();
+			ctx.fillStyle = 'rgba(4, 6, 16, 0.62)';
+			ctx.fillRect(0, 0, W, H);
+			drawFrame(PANEL.x, y, PANEL.w, h, { caps: false, centerGems: true, cornerGems: true, fill: '#0d1424' });
+			shadowText(settingsView === 'ranking' ? 'RANKING' : 'MENU', PANEL.x + PANEL.w / 2, y + 62, 40, UI.goldHi);
+			rect(PANEL.x + 120, y + 98, PANEL.w - 240, 2, UI.goldDk);
 
 			if (settingsView === 'ranking') {
 				const ranking = getRanking();
 				for (let i = 0; i < RANKING_SIZE; i += 1) {
 					const entry = ranking[i];
-					const rowY = panelY + 145 + i * 68;
-					rect(panelX + 70, rowY, panelW - 140, 48, '#66785e');
-					ctx.fillStyle = '#f4e8b5';
-					ctx.font = 'bold 22px Courier New, monospace';
-					ctx.textAlign = 'left';
-					ctx.fillText(`${String(i + 1).padStart(2, '0')}  ${entry ? entry.name : '---'}`, panelX + 92, rowY + 25);
-					ctx.textAlign = 'right';
-					ctx.fillText(entry ? formatClock(entry.ms) : '--:--.---', panelX + panelW - 92, rowY + 25);
+					const rowY = y + 130 + i * 70;
+					rect(PANEL.x + 60, rowY, PANEL.w - 120, 52, UI.navy2);
+					rect(PANEL.x + 60, rowY, 6, 52, i === 0 ? UI.goldHi : UI.violet);
+					shadowText(`${String(i + 1).padStart(2, '0')}  ${entry ? entry.name : '---'}`, PANEL.x + 84, rowY + 27, 22, UI.cream, 'left');
+					shadowText(entry ? formatClock(entry.ms) : '--:--.---', PANEL.x + PANEL.w - 84, rowY + 27, 22, UI.cream, 'right');
 				}
-				drawButton(panelX + 185, panelY + 370, 250, 64, 'BACK');
-				return;
+			} else {
+				shadowText('↑↓ 선택 · Enter 실행 · ESC 닫기', PANEL.x + PANEL.w / 2, y + h - 40, 18, '#cbbbe6');
 			}
-
-			drawButton(panelX + 95, panelY + 145, 430, 70, '랭킹');
-			drawButton(panelX + 95, panelY + 240, 430, 70, '다시하기');
-			drawButton(panelX + 95, panelY + 335, 430, 70, '게임 재개');
-			drawButton(panelX + 95, panelY + 430, 430, 70, '나가기');
-			ctx.fillStyle = '#34433a';
-			ctx.font = 'bold 18px Courier New, monospace';
-			ctx.textAlign = 'center';
-			ctx.fillText('ESC  CLOSE', panelX + panelW / 2, panelY + 530);
+			buttons.forEach(drawButton);
 		}
 
 		function canvasPoint(event) {
@@ -347,41 +448,63 @@
 			};
 		}
 
+		const inside = (p, r) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+
 		// Opening the settings panel freezes the game (same `paused` flag the
 		// level-up cards use) so nothing moves, spawns, or attacks behind it.
-		function setSettingsOpen(open) {
+		let started = false;
+		let pausedByBlur = false;
+
+		function setSettingsOpen(open, byBlur = false) {
 			settingsOpen = open;
 			settingsView = 'menu';
-			paused = open;
+			paused = open || !started;
+			pausedByBlur = open && byBlur;
+			hoverKey = open ? 'resume' : null;
 		}
 
+		function startGame() {
+			if (started) return;
+			started = true;
+			paused = false;
+			ensureAudio();
+			if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+		}
+
+		function runMenuAction(key) {
+			if (key === 'back') { settingsView = 'menu'; hoverKey = 'ranking'; }
+			else if (key === 'ranking') { settingsView = 'ranking'; hoverKey = 'back'; }
+			else if (key === 'restart') restartGame();
+			else if (key === 'resume') resumeGame();
+			else if (key === 'exit') exitToPortfolio();
+			else if (key === 'sound') { ensureAudio(); setSound(!settings.sound); }
+			else if (key === 'motion') setReduceMotion(!settings.reduceMotion);
+		}
+
+		canvas.addEventListener('mousemove', (event) => {
+			const p = canvasPoint(event);
+			hoverKey = inside(p, MENU_BTN) ? 'menuBtn' : null;
+			if (!started && inside(p, START_BTN)) hoverKey = 'start';
+			if (settingsOpen) {
+				const hit = panelLayout().buttons.find((b) => inside(p, b));
+				if (hit) hoverKey = hit.key;
+			}
+			canvas.style.cursor = hoverKey ? 'pointer' : 'crosshair';
+		});
+
 		canvas.addEventListener('click', (event) => {
-			const { x, y } = canvasPoint(event);
-			const gearX = W - 112;
-			if (x >= gearX && x <= gearX + 80 && y >= 42 && y <= 122) {
-				setSettingsOpen(!settingsOpen);
+			const p = canvasPoint(event);
+			if (!started) {
+				if (inside(p, START_BTN)) startGame();
 				return;
 			}
-
+			if (inside(p, MENU_BTN)) {
+				if (!cardFrame) setSettingsOpen(!settingsOpen);
+				return;
+			}
 			if (!settingsOpen) return;
-			const panelX = 650;
-			if (settingsView === 'ranking') {
-				if (x >= panelX + 185 && x <= panelX + 435 && y >= 600 && y <= 664) {
-					settingsView = 'menu';
-				}
-				return;
-			}
-
-			if (x < panelX + 95 || x > panelX + 525) return;
-			if (y >= 375 && y <= 445) {
-				settingsView = 'ranking';
-			} else if (y >= 470 && y <= 540) {
-				restartGame();
-			} else if (y >= 565 && y <= 635) {
-				resumeGame();
-			} else if (y >= 660 && y <= 730) {
-				exitToPortfolio();
-			}
+			const hit = panelLayout().buttons.find((b) => inside(p, b));
+			if (hit) runMenuAction(hit.key);
 		});
 
 		function restartGame() {
@@ -397,39 +520,53 @@
 		}
 
 		window.addEventListener('keydown', (event) => {
-			if (event.code !== 'Escape') return;
-			if (settingsOpen) {
-				setSettingsOpen(false);
-			} else if (!paused) {
-				// Don't let ESC open settings over something else that's already
-				// pausing the game (e.g. a level-up card).
-				setSettingsOpen(true);
+			if (event.repeat && (event.code === 'Escape' || event.code === 'KeyM' || event.code === 'Enter' || event.code === 'Space')) return; // 누르고 있어도 한 번만
+			if (!started) {
+				if (event.code === 'Enter' || event.code === 'Space') { event.preventDefault(); startGame(); }
+				return;
+			}
+			if (event.code === 'KeyM') { ensureAudio(); setSound(!settings.sound); return; }
+			if (event.code === 'Escape') {
+				if (settingsOpen) setSettingsOpen(false);
+				else if (!paused) setSettingsOpen(true); // 레벨업 카드 위에는 열지 않음
+				return;
+			}
+			if (settingsOpen && ['ArrowUp', 'ArrowDown', 'Enter', 'Space'].includes(event.code)) {
+				event.preventDefault();
+				const buttons = panelLayout().buttons;
+				let i = buttons.findIndex((b) => b.key === hoverKey);
+				if (event.code === 'ArrowDown') hoverKey = buttons[(i + 1 + buttons.length) % buttons.length].key;
+				else if (event.code === 'ArrowUp') hoverKey = buttons[(i - 1 + buttons.length) % buttons.length].key;
+				else if (i >= 0) runMenuAction(buttons[i].key);
 			}
 		});
 
-		function drawScenery(targetCtx) {
-			drawMeadow();
-			pixelTree(200, 390, .6);
-			pixelTree(1580, 430, .47);
-			pixelTree(1780, 500, .35);
-			drawFlowers();
+		// 포커스 이탈(다른 창·탭으로 이동): 눌려 있던 키를 모두 놓은 것으로 처리하고 자동 일시정지
+		function clearInput() { input.left = input.right = input.up = input.down = false; }
+		function onFocusLost() {
+			clearInput();
+			if (started && !paused && !gameOver && !cleared) setSettingsOpen(true, true);
 		}
+		window.addEventListener('blur', onFocusLost);
+		document.addEventListener('visibilitychange', () => {
+			if (document.hidden) onFocusLost();
+			else lastTime = performance.now(); // 돌아왔을 때 멈춰 있던 시간이 한꺼번에 흐르지 않게
+		});
 
 		// ===== Static background pre-render =====
-		// The meadow/trees/flowers never change, so we paint them once onto an
-		// offscreen canvas and just blit that each frame instead of redrawing
-		// every rect every tick.
+		// 배경 이미지를 한 번만 1920×1080 캔버스에 그려 두고 매 프레임 그대로 찍음
 		const bgCanvas = document.createElement('canvas');
 		bgCanvas.width = W;
 		bgCanvas.height = H;
 		const bgCtx = bgCanvas.getContext('2d');
 		bgCtx.imageSmoothingEnabled = false;
-		(function prerenderScenery() {
-			const realCtx = ctx;
-			ctx = bgCtx;
-			drawScenery();
-			ctx = realCtx;
-		})();
+		bgCtx.fillStyle = '#13262b';
+		bgCtx.fillRect(0, 0, W, H);
+		function paintBackground() {
+			bgCtx.drawImage(bgImage, 0, 0, W, H);
+		}
+		if (bgImage.complete && bgImage.naturalWidth) paintBackground();
+		else bgImage.addEventListener('load', paintBackground);
 
 		// ===== Character sprite =====
 		const FRAME_SRC_SIZE = 128;
@@ -521,7 +658,7 @@
 		// only rolls 3 out of whatever's offered.
 		const EXTRA_SHOT_MAX_PICKS = 6;
 		let lastCardLevel = 0;
-		let paused = false;
+		let paused = true; // 시작 안내 화면에서 시작하기를 누를 때까지 멈춤
 		let cardFrame = null;
 		let attackIntervalMultiplier = 1;
 		let moveSpeedMultiplier = 1;
@@ -582,7 +719,8 @@
 				cardFrame.remove();
 				cardFrame = null;
 			}
-			paused = false;
+			paused = settingsOpen || !started;
+			window.focus(); // 카드 창이 사라진 뒤 키보드 입력이 다시 게임으로 오도록
 			maybeShowLevelCard(); // in case this XP gain jumped past more than one milestone
 		});
 
@@ -669,9 +807,20 @@
 		// ice joins in at 3:00 (earlier types keep spawning too - it stacks).
 		// The live-slime cap starts at 20 and grows by 7 every 20 seconds; the
 		// actual number on screen at any moment is randomized up to that cap.
+		// ===== 난이도 설정 (T02 카드 3: 한 번에 값 하나만 바꿔서 10판씩 비교) =====
+		// 플레이 기록에 이 값들이 함께 남으므로, 바꾼 값이 기록표에서 바로 보임.
+		const DIFFICULTY = {
+			slimeSpeed: 70,      // 슬라임 이동 속도(px/초). 플레이어는 152
+			slimeDamage: 8,      // 부딪힐 때 깎이는 체력
+			spawnBase: 6,        // 7.5초 구간마다 새로 나올 수 있는 슬라임 수의 시작값
+			spawnStep: 3,        // 구간이 바뀔 때마다 늘어나는 수
+			bossStat: 2,         // 보스 체력·경험치 배율
+			finalRush: 1.6,      // 마지막 보스 등장 후 남은 슬라임 돌진 속도 배율
+		};
+
 		const SLIME_FRAME_SIZE = 128;
 		const SLIME_DISPLAY_SIZE = 64;
-		const SLIME_SPEED = 70; // px / sec, chases the player - slower than the player's 152
+		const SLIME_SPEED = DIFFICULTY.slimeSpeed; // px / sec, chases the player - slower than the player's 152
 
 		const SLIME_BOUNCE = [
 			{ duration: 520, y: 0 },
@@ -683,9 +832,9 @@
 		// normal appears from the start, poison joins at 1:30, ice joins at 3:00 -
 		// once unlocked a type keeps spawning alongside the others (mixed pool).
 		const SLIME_TYPES = {
-			normal: { src: 'assets/slime_normal_strip.png', unlockMs: 0, hp: 20, xp: 3 },
-			poison: { src: 'assets/slime_poison_strip.png', unlockMs: 90 * 1000, hp: 40, xp: 6 },
-			ice: { src: 'assets/slime_ice_strip.png', unlockMs: 3 * 60 * 1000, hp: 80, xp: 9 },
+			normal: { src: 'assets/slime_normal_strip.png', unlockMs: 0, hp: 10, xp: 3 }, // 한 방
+			poison: { src: 'assets/slime_poison_strip.png', unlockMs: 7 * 1000, hp: 20, xp: 6 }, // 두 방
+			ice: { src: 'assets/slime_ice_strip.png', unlockMs: 999 * 60 * 1000, hp: 80, xp: 9 }, // 30초 판에서는 등장 안 함
 		};
 
 		const slimeSheets = {};
@@ -704,16 +853,16 @@
 			return Object.keys(SLIME_TYPES).filter((key) => elapsedMs >= SLIME_TYPES[key].unlockMs);
 		}
 
-		const SPAWN_TIER_MS = 20000;
+		const SPAWN_TIER_MS = 7500;
 
 		function currentSlimeCap() {
-			return 20 + 7 * Math.floor(elapsedMs / SPAWN_TIER_MS);
+			return DIFFICULTY.spawnBase + DIFFICULTY.spawnStep * Math.floor(elapsedMs / SPAWN_TIER_MS);
 		}
 
 		// Every time the cap steps up (every 20s) all slime HP - regular and
 		// boss alike - goes up another 15% from its base value.
 		function hpTierMultiplier() {
-			return 1 + 0.15 * Math.floor(elapsedMs / SPAWN_TIER_MS);
+			return 1 + 0.05 * Math.floor(elapsedMs / SPAWN_TIER_MS); // 30초 판이라 체력 증가폭을 작게
 		}
 
 		// Boss slimes reuse a regular slime's art/type but 3x the display size -
@@ -721,7 +870,7 @@
 		// above), which puts a normal-boss at 200 HP, poison-boss at 400 HP,
 		// ice-boss at 800 HP at the very start of the game.
 		const BOSS_SIZE_MULTIPLIER = 3;
-		const BOSS_STAT_MULTIPLIER = 10;
+		const BOSS_STAT_MULTIPLIER = DIFFICULTY.bossStat;
 
 		function spawnSlime(isBoss = false, forcedType = null) {
 			const types = unlockedSlimeTypes();
@@ -756,6 +905,7 @@
 		let tierSpawnedCount = 0;
 
 		function updateSlimeSpawning(dt) {
+			if (finalWaveSpawned) return; // 마지막 보스가 나오면 새 슬라임 없음 → 필드를 비우면 클리어
 			nextSpawnCheck -= dt;
 			if (nextSpawnCheck > 0) return;
 			nextSpawnCheck = 800 + Math.random() * 1200; // re-roll the target every ~0.8-2s
@@ -779,13 +929,12 @@
 		// Fixed boss schedule instead of a repeating timer: 1:00 normal boss,
 		// 2:00 poison boss, 3:00 ice boss, 4:00 two random bosses, 5:00 three
 		// random bosses (the final wave - clearing the field after this wins).
-		const FINAL_WAVE_MS = 5 * 60 * 1000;
+		// 30초 판: 0:07 초록 보스 → 0:15 마지막 보스(독) 등장과 함께 새 슬라임 중단.
+		// 남은 적을 모두 처치하면 클리어(보통 30초 안팎), 체력이 0이 되면 실패.
+		const FINAL_WAVE_MS = 15 * 1000;
 		const BOSS_SCHEDULE = [
-			{ atMs: 1 * 60 * 1000, forcedType: 'normal', count: 1 },
-			{ atMs: 2 * 60 * 1000, forcedType: 'poison', count: 1 },
-			{ atMs: 3 * 60 * 1000, forcedType: 'ice', count: 1 },
-			{ atMs: 4 * 60 * 1000, forcedType: null, count: 2 },
-			{ atMs: FINAL_WAVE_MS, forcedType: null, count: 3 },
+			{ atMs: 7 * 1000, forcedType: 'normal', count: 1 },
+			{ atMs: FINAL_WAVE_MS, forcedType: 'poison', count: 1 },
 		];
 		let bossScheduleIndex = 0;
 		let finalWaveSpawned = false;
@@ -806,21 +955,44 @@
 		const RANKING_KEY = 'pixelMeadowRanking';
 		const RANKING_SIZE = 3;
 
+		// 손상된 기록은 버리고, 이름(문자열)과 시간(0 이상 숫자)이 맞는 항목만 사용
+		function cleanRanking(raw) {
+			if (!Array.isArray(raw)) return [];
+			return raw
+				.filter((e) => e && typeof e.name === 'string' && Number.isFinite(e.ms) && e.ms >= 0)
+				.map((e) => ({ name: e.name.slice(0, 10), ms: Math.floor(e.ms) }))
+				.sort((a, b) => a.ms - b.ms)
+				.slice(0, RANKING_SIZE);
+		}
+
 		function getRanking() {
-			try {
-				const raw = JSON.parse(localStorage.getItem(RANKING_KEY));
-				return Array.isArray(raw) ? raw : [];
-			} catch {
-				return [];
-			}
+			return cleanRanking(store.json(RANKING_KEY, []));
 		}
 
 		function recordRanking(name, ms) {
 			const list = getRanking();
 			list.push({ name, ms });
-			list.sort((a, b) => a.ms - b.ms);
-			list.length = Math.min(list.length, RANKING_SIZE);
-			localStorage.setItem(RANKING_KEY, JSON.stringify(list));
+			store.set(RANKING_KEY, JSON.stringify(cleanRanking(list)));
+		}
+
+		// ===== 플레이 기록 (T02 카드 3: 판마다 자동 저장, records.html에서 표로 확인) =====
+		const RUN_LOG_KEY = 'lumoriaRunLog';
+		let kills = 0;
+		let lastHitBy = '-';
+		function logRun(result) {
+			const log = store.json(RUN_LOG_KEY, []);
+			const list = Array.isArray(log) ? log.filter((r) => r && typeof r === 'object') : [];
+			list.push({
+				at: new Date().toISOString(),
+				result,                                   // 'clear' | 'fail'
+				ms: Math.floor(elapsedMs),
+				level: playerLevel,
+				kills,
+				hp: health.current,
+				cause: result === 'clear' ? '클리어' : `체력 0 (마지막 피격: ${lastHitBy})`,
+				difficulty: { ...DIFFICULTY },
+			});
+			store.set(RUN_LOG_KEY, JSON.stringify(list.slice(-100)));
 		}
 
 		let cleared = false;
@@ -830,7 +1002,9 @@
 			cleared = true;
 			const finalMs = Math.floor(elapsedMs);
 			recordRanking(playerName, finalMs);
-			sessionStorage.setItem('lastSurvivalMs', String(finalMs));
+			logRun('clear');
+			playEffect('clear');
+			session.set('lastSurvivalMs', String(finalMs));
 			window.location.href = 'clear_screen.html';
 		}
 
@@ -843,7 +1017,7 @@
 				const dx = player.x - s.x;
 				const dy = player.y - s.y;
 				const dist = Math.hypot(dx, dy) || 1;
-				const step = (SLIME_SPEED * dt) / 1000;
+				const step = (SLIME_SPEED * (finalWaveSpawned ? DIFFICULTY.finalRush : 1) * dt) / 1000;
 				s.x += (dx / dist) * step;
 				s.y += (dy / dist) * step;
 				if (Math.abs(dx) > 2) s.facing = dx < 0 ? -1 : 1;
@@ -857,7 +1031,7 @@
 		}
 
 		// ===== Slime collision =====
-		const SLIME_DAMAGE = 5;
+		const SLIME_DAMAGE = DIFFICULTY.slimeDamage;
 		const HIT_INVULN_MS = 500;
 		let playerInvulnMs = 0;
 
@@ -873,6 +1047,8 @@
 				const dy = player.y - (s.y - s.size / 2); // compare center-to-center
 				if (Math.hypot(dx, dy) <= hitRadius) {
 					health.current = Math.max(0, health.current - SLIME_DAMAGE);
+					lastHitBy = `${s.isBoss ? '보스 ' : ''}${{ normal: '초록', poison: '독', ice: '얼음' }[s.type]} 슬라임`;
+					playEffect('hit');
 					playerInvulnMs = HIT_INVULN_MS;
 					if (health.current <= 0) triggerGameOver();
 					break; // one hit per invulnerability window, even if several slimes are touching
@@ -885,7 +1061,8 @@
 		function triggerGameOver() {
 			if (gameOver) return;
 			gameOver = true;
-			sessionStorage.setItem('lastSurvivalMs', String(Math.floor(elapsedMs)));
+			logRun('fail');
+			session.set('lastSurvivalMs', String(Math.floor(elapsedMs)));
 			window.location.href = 'gameover_screen.html';
 		}
 
@@ -930,6 +1107,7 @@
 
 		function killSlime(index) {
 			const s = slimes[index];
+			kills += 1;
 			gainXP(s.xp);
 			slimes.splice(index, 1);
 		}
@@ -1167,11 +1345,61 @@
 			});
 		}
 
+		// ===== 배경 연출: 떠다니는 보라 입자 (배경 그림 위에 아주 은은하게) =====
+		const motes = Array.from({ length: 36 }, (_, i) => {
+			const r = seeded(100 + i);
+			return { x: r() * W, y: r() * H, v: 6 + r() * 14, ph: r() * 6.28, s: r() < 0.3 ? 6 : 4, c: ['#b57bff', '#d6b4ff', '#8f5cf0'][i % 3] };
+		});
+
+		let ambientT = 0;
+		function drawAmbient(dt) {
+			if (!reduceMotion) ambientT += dt;
+			const t = ambientT / 1000;
+			ctx.save();
+			ctx.imageSmoothingEnabled = false;
+			motes.forEach((m) => {
+				const y = reduceMotion ? m.y : (m.y - t * m.v + H * 4) % H;
+				const x = m.x + (reduceMotion ? 0 : Math.sin(t * 0.6 + m.ph) * 10);
+				ctx.globalAlpha = 0.35 + 0.35 * (reduceMotion ? 1 : (Math.sin(t * 1.3 + m.ph) + 1) / 2);
+				ctx.fillStyle = m.c;
+				ctx.fillRect(Math.round(x), Math.round(y), m.s, m.s);
+			});
+			ctx.restore();
+		}
+
+		// 어두운 바닥에서도 마법사가 잘 보이도록 발밑에 계단식 보라빛
+		function drawPlayerLight() {
+			const cx = player.x, cy = player.y + CHAR_DISPLAY_SIZE / 2 - 6;
+			[[64, 18, 0.10], [48, 13, 0.14], [30, 8, 0.20]].forEach(([rx, ry, a]) => {
+				ctx.fillStyle = `rgba(143, 92, 240, ${a})`;
+				for (let y = -ry; y <= ry; y += 4) {
+					const half = Math.floor(rx * Math.sqrt(Math.max(0, 1 - (y / ry) ** 2)) / 4) * 4;
+					ctx.fillRect(cx - half, cy + y, half * 2, 4);
+				}
+			});
+		}
+
+		let lastDrawDt = 16;
 		function draw() {
+			const dt = paused ? 0 : lastDrawDt;
+			shakeMs = Math.max(0, shakeMs - dt);
+			flashMs = Math.max(0, flashMs - dt);
+			ctx.save();
+			if (shakeMs > 0 && !reduceMotion) {
+				const k = shakeMs / 220 * 8;
+				ctx.translate(Math.round((Math.random() - 0.5) * k), Math.round((Math.random() - 0.5) * k));
+			}
 			ctx.drawImage(bgCanvas, 0, 0);
+			drawAmbient(dt);
 			drawSlimes();
 			drawProjectiles();
+			drawPlayerLight();
 			drawPlayer();
+			ctx.restore();
+			if (flashMs > 0) {
+				ctx.fillStyle = `rgba(220, 40, 60, ${(reduceMotion ? 0.10 : 0.22) * flashMs / 180})`;
+				ctx.fillRect(0, 0, W, H);
+			}
 			drawHud();
 		}
 
@@ -1200,6 +1428,7 @@
 				updateProjectiles(dt);
 				checkClearCondition();
 			}
+			lastDrawDt = dt;
 			draw();
 
 			requestAnimationFrame(tick);

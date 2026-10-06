@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Level Up</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
 	<style>
 		* { box-sizing: border-box; }
 
@@ -12,143 +13,116 @@
 			height: 100%;
 			margin: 0;
 			background: transparent;
-			font-family: "Courier New", monospace;
-			font-weight: bold;
+			font-family: "Galmuri11", "Courier New", monospace;
 			overflow: hidden;
 		}
 
-		body {
-			display: grid;
-			place-items: center;
+		.sr-only {
+			position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+			overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 		}
 
 		.backdrop {
 			position: fixed;
 			inset: 0;
-			background: rgba(10, 22, 20, 0.72);
 			display: grid;
 			place-items: center;
+			background:
+				radial-gradient(ellipse at 50% 48%, rgba(80, 40, 150, .35), rgba(6, 10, 22, 0) 60%),
+				rgba(6, 10, 22, .80);
 		}
 
-		.panel {
-			text-align: center;
-		}
+		.panel { text-align: center; }
 
 		.title {
-			margin: 0 0 28px;
-			font-size: 40px;
-			font-weight: bold;
-			letter-spacing: 4px;
-			color: #f4e8b5;
-			text-shadow: 4px 4px 0 #17252b;
+			margin: 0 0 clamp(14px, 3vh, 30px);
+			font-family: "Galmuri11", "Courier New", monospace;
+			font-size: clamp(30px, 6vh, 52px);
+			font-weight: 700;
+			letter-spacing: .12em;
+			color: #f6d784;
+			text-shadow: 0 .08em 0 #7a4a12, .08em .16em 0 #2b1554;
 		}
 
 		.cards {
 			display: flex;
-			gap: 26px;
+			gap: clamp(14px, 2.4vw, 40px);
+			justify-content: center;
+			align-items: flex-end;
 		}
 
 		.card {
-			width: 220px;
-			padding: 22px 18px;
-			background: #e8d995;
-			box-shadow: 0 0 0 6px #17252b, 0 14px 30px rgba(0, 0, 0, 0.45);
+			--w: clamp(150px, min(16vw, 34vh), 270px);
+			position: relative;
+			width: var(--w);
+			padding: 0;
+			border: 0;
+			background: none;
 			cursor: pointer;
-			transition: transform 0.12s ease, background 0.12s ease;
-			color: #202d2d;
+			font: inherit;
+			transition: transform .12s steps(2);
+		}
+		.card img {
+			display: block;
+			width: 100%;
+			height: auto;
+			image-rendering: pixelated;
+			filter: drop-shadow(0 10px 0 rgba(0, 0, 0, .35));
+		}
+		.card.epic { --w: clamp(170px, min(18.2vw, 38.6vh), 307px); }
+		.card.rare { --w: clamp(160px, min(17vw, 36vh), 284px); }
+
+		.card:hover, .card:focus-visible { transform: translateY(-10px); }
+		.card:hover img, .card:focus-visible img { filter: drop-shadow(0 0 0 #c79bff) drop-shadow(0 10px 0 rgba(0, 0, 0, .35)) brightness(1.08); }
+		.card.rare:hover img, .card.rare:focus-visible img { filter: drop-shadow(0 0 10px rgba(255, 200, 80, .7)) brightness(1.08); }
+		.card.epic:hover img, .card.epic:focus-visible img { filter: drop-shadow(0 0 10px rgba(120, 200, 255, .7)) brightness(1.08); }
+		.card:focus-visible { outline: 4px solid #ffe9a8; outline-offset: 6px; }
+		.card:disabled { cursor: default; }
+
+		.key {
+			position: absolute;
+			left: 50%; bottom: -34px;
+			transform: translateX(-50%);
+			min-width: 26px;
+			padding: 3px 7px;
+			font-size: 14px;
+			color: #f6e6bf;
+			background: #1c1236;
+			box-shadow: 0 0 0 2px #d9a54a;
+		}
+		.badge {
+			position: absolute;
+			left: 50%; top: 8%;
+			transform: translateX(-50%);
+			padding: 3px 8px;
+			font-size: clamp(11px, 1.6vh, 14px);
+			color: #f6e6bf;
+			background: rgba(28, 18, 54, .92);
+			box-shadow: 0 0 0 2px #8f5cf0;
+			white-space: nowrap;
 		}
 
-		.card:hover {
-			background: #f4e8b5;
-			transform: translateY(-8px);
-		}
-
-		.card:active {
-			transform: translateY(-2px);
-		}
-
-		/* Rarer pick (pierce) - richer gold with a glow so it stands out. */
-		.card.rare {
-			background: linear-gradient(160deg, #ffe07a 0%, #f0b429 60%, #d99a1c 100%);
-			box-shadow:
-				0 0 0 6px #17252b,
-				0 0 28px rgba(255, 197, 61, 0.7),
-				0 14px 30px rgba(0, 0, 0, 0.45);
-		}
-
-		.card.rare:hover {
-			background: linear-gradient(160deg, #fff0ac 0%, #ffc93c 60%, #e7ab2c 100%);
-			box-shadow:
-				0 0 0 6px #17252b,
-				0 0 38px rgba(255, 210, 90, 0.85),
-				0 14px 30px rgba(0, 0, 0, 0.45);
-		}
-
-		.card.rare .card-title {
-			color: #4a2e04;
-		}
-
-		.card.rare .card-desc {
-			color: #5a3d07;
-		}
-
-		/* Next tier up from rare (volley) - icy diamond, brighter glow. */
-		.card.epic {
-			background: linear-gradient(160deg, #eaf9ff 0%, #9fe3f7 55%, #4fc3e8 100%);
-			box-shadow:
-				0 0 0 6px #17252b,
-				0 0 30px rgba(120, 210, 245, 0.85),
-				0 14px 30px rgba(0, 0, 0, 0.45);
-		}
-
-		.card.epic:hover {
-			background: linear-gradient(160deg, #ffffff 0%, #c3f0ff 55%, #6fd4f2 100%);
-			box-shadow:
-				0 0 0 6px #17252b,
-				0 0 42px rgba(140, 220, 250, 1),
-				0 14px 30px rgba(0, 0, 0, 0.45);
-		}
-
-		.card.epic .card-title {
-			color: #0d3a4a;
-		}
-
-		.card.epic .card-desc {
-			color: #14495c;
-		}
-
-		.card-title {
-			font-size: 17px;
-			font-weight: bold;
-			letter-spacing: 1px;
-			line-height: 1.4;
-			min-height: 48px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		.card-desc {
-			margin-top: 14px;
-			font-size: 13px;
-			line-height: 1.7;
-			color: #3c4a44;
-		}
-
+		.hint small { font-size: .82em; color: #a995cf; }
 		.hint {
-			margin-top: 26px;
-			font-size: 13px;
-			letter-spacing: 1px;
-			color: #cdd8d0;
+			margin: 52px 0 0;
+			line-height: 1.7;
+			font-size: clamp(13px, 2vh, 17px);
+			letter-spacing: .06em;
+			color: #cbbbe6;
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.card { transition: none; }
+			.card:hover, .card:focus-visible { transform: none; }
 		}
 	</style>
 </head>
 <body>
 	<div class="backdrop">
-		<div class="panel">
-			<h1 class="title">LEVEL UP!</h1>
+		<div class="panel" role="dialog" aria-modal="true" aria-labelledby="lvTitle">
+			<h1 class="title" id="lvTitle">LEVEL UP!</h1>
 			<div class="cards" id="cards"></div>
-			<p class="hint">카드를 선택하세요</p>
+			<p class="hint">→ 카드를 선택하세요 ←<br><small>클릭 · 숫자 1/2/3 · ←→ 후 Enter</small></p>
 		</div>
 	</div>
 
@@ -211,20 +185,40 @@
 		}
 
 		const cardsEl = document.getElementById('cards');
-		pickThree().forEach((upgrade) => {
-			const card = document.createElement('div');
-			if (upgrade.key === 'pierce') card.className = 'card rare';
-			else if (upgrade.key === 'wave' || upgrade.key === 'spray') card.className = 'card epic';
-			else card.className = 'card';
+		let picked = false; // 한 번 고르면 끝 — 빠른 연타로 강화가 여러 번 적용되지 않게
+
+		function choose(upgrade) {
+			if (picked) return;
+			picked = true;
+			cardsEl.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+			window.parent.postMessage({ source: 'level-card', key: upgrade.key }, '*');
+		}
+
+		const pickedCards = pickThree();
+		pickedCards.forEach((upgrade, index) => {
+			const card = document.createElement('button');
+			card.type = 'button';
+			card.className = 'card' + (upgrade.key === 'pierce' ? ' rare' : (upgrade.key === 'wave' || upgrade.key === 'spray') ? ' epic' : '');
 			card.innerHTML = `
-				<div class="card-title">${upgrade.title}</div>
-				<div class="card-desc">${upgrade.desc.replace(/\n/g, '<br>')}</div>
+				<img src="assets/cards/card_${upgrade.key}.png" alt="" draggable="false">
+				<span class="sr-only">${index + 1}번. ${upgrade.title}. ${upgrade.desc.replace(/\n/g, ' ')}</span>
+				${upgrade.key === 'extra_shot' ? `<span class="badge" aria-hidden="true">${extraShotCount}/${EXTRA_SHOT_MAX_PICKS}회 획득</span>` : ''}
+				<span class="key" aria-hidden="true">${index + 1}</span>
 			`;
-			card.addEventListener('click', () => {
-				window.parent.postMessage({ source: 'level-card', key: upgrade.key }, '*');
-			});
+			card.addEventListener('click', () => choose(upgrade));
 			cardsEl.appendChild(card);
 		});
-	</script>
+
+		// 키보드: 숫자 1·2·3으로 바로 선택, 또는 Tab/←→로 이동 후 Enter
+		window.addEventListener('keydown', (event) => {
+			const buttons = [...cardsEl.querySelectorAll('button')];
+			const n = Number(event.key);
+			if (n >= 1 && n <= buttons.length) { buttons[n - 1].click(); return; }
+			const i = buttons.indexOf(document.activeElement);
+			if (event.key === 'ArrowRight') { buttons[(i + 1) % buttons.length].focus(); event.preventDefault(); }
+			if (event.key === 'ArrowLeft') { buttons[(i - 1 + buttons.length) % buttons.length].focus(); event.preventDefault(); }
+		});
+		window.addEventListener('load', () => { const first = cardsEl.querySelector('button'); if (first) first.focus(); });
+</script>
 </body>
 </html>
