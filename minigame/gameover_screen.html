@@ -208,7 +208,7 @@
 				<p class="subtitle" id="playerNameLine">체력이 모두 소진되었습니다</p>
 
 				<div class="survival-box">
-					<span class="survival-label">SURVIVAL TIME</span>
+					<span class="survival-label" id="modeLabel">SURVIVAL TIME</span>
 					<span class="survival-time" id="survivalTime">00:00</span>
 				</div>
 
@@ -224,6 +224,10 @@
 		function readLocal(key) { try { return window.localStorage.getItem(key); } catch (e) { return null; } }
 		function readSession(key) { try { return window.sessionStorage.getItem(key); } catch (e) { return null; } }
 		function removeSession(key) { try { window.sessionStorage.removeItem(key); } catch (e) {} }
+
+		// 방금 끝난 판의 모드 (30초 / 5분) — 다시하기·랭킹이 같은 모드로 이어지게
+		const lastMode = readSession('lastMode') === '5m' ? '5m' : '30s';
+		const modeLabel = lastMode === '5m' ? '5분 모드' : '30초 모드';
 
 		function formatClock(ms) {
 			const totalMs = Math.max(0, Math.floor(ms));
@@ -243,9 +247,11 @@
 			document.getElementById('playerNameLine').textContent = `${playerName}님, 체력이 모두 소진되었습니다`;
 		}
 
+		document.getElementById('modeLabel').textContent += ` · ${modeLabel}`;
+
 		document.getElementById('retryButton').addEventListener('click', () => {
 			removeSession('lastSurvivalMs');
-			window.location.href = 'Screen.html';
+			window.location.href = `Screen.html?mode=${lastMode}`;
 		});
 
 		document.getElementById('exitButton').addEventListener('click', () => {

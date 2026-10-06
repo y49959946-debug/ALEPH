@@ -40,6 +40,10 @@
 
 		body { display: grid; place-items: center; }
 
+		/* 16:9가 아닌 화면의 바깥 여백에도 타이틀 그림을 어둡게 깔기 */
+		html { background: #050c0b url("assets/lumoria/base.png") center / cover no-repeat; image-rendering: pixelated; }
+		body { background: rgba(4, 8, 12, .62); }
+
 		.sr-only {
 			position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
 			overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;

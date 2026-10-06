@@ -314,7 +314,7 @@
 				<p class="subtitle" id="playerNameLine">맵 안의 모든 몬스터를 처치했습니다</p>
 
 				<div class="survival-box">
-					<span class="survival-label">CLEAR TIME</span>
+					<span class="survival-label" id="modeLabel">CLEAR TIME</span>
 					<span class="survival-time" id="clearTime">00:00</span>
 				</div>
 
@@ -342,6 +342,10 @@
 		function readSession(key) { try { return window.sessionStorage.getItem(key); } catch (e) { return null; } }
 		function removeSession(key) { try { window.sessionStorage.removeItem(key); } catch (e) {} }
 
+		// 방금 끝난 판의 모드 (30초 / 5분) — 다시하기·랭킹이 같은 모드로 이어지게
+		const lastMode = readSession('lastMode') === '5m' ? '5m' : '30s';
+		const modeLabel = lastMode === '5m' ? '5분 모드' : '30초 모드';
+
 		function formatClock(ms) {
 			const totalMs = Math.max(0, Math.floor(ms));
 			const m = Math.floor(totalMs / 60000);
@@ -360,9 +364,11 @@
 			document.getElementById('playerNameLine').textContent = `${playerName}님, 맵 안의 모든 몬스터를 처치했습니다`;
 		}
 
+		document.getElementById('modeLabel').textContent += ` · ${modeLabel}`;
+
 		document.getElementById('retryButton').addEventListener('click', () => {
 			removeSession('lastSurvivalMs');
-			window.location.href = 'Screen.html';
+			window.location.href = `Screen.html?mode=${lastMode}`;
 		});
 
 		document.getElementById('exitButton').addEventListener('click', () => {
@@ -372,7 +378,7 @@
 
 		// Same storage key/shape Screen.html writes to when a run clears:
 		// [{ name, ms }], ascending by ms (fastest first), top 3 only.
-		const RANKING_KEY = 'pixelMeadowRanking';
+		const RANKING_KEY = lastMode === '5m' ? 'lumoriaRanking5m' : 'lumoriaRanking30s';
 		const RANKING_SIZE = 3;
 
 		// 손상된 항목(이름이 문자열이 아니거나 시간이 숫자가 아님)은 버리고 정상 항목만 표시
@@ -408,6 +414,7 @@
 
 		document.getElementById('rankingButton').addEventListener('click', () => {
 			renderRanking();
+			document.querySelector('.ranking-title').textContent = `RANKING · ${lastMode === '5m' ? '5분' : '30초'}`;
 			rankingOverlay.classList.add('visible');
 		});
 

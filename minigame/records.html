@@ -39,7 +39,7 @@
 		<p id="msg" role="status"></p>
 		<div class="scroll">
 			<table>
-				<thead><tr><th>#</th><th>시각</th><th>결과</th><th>시간(초)</th><th>레벨</th><th>처치</th><th>남은 HP</th><th>실패 원인</th><th>난이도(속도/피해/스폰/보스)</th></tr></thead>
+				<thead><tr><th>#</th><th>시각</th><th>모드</th><th>결과</th><th>시간(초)</th><th>레벨</th><th>처치</th><th>남은 HP</th><th>실패 원인</th><th>난이도(속도/피해/스폰/보스)</th></tr></thead>
 				<tbody id="rows"></tbody>
 			</table>
 		</div>
@@ -60,8 +60,8 @@
 			tbody.textContent = '';
 			list.forEach((r, i) => {
 				const tr = document.createElement('tr');
-				const cells = [i + 1, new Date(r.at).toLocaleString('ko-KR'), r.result === 'clear' ? '성공' : '실패', (r.ms / 1000).toFixed(1), r.level, r.kills, r.hp, r.cause, diffText(r.difficulty)];
-				cells.forEach((c, ci) => { const td = document.createElement('td'); td.textContent = String(c ?? '-'); if (ci === 2) td.className = r.result; tr.appendChild(td); });
+				const cells = [i + 1, new Date(r.at).toLocaleString('ko-KR'), r.mode === '5m' ? '5분' : '30초', r.result === 'clear' ? '성공' : '실패', (r.ms / 1000).toFixed(1), r.level, r.kills, r.hp, r.cause, diffText(r.difficulty)];
+				cells.forEach((c, ci) => { const td = document.createElement('td'); td.textContent = String(c ?? '-'); if (ci === 3) td.className = r.result; tr.appendChild(td); });
 				tbody.appendChild(tr);
 			});
 			const sec = list.map((r) => r.ms / 1000);
@@ -75,8 +75,8 @@
 		const list0 = render();
 		document.getElementById('copyBtn').addEventListener('click', async () => {
 			const list = load();
-			const lines = [['#', '시각', '결과', '시간(초)', '레벨', '처치', '남은HP', '원인', '속도', '피해', '스폰시작', '스폰증가', '보스배율'].join(',')]
-				.concat(list.map((r, i) => [i + 1, r.at, r.result === 'clear' ? '성공' : '실패', (r.ms / 1000).toFixed(1), r.level, r.kills, r.hp, `"${String(r.cause).replace(/"/g, '""')}"`,
+			const lines = [['#', '시각', '모드', '결과', '시간(초)', '레벨', '처치', '남은HP', '원인', '속도', '피해', '스폰시작', '스폰증가', '보스배율'].join(',')]
+				.concat(list.map((r, i) => [i + 1, r.at, r.mode === '5m' ? '5분' : '30초', r.result === 'clear' ? '성공' : '실패', (r.ms / 1000).toFixed(1), r.level, r.kills, r.hp, `"${String(r.cause).replace(/"/g, '""')}"`,
 					r.difficulty?.slimeSpeed, r.difficulty?.slimeDamage, r.difficulty?.spawnBase, r.difficulty?.spawnStep, r.difficulty?.bossStat].join(',')));
 			try { await navigator.clipboard.writeText(lines.join('\n')); document.getElementById('msg').textContent = `${list.length}판 기록을 복사했어요. 엑셀이나 문서에 붙여 넣으세요.`; }
 			catch (e) { document.getElementById('msg').textContent = '복사가 막혀 있어요. 표를 직접 드래그해서 복사해 주세요.'; }

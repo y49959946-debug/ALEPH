@@ -72,11 +72,11 @@
 		.card.epic { --w: clamp(170px, min(18.2vw, 38.6vh), 307px); }
 		.card.rare { --w: clamp(160px, min(17vw, 36vh), 284px); }
 
-		.card:hover, .card:focus-visible { transform: translateY(-10px); }
-		.card:hover img, .card:focus-visible img { filter: drop-shadow(0 0 0 #c79bff) drop-shadow(0 10px 0 rgba(0, 0, 0, .35)) brightness(1.08); }
-		.card.rare:hover img, .card.rare:focus-visible img { filter: drop-shadow(0 0 10px rgba(255, 200, 80, .7)) brightness(1.08); }
-		.card.epic:hover img, .card.epic:focus-visible img { filter: drop-shadow(0 0 10px rgba(120, 200, 255, .7)) brightness(1.08); }
-		.card:focus-visible { outline: 4px solid #ffe9a8; outline-offset: 6px; }
+		/* 선택 표시는 마우스·방향키·Tab 모두 같은 .selected 하나로 */
+		.card.selected { transform: translateY(-10px); }
+		.card:focus { outline: none; }
+		.card.selected img { filter: drop-shadow(0 0 0 #ffe9a8) drop-shadow(0 0 3px #ffe9a8) drop-shadow(0 0 10px rgba(255, 233, 168, .8)) brightness(1.08); }
+		.card.selected .key { background: #ffe9a8; color: #1c1236; }
 		.card:disabled { cursor: default; }
 
 		.key {
@@ -113,7 +113,7 @@
 
 		@media (prefers-reduced-motion: reduce) {
 			.card { transition: none; }
-			.card:hover, .card:focus-visible { transform: none; }
+			.card.selected { transform: none; }
 		}
 	</style>
 </head>
@@ -185,6 +185,11 @@
 		}
 
 		const cardsEl = document.getElementById('cards');
+
+		function select(card) {
+			cardsEl.querySelectorAll('.card').forEach((c) => c.classList.toggle('selected', c === card));
+			if (document.activeElement !== card) card.focus({ preventScroll: true }); // Enter가 이 카드에 적용되게
+		}
 		let picked = false; // 한 번 고르면 끝 — 빠른 연타로 강화가 여러 번 적용되지 않게
 
 		function choose(upgrade) {
@@ -206,6 +211,8 @@
 				<span class="key" aria-hidden="true">${index + 1}</span>
 			`;
 			card.addEventListener('click', () => choose(upgrade));
+			card.addEventListener('mouseenter', () => select(card)); // 마우스를 올리면 그 카드가 선택됨
+			card.addEventListener('focus', () => select(card));      // Tab·방향키로 이동해도 같은 표시
 			cardsEl.appendChild(card);
 		});
 
@@ -214,11 +221,12 @@
 			const buttons = [...cardsEl.querySelectorAll('button')];
 			const n = Number(event.key);
 			if (n >= 1 && n <= buttons.length) { buttons[n - 1].click(); return; }
-			const i = buttons.indexOf(document.activeElement);
-			if (event.key === 'ArrowRight') { buttons[(i + 1) % buttons.length].focus(); event.preventDefault(); }
-			if (event.key === 'ArrowLeft') { buttons[(i - 1 + buttons.length) % buttons.length].focus(); event.preventDefault(); }
+			const i = buttons.findIndex((b) => b.classList.contains('selected'));
+			if (event.key === 'ArrowRight') { select(buttons[i < 0 ? 0 : (i + 1) % buttons.length]); event.preventDefault(); }
+			if (event.key === 'ArrowLeft') { select(buttons[i < 0 ? buttons.length - 1 : (i - 1 + buttons.length) % buttons.length]); event.preventDefault(); }
 		});
-		window.addEventListener('load', () => { const first = cardsEl.querySelector('button'); if (first) first.focus(); });
+		// 카드 화면 자체에만 포커스를 줘서 숫자 키는 바로 받되, 처음부터 특정 카드에 테두리가 생기지 않게 함
+		window.addEventListener('load', () => { window.focus(); });
 </script>
 </body>
 </html>

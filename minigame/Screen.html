@@ -7,7 +7,6 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
 	<style>
 		:root {
-			background: #142b2a;
 			color: #fff;
 			font-family: "Courier New", monospace;
 		}
@@ -19,27 +18,43 @@
 			height: 100%;
 			margin: 0;
 			overflow: hidden;
-			background: #142b2a;
 		}
+
+		/* 화면 비율이 16:9가 아닐 때 생기는 바깥 여백에도 같은 숲 배경을 어둡게 깔아 이어 보이게 */
+		html { background: #070b14; }
 
 		body {
 			display: grid;
 			place-items: center;
+			background: #070b14;
+		}
+
+		/* 시안 9번 "배경 효과(전체 화면용)": 게임 뒤 화면 전체 — 밤하늘·달·떠 있는 섬·안개·마법진·입자 */
+		#backdrop {
+			position: fixed;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			image-rendering: pixelated;
+			z-index: 0;
 		}
 
 		#game {
+			position: relative;
+			z-index: 1;
 			display: block;
 			width: min(100vw, 177.7778vh);
 			height: min(56.25vw, 100vh);
 			cursor: crosshair;
 			image-rendering: pixelated;
 			image-rendering: crisp-edges;
-			background: #82c9db;
-			box-shadow: 0 0 0 8px #0a1719, 0 18px 50px rgba(0, 0, 0, .42);
+			background: #13262b;
+			box-shadow: 0 0 0 4px #06080f, 0 0 0 7px #7a4a12, 0 18px 50px rgba(0, 0, 0, .55);
 		}
 	</style>
 </head>
 <body>
+	<canvas id="backdrop" aria-hidden="true"></canvas>
 	<canvas id="game" width="1920" height="1080" aria-label="LUMORIA 게임 화면: 마법사를 WASD로 움직여 몰려오는 슬라임을 피하며 자동 마법으로 처치"></canvas>
 
 	<script>
@@ -99,6 +114,42 @@
 			reduceMotion: typeof savedSettings.reduceMotion === 'boolean' ? savedSettings.reduceMotion : systemReduce,
 		};
 		let reduceMotion = settings.reduceMotion;
+
+		// ===== 게임 모드 =====
+		// 30초 모드(기본, 과제 기준): 짧은 한 판으로 빠르게 성공/실패 → 다시하기
+		// 5분 모드: 원래 버전처럼 오래 버티며 성장. 마지막 보스 뒤 새 슬라임은 멈춰서 클리어 가능
+		// 모드는 시작 화면에서 고르며, 고른 모드는 다음 접속에도 유지
+		const MODES = {
+			'30s': {
+				label: '30초 모드', short: '30초',
+				// 난이도 설정 (T02 카드 3: 한 번에 값 하나만 바꿔서 10판씩 비교)
+				difficulty: { slimeSpeed: 70, slimeDamage: 8, spawnBase: 6, spawnStep: 3, bossStat: 2, finalRush: 1.6 },
+				hp: { normal: 10, poison: 20, ice: 80 },
+				unlock: { normal: 0, poison: 7000, ice: Infinity },
+				tierMs: 7500, hpGrowth: 0.05,
+				bosses: [{ atMs: 7000, forcedType: 'normal', count: 1 }, { atMs: 15000, forcedType: 'poison', count: 1 }],
+				rules: ['· 0:07 보스 등장, 0:15 마지막 보스 등장.', '· 마지막 보스 뒤엔 새 슬라임이 멈추고 남은 적이 돌진해요.'],
+				rankingKey: 'lumoriaRanking30s',
+			},
+			'5m': {
+				label: '5분 모드', short: '5분',
+				difficulty: { slimeSpeed: 70, slimeDamage: 5, spawnBase: 20, spawnStep: 7, bossStat: 10, finalRush: 1.3 },
+				hp: { normal: 20, poison: 40, ice: 80 },
+				unlock: { normal: 0, poison: 90000, ice: 180000 },
+				tierMs: 20000, hpGrowth: 0.15,
+				bosses: [
+					{ atMs: 60000, forcedType: 'normal', count: 1 }, { atMs: 120000, forcedType: 'poison', count: 1 },
+					{ atMs: 180000, forcedType: 'ice', count: 1 }, { atMs: 240000, forcedType: null, count: 2 },
+					{ atMs: 300000, forcedType: null, count: 3 },
+				],
+				rules: ['· 1·2·3분 보스, 4분 보스 2마리, 5분 마지막 보스 3마리.', '· 마지막 보스 뒤엔 새 슬라임이 멈추고 남은 적이 돌진해요.'],
+				rankingKey: 'lumoriaRanking5m',
+			},
+		};
+		const urlMode = new URLSearchParams(location.search).get('mode');
+		const modeKey = MODES[urlMode] ? urlMode : (MODES[savedSettings.mode] ? savedSettings.mode : '30s');
+		const MODE = MODES[modeKey];
+		settings.mode = modeKey;
 		function saveSettings() { store.set(SETTINGS_KEY, JSON.stringify(settings)); }
 
 		let audioCtx = null;
@@ -313,7 +364,8 @@
 			if (settingsOpen) return pausedByBlur ? '일시정지 — 창을 벗어났어요' : '일시정지';
 			if (cardFrame) return '레벨업 — 카드를 고르세요';
 			if (finalWaveSpawned) return `마지막 보스! 남은 적 ${slimes.length} — 모두 처치하면 클리어`;
-			return `진행 중 — 마지막 보스까지 ${Math.max(0, Math.ceil((FINAL_WAVE_MS - elapsedMs) / 1000))}초`;
+			const left = Math.max(0, Math.ceil((FINAL_WAVE_MS - elapsedMs) / 1000));
+			return `${MODE.short} · 진행 중 — 마지막 보스까지 ${left >= 60 ? `${Math.floor(left / 60)}분 ${left % 60}초` : `${left}초`}`;
 		}
 
 		function drawStatus() {
@@ -335,29 +387,44 @@
 			shadowText(text, 24 + w / 2, H - 37, 16, '#cbbbe6');
 		}
 
-		const START_BTN = { key: 'start', label: '시작하기  (Enter)', x: W / 2 - 190, y: 778, w: 380, h: 68 };
+		const START_BTN = { key: 'start', label: '시작하기  (Enter)', x: W / 2 - 190, y: 800, w: 380, h: 64 };
+		const MODE_BTNS = [
+			{ key: 'mode30s', mode: '30s', label: '30초 모드 (기본)', x: W / 2 - 400, y: 300, w: 360, h: 58 },
+			{ key: 'mode5m', mode: '5m', label: '5분 모드', x: W / 2 + 40, y: 300, w: 360, h: 58 },
+		];
+		function selectMode(mode) {
+			if (mode === modeKey || started) return;
+			settings.mode = mode;
+			saveSettings();
+			window.location.href = `Screen.html?mode=${mode}`; // 시작 전이라 잃는 진행 상황 없음
+		}
+
 		function drawStartPanel() {
 			ctx.fillStyle = 'rgba(4, 6, 16, 0.70)';
 			ctx.fillRect(0, 0, W, H);
-			const x = 500, y = 170, w = 920, h = 720;
+			const x = 480, y = 120, w = 960, h = 790;
 			drawFrame(x, y, w, h, { caps: false, centerGems: true, cornerGems: true, fill: '#0d1424' });
-			shadowText('LUMORIA', W / 2, y + 70, 54, UI.goldHi);
-			shadowText(`${playerName}님, 30초 판을 시작합니다`, W / 2, y + 130, 22, UI.cream);
+			shadowText('LUMORIA', W / 2, y + 62, 52, UI.goldHi);
+			shadowText(`${playerName}님, 모드를 고르고 시작하세요  (←→로 바꾸기)`, W / 2, y + 120, 21, UI.cream);
+			MODE_BTNS.forEach((b) => {
+				const on = b.mode === modeKey;
+				drawFrame(b.x, b.y, b.w, b.h, { glow: on || hoverKey === b.key });
+				shadowText((on ? '▶ ' : '') + b.label, b.x + b.w / 2, b.y + b.h / 2 + 1, 23, on ? '#ffffff' : '#cbbbe6');
+			});
 			const lines = [
 				['규칙', ''],
 				['', '· 사방에서 슬라임이 몰려와요. 닿으면 체력이 깎여요.'],
 				['', '· 마법은 가장 가까운 적에게 자동으로 날아가요.'],
-				['', '· 0:07 보스 등장, 0:15 마지막 보스 등장.'],
-				['', '· 마지막 보스 뒤엔 새 슬라임이 멈추고 남은 적이 돌진해요.'],
+				...MODE.rules.map((r) => ['', r]),
 				['', '· 남은 적을 모두 처치하면 클리어, 체력이 0이 되면 실패.'],
 				['조작', ''],
 				['', '· WASD 이동   · ESC 일시정지/메뉴   · M 소리 끄기·켜기'],
 				['', '· 레벨업 카드: 클릭 또는 숫자 1·2·3'],
 			];
-			let ly = y + 190;
+			let ly = y + 290;
 			lines.forEach(([head, body]) => {
-				if (head) { shadowText(head, x + 90, ly, 24, UI.goldHi, 'left'); ly += 40; }
-				else { shadowText(body, x + 110, ly, 21, UI.cream, 'left'); ly += 38; }
+				if (head) { shadowText(head, x + 100, ly, 24, UI.goldHi, 'left'); ly += 38; }
+				else { shadowText(body, x + 120, ly, 21, UI.cream, 'left'); ly += 36; }
 			});
 			drawFrame(START_BTN.x, START_BTN.y, START_BTN.w, START_BTN.h, { glow: true });
 			shadowText(START_BTN.label, W / 2, START_BTN.y + START_BTN.h / 2 + 1, 26, '#ffffff');
@@ -485,6 +552,7 @@
 			const p = canvasPoint(event);
 			hoverKey = inside(p, MENU_BTN) ? 'menuBtn' : null;
 			if (!started && inside(p, START_BTN)) hoverKey = 'start';
+			if (!started) { const mb = MODE_BTNS.find((b) => inside(p, b)); if (mb) hoverKey = mb.key; }
 			if (settingsOpen) {
 				const hit = panelLayout().buttons.find((b) => inside(p, b));
 				if (hit) hoverKey = hit.key;
@@ -496,6 +564,8 @@
 			const p = canvasPoint(event);
 			if (!started) {
 				if (inside(p, START_BTN)) startGame();
+				const mb = MODE_BTNS.find((b) => inside(p, b));
+				if (mb) selectMode(mb.mode);
 				return;
 			}
 			if (inside(p, MENU_BTN)) {
@@ -508,7 +578,7 @@
 		});
 
 		function restartGame() {
-			window.location.reload();
+			window.location.href = `Screen.html?mode=${modeKey}`;
 		}
 
 		function resumeGame() {
@@ -523,6 +593,7 @@
 			if (event.repeat && (event.code === 'Escape' || event.code === 'KeyM' || event.code === 'Enter' || event.code === 'Space')) return; // 누르고 있어도 한 번만
 			if (!started) {
 				if (event.code === 'Enter' || event.code === 'Space') { event.preventDefault(); startGame(); }
+				if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') selectMode(modeKey === '30s' ? '5m' : '30s');
 				return;
 			}
 			if (event.code === 'KeyM') { ensureAudio(); setSound(!settings.sound); return; }
@@ -807,16 +878,8 @@
 		// ice joins in at 3:00 (earlier types keep spawning too - it stacks).
 		// The live-slime cap starts at 20 and grows by 7 every 20 seconds; the
 		// actual number on screen at any moment is randomized up to that cap.
-		// ===== 난이도 설정 (T02 카드 3: 한 번에 값 하나만 바꿔서 10판씩 비교) =====
-		// 플레이 기록에 이 값들이 함께 남으므로, 바꾼 값이 기록표에서 바로 보임.
-		const DIFFICULTY = {
-			slimeSpeed: 70,      // 슬라임 이동 속도(px/초). 플레이어는 152
-			slimeDamage: 8,      // 부딪힐 때 깎이는 체력
-			spawnBase: 6,        // 7.5초 구간마다 새로 나올 수 있는 슬라임 수의 시작값
-			spawnStep: 3,        // 구간이 바뀔 때마다 늘어나는 수
-			bossStat: 2,         // 보스 체력·경험치 배율
-			finalRush: 1.6,      // 마지막 보스 등장 후 남은 슬라임 돌진 속도 배율
-		};
+		// 난이도 값은 위의 MODES[모드].difficulty 에서 조절 (플레이 기록에 함께 저장됨)
+		const DIFFICULTY = MODE.difficulty;
 
 		const SLIME_FRAME_SIZE = 128;
 		const SLIME_DISPLAY_SIZE = 64;
@@ -832,9 +895,9 @@
 		// normal appears from the start, poison joins at 1:30, ice joins at 3:00 -
 		// once unlocked a type keeps spawning alongside the others (mixed pool).
 		const SLIME_TYPES = {
-			normal: { src: 'assets/slime_normal_strip.png', unlockMs: 0, hp: 10, xp: 3 }, // 한 방
-			poison: { src: 'assets/slime_poison_strip.png', unlockMs: 7 * 1000, hp: 20, xp: 6 }, // 두 방
-			ice: { src: 'assets/slime_ice_strip.png', unlockMs: 999 * 60 * 1000, hp: 80, xp: 9 }, // 30초 판에서는 등장 안 함
+			normal: { src: 'assets/slime_normal_strip.png', unlockMs: MODE.unlock.normal, hp: MODE.hp.normal, xp: 3 },
+			poison: { src: 'assets/slime_poison_strip.png', unlockMs: MODE.unlock.poison, hp: MODE.hp.poison, xp: 6 },
+			ice: { src: 'assets/slime_ice_strip.png', unlockMs: MODE.unlock.ice, hp: MODE.hp.ice, xp: 9 },
 		};
 
 		const slimeSheets = {};
@@ -853,7 +916,7 @@
 			return Object.keys(SLIME_TYPES).filter((key) => elapsedMs >= SLIME_TYPES[key].unlockMs);
 		}
 
-		const SPAWN_TIER_MS = 7500;
+		const SPAWN_TIER_MS = MODE.tierMs;
 
 		function currentSlimeCap() {
 			return DIFFICULTY.spawnBase + DIFFICULTY.spawnStep * Math.floor(elapsedMs / SPAWN_TIER_MS);
@@ -862,7 +925,7 @@
 		// Every time the cap steps up (every 20s) all slime HP - regular and
 		// boss alike - goes up another 15% from its base value.
 		function hpTierMultiplier() {
-			return 1 + 0.05 * Math.floor(elapsedMs / SPAWN_TIER_MS); // 30초 판이라 체력 증가폭을 작게
+			return 1 + MODE.hpGrowth * Math.floor(elapsedMs / SPAWN_TIER_MS);
 		}
 
 		// Boss slimes reuse a regular slime's art/type but 3x the display size -
@@ -929,13 +992,9 @@
 		// Fixed boss schedule instead of a repeating timer: 1:00 normal boss,
 		// 2:00 poison boss, 3:00 ice boss, 4:00 two random bosses, 5:00 three
 		// random bosses (the final wave - clearing the field after this wins).
-		// 30초 판: 0:07 초록 보스 → 0:15 마지막 보스(독) 등장과 함께 새 슬라임 중단.
-		// 남은 적을 모두 처치하면 클리어(보통 30초 안팎), 체력이 0이 되면 실패.
-		const FINAL_WAVE_MS = 15 * 1000;
-		const BOSS_SCHEDULE = [
-			{ atMs: 7 * 1000, forcedType: 'normal', count: 1 },
-			{ atMs: FINAL_WAVE_MS, forcedType: 'poison', count: 1 },
-		];
+		// 보스 일정은 모드별(MODES). 마지막 일정이 '마지막 보스'이고, 그 뒤로 새 슬라임은 나오지 않음.
+		const BOSS_SCHEDULE = MODE.bosses;
+		const FINAL_WAVE_MS = BOSS_SCHEDULE[BOSS_SCHEDULE.length - 1].atMs;
 		let bossScheduleIndex = 0;
 		let finalWaveSpawned = false;
 
@@ -952,7 +1011,7 @@
 		// Stored as [{ name, ms }], ascending by ms (fastest clear first).
 		// Anything that doesn't make the top 3 after a sort+slice is simply
 		// dropped - never written back to storage.
-		const RANKING_KEY = 'pixelMeadowRanking';
+		const RANKING_KEY = MODE.rankingKey; // 모드별 랭킹
 		const RANKING_SIZE = 3;
 
 		// 손상된 기록은 버리고, 이름(문자열)과 시간(0 이상 숫자)이 맞는 항목만 사용
@@ -990,6 +1049,7 @@
 				kills,
 				hp: health.current,
 				cause: result === 'clear' ? '클리어' : `체력 0 (마지막 피격: ${lastHitBy})`,
+				mode: modeKey,
 				difficulty: { ...DIFFICULTY },
 			});
 			store.set(RUN_LOG_KEY, JSON.stringify(list.slice(-100)));
@@ -1005,6 +1065,7 @@
 			logRun('clear');
 			playEffect('clear');
 			session.set('lastSurvivalMs', String(finalMs));
+			session.set('lastMode', modeKey);
 			window.location.href = 'clear_screen.html';
 		}
 
@@ -1063,6 +1124,7 @@
 			gameOver = true;
 			logRun('fail');
 			session.set('lastSurvivalMs', String(Math.floor(elapsedMs)));
+			session.set('lastMode', modeKey);
 			window.location.href = 'gameover_screen.html';
 		}
 
@@ -1345,7 +1407,34 @@
 			});
 		}
 
-		// ===== 배경 연출: 떠다니는 보라 입자 (배경 그림 위에 아주 은은하게) =====
+		// ===== 배경 연출 (시안 레이어 2 "배경 효과"): 마법진 밝기 · 안개 · 떠다니는 입자 =====
+		const circleCanvas = document.createElement('canvas');
+		circleCanvas.width = 720; circleCanvas.height = 720;
+		(function prerenderCircle() {
+			const c = circleCanvas.getContext('2d');
+			c.fillStyle = '#b57bff';
+			const cx = 360, cy = 360;
+			[340, 300, 200].forEach((rr, ri) => {
+				for (let a = 0; a < Math.PI * 2; a += 4 / rr) c.fillRect(Math.round((cx + Math.cos(a) * rr) / 4) * 4, Math.round((cy + Math.sin(a) * rr) / 4) * 4, 4, 4);
+				if (ri === 1) for (let k = 0; k < 24; k += 1) { const a = (k / 24) * Math.PI * 2; c.fillRect(Math.round(cx + Math.cos(a) * (rr + 18)) - 4, Math.round(cy + Math.sin(a) * (rr + 18)) - 4, 8, 8); }
+			});
+			for (let k = 0; k < 6; k += 1) {
+				const a1 = (k / 6) * Math.PI * 2, a2 = ((k + 2) / 6) * Math.PI * 2;
+				for (let tt = 0; tt <= 1; tt += 0.006) c.fillRect(Math.round((cx + Math.cos(a1) * 300 * (1 - tt) + Math.cos(a2) * 300 * tt) / 4) * 4, Math.round((cy + Math.sin(a1) * 300 * (1 - tt) + Math.sin(a2) * 300 * tt) / 4) * 4, 4, 4);
+			}
+		})();
+		const fogCanvas = document.createElement('canvas');
+		fogCanvas.width = 240; fogCanvas.height = 135;
+		(function prerenderFog() {
+			const c = fogCanvas.getContext('2d');
+			const r = seeded(29);
+			for (let i = 0; i < 16; i += 1) {
+				const cx = r() * 240, cy = 70 + r() * 65, rx = 16 + r() * 26, ry = 4 + r() * 8;
+				c.fillStyle = 'rgba(140, 100, 220, .5)';
+				for (let y = -ry; y <= ry; y += 1) { const half = Math.floor(rx * Math.sqrt(Math.max(0, 1 - (y / ry) ** 2))); c.fillRect((cx - half) | 0, (cy + y) | 0, half * 2, 1); }
+			}
+		})();
+
 		const motes = Array.from({ length: 36 }, (_, i) => {
 			const r = seeded(100 + i);
 			return { x: r() * W, y: r() * H, v: 6 + r() * 14, ph: r() * 6.28, s: r() < 0.3 ? 6 : 4, c: ['#b57bff', '#d6b4ff', '#8f5cf0'][i % 3] };
@@ -1357,6 +1446,11 @@
 			const t = ambientT / 1000;
 			ctx.save();
 			ctx.imageSmoothingEnabled = false;
+			ctx.globalAlpha = 0.05 + 0.05 * (reduceMotion ? 0.5 : (Math.sin(t * 0.7) + 1) / 2); // 중앙 마법진: 서서히 밝아졌다 어두워짐
+			ctx.drawImage(circleCanvas, W / 2 - 360, H / 2 - 320);
+			ctx.globalAlpha = 0.10;                                                              // 안개: 좌우로 천천히
+			ctx.drawImage(fogCanvas, -80 + (reduceMotion ? 0 : Math.sin(t / 9) * 60), 0, W + 160, H);
+			ctx.globalAlpha = 1;
 			motes.forEach((m) => {
 				const y = reduceMotion ? m.y : (m.y - t * m.v + H * 4) % H;
 				const x = m.x + (reduceMotion ? 0 : Math.sin(t * 0.6 + m.ph) * 10);
@@ -1435,6 +1529,112 @@
 		}
 
 		requestAnimationFrame(tick);
+
+		// ===== 시안 9번: 게임 뒤 전체 화면 배경 효과 =====
+		// 저해상도(화면의 1/4) 캔버스에 픽셀로 그리고 CSS로 키워서 도트 느낌 유지.
+		// ① 배경 안개: 좌우로 천천히 ② 중앙 마법진: 서서히 밝기 변화 ③ 먼 오브젝트(달·섬): 아주 느리게 이동 ④ 입자: 느리게 떠다님
+		(function backdropEffects() {
+			const bd = document.getElementById('backdrop');
+			const b = bd.getContext('2d');
+			const PX = 4;
+			let bw = 0, bh = 0;
+			function resize() {
+				bw = Math.ceil(window.innerWidth / PX);
+				bh = Math.ceil(window.innerHeight / PX);
+				bd.width = bw; bd.height = bh;
+				b.imageSmoothingEnabled = false;
+			}
+			resize();
+			window.addEventListener('resize', resize);
+
+			const r = seeded(77);
+			const stars = Array.from({ length: 140 }, () => ({ x: r(), y: r() * 0.8, ph: r() * 6.28, c: r() < 0.25 ? '#d6b4ff' : '#8f86c9' }));
+			const motes = Array.from({ length: 50 }, () => ({ x: r(), y: r(), v: 0.6 + r() * 1.6, ph: r() * 6.28 }));
+			// 여백(좌우·위아래)에서 보이도록 가장자리 쪽에 배치
+			const islands = [
+				{ x: 0.045, y: 0.34, w: 40, h: 14, ph: 0 },
+				{ x: 0.955, y: 0.58, w: 46, h: 16, ph: 2 },
+				{ x: 0.30, y: 0.05, w: 30, h: 10, ph: 4 },
+				{ x: 0.70, y: 0.95, w: 36, h: 12, ph: 1 },
+			];
+			const fogBlobs = Array.from({ length: 18 }, () => ({ x: r(), y: 0.55 + r() * 0.45, rx: 18 + r() * 40, ry: 4 + r() * 8, sp: 0.5 + r() }));
+
+			function px(x, y, w, h, c) { b.fillStyle = c; b.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+			function blob(cx, cy, rx, ry, c) {
+				for (let y = -ry; y <= ry; y += 1) {
+					const half = Math.floor(rx * Math.sqrt(Math.max(0, 1 - (y / ry) ** 2)));
+					px(cx - half, cy + y, half * 2, 1, c);
+				}
+			}
+			function ring(cx, cy, rad, c) {
+				const steps = Math.max(24, Math.floor(rad * 6));
+				b.fillStyle = c;
+				for (let i = 0; i < steps; i += 1) {
+					const a = (i / steps) * Math.PI * 2;
+					b.fillRect(Math.round(cx + Math.cos(a) * rad), Math.round(cy + Math.sin(a) * rad), 1, 1);
+				}
+			}
+
+			let t = 0, last = performance.now();
+			function frame(now) {
+				const dt = Math.min(50, now - last); last = now;
+				if (!reduceMotion && !document.hidden) t += dt / 1000;
+
+				// 하늘: 계단식 세로 그라데이션
+				const bands = ['#070a18', '#0a0d20', '#0d0f28', '#120f30', '#171238', '#1b1440', '#201646'];
+				bands.forEach((c, i) => px(0, (bh * i) / bands.length, bw, bh / bands.length + 1, c));
+
+				// 별
+				stars.forEach((s) => {
+					const a = reduceMotion ? 0.7 : 0.45 + 0.4 * Math.sin(t * 1.2 + s.ph);
+					b.globalAlpha = a; px(s.x * bw, s.y * bh, 1, 1, s.c);
+				});
+				b.globalAlpha = 1;
+
+				// ③ 달(아주 느리게 오른쪽으로)
+				const mx = (0.955 + Math.sin(t * 0.02) * 0.01) * bw, my = bh * (0.16 + Math.sin(t * 0.015) * 0.01);
+				[[22, '#1d1846'], [17, '#2a2160'], [12, '#3d2f7e']].forEach(([rr, c]) => blob(mx, my, rr, rr, c));
+				blob(mx, my, 9, 9, '#8f7fd0'); blob(mx - 2, my - 2, 6, 6, '#b8a9ee');
+
+				// ③ 먼 떠 있는 섬(실루엣, 아주 느리게 이동)
+				islands.forEach((is) => {
+					const x = (is.x + Math.sin(t * 0.03 + is.ph) * 0.012) * bw, y = is.y * bh + Math.sin(t * 0.3 + is.ph) * 1.5;
+					blob(x, y, is.w / 2, is.h / 3, '#191433');
+					for (let k = 0; k < is.h; k += 2) px(x - (is.w / 2) * (1 - k / is.h) * 0.8, y + k, is.w * (1 - k / is.h) * 0.8, 2, '#161130');
+					px(x - is.w * 0.15, y - is.h * 0.6, 3, is.h * 0.6, '#1d173c');
+				});
+
+				// ② 중앙 마법진(서서히 밝기 변화) — 게임 화면 뒤에서 바깥으로 번져 보이게 크게
+				const glow = reduceMotion ? 0.35 : 0.25 + 0.2 * (Math.sin(t * 0.7) + 1) / 2;
+				b.globalAlpha = glow;
+				const cx = bw / 2, cy = bh / 2, R = Math.min(bw, bh) * 0.62;
+				ring(cx, cy, R, '#8f5cf0'); ring(cx, cy, R * 0.9, '#6b36c6'); ring(cx, cy, R * 1.12, '#4a2588');
+				for (let k = 0; k < 12; k += 1) {
+					const a = (k / 12) * Math.PI * 2 + t * 0.02;
+					px(cx + Math.cos(a) * R * 1.06 - 1, cy + Math.sin(a) * R * 1.06 - 1, 3, 3, '#b57bff');
+				}
+				b.globalAlpha = 1;
+
+				// ① 안개(좌우로 천천히)
+				b.globalAlpha = 0.22;
+				fogBlobs.forEach((f) => {
+					const x = f.x * bw + Math.sin(t * 0.08 * f.sp + f.x * 7) * 26;
+					blob(x, f.y * bh, f.rx, f.ry, '#5a3fa6');
+				});
+				b.globalAlpha = 1;
+
+				// ④ 입자(느리게 위로 떠다님)
+				motes.forEach((m) => {
+					const y = reduceMotion ? m.y * bh : ((m.y * bh - t * m.v * 3) % bh + bh) % bh;
+					const x = m.x * bw + (reduceMotion ? 0 : Math.sin(t * 0.5 + m.ph) * 3);
+					b.globalAlpha = 0.4 + 0.4 * (reduceMotion ? 1 : (Math.sin(t * 1.4 + m.ph) + 1) / 2);
+					px(x, y, 1, 1, m.ph > 3 ? '#d6b4ff' : '#b57bff');
+				});
+				b.globalAlpha = 1;
+				requestAnimationFrame(frame);
+			}
+			requestAnimationFrame(frame);
+		})();
 	</script>
 </body>
 </html>
