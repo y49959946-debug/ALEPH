@@ -68,48 +68,43 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-col
 .notice ol { margin: 8px 0 0; padding-left: 20px; }
 
 
-/* 첫 화면 넓게: PC에서는 왼쪽 소개 / 오른쪽 입력, 아래 결과 미리보기와 샘플 3열 */
-.page.wide { max-width: 1120px; }
-.steps-h { font-size: 14px; font-weight: 800; color: var(--ink-3); margin: 18px 0 8px; letter-spacing: .02em; }
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.steps li { display: flex; gap: 12px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 8px 14px 8px 8px; }
+/* 글 넣기: 다음 버튼으로 넘겨 읽는 3페이지 (1 소개 → 2 받게 될 결과 → 3 시작하기) */
+#write { max-width: 760px; padding-bottom: 120px; }
+.wdots { list-style: none; margin: 0 0 18px; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.wdots button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-3); border-radius: 999px; padding: 6px 14px 6px 6px; font-size: 13.5px; font-weight: 700; }
+.wdots button i { font-style: normal; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--panel-2); font-size: 12px; font-variant-numeric: tabular-nums; }
+.wdots button.done { color: var(--ink-2); }
+.wdots button.done i { background: var(--accent-soft); color: var(--accent); }
+.wdots button[aria-current="step"] { color: var(--ink); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.wdots button[aria-current="step"] i { background: var(--accent); color: var(--on-accent); }
+.wp-h { font-family: var(--serif); font-weight: 800; font-size: clamp(24px, 4.4vw, 30px); letter-spacing: -.02em; line-height: 1.3; margin: 6px 0 6px; }
+.wp-lead { color: var(--ink-2); margin: 0 0 18px; }
+.steps-h { font-size: 14px; font-weight: 800; color: var(--ink-3); margin: 22px 0 10px; letter-spacing: .02em; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.steps li { display: flex; gap: 14px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 10px 16px 10px 10px; }
 .steps li.main { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
 .steps li > div { min-width: 0; }
-.steps b { display: block; font-size: 15px; }
-.steps span { font-size: 13px; color: var(--ink-2); }
-.steps .av-img { width: 44px; height: 44px; flex: none; }
+.steps b { display: block; font-size: 16px; }
+.steps span { font-size: 14px; color: var(--ink-2); }
+.steps .av-img { width: 52px; height: 52px; flex: none; }
 .steps .trio { display: flex; flex: none; }
-.steps .trio .av-img { width: 36px; height: 36px; margin-right: -8px; }
+.steps .trio .av-img { width: 42px; height: 42px; margin-right: -9px; }
 .steps .trio .av-img:last-child { margin-right: 0; }
-.preview { margin-top: 12px; }
-.pv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.pvc { text-align: left; padding: 0; cursor: default; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; box-shadow: var(--shadow); }
+.pv { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.pvc { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: auto 1fr; align-items: start; text-align: left; padding: 0; cursor: default; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; box-shadow: var(--shadow); }
 /* 미리보기는 보여주기만 한다 (눌러도 이동하지 않음) */
-.pvc img { display: block; width: 100%; height: auto; aspect-ratio: 640 / 396; object-fit: cover; object-position: top; border-bottom: 1px solid var(--line); }
-.pvc b { display: block; font-size: 15px; padding: 10px 14px 0; }
-.pvc span { display: block; font-size: 13px; color: var(--ink-2); padding: 0 14px 12px; }
-@media (min-width: 960px) {
-  #write .intro { display: grid; grid-template-columns: 1.08fr 1fr; grid-template-rows: auto 1fr; column-gap: 32px; align-items: start; }
-  #write .hero { grid-column: 1; grid-row: 1; padding-bottom: 0; }
-  #write .side-r { grid-column: 2; grid-row: 1 / span 2; align-self: stretch; border-left: 1px solid var(--line); padding-left: 32px; }
-  #write .preview { grid-column: 1; grid-row: 2; margin-top: 18px; }
-  #write .preview .samples-h { margin: 0 0 8px; }
-  #write .pv { grid-template-columns: 1fr; gap: 8px; }
-  #write .pvc { display: grid; grid-template-columns: 168px 1fr; grid-template-rows: auto 1fr; align-items: start; box-shadow: none; }
-  #write .pvc img { grid-row: 1 / span 2; height: 100%; aspect-ratio: auto; border-bottom: 0; border-right: 1px solid var(--line); }
-  #write .pvc b { padding: 12px 14px 0; } #write .pvc span { padding: 2px 14px 12px; }
-  #write .hero { padding-top: 4px; }
-  #write .hero-img { margin-bottom: 6px; }
-  #write .side-r { margin-top: 8px; }
-  #write .side-r .samples-h { margin-top: 22px; }
-  #write .chip { padding: 10px 12px; }
-  #write .chip small { font-size: 12.5px; }
-}
+.pvc img { grid-row: 1 / span 2; display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; border-right: 1px solid var(--line); }
+.pvc b { display: block; font-size: 17px; padding: 18px 20px 0; }
+.pvc span { display: block; font-size: 14.5px; color: var(--ink-2); padding: 4px 20px 18px; }
+.wp-band { max-width: 460px; margin: -8px auto 2px; }
+.wp[data-wp="2"] .samples-h { margin-top: 26px; }
+#wpager .in { max-width: 760px !important; padding-left: 0; }
+#wpager button[hidden] { display: inline-block; visibility: hidden; }
 @media (max-width: 700px) {
-  .pv { grid-template-columns: 1fr; gap: 8px; }
-  .pvc { display: grid; grid-template-columns: 116px 1fr; align-items: center; box-shadow: none; }
-  .pvc img { grid-row: 1 / span 2; height: 100%; aspect-ratio: auto; border-bottom: 0; border-right: 1px solid var(--line); }
-  .pvc b { padding: 10px 12px 0; } .pvc span { padding: 0 12px 10px; }
+  .pv { gap: 8px; }
+  .pvc { grid-template-columns: 124px 1fr; align-items: center; box-shadow: none; }
+  .pvc b { font-size: 15px; padding: 10px 12px 0; } .pvc span { font-size: 13px; padding: 2px 12px 10px; }
+  .wdots button { padding-right: 10px; font-size: 12.5px; }
   #write .chips { grid-template-columns: 1fr 1fr; gap: 6px; }
   #write .chip { padding: 9px 10px; } #write .chip small { font-size: 12px; line-height: 1.4; }
   #write .chip b { font-size: 13.5px; gap: 5px; flex-wrap: wrap; }
@@ -496,9 +491,15 @@ table.cm tbody th { font-weight: 600; width: 38%; }
 </header>
 
 <!-- 1. 글 넣기 -->
-<main class="page wide screen" id="write" hidden>
-  <div class="intro">
-  <section class="hero">
+<main class="page screen" id="write" hidden>
+  <ol class="wdots" id="wdots" aria-label="글 넣기 순서">
+    <li><button type="button" data-wp="0"><i>1</i>소개</button></li>
+    <li><button type="button" data-wp="1"><i>2</i>받게 될 결과</button></li>
+    <li><button type="button" data-wp="2"><i>3</i>시작하기</button></li>
+  </ol>
+
+  <!-- 1페이지: 소개 -->
+  <section class="wp hero" data-wp="0">
     <img class="hero-img" src="assets/hero.jpg" alt="세 사람이 한 장의 자기소개서를 각자의 방식으로 함께 읽는 그림" width="1200" height="388">
     <div class="eyebrow">한눈 · 한 글을 여러 눈으로 읽어봅니다</div>
     <h1>내 자기소개서, 세 사람은 어떻게 읽을까요?</h1>
@@ -509,30 +510,36 @@ table.cm tbody th { font-weight: 600; width: 38%; }
       <li><img class="av av-img" src="assets/char-chair.png" alt=""><div><b>의장이 무엇부터 고칠지 정리해요</b><span>판정이 갈린 문장과 고칠 방법까지</span></div></li>
     </ol>
   </section>
-  <div class="side-r">
-  <section class="composer">
-    <div class="notice" id="env" hidden style="margin:0 0 14px"></div>
-    <div class="notice" id="demoNote" style="margin:0 0 14px">공개 데모에서는 <b>미리 분석해 둔 샘플</b>만 볼 수 있어요. 무료 AI 한도가 작고, 넣은 글이 외부 AI 서비스로 전송되기 때문이에요. 내 글은 <a class="repo" target="_blank" rel="noopener">코드</a>를 받아 내 컴퓨터에서 분석할 수 있어요.</div>
-    <label for="text">자기소개서</label>
-    <textarea id="text" placeholder="여기에 붙여 넣거나, 아래 샘플을 골라 보세요."></textarea>
-    <div class="row"><span class="count" id="count">0자</span><div class="actions" id="actions"></div></div>
-    <div class="notice" id="notice" hidden role="status"></div>
-  </section>
-    <div class="samples-h"><h2>샘플로 해보기</h2><span class="fine">모두 지어낸 글이에요</span></div>
-    <div class="chips" id="chips"></div>
-  </div>
-  <section class="preview" aria-label="결과 미리보기">
-    <div class="samples-h"><h2>이런 결과를 받아요</h2><span class="fine">샘플 01 결과</span></div>
+
+  <!-- 2페이지: 받게 될 결과 -->
+  <section class="wp preview" data-wp="1" hidden aria-label="결과 미리보기">
+    <h2 class="wp-h">이런 결과를 받아요</h2>
+    <p class="wp-lead">샘플 01을 심의한 결과의 일부예요. 심의가 끝나면 이런 장을 한 장씩 넘겨 읽어요.</p>
     <div class="pv">
       <div class="pvc" data-pv="imp"><img src="assets/preview-imp.jpg" alt="" loading="lazy" width="640" height="396"><b>첫인상</b><span>어떤 어조로 읽히는지</span></div>
       <div class="pvc" data-pv="clash"><img src="assets/preview-clash.jpg" alt="" loading="lazy" width="640" height="396"><b>갈린 판정</b><span>같은 문장, 평가자마다 다른 판단</span></div>
       <div class="pvc" data-pv="fix"><img src="assets/preview-fix.jpg" alt="" loading="lazy" width="640" height="396"><b>고칠 것</b><span>무엇부터, 어떻게 고칠지</span></div>
     </div>
   </section>
-  </div>
 
-  <p class="fine" style="margin-top:28px">분석 결과는 글이 이렇게 읽힌다는 인상이지, 작성자의 역량이나 성격을 판단한 것이 아니에요. · <a class="repo" target="_blank" rel="noopener">코드 보기</a><span id="home"> · <a href="../../Plan_page.html">만든 사람의 포트폴리오(행로)</a></span></p>
+  <!-- 3페이지: 시작하기 -->
+  <section class="wp" data-wp="2" hidden>
+    <img class="hero-img wp-band" src="assets/hero.jpg" alt="" width="1200" height="388">
+    <div class="eyebrow" style="margin-bottom:14px">한눈 · 한 글을 여러 눈으로 읽어봅니다</div>
+    <section class="composer">
+      <div class="notice" id="env" hidden style="margin:0 0 14px"></div>
+      <div class="notice" id="demoNote" style="margin:0 0 14px">공개 데모에서는 <b>미리 분석해 둔 샘플</b>만 볼 수 있어요. 무료 AI 한도가 작고, 넣은 글이 외부 AI 서비스로 전송되기 때문이에요. 내 글은 <a class="repo" target="_blank" rel="noopener">코드</a>를 받아 내 컴퓨터에서 분석할 수 있어요.</div>
+      <label for="text">자기소개서</label>
+      <textarea id="text" placeholder="여기에 붙여 넣거나, 아래 샘플을 골라 보세요."></textarea>
+      <div class="row"><span class="count" id="count">0자</span><div class="actions" id="actions"></div></div>
+      <div class="notice" id="notice" hidden role="status"></div>
+    </section>
+    <div class="samples-h"><h2>샘플로 해보기</h2><span class="fine">모두 지어낸 글이에요</span></div>
+    <div class="chips" id="chips"></div>
+    <p class="fine" style="margin-top:28px">분석 결과는 글이 이렇게 읽힌다는 인상이지, 작성자의 역량이나 성격을 판단한 것이 아니에요. · <a class="repo" target="_blank" rel="noopener">코드 보기</a><span id="home"> · <a href="../../Plan_page.html">만든 사람의 포트폴리오(행로)</a></span></p>
+  </section>
 </main>
+<div class="pager" id="wpager" hidden><div class="in"><button id="wprev" type="button">← 이전</button><span class="pos" id="wpos"></span><button class="next" id="wnext" type="button">다음 →</button></div></div>
 
 <!-- 2. 심의 중 (채팅) -->
 <main class="page screen" id="talk" hidden>
@@ -556,7 +563,36 @@ $$(".repo").forEach((a) => (a.href = D.repo));
 if (D.local) { $("#demoNote").hidden = true; $("#home").hidden = true; }
 else { $("#text").style.minHeight = "150px"; }
 // 결과 미리보기는 보여주기만 한다 (눌러도 이동하지 않음)
-if (!Object.keys(D.runs).length) $(".preview").hidden = true;
+
+// 글 넣기 3페이지: 1 소개 → 2 받게 될 결과 → 3 시작하기 (결과가 하나도 없으면 2페이지는 건너뜀)
+const WP = Object.keys(D.runs).length ? [0, 1, 2] : [0, 2];
+const WNAME = ["소개", "받게 될 결과", "시작하기"];
+if (WP.length === 2) $('#wdots button[data-wp="1"]').parentElement.hidden = true;
+let wpNo = 0;   // WP 안에서의 위치
+function wgo(i, scroll = true) {
+  wpNo = Math.max(0, Math.min(WP.length - 1, i));
+  const cur = WP[wpNo];
+  $$("#write .wp").forEach((el) => (el.hidden = +el.dataset.wp !== cur));
+  $$("#wdots button").forEach((b) => {
+    const k = WP.indexOf(+b.dataset.wp);
+    b.setAttribute("aria-current", k === wpNo ? "step" : "false");
+    b.classList.toggle("done", k >= 0 && k < wpNo);
+  });
+  $("#wprev").hidden = wpNo === 0;
+  const last = wpNo === WP.length - 1;
+  $("#wnext").hidden = last;
+  if (!last) $("#wnext").textContent = `다음 · ${WNAME[WP[wpNo + 1]]} →`;
+  $("#wpos").textContent = `${wpNo + 1} / ${WP.length}`;
+  if (scroll) window.scrollTo(0, 0);
+}
+$("#wprev").addEventListener("click", () => wgo(wpNo - 1));
+$("#wnext").addEventListener("click", () => wgo(wpNo + 1));
+$$("#wdots button").forEach((b) => b.addEventListener("click", () => wgo(WP.indexOf(+b.dataset.wp))));
+document.addEventListener("keydown", (e) => {
+  if ($("#write").hidden || e.target.closest("textarea, input, select")) return;
+  if (e.key === "ArrowRight") wgo(wpNo + 1); else if (e.key === "ArrowLeft") wgo(wpNo - 1);
+});
+wgo(0, false);
 
 // 밝게/어둡게: 처음에는 기기 설정을 따르고, 버튼을 누르면 그 선택을 기억한다
 const darkNow = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -601,6 +637,7 @@ function show(id) {
   ["write", "talk", "dash"].forEach((s) => ($("#" + s).hidden = s !== id));
   $("#dock").hidden = id !== "talk";
   $("#pager").hidden = id !== "dash";
+  $("#wpager").hidden = id !== "write";
   $("#tabWrite").setAttribute("aria-current", id === "write" ? "page" : "false");
   $("#tabDash").setAttribute("aria-current", id !== "write" ? "page" : "false");
   $("#tabDash").textContent = id === "talk" ? "심의 중" : "결과";
@@ -622,7 +659,7 @@ document.addEventListener("click", async (e) => {
   b.textContent = ok ? "복사했어요" : "복사 안 됨"; b.classList.toggle("done", ok);
   setTimeout(() => { b.textContent = "복사"; b.classList.remove("done"); }, 1600);
 });
-const goWrite = (e) => { e.preventDefault(); stopTalk(); setURL({}); show("write"); };
+const goWrite = (e) => { e.preventDefault(); stopTalk(); setURL({}); wgo(0, false); show("write"); };
 $("#tabWrite").addEventListener("click", goWrite);
 $(".top .brand").addEventListener("click", goWrite);
 $("#tabDash").addEventListener("click", (e) => {
@@ -963,7 +1000,7 @@ async function runLocal() {
   }
 }
 function localFail(msg) {
-  show("write");
+  wgo(WP.length - 1, false); show("write");
   const n = $("#notice"); n.hidden = false; n.className = "notice warn"; n.innerHTML = stateBox(`<b>분석이 멈췄어요.</b><br>${esc(msg)}<br><span class="fine">무료 한도가 끝났다면 오후 4시 이후에 다시 해 보세요. 이미 끝난 단계는 저장돼 있어서 이어서 해요.</span>`);
 }
 
@@ -1086,7 +1123,7 @@ function buildSections(id) {
   list.forEach((x) => secObs.observe(x.el));
 }
 $("#prev").addEventListener("click", () => go(pageNo - 1));
-$("#next").addEventListener("click", () => { if (pageNo === pages.length - 1) { setURL({}); show("write"); } else go(pageNo + 1); });
+$("#next").addEventListener("click", () => { if (pageNo === pages.length - 1) { setURL({}); wgo(WP.length - 1, false); show("write"); } else go(pageNo + 1); });
 document.addEventListener("keydown", (e) => {
   if ($("#dash").hidden || e.target.closest("input, textarea, select")) return;
   if (e.key === "ArrowRight") go(pageNo + 1);
