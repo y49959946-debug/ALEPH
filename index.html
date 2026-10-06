@@ -1878,6 +1878,120 @@
       @media (max-width: 680px) {
         .summary-card:first-of-type { padding-top: 8px; border-top: 0; }
       }
+
+      /* ---- T01-C16: 텍스트 대비 4.5:1 미달 5곳 보정 ---- */
+      /* 현재 페이지 표시(메인 화면): #5b7163 on 연녹색 배경 3.96:1 → 더 진한 녹색 */
+      .nav-button.current { color: #3c5144; }
+
+      /* 입력칸 안내 글자: 브라우저 기본 #757575 4.41:1 → 메모 칸과 같은 색 */
+      .passkey-register-form input::placeholder { color: #68706a; opacity: 1; }
+
+      /* 로그인 후 메모 본문: 예전 어두운 테마 색(#a9b8c4)이 남아 1.82:1 → 본문 색 */
+      .private-card .private-card-text { color: #46514a; }
+
+      /* ---- T01-C06~C09, C19~C22: 강점 카드 3개 + 근거 펼치기 ---- */
+      #ability-1::before { content: "01"; }
+      #ability-2::before { content: "02"; }
+      #ability-3::before { content: "03"; }
+
+      .summary-card h3 .line { white-space: nowrap; }
+
+      .evidence-toggle {
+        margin-top: 14px;
+        min-height: 40px;
+        padding: 8px 14px;
+        border: 1px solid #52665a;
+        border-radius: 2px;
+        background: transparent;
+        color: #2f4237;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 650;
+        cursor: pointer;
+        transition: background 160ms ease, color 160ms ease;
+      }
+
+      .evidence-toggle::after { content: " ▾"; }
+      .evidence-toggle[aria-expanded="true"]::after { content: " ▴"; }
+
+      .evidence-toggle:hover,
+      .evidence-toggle[aria-expanded="true"] {
+        background: #2f4237;
+        color: #faf8f2;
+      }
+
+      .evidence-panel {
+        margin-top: 16px;
+        animation: evidence-in 180ms ease-out;
+      }
+
+      @keyframes evidence-in {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: none; }
+      }
+
+      .sar {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 8px 14px;
+        margin: 0;
+        max-width: 38ch;
+      }
+
+      .sar dt {
+        color: #3c5144;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        line-height: 1.8;
+      }
+
+      .sar dd {
+        margin: 0;
+        color: #3a443e;
+        font-size: 14px;
+        line-height: 1.75;
+        word-break: keep-all;
+      }
+
+      .evidence-link {
+        display: inline-block;
+        margin-top: 14px;
+        color: #2f4237;
+        font-size: 14px;
+        font-weight: 650;
+        text-underline-offset: 3px;
+      }
+
+      .evidence-link:hover { color: #52665a; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .evidence-panel { animation: none; }
+      }
+
+      /* ---- T01-C03: 대상·목적 한 문장 ---- */
+      .page-purpose {
+        max-width: 560px;
+        margin: clamp(10px, 1.8svh, 20px) 0 0;
+        color: #202724;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.6;
+        word-break: keep-all;
+      }
+
+      /* 목적 문장이 들어간 만큼 첫 화면 높이 확보: 장식용 영문 라벨(PERSONAL JOURNEY)은 숨김 */
+      .hero-copy .eyebrow { display: none; }
+      .hero-copy h1 { margin-top: 4px; }
+
+      .route-text { line-height: 1.6; }
+      .hero-copy h1 { font-size: clamp(36px, min(5.6vw, 6svh), 84px); }
+      .page-purpose { font-size: 15px; }
+      .summary-card::before { margin-bottom: 4px; }
+      .evidence-toggle { margin-top: 8px; min-height: 36px; padding: 6px 12px; }
+
+      /* ---- T01-C23: 거주 지역(DAEGU, KOREA) 비공개 ---- */
+      .hero-visual::before { content: none; display: none; }
     </style>
   </head>
   <body>
@@ -1926,6 +2040,7 @@
         <section class="hero-copy">
           <p class="eyebrow">Personal Journey</p>
           <h1>나의 행로를<span>따라가보세요.</span></h1>
+          <p class="page-purpose">이 페이지는 채용 담당자와 함께 일할 동료에게, 제 강점 세 가지와 그 근거를 보여주는 소개 페이지입니다.</p>
 
           <div class="route-def">
             <span class="dot"></span>
@@ -1948,23 +2063,58 @@
 
       <section class="summary" aria-labelledby="summary-title">
         <h2 class="summary-title" id="summary-title">A PERSONAL JOURNEY</h2>
-        <article class="summary-card clickable" id="strength-card" role="link" tabindex="0">
+        <article class="summary-card" id="ability-1">
           <div class="card-tag">강점</div>
-          <h3><span class="topic-highlight">나는<br /><span class="line">칼 같은 사람입니다.</span></span></h3>
-          <p>칼은 갈고닦을수록 날카로워지고,
-             사용하는 목적에 따라 그 쓰임이 달라집니다.</p>
+          <h3><span class="topic-highlight"><span class="line">자기조절력</span></span></h3>
+          <p>같은 질문이 몇 번이고 반복돼도 화내지 않고 답합니다.</p>
+          <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-1-detail">근거 펼치기</button>
+          <div class="evidence-panel" id="ability-1-detail" hidden>
+            <dl class="sar">
+              <dt>상황</dt>
+              <dd>K-뉴딜 SKT Aleph 심화 과정 조 활동 첫날, 동료의 추천으로 얼떨결에 조장을 맡았습니다.</dd>
+              <dt>행동</dt>
+              <dd>같은 질문을 몇 번이고 반복하는 동료들에게도 화내지 않고 최대한 친절하게 답했습니다.</dd>
+              <dt>결과</dt>
+              <dd>심화 과정 동안 한 번도 빠지지 않고 출석했고, 중간평가 우수자로 선정되었습니다.</dd>
+            </dl>
+            <a class="evidence-link" href="Intro.html">근거 · 자기소개의 ‘숫자로 보는 활동’</a>
+          </div>
         </article>
 
-        <article class="summary-card clickable" id="preference-card" role="link" tabindex="0">
-          <div class="card-tag">취향</div>
-          <h3><span class="topic-highlight">나는<br /><span class="line">청사진 같은 사람입니다.</span></span></h3>
-          <p>아직 보이지 않는 목표를 구체적인 형태로 그려내고, 하나씩 현실로 완성합니다.</p>
+        <article class="summary-card" id="ability-2">
+          <div class="card-tag">강점</div>
+          <h3><span class="topic-highlight"><span class="line">자기동기력</span></span></h3>
+          <p>원하던 결과가 아니어도 있는 그대로 받아들이고 끝까지 붙잡습니다.</p>
+          <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-2-detail">근거 펼치기</button>
+          <div class="evidence-panel" id="ability-2-detail" hidden>
+            <dl class="sar">
+              <dt>상황</dt>
+              <dd>리추얼 기록 26일치를 직접 분석했는데, 지속 기간과 문장 길이 사이에 상관관계가 거의 없다는 예상과 다른 결과가 나왔습니다.</dd>
+              <dt>행동</dt>
+              <dd>원하던 결과는 아니었지만 있는 그대로 받아들이고, 가설을 수정해 다시 적었습니다.</dd>
+              <dt>결과</dt>
+              <dd>수정한 가설까지 담은 논문을 제출했습니다. 아래 링크에서 직접 읽을 수 있습니다.</dd>
+            </dl>
+            <a class="evidence-link" href="Paper.html">근거 · 논문 읽기</a>
+          </div>
         </article>
 
-        <article class="summary-card clickable" id="plan-card" role="link" tabindex="0">
-          <div class="card-tag">계획</div>
-          <h3><span class="topic-highlight"><span class="line">앞으로의 성장 방향</span></span></h3>
-          <p>기술을 익히고, 더 나은 결과물을 만들며, 개인의 가치를 자연스럽게 드러내는 방향으로 나아갑니다.</p>
+        <article class="summary-card" id="ability-3">
+          <div class="card-tag">강점</div>
+          <h3><span class="topic-highlight"><span class="line">대인관계력</span></span></h3>
+          <p>도움이 필요한 순간엔 망설임보다 몸이 먼저 움직입니다.</p>
+          <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-3-detail">근거 펼치기</button>
+          <div class="evidence-panel" id="ability-3-detail" hidden>
+            <dl class="sar">
+              <dt>상황</dt>
+              <dd>학원 건물 앞에서 휠체어를 타신 어르신이 문을 못 열고 계셨습니다.</dd>
+              <dt>행동</dt>
+              <dd>생각하기도 전에 뛰어가 문을 잡아드렸습니다.</dd>
+              <dt>결과</dt>
+              <dd>보상과 상관없이 2달에 한 번씩 헌혈을 이어가고 있습니다.</dd>
+            </dl>
+            <a class="evidence-link" href="Intro.html">근거 · 자기소개 전문</a>
+          </div>
         </article>
       </section>
 
@@ -2073,37 +2223,15 @@
         if (!event.target.closest('.nav-item')) closeAllMenus();
       });
 
-      const strengthCard = document.getElementById('strength-card');
-      strengthCard.addEventListener('click', () => {
-        window.location.href = 'Strength_page.html';
-      });
-      strengthCard.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          window.location.href = 'Strength_page.html';
-        }
-      });
-
-      const preferenceCard = document.getElementById('preference-card');
-      preferenceCard.addEventListener('click', () => {
-        window.location.href = 'Preference_page.html';
-      });
-      preferenceCard.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          window.location.href = 'Preference_page.html';
-        }
-      });
-
-      const planCard = document.getElementById('plan-card');
-      planCard.addEventListener('click', () => {
-        window.location.href = 'Plan_page.html';
-      });
-      planCard.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          window.location.href = 'Plan_page.html';
-        }
+      // T01-C19~C21: 강점 카드의 "근거 펼치기" — button이라 마우스 클릭·Enter·Space 모두 동작
+      document.querySelectorAll('.evidence-toggle').forEach((toggle) => {
+        const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+        toggle.addEventListener('click', () => {
+          const open = toggle.getAttribute('aria-expanded') !== 'true';
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.textContent = open ? '근거 접기' : '근거 펼치기';
+          panel.hidden = !open;
+        });
       });
 
       // ---- 비공개 영역 ----
