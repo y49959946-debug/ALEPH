@@ -546,6 +546,28 @@
 	}
 	.template-item button:hover { background: #20232c; color: #7dc4ff; }
 	.template-item button.danger:hover { color: #ff8a8a; }
+	.template-item button.danger.confirming { background: #3a2026; color: #ff8a8a; }
+	.template-item.editing { flex-wrap: wrap; border-color: #7dc4ff; }
+	.template-edit {
+		flex: 1 1 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.template-edit input[type="text"] {
+		background: #10131a;
+		border: 1px solid #3c4152;
+		border-radius: 6px;
+		color: #eee;
+		padding: 7px 8px;
+		font-size: 13px;
+	}
+	.template-edit .edit-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+	.template-edit .edit-actions button { border: 1px solid #3c4152; }
+	.dropzone:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid #7dc4ff; outline-offset: 2px; }
+	button:disabled { opacity: .55; cursor: progress; }
+	.test-tools { margin-top: 14px; font-size: 13px; color: #9aa0ac; }
+	.test-tools summary { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -563,9 +585,9 @@
 		<div class="image-head">
 			<div class="section-header">
 				<h2>이미지</h2>
-				<button type="button" class="expand-btn" id="ratioToggleBtn" aria-expanded="true" aria-controls="ratioPanel" title="다운로드 비율 접기/펼치기">▾</button>
+				<button type="button" class="expand-btn" id="ratioToggleBtn" aria-expanded="false" aria-controls="ratioPanel" title="다운로드 비율 접기/펼치기">▸</button>
 			</div>
-			<div class="ratio-panel" id="ratioPanel">
+			<div class="ratio-panel collapsed" id="ratioPanel">
 				<div class="ratio-panel-inner">
 					<div class="ratio-tabs">
 						<button type="button" class="ratio-tab is-active" data-tab="preset">비율</button>
@@ -595,20 +617,22 @@
 			</div>
 		</div>
 		<div class="field">
-			<div class="dropzone" id="dropzone">
-				이미지를 드래그하거나 클릭해서 업로드
-				<input type="file" id="imageInput" accept="image/*">
+			<div class="dropzone" id="dropzone" role="button" tabindex="0" aria-describedby="uploadRule">
+				PNG·JPEG 이미지를 드래그하거나 클릭해서 업로드
+				<input type="file" id="imageInput" accept="image/png,image/jpeg,.png,.jpg,.jpeg">
 			</div>
-			<div class="upload-msg" id="uploadMsg"></div>
+			<div class="hint" id="uploadRule" style="margin-top:6px">PNG·JPEG만, 20MB 이하. 다른 파일은 거부되고 지금 작업은 그대로 남아요.</div>
+			<div class="upload-msg" id="uploadMsg" role="status" aria-live="polite"></div>
 		</div>
 
 		<div class="section-header">
 			<h2>문구</h2>
-			<button type="button" class="expand-btn" id="addTextBtn" title="문구 추가">+</button>
+			<button type="button" class="expand-btn" id="addTextBtn" title="문구 추가" aria-label="문구 추가">+</button>
 		</div>
 		<div class="text-layer-list" id="textLayerList"></div>
 		<div class="field">
-			<textarea id="captionInput" placeholder="카드에 넣을 문구를 입력하세요"></textarea>
+			<label for="captionInput">문구 내용 <span class="val" id="captionCount">0/500</span></label>
+			<textarea id="captionInput" maxlength="500" placeholder="카드에 넣을 문구를 입력하세요 (길면 자동으로 줄바꿈돼요)"></textarea>
 		</div>
 
 		<h2>텍스트 조절</h2>
@@ -631,6 +655,14 @@
 			<label>외곽선 크기 <span class="val" id="strokeWidthVal">6</span></label>
 			<input type="range" id="strokeWidthRange" min="0" max="30" value="6">
 		</div>
+		<div class="field">
+			<label for="posXRange">가로 위치 <span class="val" id="posXVal">50%</span></label>
+			<input type="range" id="posXRange" min="0" max="100" step="1" value="50">
+		</div>
+		<div class="field">
+			<label for="posYRange">세로 위치 <span class="val" id="posYVal">90%</span></label>
+			<input type="range" id="posYRange" min="0" max="100" step="1" value="90">
+		</div>
 		<div class="field row">
 			<span class="name">색상</span>
 			<input type="color" id="colorInput" value="#ffffff">
@@ -640,13 +672,19 @@
 		<div class="hint">캔버스에서 이미지나 문구를 클릭하면 선택되고, 드래그하면 위치가, 모서리 점을 드래그하면 크기가 바뀌어요.</div>
 
 		<h2 style="margin-top:18px">내보내기</h2>
-		<button class="primary" id="downloadBtn">카드 이미지 저장</button>
+		<button class="primary" id="downloadBtn">카드 이미지 저장 (PNG)</button>
+		<div class="upload-msg" id="exportMsg" role="status" aria-live="polite"></div>
 		<button class="ghost" id="resetBtn">초기화</button>
+		<details class="test-tools">
+			<summary>검사 도구</summary>
+			<div class="hint" style="margin:8px 0">네 모서리와 가운데에 줄바꿈·이모지가 섞인 검사 문구를 놓아요. 지금 문구는 바뀌니 템플릿으로 먼저 저장해 두세요.</div>
+			<button type="button" class="ghost" id="testTextBtn" style="margin-top:0">가장자리·줄바꿈 검사 문구 배치</button>
+		</details>
 	</div>
 
 	<div class="canvas-wrap">
-		<canvas id="cardCanvas" width="900" height="900"></canvas>
-		<div class="hint">미리보기 — 값을 바꾸면 바로 반영됩니다.</div>
+		<canvas id="cardCanvas" width="900" height="900" tabindex="0" role="img" aria-label="카드 미리보기. 선택한 문구는 방향키로 옮길 수 있어요."></canvas>
+		<div class="hint">미리보기 — 값을 바꾸면 바로 반영되고, 저장 파일도 이 모습 그대로예요(파란 점 제외).</div>
 	</div>
 
 	<div class="panel">
@@ -655,7 +693,7 @@
 			<input type="text" id="templateNameInput" placeholder="템플릿 이름">
 			<button id="saveTemplateBtn">저장</button>
 		</div>
-		<div class="hint">추가한 모든 문구(폰트·글자크기·색상·위치 포함)와 캔버스 비율/크기가 저장돼요. 이미지는 저장되지 않아요.</div>
+		<div class="hint">추가한 모든 문구(폰트·글자크기·색상·위치 포함)와 캔버스 비율/크기가 저장돼요. 이미지는 저장되지 않아요. 새로고침해도 남아요.</div>
 
 		<div class="template-io-row">
 			<button type="button" id="exportTemplatesBtn">JSON 내보내기</button>
@@ -705,11 +743,38 @@
 	const importTemplatesBtn = document.getElementById('importTemplatesBtn');
 	const importTemplatesInput = document.getElementById('importTemplatesInput');
 	const templateMsg = document.getElementById('templateMsg');
+	const exportMsg = document.getElementById('exportMsg');
+	const captionCount = document.getElementById('captionCount');
+	const posXRange = document.getElementById('posXRange');
+	const posYRange = document.getElementById('posYRange');
+	const posXVal = document.getElementById('posXVal');
+	const posYVal = document.getElementById('posYVal');
+	const testTextBtn = document.getElementById('testTextBtn');
 
 	const MIN_FONT_SIZE = 12;
 	const MAX_FONT_SIZE = 140;
 	const MIN_CANVAS_SIZE = 100;
 	const MAX_CANVAS_SIZE = 3000;
+	const MAX_TEXT_LEN = 500;
+	const MAX_LAYERS = 20;
+	const MAX_STROKE = 30;
+	const FONT_VALUES = Array.from(fontSelect.options).map((o) => o.value);
+	const EMOJI_FALLBACK = "'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'";
+
+	function fontString(layer, size) {
+		return `bold ${size}px ${layer.fontFamily}, ${EMOJI_FALLBACK}`;
+	}
+	function clampNum(v, lo, hi) {
+		return Math.min(hi, Math.max(lo, v));
+	}
+	function normalizeHex(v) {
+		if (typeof v !== 'string') return null;
+		const s = v.trim().toLowerCase();
+		if (/^#[0-9a-f]{6}$/.test(s)) return s;
+		if (/^#[0-9a-f]{3}$/.test(s)) return '#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+		return null;
+	}
+	const layoutCache = new Map();
 
 	let nextTextId = 1;
 	function newTextLayer(overrides) {
@@ -759,11 +824,16 @@
 		strokeWidthRange.disabled = !has;
 		colorInput.disabled = !has;
 		strokeColorInput.disabled = !has;
+		posXRange.disabled = !has;
+		posYRange.disabled = !has;
 		if (!has) {
 			captionInput.value = '';
+			captionCount.textContent = `0/${MAX_TEXT_LEN}`;
 			return;
 		}
 		captionInput.value = t.text;
+		captionCount.textContent = `${t.text.length}/${MAX_TEXT_LEN}`;
+		syncPositionControls(t);
 		fontSelect.value = t.fontFamily;
 		sizeRange.value = t.fontSize;
 		sizeVal.textContent = t.fontSize;
@@ -771,6 +841,15 @@
 		strokeWidthVal.textContent = t.strokeWidth;
 		colorInput.value = t.color;
 		strokeColorInput.value = t.strokeColor;
+	}
+
+	function syncPositionControls(t) {
+		const px = Math.round((t.x / CW) * 100);
+		const py = Math.round((t.y / CH) * 100);
+		posXRange.value = px;
+		posYRange.value = py;
+		posXVal.textContent = px + '%';
+		posYVal.textContent = py + '%';
 	}
 
 	function selectTextLayer(id) {
@@ -816,6 +895,10 @@
 	}
 
 	function addTextLayer() {
+		if (state.texts.length >= MAX_LAYERS) {
+			showUploadMsg(`문구는 최대 ${MAX_LAYERS}개까지 추가할 수 있어요.`, 'error');
+			return;
+		}
 		const active = getActiveText();
 		const base = active ? {
 			fontFamily: active.fontFamily,
@@ -868,11 +951,13 @@
 			? { relX: state.imageX / CW, relY: state.imageY / CH, scale: state.imageScale, minScale: state.imageMinScale, maxScale: state.imageMaxScale }
 			: null;
 		const oldCW = CW;
+		const wasCovering = !!state.image && imageCoversCanvas();
 
 		canvas.width = newW;
 		canvas.height = newH;
 		CW = newW;
 		CH = newH;
+		layoutCache.clear();
 
 		relPositions.forEach(({ t, relX, relY }) => {
 			t.x = relX * CW;
@@ -886,7 +971,30 @@
 			state.imageScale = imgRel.scale * factor;
 			state.imageMinScale = imgRel.minScale * factor;
 			state.imageMaxScale = imgRel.maxScale * factor;
+			// A photo that filled the old frame should still fill the new one,
+			// otherwise switching 1:1 -> 9:16 leaves empty transparent strips.
+			if (wasCovering) coverCanvasWithImage();
 		}
+	}
+
+	function imageCoversCanvas() {
+		const img = state.image;
+		const halfW = (img.width * state.imageScale) / 2;
+		const halfH = (img.height * state.imageScale) / 2;
+		return state.imageX - halfW <= 0.5 && state.imageX + halfW >= CW - 0.5
+			&& state.imageY - halfH <= 0.5 && state.imageY + halfH >= CH - 0.5;
+	}
+
+	function coverCanvasWithImage() {
+		const img = state.image;
+		const cover = Math.max(CW / img.width, CH / img.height);
+		if (state.imageScale < cover) state.imageScale = cover;
+		state.imageMinScale = Math.min(state.imageMinScale, cover * 0.15);
+		state.imageMaxScale = Math.max(state.imageMaxScale, cover * 6);
+		const halfW = (img.width * state.imageScale) / 2;
+		const halfH = (img.height * state.imageScale) / 2;
+		state.imageX = clampNum(state.imageX, CW - halfW, halfW);
+		state.imageY = clampNum(state.imageY, CH - halfH, halfH);
 	}
 
 	function computePresetSize(w, h) {
@@ -967,6 +1075,25 @@
 		}
 	}
 
+	// Turns anything that looks roughly like a text layer into a safe one
+	// (fills in defaults, clamps numbers, keeps the id if it is usable).
+	function sanitizeLayer(t) {
+		if (!t || typeof t !== 'object' || Array.isArray(t)) return null;
+		const d = newTextLayer({});
+		const num = (v, fallback, lo, hi) => (typeof v === 'number' && Number.isFinite(v) ? clampNum(v, lo, hi) : fallback);
+		return {
+			id: Number.isInteger(t.id) && t.id > 0 ? t.id : d.id,
+			text: typeof t.text === 'string' ? t.text.slice(0, MAX_TEXT_LEN) : '',
+			fontFamily: FONT_VALUES.includes(t.fontFamily) ? t.fontFamily : d.fontFamily,
+			fontSize: num(t.fontSize, d.fontSize, MIN_FONT_SIZE, MAX_FONT_SIZE),
+			color: normalizeHex(t.color) || d.color,
+			strokeColor: normalizeHex(t.strokeColor) || d.strokeColor,
+			strokeWidth: num(t.strokeWidth, d.strokeWidth, 0, MAX_STROKE),
+			x: num(t.x, CW / 2, 0, CW),
+			y: num(t.y, CH - 90, 0, CH),
+		};
+	}
+
 	function loadDraft() {
 		let meta = null;
 		try {
@@ -976,15 +1103,21 @@
 			meta = null;
 		}
 
+		if (meta && (typeof meta !== 'object' || Array.isArray(meta))) meta = null;
 		if (meta) {
-			setCanvasSize(meta.canvasW || CW, meta.canvasH || CH);
+			const dw = Number.isFinite(meta.canvasW) ? clampCanvasDim(meta.canvasW) : CW;
+			const dh = Number.isFinite(meta.canvasH) ? clampCanvasDim(meta.canvasH) : CH;
+			setCanvasSize(dw, dh);
 			const match = findMatchingPreset(CW, CH);
 			if (match) setActiveRatioButton(match.w, match.h);
 			else clearActiveRatioButtons();
 			syncCustomSizeInputs();
 
 			if (Array.isArray(meta.texts) && meta.texts.length) {
-				state.texts = meta.texts.map((t) => Object.assign(newTextLayer({}), t));
+				// A damaged autosave must never take the page down - keep the
+				// layers that make sense, quietly drop the rest.
+				const restored = meta.texts.slice(0, MAX_LAYERS).map(sanitizeLayer).filter(Boolean);
+				if (restored.length) state.texts = restored;
 			} else if (typeof meta.text === 'string') {
 				// legacy single-text draft shape from before multi-layer support
 				state.texts = [newTextLayer({
@@ -996,7 +1129,8 @@
 					strokeWidth: meta.strokeWidth,
 					x: meta.x,
 					y: meta.y,
-				})];
+				})].map(sanitizeLayer).filter(Boolean);
+				if (!state.texts.length) state.texts = [newTextLayer({ text: '여기에 문구 입력' })];
 			}
 			nextTextId = Math.max(nextTextId, ...state.texts.map((t) => t.id + 1));
 
@@ -1039,10 +1173,26 @@
 		render();
 	}
 
+	function setRatioPanelOpen(open) {
+		ratioPanel.classList.toggle('collapsed', !open);
+		ratioToggleBtn.textContent = open ? '▾' : '▸';
+		ratioToggleBtn.setAttribute('aria-expanded', String(open));
+	}
 	ratioToggleBtn.addEventListener('click', () => {
-		const collapsed = ratioPanel.classList.toggle('collapsed');
-		ratioToggleBtn.textContent = collapsed ? '▸' : '▾';
-		ratioToggleBtn.setAttribute('aria-expanded', String(!collapsed));
+		setRatioPanelOpen(ratioPanel.classList.contains('collapsed'));
+	});
+	// On wide screens the flyout sits over the preview's corner - close it as
+	// soon as the user goes back to the canvas (or anywhere else), or presses Esc.
+	document.addEventListener('pointerdown', (e) => {
+		if (ratioPanel.classList.contains('collapsed')) return;
+		if (ratioPanel.contains(e.target) || ratioToggleBtn.contains(e.target)) return;
+		setRatioPanelOpen(false);
+	});
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && !ratioPanel.classList.contains('collapsed')) {
+			setRatioPanelOpen(false);
+			ratioToggleBtn.focus();
+		}
 	});
 
 	ratioTabs.forEach((tab) => {
@@ -1087,32 +1237,114 @@
 		uploadMsg.className = 'upload-msg' + (type ? ' ' + type : '');
 	}
 
-	function loadImageFile(file) {
+	const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+	const MAX_IMAGE_PIXELS = 40 * 1000 * 1000;
+	const KEEP_NOTE = ' 지금 작업은 그대로예요.';
+
+	// Decide by the file's first bytes, not its name or the browser's guess -
+	// a GIF renamed to .png or a text file called photo.jpg is still rejected.
+	function sniffImageType(bytes) {
+		const b = bytes;
+		if (b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47
+			&& b[4] === 0x0d && b[5] === 0x0a && b[6] === 0x1a && b[7] === 0x0a) return 'PNG';
+		if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'JPEG';
+		const ascii = String.fromCharCode(...b.slice(0, 12));
+		if (ascii.startsWith('GIF8')) return 'GIF';
+		if (ascii.startsWith('RIFF') && ascii.slice(8, 12) === 'WEBP') return 'WebP';
+		if (ascii.startsWith('BM')) return 'BMP';
+		if (ascii.slice(4, 12).includes('ftyp')) return 'HEIC/MP4 계열';
+		if (ascii.startsWith('%PDF')) return 'PDF';
+		if (ascii.startsWith('PK')) return 'ZIP/문서';
+		if (/^\s*</.test(ascii)) return 'SVG/HTML 텍스트';
+		return null;
+	}
+
+	function readBytes(file, start, end) {
+		const part = file.slice(start, end);
+		if (part.arrayBuffer) return part.arrayBuffer().then((buf) => new Uint8Array(buf));
+		return new Promise((resolve, reject) => {
+			const r = new FileReader();
+			r.onload = () => resolve(new Uint8Array(r.result));
+			r.onerror = reject;
+			r.readAsArrayBuffer(part);
+		});
+	}
+
+	// Browsers happily paint half of a cut-off download (grey below the
+	// break), so also require the format's end marker: IEND for PNG,
+	// FF D9 for JPEG (some cameras pad a few bytes after it).
+	function hasEndMarker(kind, tail) {
+		if (kind === 'PNG') {
+			for (let i = tail.length - 8; i >= 0; i--) {
+				if (tail[i] === 0x49 && tail[i + 1] === 0x45 && tail[i + 2] === 0x4e && tail[i + 3] === 0x44) return true;
+			}
+			return false;
+		}
+		for (let i = tail.length - 2; i >= 0; i--) {
+			if (tail[i] === 0xff && tail[i + 1] === 0xd9) return true;
+		}
+		return false;
+	}
+
+	async function loadImageFile(file) {
 		if (!file) return;
 		imageInput.value = ''; // allow re-selecting the same rejected file
-		if (!file.type.startsWith('image/')) {
-			showUploadMsg(`지원하지 않는 파일 형식이에요 (${file.type || file.name}). PNG, JPG, GIF, WebP, BMP, SVG 파일을 사용해주세요.`, 'error');
+		const label = file.name ? `"${file.name}"` : '이 파일';
+		if (file.size === 0) {
+			showUploadMsg(`${label}은(는) 빈 파일이라 불러올 수 없어요.` + KEEP_NOTE, 'error');
+			return;
+		}
+		if (file.size > MAX_IMAGE_BYTES) {
+			showUploadMsg(`${label}이(가) 너무 커요 (${(file.size / 1048576).toFixed(1)}MB). 20MB 이하만 불러올 수 있어요.` + KEEP_NOTE, 'error');
+			return;
+		}
+		let kind;
+		let tail;
+		try {
+			kind = sniffImageType(await readBytes(file, 0, 16));
+			tail = await readBytes(file, Math.max(0, file.size - 64), file.size);
+		} catch {
+			showUploadMsg('파일을 읽는 중 문제가 발생했어요. 다시 시도해주세요.' + KEEP_NOTE, 'error');
+			return;
+		}
+		if (kind !== 'PNG' && kind !== 'JPEG') {
+			const what = kind ? `${kind} 파일` : '이미지가 아닌 파일';
+			showUploadMsg(`지원하지 않는 파일이에요 — ${label}은(는) ${what}이에요. PNG·JPEG만 불러올 수 있어요.` + KEEP_NOTE, 'error');
+			return;
+		}
+		if (!hasEndMarker(kind, tail)) {
+			showUploadMsg(`${label}은(는) ${kind} 파일이지만 끝부분이 잘려 있어요(다운로드가 덜 됐거나 손상). 다른 파일로 시도해주세요.` + KEEP_NOTE, 'error');
 			return;
 		}
 		const reader = new FileReader();
 		reader.onerror = () => {
-			showUploadMsg('파일을 읽는 중 문제가 발생했어요. 다시 시도해주세요.', 'error');
+			showUploadMsg('파일을 읽는 중 문제가 발생했어요. 다시 시도해주세요.' + KEEP_NOTE, 'error');
 		};
 		reader.onload = (e) => {
 			const img = new Image();
 			img.onload = () => {
+				if (!img.naturalWidth || !img.naturalHeight) {
+					showUploadMsg(`${kind} 파일이 손상돼서 열 수 없어요.` + KEEP_NOTE, 'error');
+					return;
+				}
+				if (img.naturalWidth * img.naturalHeight > MAX_IMAGE_PIXELS) {
+					showUploadMsg(`이미지가 너무 커요 (${img.naturalWidth}×${img.naturalHeight}). 4천만 화소 이하만 불러올 수 있어요.` + KEEP_NOTE, 'error');
+					return;
+				}
 				state.image = img;
 				setImageCoverDefaults(img);
+				const info = `${kind} ${img.naturalWidth}×${img.naturalHeight}`;
 				try {
 					localStorage.setItem(DRAFT_IMAGE_KEY, e.target.result);
-					showUploadMsg('이미지를 불러왔어요.', 'success');
+					showUploadMsg(`이미지를 불러왔어요 (${info}).`, 'success');
 				} catch {
-					showUploadMsg('이미지를 불러왔어요. (용량이 커서 새로고침 시 자동으로 복원되진 않아요)', 'success');
+					try { localStorage.removeItem(DRAFT_IMAGE_KEY); } catch { /* ignore */ }
+					showUploadMsg(`이미지를 불러왔어요 (${info}). 용량이 커서 새로고침 시 자동으로 복원되진 않아요.`, 'success');
 				}
 				render();
 			};
 			img.onerror = () => {
-				showUploadMsg('이 이미지 형식은 브라우저에서 열 수 없어요 (HEIC, TIFF, PSD, RAW 등은 미지원). 다른 파일로 시도해주세요.', 'error');
+				showUploadMsg(`${kind}처럼 보이지만 파일이 손상돼서 열 수 없어요.` + KEEP_NOTE, 'error');
 			};
 			img.src = e.target.result;
 		};
@@ -1120,6 +1352,20 @@
 	}
 
 	dropzone.addEventListener('click', () => imageInput.click());
+	dropzone.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			imageInput.click();
+		}
+	});
+	// A file dropped anywhere else would make the browser open it and throw
+	// away the card in progress - swallow those drops; the canvas accepts them.
+	window.addEventListener('dragover', (e) => e.preventDefault());
+	window.addEventListener('drop', (e) => e.preventDefault());
+	canvas.addEventListener('drop', (e) => {
+		const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+		if (file) loadImageFile(file);
+	});
 	imageInput.addEventListener('change', () => loadImageFile(imageInput.files[0]));
 
 	['dragenter', 'dragover'].forEach((evt) =>
@@ -1142,8 +1388,23 @@
 	captionInput.addEventListener('input', () => {
 		const t = getActiveText();
 		if (!t) return;
-		t.text = captionInput.value;
+		t.text = captionInput.value.slice(0, MAX_TEXT_LEN);
+		captionCount.textContent = `${t.text.length}/${MAX_TEXT_LEN}`;
 		renderTextLayerList();
+		render();
+	});
+	posXRange.addEventListener('input', () => {
+		const t = getActiveText();
+		if (!t) return;
+		t.x = (Number(posXRange.value) / 100) * CW;
+		posXVal.textContent = posXRange.value + '%';
+		render();
+	});
+	posYRange.addEventListener('input', () => {
+		const t = getActiveText();
+		if (!t) return;
+		t.y = (Number(posYRange.value) / 100) * CH;
+		posYVal.textContent = posYRange.value + '%';
 		render();
 	});
 	sizeRange.addEventListener('input', () => {
@@ -1157,6 +1418,22 @@
 		const t = getActiveText();
 		if (!t) return;
 		t.fontFamily = fontSelect.value;
+		render();
+	});
+	document.addEventListener('keydown', (e) => {
+		// Arrow keys nudge the selected caption when the canvas has focus.
+		if (document.activeElement !== canvas) return;
+		const t = getActiveText();
+		if (!t) return;
+		const step = e.shiftKey ? 20 : 4;
+		const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+		const mv = moves[e.key];
+		if (!mv) return;
+		e.preventDefault();
+		t.x = clampNum(t.x + mv[0], 0, CW);
+		t.y = clampNum(t.y + mv[1], 0, CH);
+		snapLayerToVisible(t);
+		syncPositionControls(t);
 		render();
 	});
 	strokeWidthRange.addEventListener('input', () => {
@@ -1179,52 +1456,120 @@
 		render();
 	});
 
-	function wrapLines(text) {
-		return text.split('\n');
-	}
-
 	const FIT_MARGIN = 32; // keeps corner handles + their hit area on-canvas
+	const BOX_PAD = 10;
+	const MIN_FIT_FONT = 10;
+	const graphemeSegmenter = (typeof Intl !== 'undefined' && Intl.Segmenter)
+		? new Intl.Segmenter('ko', { granularity: 'grapheme' })
+		: null;
 
-	function measureAt(layer, fontSize) {
-		ctx.font = `bold ${fontSize}px ${layer.fontFamily}`;
-		const lines = wrapLines(layer.text);
-		const lineHeight = fontSize * 1.2;
-		let maxWidth = 0;
-		lines.forEach((line) => {
-			const w = ctx.measureText(line).width;
-			if (w > maxWidth) maxWidth = w;
+	// Split into user-visible characters so an emoji (or a flag, or a
+	// skin-tone sequence) is never cut in half at a line break.
+	function graphemes(s) {
+		return graphemeSegmenter ? Array.from(graphemeSegmenter.segment(s), (x) => x.segment) : Array.from(s);
+	}
+
+	// Word-wraps with the current ctx.font: breaks at spaces first and only
+	// falls back to per-character breaks for a single token that is wider
+	// than the line (long URLs, no-space Korean, emoji runs).
+	function wrapToWidth(text, maxW) {
+		const measure = (s) => ctx.measureText(s).width;
+		const out = [];
+		text.split('\n').forEach((para) => {
+			let line = '';
+			const tokens = para.split(/(\s+)/);
+			for (const tok of tokens) {
+				if (!tok) continue;
+				const isSpace = /^\s+$/.test(tok);
+				if (isSpace && line === '') continue;
+				if (measure(line + tok) <= maxW) {
+					line += tok;
+					continue;
+				}
+				if (isSpace) {
+					out.push(line);
+					line = '';
+					continue;
+				}
+				if (line !== '') {
+					out.push(line.replace(/\s+$/, ''));
+					line = '';
+				}
+				if (measure(tok) <= maxW) {
+					line = tok;
+					continue;
+				}
+				for (const g of graphemes(tok)) {
+					if (line !== '' && measure(line + g) > maxW) {
+						out.push(line);
+						line = g;
+					} else {
+						line += g;
+					}
+				}
+			}
+			out.push(line.replace(/\s+$/, ''));
 		});
-		return { lines, lineHeight, maxWidth, totalHeight: lineHeight * lines.length };
+		return out;
 	}
 
-	// A layer can't be dragged wider/taller than the canvas - shrink it to
-	// fit (without touching the user's chosen size) so it, and its corner
-	// handles, never end up rendered outside the visible canvas.
-	function measureTextBlock(layer) {
-		let fontSize = layer.fontSize;
-		let m = measureAt(layer, fontSize);
-		const maxW = CW - FIT_MARGIN * 2;
-		const maxH = CH - FIT_MARGIN * 2;
-		while (fontSize > 8 && (m.maxWidth > maxW || m.totalHeight > maxH)) {
-			fontSize -= 1;
-			m = measureAt(layer, fontSize);
+	// One place decides how a caption is laid out; the preview, the saved
+	// file, hit-testing and the handles all read from it so they can't drift.
+	function layoutText(layer) {
+		const key = [layer.text, layer.fontFamily, layer.fontSize, layer.strokeWidth, CW, CH].join('\u0001');
+		let shape = layoutCache.get(key);
+		if (!shape) {
+			const maxW = Math.max(40, CW - FIT_MARGIN * 2 - BOX_PAD * 2 - layer.strokeWidth);
+			const maxH = Math.max(40, CH - FIT_MARGIN * 2 - BOX_PAD * 2 - layer.strokeWidth);
+			let fontSize = layer.fontSize;
+			let lines;
+			let maxWidth;
+			for (;;) {
+				ctx.font = fontString(layer, fontSize);
+				lines = wrapToWidth(layer.text, maxW);
+				maxWidth = 0;
+				lines.forEach((l) => { maxWidth = Math.max(maxWidth, ctx.measureText(l).width); });
+				if (lines.length * fontSize * 1.2 <= maxH || fontSize <= MIN_FIT_FONT) break;
+				fontSize = Math.max(MIN_FIT_FONT, fontSize - 2);
+			}
+			const lineHeight = fontSize * 1.2;
+			const totalHeight = lineHeight * lines.length;
+			shape = {
+				lines,
+				fontSize,
+				lineHeight,
+				totalHeight,
+				maxWidth,
+				halfW: maxWidth / 2 + BOX_PAD + layer.strokeWidth / 2,
+				halfH: totalHeight / 2 + BOX_PAD + layer.strokeWidth / 2,
+			};
+			if (layoutCache.size > 200) layoutCache.clear();
+			layoutCache.set(key, shape);
 		}
-		return { ...m, fontSize };
+		// Keep the whole block inside the frame: a caption pushed against an
+		// edge slides back in instead of being cut off in the saved file.
+		// EDGE leaves room for the corner handles so they stay grabbable.
+		const EDGE = HANDLE_RADIUS;
+		const x = (shape.halfW + EDGE) * 2 >= CW ? CW / 2 : clampNum(layer.x, shape.halfW + EDGE, CW - shape.halfW - EDGE);
+		const y = (shape.halfH + EDGE) * 2 >= CH ? CH / 2 : clampNum(layer.y, shape.halfH + EDGE, CH - shape.halfH - EDGE);
+		return Object.assign({ x, y }, shape);
 	}
 
-	function textBounds(layer) {
-		const { maxWidth, totalHeight } = measureTextBlock(layer);
-		return { halfW: maxWidth / 2 + 10, halfH: totalHeight / 2 + 10 };
+	function snapLayerToVisible(layer) {
+		if (!layer.text.trim()) return;
+		const L = layoutText(layer);
+		layer.x = L.x;
+		layer.y = L.y;
 	}
 
 	function textCorners(layer) {
 		if (!layer.text.trim()) return null;
-		const { halfW, halfH } = textBounds(layer);
+		const { x, y, halfW, halfH } = layoutText(layer);
 		return [
-			{ x: layer.x - halfW, y: layer.y - halfH },
-			{ x: layer.x + halfW, y: layer.y - halfH },
-			{ x: layer.x - halfW, y: layer.y + halfH },
-			{ x: layer.x + halfW, y: layer.y + halfH },
+			{ x: x - halfW, y: y - halfH },
+			{ x: x + halfW, y: y - halfH },
+			{ x: x - halfW, y: y + halfH },
+			{ x: x + halfW, y: y + halfH },
 		];
 	}
 
@@ -1240,7 +1585,35 @@
 		});
 	}
 
-	function render() {
+	// Web fonts arrive late and per-character subset; ask for exactly the
+	// glyphs each caption uses and redraw once they land.
+	const requestedFontKeys = new Set();
+	function requestFonts(layer) {
+		if (!document.fonts || !document.fonts.load) return;
+		const key = layer.fontFamily + '\u0001' + layer.text;
+		if (requestedFontKeys.has(key)) return;
+		requestedFontKeys.add(key);
+		document.fonts.load(fontString(layer, 48), layer.text || '가A').then((faces) => {
+			if (faces && faces.length) {
+				layoutCache.clear();
+				render();
+			}
+		}).catch(() => {});
+	}
+
+	async function ensureFontsReady() {
+		if (!document.fonts || !document.fonts.load) return;
+		await Promise.all(state.texts.map((t) =>
+			document.fonts.load(fontString(t, 48), t.text || '가A').catch(() => [])
+		));
+		try { await document.fonts.ready; } catch { /* ignore */ }
+		layoutCache.clear();
+	}
+
+	// forExport: draw exactly what goes into the file - no selection handles,
+	// no "upload an image" placeholder text.
+	function render(opts) {
+		const forExport = !!(opts && opts.forExport);
 		ctx.clearRect(0, 0, CW, CH);
 
 		if (state.image) {
@@ -1251,22 +1624,25 @@
 			const dw = img.width * state.imageScale;
 			const dh = img.height * state.imageScale;
 			ctx.drawImage(img, state.imageX - dw / 2, state.imageY - dh / 2, dw, dh);
-			if (isImageActive()) drawHandles(imageCorners());
+			if (!forExport && isImageActive()) drawHandles(imageCorners());
 		} else {
 			ctx.fillStyle = '#14151a';
 			ctx.fillRect(0, 0, CW, CH);
-			ctx.fillStyle = '#4b5160';
-			ctx.font = '20px sans-serif';
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText('이미지를 업로드하세요', CW / 2, CH / 2);
+			if (!forExport) {
+				ctx.fillStyle = '#4b5160';
+				ctx.font = '20px sans-serif';
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText('이미지를 업로드하세요', CW / 2, CH / 2);
+			}
 		}
 
 		const activeTextId = state.activeTarget && state.activeTarget.type === 'text' ? state.activeTarget.id : null;
 		state.texts.forEach((layer) => {
 			if (!layer.text.trim()) return;
-			const { lines, lineHeight, totalHeight, fontSize } = measureTextBlock(layer);
-			ctx.font = `bold ${fontSize}px ${layer.fontFamily}`;
+			if (!forExport) requestFonts(layer);
+			const L = layoutText(layer);
+			ctx.font = fontString(layer, L.fontSize);
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
 			ctx.lineJoin = 'round';
@@ -1274,17 +1650,17 @@
 			ctx.strokeStyle = layer.strokeColor;
 			ctx.fillStyle = layer.color;
 
-			const startY = layer.y - totalHeight / 2 + lineHeight / 2;
-			lines.forEach((line, i) => {
-				const ly = startY + i * lineHeight;
-				if (layer.strokeWidth > 0) ctx.strokeText(line, layer.x, ly);
-				ctx.fillText(line, layer.x, ly);
+			const startY = L.y - L.totalHeight / 2 + L.lineHeight / 2;
+			L.lines.forEach((line, i) => {
+				const ly = startY + i * L.lineHeight;
+				if (layer.strokeWidth > 0) ctx.strokeText(line, L.x, ly);
+				ctx.fillText(line, L.x, ly);
 			});
 
-			if (layer.id === activeTextId) drawHandles(textCorners(layer));
+			if (!forExport && layer.id === activeTextId) drawHandles(textCorners(layer));
 		});
 
-		scheduleDraftSave();
+		if (!forExport) scheduleDraftSave();
 	}
 
 	// --- drag text (move) and drag handle (resize) directly on canvas ---
@@ -1304,8 +1680,8 @@
 
 	function hitTestBody(layer, px, py) {
 		if (!layer.text.trim()) return false;
-		const { halfW, halfH } = textBounds(layer);
-		return Math.abs(px - layer.x) <= halfW && Math.abs(py - layer.y) <= halfH;
+		const { x, y, halfW, halfH } = layoutText(layer);
+		return Math.abs(px - x) <= halfW && Math.abs(py - y) <= halfH;
 	}
 
 	function hitTestHandle(layer, px, py) {
@@ -1363,6 +1739,7 @@
 		if (active && hitTestHandle(active, p.x, p.y)) {
 			dragMode = 'resize';
 			dragLayer = active;
+			snapLayerToVisible(active);
 			resizeStart.dist = Math.max(1, Math.hypot(p.x - active.x, p.y - active.y));
 			resizeStart.fontSize = active.fontSize;
 			canvas.classList.add('resizing');
@@ -1378,6 +1755,7 @@
 			}
 			dragMode = 'move';
 			dragLayer = hitText;
+			snapLayerToVisible(hitText);
 			dragOffset.x = p.x - hitText.x;
 			dragOffset.y = p.y - hitText.y;
 			canvas.classList.add('dragging');
@@ -1403,15 +1781,19 @@
 		if (dragMode === 'move' && dragLayer) {
 			dragLayer.x = Math.min(CW, Math.max(0, p.x - dragOffset.x));
 			dragLayer.y = Math.min(CH, Math.max(0, p.y - dragOffset.y));
+			snapLayerToVisible(dragLayer);
+			syncPositionControls(dragLayer);
 			render();
 		} else if (dragMode === 'resize' && dragLayer) {
 			const dist = Math.hypot(p.x - dragLayer.x, p.y - dragLayer.y);
 			const scale = dist / resizeStart.dist;
 			const newSize = Math.round(Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, resizeStart.fontSize * scale)));
 			dragLayer.fontSize = newSize;
+			snapLayerToVisible(dragLayer);
 			if (state.activeTarget && state.activeTarget.type === 'text' && state.activeTarget.id === dragLayer.id) {
 				sizeRange.value = newSize;
 				sizeVal.textContent = newSize;
+				syncPositionControls(dragLayer);
 			}
 			render();
 		} else if (dragMode === 'move-image') {
@@ -1437,6 +1819,7 @@
 		}
 	}
 	function pointerUp() {
+		if (dragMode) render(); // flush the final position into the autosave
 		dragMode = null;
 		dragLayer = null;
 		canvas.classList.remove('dragging', 'resizing');
@@ -1457,11 +1840,66 @@
 	}, { passive: true });
 	canvas.addEventListener('touchend', pointerUp);
 
-	downloadBtn.addEventListener('click', () => {
-		const link = document.createElement('a');
-		link.download = 'card.png';
-		link.href = canvas.toDataURL('image/png');
-		link.click();
+	function currentRatioLabel() {
+		const m = findMatchingPreset(CW, CH);
+		return m ? `${m.w}x${m.h}` : 'custom';
+	}
+
+	function showExportMsg(text, type) {
+		exportMsg.textContent = text;
+		exportMsg.className = 'upload-msg' + (type ? ' ' + type : '');
+	}
+
+	// Waits for every caption's web font first, then draws a handle-free
+	// frame and saves exactly that - so the file matches the preview.
+	async function exportCardBlob() {
+		await ensureFontsReady();
+		render({ forExport: true });
+		const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+		render();
+		return blob;
+	}
+
+	downloadBtn.addEventListener('click', async () => {
+		downloadBtn.disabled = true;
+		showExportMsg('글꼴을 준비하고 저장하는 중…');
+		try {
+			const blob = await exportCardBlob();
+			if (!blob) throw new Error('empty');
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.download = `card_${currentRatioLabel()}_${CW}x${CH}.png`;
+			link.href = url;
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 2000);
+			showExportMsg(`${link.download} 로 저장했어요.`, 'success');
+		} catch {
+			render();
+			showExportMsg('저장하지 못했어요. 다시 시도해주세요.', 'error');
+		} finally {
+			downloadBtn.disabled = false;
+		}
+	});
+
+	testTextBtn.addEventListener('click', () => {
+		const base = { fontFamily: FONT_VALUES[0], color: '#ffffff', strokeColor: '#000000', strokeWidth: 6 };
+		state.texts = [
+			newTextLayer(Object.assign({}, base, { text: '↖ 왼쪽 위', fontSize: 30, x: 0, y: 0 })),
+			newTextLayer(Object.assign({}, base, { text: '오른쪽 위 ↗', fontSize: 30, x: CW, y: 0 })),
+			newTextLayer(Object.assign({}, base, { text: '↙ 왼쪽 아래', fontSize: 30, x: 0, y: CH })),
+			newTextLayer(Object.assign({}, base, { text: '오른쪽 아래 ↘', fontSize: 30, x: CW, y: CH })),
+			newTextLayer(Object.assign({}, base, {
+				text: '줄바꿈 검사 Line-break test 😀 길게 이어지는 문장이 자동으로 다음 줄로 넘어가요\n두 번째 줄 ✔',
+				fontSize: 44, color: '#ffe066', x: CW / 2, y: CH / 2,
+			})),
+		];
+		state.texts.forEach(snapLayerToVisible);
+		state.activeTarget = { type: 'text', id: state.texts[4].id };
+		syncControlsFromActiveText();
+		renderTextLayerList();
+		render();
 	});
 
 	resetBtn.addEventListener('click', () => {
@@ -1481,27 +1919,169 @@
 		render();
 	});
 
-	// --- templates: save/apply/delete text style presets in localStorage ---
+	// --- templates: create / load / edit / delete, kept in localStorage ---
 	const TEMPLATE_KEY = 'jjalCardStudio.templates';
 	const MAX_TEMPLATES = 30;
+	const MAX_NAME_LEN = 40;
+	const MAX_IMPORT_BYTES = 1024 * 1024;
 
+	// Stable ids: every action targets a template by id, never by its
+	// position in the list, so editing or deleting can't hit the wrong one.
+	function newTemplateId() {
+		return 'tpl_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+	}
+
+	// Legacy templates (saved before multi-layer support) stored their text
+	// fields flat on the template itself instead of in a `texts` array.
+	function templateLayers(tpl) {
+		return Array.isArray(tpl.texts) && tpl.texts.length ? tpl.texts : [tpl];
+	}
+
+	const TEXT_LAYER_NUMBER_FIELDS = ['fontSize', 'strokeWidth', 'x', 'y'];
+
+	// Checks one text layer within a template - returns a human-readable
+	// reason it was rejected, or null if it's valid.
+	function validateTextLayer(entry, templateIndex, layerIndex, canvasW, canvasH) {
+		const where = `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구`;
+		if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+			return `${where}가 올바른 형식이 아니에요.`;
+		}
+		if (typeof entry.text !== 'string') {
+			return `${where}에 "text" 값이 없어요.`;
+		}
+		if (entry.text.length > MAX_TEXT_LEN) {
+			return `${where}가 너무 길어요 (${entry.text.length}자, 최대 ${MAX_TEXT_LEN}자).`;
+		}
+		if (typeof entry.fontFamily !== 'string' || entry.fontFamily.trim() === '') {
+			return `${where}에 "fontFamily" 값이 없어요.`;
+		}
+		if (!FONT_VALUES.includes(entry.fontFamily)) {
+			return `${where}의 글꼴(fontFamily)을 이 도구에서 쓸 수 없어요.`;
+		}
+		for (const key of ['color', 'strokeColor']) {
+			if (entry[key] === undefined || entry[key] === null || entry[key] === '') {
+				return `${where}에 "${key}" 값이 없어요.`;
+			}
+			if (!normalizeHex(entry[key])) {
+				return `${where}의 "${key}" 값이 #rrggbb 색상이 아니에요.`;
+			}
+		}
+		for (const key of TEXT_LAYER_NUMBER_FIELDS) {
+			if (typeof entry[key] !== 'number' || !Number.isFinite(entry[key])) {
+				return `${where}에 "${key}" 값이 없거나 숫자가 아니에요.`;
+			}
+		}
+		if (entry.x < 0 || entry.x > canvasW || entry.y < 0 || entry.y > canvasH) {
+			return `${where}의 위치(x, y)가 캔버스 밖이에요.`;
+		}
+		return null;
+	}
+
+	// Checks one template entry - returns a human-readable reason it was
+	// rejected, or null if it (and every one of its text layers) is valid.
+	function validateTemplateEntry(entry, index) {
+		if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+			return `${index + 1}번째 항목이 객체 형식이 아니에요.`;
+		}
+		if (typeof entry.name !== 'string' || entry.name.trim() === '') {
+			return `${index + 1}번째 항목에 "name" 값이 없어요.`;
+		}
+		if (entry.name.length > MAX_NAME_LEN) {
+			return `${index + 1}번째 항목의 이름이 너무 길어요 (최대 ${MAX_NAME_LEN}자).`;
+		}
+		if (typeof entry.canvasW !== 'number' || !Number.isFinite(entry.canvasW)
+			|| typeof entry.canvasH !== 'number' || !Number.isFinite(entry.canvasH)) {
+			return `${index + 1}번째 항목에 캔버스 크기(canvasW/canvasH) 값이 없어요.`;
+		}
+		if (entry.canvasW < MIN_CANVAS_SIZE || entry.canvasW > MAX_CANVAS_SIZE
+			|| entry.canvasH < MIN_CANVAS_SIZE || entry.canvasH > MAX_CANVAS_SIZE) {
+			return `${index + 1}번째 항목의 캔버스 크기는 ${MIN_CANVAS_SIZE}~${MAX_CANVAS_SIZE}px여야 해요.`;
+		}
+		if (!Array.isArray(entry.texts) || entry.texts.length === 0) {
+			return `${index + 1}번째 항목에 문구(texts) 배열이 없어요.`;
+		}
+		if (entry.texts.length > MAX_LAYERS) {
+			return `${index + 1}번째 항목의 문구가 너무 많아요 (최대 ${MAX_LAYERS}개).`;
+		}
+		for (let i = 0; i < entry.texts.length; i++) {
+			const reason = validateTextLayer(entry.texts[i], index, i, entry.canvasW, entry.canvasH);
+			if (reason) return reason;
+		}
+		return null;
+	}
+
+	// Copies only the known fields, so nothing unexpected rides along.
+	function cleanTemplate(entry, id) {
+		return {
+			id,
+			name: entry.name.trim().slice(0, MAX_NAME_LEN),
+			texts: entry.texts.map((t) => ({
+				text: t.text,
+				fontFamily: t.fontFamily,
+				fontSize: clampNum(t.fontSize, MIN_FONT_SIZE, MAX_FONT_SIZE),
+				color: normalizeHex(t.color),
+				strokeColor: normalizeHex(t.strokeColor),
+				strokeWidth: clampNum(t.strokeWidth, 0, MAX_STROKE),
+				x: t.x,
+				y: t.y,
+			})),
+			canvasW: Math.round(entry.canvasW),
+			canvasH: Math.round(entry.canvasH),
+			updatedAt: typeof entry.updatedAt === 'string' ? entry.updatedAt : new Date().toISOString(),
+		};
+	}
+
+	let skippedStoredTemplates = 0;
 	function loadTemplates() {
+		let raw = null;
 		try {
-			const raw = localStorage.getItem(TEMPLATE_KEY);
-			return raw ? JSON.parse(raw) : [];
+			raw = localStorage.getItem(TEMPLATE_KEY);
 		} catch {
 			return [];
 		}
-	}
-	function persistTemplates(list) {
+		if (!raw) return [];
+		let parsed;
 		try {
-			localStorage.setItem(TEMPLATE_KEY, JSON.stringify(list));
+			parsed = JSON.parse(raw);
 		} catch {
-			showUploadMsg('템플릿을 저장하지 못했어요 (브라우저 저장공간 문제).', 'error');
+			parsed = null;
 		}
+		if (!Array.isArray(parsed)) {
+			skippedStoredTemplates = 1;
+			return [];
+		}
+		const out = [];
+		const seen = new Set();
+		parsed.forEach((tpl, i) => {
+			if (!tpl || typeof tpl !== 'object') { skippedStoredTemplates++; return; }
+			const shaped = Array.isArray(tpl.texts) ? tpl : Object.assign({}, tpl, { texts: [tpl] });
+			if (validateTemplateEntry(shaped, i)) { skippedStoredTemplates++; return; }
+			let id = (typeof tpl.id === 'string' || Number.isFinite(tpl.id)) ? tpl.id : newTemplateId();
+			if (seen.has(id)) id = newTemplateId();
+			seen.add(id);
+			out.push(cleanTemplate(shaped, id));
+		});
+		return out.slice(0, MAX_TEMPLATES);
+	}
+
+	// Writes first, and only lets the screen change if the write worked -
+	// the list on screen is always what a refresh will bring back.
+	function commitTemplates(next) {
+		try {
+			localStorage.setItem(TEMPLATE_KEY, JSON.stringify(next));
+		} catch {
+			showTemplateMsg('브라우저 저장공간에 쓰지 못해서 바꾸지 않았어요 (시크릿 창·저장공간 가득 참 등).', 'error');
+			return false;
+		}
+		templates = next;
+		renderTemplateList();
+		return true;
 	}
 
 	let templates = loadTemplates();
+	let editingTemplateId = null;
+	let pendingDeleteId = null;
+	let pendingDeleteTimer = null;
 
 	function fontLabel(fontFamily) {
 		const opt = Array.from(fontSelect.options).find((o) => o.value === fontFamily);
@@ -1509,12 +2089,6 @@
 	}
 
 	const THUMB_SIZE = 52;
-
-	// Legacy templates (saved before multi-layer support) stored their text
-	// fields flat on the template itself instead of in a `texts` array.
-	function templateLayers(tpl) {
-		return Array.isArray(tpl.texts) && tpl.texts.length ? tpl.texts : [tpl];
-	}
 
 	function drawTemplateThumb(canvasEl, tpl) {
 		const primary = templateLayers(tpl)[0];
@@ -1532,7 +2106,7 @@
 
 		let width;
 		do {
-			tctx.font = `bold ${fontSize}px ${primary.fontFamily}`;
+			tctx.font = fontString(primary, fontSize);
 			width = tctx.measureText(sample).width;
 			if (width > S - 10) fontSize -= 1;
 		} while (width > S - 10 && fontSize > 6);
@@ -1547,6 +2121,15 @@
 		tctx.fillText(sample, S / 2, S / 2);
 	}
 
+	function makeBtn(text, onClick, extraClass) {
+		const b = document.createElement('button');
+		b.type = 'button';
+		b.textContent = text;
+		if (extraClass) b.className = extraClass;
+		b.addEventListener('click', onClick);
+		return b;
+	}
+
 	function renderTemplateList() {
 		templateList.innerHTML = '';
 		if (templates.length === 0) {
@@ -1559,6 +2142,7 @@
 		templates.forEach((tpl) => {
 			const item = document.createElement('div');
 			item.className = 'template-item';
+			item.dataset.templateId = String(tpl.id);
 
 			const thumb = document.createElement('canvas');
 			thumb.className = 'thumb';
@@ -1576,7 +2160,7 @@
 			tname.textContent = tpl.name;
 			const tmeta = document.createElement('div');
 			tmeta.className = 'tmeta';
-			tmeta.textContent = `${fontLabel(primary.fontFamily)} · ${primary.fontSize}px`
+			tmeta.textContent = `${tpl.canvasW}×${tpl.canvasH} · ${fontLabel(primary.fontFamily)} · ${primary.fontSize}px`
 				+ (layers.length > 1 ? ` · 문구 ${layers.length}개` : '');
 			info.appendChild(tname);
 			info.appendChild(tmeta);
@@ -1584,26 +2168,59 @@
 
 			const actions = document.createElement('div');
 			actions.className = 'actions';
-			const applyBtn = document.createElement('button');
-			applyBtn.textContent = '적용';
-			applyBtn.addEventListener('click', () => applyTemplate(tpl));
-			const deleteBtn = document.createElement('button');
-			deleteBtn.className = 'danger';
-			deleteBtn.textContent = '삭제';
-			deleteBtn.addEventListener('click', () => deleteTemplate(tpl.id));
-			actions.appendChild(applyBtn);
-			actions.appendChild(deleteBtn);
+			actions.appendChild(makeBtn('불러오기', () => applyTemplate(tpl.id), 'act-load'));
+			actions.appendChild(makeBtn('수정', () => startEditTemplate(tpl.id), 'act-edit'));
+			const confirming = pendingDeleteId === tpl.id;
+			actions.appendChild(makeBtn(confirming ? '정말 삭제' : '삭제', () => deleteTemplate(tpl.id),
+				'danger act-delete' + (confirming ? ' confirming' : '')));
 			item.appendChild(actions);
+
+			if (editingTemplateId === tpl.id) {
+				item.classList.add('editing');
+				const box = document.createElement('div');
+				box.className = 'template-edit';
+				const nameInput = document.createElement('input');
+				nameInput.type = 'text';
+				nameInput.maxLength = MAX_NAME_LEN;
+				nameInput.value = tpl.name;
+				nameInput.setAttribute('aria-label', '템플릿 이름 수정');
+				nameInput.className = 'edit-name';
+				nameInput.addEventListener('keydown', (e) => {
+					if (e.key === 'Enter') saveTemplateEdit(tpl.id, nameInput.value, false);
+					if (e.key === 'Escape') cancelEditTemplate();
+				});
+				box.appendChild(nameInput);
+				const row = document.createElement('div');
+				row.className = 'edit-actions';
+				row.appendChild(makeBtn('이름만 저장', () => saveTemplateEdit(tpl.id, nameInput.value, false), 'act-rename'));
+				row.appendChild(makeBtn('지금 편집 내용으로 덮어쓰기', () => saveTemplateEdit(tpl.id, nameInput.value, true), 'act-overwrite'));
+				row.appendChild(makeBtn('취소', cancelEditTemplate, 'act-cancel'));
+				box.appendChild(row);
+				const help = document.createElement('div');
+				help.className = 'hint';
+				help.textContent = '덮어쓰기는 캔버스에 있는 문구·비율을 이 템플릿에 저장해요.';
+				box.appendChild(help);
+				item.appendChild(box);
+				setTimeout(() => nameInput.focus(), 0);
+			}
 
 			templateList.appendChild(item);
 		});
 	}
 
-	function applyTemplate(tpl) {
-		const canvasW = tpl.canvasW || CANVAS_LONG_SIDE;
-		const canvasH = tpl.canvasH || CANVAS_LONG_SIDE;
-		setCanvasSize(canvasW, canvasH);
-		const match = findMatchingPreset(canvasW, canvasH);
+	function findTemplate(id) {
+		return templates.find((t) => t.id === id) || null;
+	}
+
+	function applyTemplate(id) {
+		const tpl = findTemplate(id);
+		if (!tpl) {
+			showTemplateMsg('그 템플릿을 찾을 수 없어요. 목록을 다시 확인해주세요.', 'error');
+			renderTemplateList();
+			return;
+		}
+		setCanvasSize(tpl.canvasW, tpl.canvasH);
+		const match = findMatchingPreset(tpl.canvasW, tpl.canvasH);
 		if (match) setActiveRatioButton(match.w, match.h);
 		else clearActiveRatioButtons();
 		syncCustomSizeInputs();
@@ -1614,12 +2231,80 @@
 		syncControlsFromActiveText();
 		renderTextLayerList();
 		render();
+		showTemplateMsg(`"${tpl.name}" 템플릿을 불러왔어요.`, 'success');
 	}
 
-	function deleteTemplate(id) {
-		templates = templates.filter((t) => t.id !== id);
-		persistTemplates(templates);
+	function snapshotTexts() {
+		return state.texts.map(({ id, ...rest }) => Object.assign({}, rest));
+	}
+
+	function startEditTemplate(id) {
+		editingTemplateId = id;
 		renderTemplateList();
+	}
+
+	function cancelEditTemplate() {
+		editingTemplateId = null;
+		renderTemplateList();
+	}
+
+	function saveTemplateEdit(id, nameValue, overwrite) {
+		const tpl = findTemplate(id);
+		if (!tpl) {
+			editingTemplateId = null;
+			showTemplateMsg('그 템플릿을 찾을 수 없어요.', 'error');
+			renderTemplateList();
+			return;
+		}
+		const name = (nameValue || '').trim().slice(0, MAX_NAME_LEN);
+		if (!name) {
+			showTemplateMsg('이름을 비워둘 수는 없어요.', 'error');
+			return;
+		}
+		if (overwrite && state.texts.length === 0) {
+			showTemplateMsg('캔버스에 문구가 없어서 덮어쓸 수 없어요.', 'error');
+			return;
+		}
+		const updated = Object.assign({}, tpl, { name, updatedAt: new Date().toISOString() });
+		if (overwrite) {
+			updated.texts = snapshotTexts();
+			updated.canvasW = CW;
+			updated.canvasH = CH;
+		}
+		const next = templates.map((t) => (t.id === id ? updated : t));
+		const prevEditing = editingTemplateId;
+		editingTemplateId = null;
+		if (commitTemplates(next)) {
+			showTemplateMsg(overwrite ? `"${name}" 템플릿을 지금 편집 내용으로 바꿨어요.` : `템플릿 이름을 "${name}"(으)로 바꿨어요.`, 'success');
+		} else {
+			editingTemplateId = prevEditing;
+		}
+	}
+
+	// Two-step delete without a blocking dialog: first click arms it for 4s.
+	function deleteTemplate(id) {
+		const tpl = findTemplate(id);
+		if (!tpl) {
+			renderTemplateList();
+			return;
+		}
+		if (pendingDeleteId !== id) {
+			pendingDeleteId = id;
+			clearTimeout(pendingDeleteTimer);
+			pendingDeleteTimer = setTimeout(() => {
+				pendingDeleteId = null;
+				renderTemplateList();
+			}, 4000);
+			renderTemplateList();
+			showTemplateMsg(`"${tpl.name}"을(를) 지우려면 '정말 삭제'를 한 번 더 눌러주세요.`);
+			return;
+		}
+		clearTimeout(pendingDeleteTimer);
+		pendingDeleteId = null;
+		if (editingTemplateId === id) editingTemplateId = null;
+		if (commitTemplates(templates.filter((t) => t.id !== id))) {
+			showTemplateMsg(`"${tpl.name}" 템플릿을 삭제했어요.`, 'success');
+		}
 	}
 
 	saveTemplateBtn.addEventListener('click', () => {
@@ -1631,19 +2316,22 @@
 			showTemplateMsg('저장할 문구가 없어요. + 버튼으로 문구를 추가한 뒤 저장해주세요.', 'error');
 			return;
 		}
-		const name = templateNameInput.value.trim() || `템플릿 ${templates.length + 1}`;
-		templates.push({
-			id: Date.now(),
+		const name = (templateNameInput.value.trim() || `템플릿 ${templates.length + 1}`).slice(0, MAX_NAME_LEN);
+		const tpl = {
+			id: newTemplateId(),
 			name,
-			texts: state.texts.map(({ id, ...rest }) => rest),
+			texts: snapshotTexts(),
 			canvasW: CW,
 			canvasH: CH,
-		});
-		persistTemplates(templates);
-		templateNameInput.value = '';
-		renderTemplateList();
+			updatedAt: new Date().toISOString(),
+		};
+		if (commitTemplates(templates.concat([tpl]))) {
+			templateNameInput.value = '';
+			showTemplateMsg(`"${name}" 템플릿을 저장했어요.`, 'success');
+		}
 	});
 
+	templateNameInput.maxLength = MAX_NAME_LEN;
 	templateNameInput.addEventListener('keydown', (e) => {
 		if (e.key === 'Enter') saveTemplateBtn.click();
 	});
@@ -1653,138 +2341,89 @@
 		templateMsg.className = 'upload-msg' + (type ? ' ' + type : '');
 	}
 
-	const TEXT_LAYER_NUMBER_FIELDS = ['fontSize', 'strokeWidth', 'x', 'y'];
-	const TEXT_LAYER_COLOR_FIELDS = ['fontFamily', 'color', 'strokeColor'];
-
-	// Checks one text layer within an imported template - returns a
-	// human-readable reason it was rejected, or null if it's valid.
-	function validateTextLayer(entry, templateIndex, layerIndex) {
-		if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
-			return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구가 올바른 형식이 아니에요.`;
-		}
-		if (typeof entry.text !== 'string') {
-			return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구에 "text" 값이 없어요.`;
-		}
-		for (const key of TEXT_LAYER_COLOR_FIELDS) {
-			if (typeof entry[key] !== 'string' || entry[key].trim() === '') {
-				return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구에 "${key}" 값이 없어요.`;
-			}
-		}
-		for (const key of TEXT_LAYER_NUMBER_FIELDS) {
-			if (typeof entry[key] !== 'number' || !Number.isFinite(entry[key])) {
-				return `${templateIndex + 1}번째 템플릿의 ${layerIndex + 1}번째 문구에 "${key}" 값이 없거나 숫자가 아니에요.`;
-			}
-		}
-		return null;
-	}
-
-	// Checks one imported template entry - returns a human-readable reason
-	// it was rejected, or null if it (and every one of its text layers) is valid.
-	function validateTemplateEntry(entry, index) {
-		if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
-			return `${index + 1}번째 항목이 객체 형식이 아니에요.`;
-		}
-		if (typeof entry.name !== 'string' || entry.name.trim() === '') {
-			return `${index + 1}번째 항목에 "name" 값이 없어요.`;
-		}
-		if (!Array.isArray(entry.texts) || entry.texts.length === 0) {
-			return `${index + 1}번째 항목에 문구(texts) 배열이 없어요.`;
-		}
-		for (let i = 0; i < entry.texts.length; i++) {
-			const reason = validateTextLayer(entry.texts[i], index, i);
-			if (reason) return reason;
-		}
-		if (typeof entry.canvasW !== 'number' || !Number.isFinite(entry.canvasW)
-			|| typeof entry.canvasH !== 'number' || !Number.isFinite(entry.canvasH)) {
-			return `${index + 1}번째 항목에 캔버스 크기(canvasW/canvasH) 값이 없어요.`;
-		}
-		return null;
-	}
-
 	exportTemplatesBtn.addEventListener('click', () => {
 		if (templates.length === 0) {
 			showTemplateMsg('내보낼 템플릿이 없어요.', 'error');
 			return;
 		}
-		const payload = templates.map(({ id, ...rest }) => rest);
+		const payload = {
+			format: 'jjal-card-templates',
+			version: 1,
+			templates: templates.map(({ id, ...rest }) => rest),
+		};
 		const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
 		const link = document.createElement('a');
 		link.href = url;
 		link.download = 'jjal-card-templates.json';
+		document.body.appendChild(link);
 		link.click();
-		URL.revokeObjectURL(url);
+		link.remove();
+		setTimeout(() => URL.revokeObjectURL(url), 2000);
 		showTemplateMsg(`템플릿 ${templates.length}개를 JSON으로 내보냈어요.`, 'success');
 	});
 
 	importTemplatesBtn.addEventListener('click', () => importTemplatesInput.click());
 
+	// Validate everything first, change nothing unless all of it is good.
+	function importTemplatesText(text) {
+		let parsed;
+		try {
+			parsed = JSON.parse(text);
+		} catch {
+			showTemplateMsg('가져오기를 취소했어요 — JSON 문법이 손상됐어요. 기존 템플릿은 그대로예요.', 'error');
+			return false;
+		}
+		const list = Array.isArray(parsed)
+			? parsed
+			: (parsed && Array.isArray(parsed.templates) ? parsed.templates : null);
+		if (!list) {
+			showTemplateMsg('가져오기를 취소했어요 — 템플릿 배열(templates)이 없어요. 기존 템플릿은 그대로예요.', 'error');
+			return false;
+		}
+		if (list.length === 0) {
+			showTemplateMsg('가져올 템플릿이 없어요.', 'error');
+			return false;
+		}
+		for (let i = 0; i < list.length; i++) {
+			const reason = validateTemplateEntry(list[i], i);
+			if (reason) {
+				showTemplateMsg(`가져오기를 취소했어요 — ${reason} 기존 템플릿은 그대로예요.`, 'error');
+				return false;
+			}
+		}
+		if (templates.length + list.length > MAX_TEMPLATES) {
+			showTemplateMsg(`템플릿은 최대 ${MAX_TEMPLATES}개까지예요. 가져오면 ${templates.length + list.length}개가 되어 초과해요.`, 'error');
+			return false;
+		}
+		const imported = list.map((entry) => cleanTemplate(entry, newTemplateId()));
+		if (commitTemplates(templates.concat(imported))) {
+			showTemplateMsg(`템플릿 ${imported.length}개를 가져왔어요 (전체 ${templates.length}개).`, 'success');
+			return true;
+		}
+		return false;
+	}
+
 	importTemplatesInput.addEventListener('change', () => {
 		const file = importTemplatesInput.files[0];
 		importTemplatesInput.value = '';
 		if (!file) return;
-
+		if (file.size > MAX_IMPORT_BYTES) {
+			showTemplateMsg('가져오기를 취소했어요 — 파일이 너무 커요 (1MB 이하). 기존 템플릿은 그대로예요.', 'error');
+			return;
+		}
 		const reader = new FileReader();
 		reader.onerror = () => {
-			showTemplateMsg('파일을 읽는 중 문제가 발생했어요.', 'error');
+			showTemplateMsg('파일을 읽는 중 문제가 발생했어요. 기존 템플릿은 그대로예요.', 'error');
 		};
-		reader.onload = (e) => {
-			let parsed;
-			try {
-				parsed = JSON.parse(e.target.result);
-			} catch {
-				showTemplateMsg('JSON 형식이 올바르지 않아요 (문법 오류). 파일을 확인해주세요.', 'error');
-				return;
-			}
-
-			const list = Array.isArray(parsed)
-				? parsed
-				: (parsed && Array.isArray(parsed.templates) ? parsed.templates : null);
-			if (!list) {
-				showTemplateMsg('JSON 구조가 올바르지 않아요. 템플릿 배열이 필요해요.', 'error');
-				return;
-			}
-			if (list.length === 0) {
-				showTemplateMsg('가져올 템플릿이 없어요.', 'error');
-				return;
-			}
-			for (let i = 0; i < list.length; i++) {
-				const reason = validateTemplateEntry(list[i], i);
-				if (reason) {
-					showTemplateMsg(`가져오기를 취소했어요 — ${reason}`, 'error');
-					return;
-				}
-			}
-			if (templates.length + list.length > MAX_TEMPLATES) {
-				showTemplateMsg(`템플릿은 최대 ${MAX_TEMPLATES}개까지예요. 가져오면 ${templates.length + list.length}개가 되어 초과해요.`, 'error');
-				return;
-			}
-
-			const imported = list.map((entry, i) => ({
-				id: Date.now() + i,
-				name: entry.name,
-				texts: entry.texts.map((t) => ({
-					text: t.text,
-					fontFamily: t.fontFamily,
-					fontSize: Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, t.fontSize)),
-					color: t.color,
-					strokeColor: t.strokeColor,
-					strokeWidth: Math.min(30, Math.max(0, t.strokeWidth)),
-					x: t.x,
-					y: t.y,
-				})),
-				canvasW: clampCanvasDim(entry.canvasW),
-				canvasH: clampCanvasDim(entry.canvasH),
-			}));
-			templates = templates.concat(imported);
-			persistTemplates(templates);
-			renderTemplateList();
-			showTemplateMsg(`템플릿 ${imported.length}개를 가져왔어요.`, 'success');
-		};
+		reader.onload = (e) => importTemplatesText(e.target.result);
 		reader.readAsText(file);
 	});
 
 	renderTemplateList();
+	if (skippedStoredTemplates) {
+		showTemplateMsg(`브라우저에 남아 있던 손상된 템플릿 ${skippedStoredTemplates}개는 건너뛰었어요.`, 'error');
+	}
 
 	loadDraft();
 	if (document.fonts && document.fonts.ready) {
