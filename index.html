@@ -321,48 +321,60 @@
       /* 수풀: 로그인 전에는 기록 공간 전체를 덮고, 로그인하면 양옆으로 갈라지며 열립니다. */
       .grove { background: url("assets/home/bg_bottom.jpg") center top / 100% auto no-repeat, #8d9a68; min-height: max(520px, 46.5vw); }
 
-      /* ---------- 첫 방문: 수풀이 닫혀 있다가 '들어가기'를 누르면 갈라지며 열림 ---------- */
-      .intro-gate { position: fixed; inset: 0; z-index: 100; overflow: hidden; }
+      /* ---------- 첫 방문: 수풀을 헤치고 걸어 들어가는 장면 ----------
+         층(멀리→가까이): 그늘 → 뒤 수풀 2장 → 앞 수풀 2장 → 흐릿한 앞 잎 3덩이.
+         가까운 층일수록 더 빨리·더 크게 움직여 깊이감(시차)을 만듭니다. 움직임은 아래 스크립트(Web Animations)가 맡습니다. */
+      .intro-gate { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #33412a; }
       .intro-gate[hidden] { display: none; }
-      .bush {
-        position: absolute;
-        top: -2%;
-        bottom: -2%;
-        width: 76%;
-        background-repeat: no-repeat;
-        background-size: cover;
-        transition: transform 1.5s cubic-bezier(.6, .05, .3, 1), opacity 1.5s ease;
-        filter: drop-shadow(0 6px 22px rgba(40, 55, 25, .3));
+      .intro-world { position: absolute; inset: 0; transform-origin: 50% 55%; }
+      .intro-shade { position: absolute; inset: 0; background: radial-gradient(60% 70% at 50% 50%, #55683d 0%, #3a4a2c 60%, #26311c 100%); }
+      .intro-light {
+        position: absolute; left: 50%; top: 50%;
+        width: 70vmax; height: 70vmax;
+        translate: -50% -50%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 236, 190, .95) 0%, rgba(255, 214, 150, .55) 35%, rgba(255, 214, 150, 0) 70%);
+        opacity: 0;
+        pointer-events: none;
       }
-      .bush.left { left: -6%; background-image: url("assets/home/curtain_left.webp"); background-position: left center; }
-      .bush.right { right: -6%; background-image: url("assets/home/curtain_right.webp"); background-position: right center; }
-      .intro-veil { position: absolute; inset: 0; background: rgba(238, 228, 200, .82); transition: opacity 1.2s ease; }
-      .intro-card {
+      .hedge {
         position: absolute;
-        left: 50%;
         top: 50%;
-        width: min(380px, calc(100% - 40px));
-        transform: translate(-50%, -50%);
-        padding: 28px 26px 26px;
-        border-radius: 12px;
-        background: var(--paper-noise), rgba(251, 247, 236, .96);
-        box-shadow: 0 20px 44px rgba(30, 40, 20, .32);
+        width: max(86vw, 89vh);
+        aspect-ratio: 1182 / 1330;
+        translate: 0 -50%;
+        background: center / 100% 100% no-repeat;
+        will-change: transform;
+      }
+      .hedge.left { left: 0; background-image: url("assets/home/hedge_left.webp"); transform-origin: 0% 50%; }
+      .hedge.right { right: 0; background-image: url("assets/home/hedge_right.webp"); transform-origin: 100% 50%; }
+      .hedge.back { filter: brightness(.62) saturate(.9) blur(1.5px); }
+      .hedge.back.left { left: -8%; }
+      .hedge.back.right { right: -8%; }
+      .hedge.front.right { filter: drop-shadow(-16px 0 20px rgba(20, 28, 12, .45)); }
+      .fg-leaf { position: absolute; background: center / contain no-repeat; pointer-events: none; will-change: transform; }
+      .fg-leaf.a { width: 46vmax; height: 46vmax; left: -14vmax; bottom: -16vmax; background-image: url("assets/home/fg_leaf_1.webp"); }
+      .fg-leaf.b { width: 48vmax; height: 48vmax; right: -16vmax; bottom: -18vmax; background-image: url("assets/home/fg_leaf_2.webp"); }
+      .fg-leaf.c { width: 40vmax; height: 40vmax; right: -12vmax; top: -16vmax; background-image: url("assets/home/fg_leaf_3.webp"); }
+      .intro-title {
+        position: absolute; left: 50%; top: 50%;
+        translate: -50% -50%;
+        width: min(420px, calc(100% - 40px));
+        padding: 34px 20px 30px;
         text-align: center;
-        transition: opacity .6s ease, transform .6s ease;
+        /* 잎 사이로 빛이 고인 자리처럼 보이도록 둥근 빛 번짐 위에 글자를 올립니다 */
+        background: radial-gradient(closest-side, rgba(253, 245, 225, .94) 0%, rgba(253, 245, 225, .86) 55%, rgba(253, 245, 225, 0) 100%);
       }
-      .intro-card img { width: 150px; height: auto; }
-      .intro-card p { margin: 10px 0 18px; font: 700 26px/1.3 var(--hand); color: var(--ink); }
-      .intro-card button { padding: 12px 28px; border: 0; border-radius: 999px; background: var(--button); color: #fffaf0; font: 700 15px/1.2 var(--body); cursor: pointer; }
-      .intro-card button:hover { background: var(--button-hover); }
-      .intro-gate.is-open .bush.left { transform: translateX(-100%); opacity: .2; }
-      .intro-gate.is-open .bush.right { transform: translateX(100%); opacity: .2; }
-      .intro-gate.is-open .intro-veil { opacity: 0; }
-      .intro-gate.is-open .intro-card { opacity: 0; transform: translate(-50%, -46%); pointer-events: none; }
+      .intro-title img { width: 150px; height: auto; }
+      .intro-title p { margin: 6px 0 16px; font: 700 27px/1.3 var(--hand); color: var(--ink); }
+      .intro-title button {
+        padding: 11px 30px; border: 1px solid rgba(60, 50, 30, .25); border-radius: 999px;
+        background: var(--button); color: #fffaf0; font: 700 15px/1.2 var(--body); cursor: pointer;
+        box-shadow: 0 6px 16px rgba(40, 30, 10, .25);
+      }
+      .intro-title button:hover { background: var(--button-hover); }
       body.intro-locked { overflow: hidden; }
-      @media (prefers-reduced-motion: reduce) {
-        .bush, .intro-veil, .intro-card { transition: none; }
-      }
-      @media (max-width: 720px) { .bush { width: 80%; } }
+      body.intro-locked .page-shell { transform: scale(.94); filter: blur(3px); }
 
       /* ---------- 바닥 ---------- */
       .ground { position: relative; padding: 26px 0 30px; background: var(--paper); }
@@ -392,10 +404,18 @@
   </head>
   <body>
     <div class="intro-gate" id="intro-gate" hidden>
-      <div class="intro-veil"></div>
-      <div class="bush left" aria-hidden="true"></div>
-      <div class="bush right" aria-hidden="true"></div>
-      <div class="intro-card" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+      <div class="intro-world" id="intro-world" aria-hidden="true">
+        <div class="intro-shade"></div>
+        <div class="intro-light" id="intro-light"></div>
+        <div class="hedge back left" id="hedge-back-left"></div>
+        <div class="hedge back right" id="hedge-back-right"></div>
+        <div class="hedge front left" id="hedge-front-left"></div>
+        <div class="hedge front right" id="hedge-front-right"></div>
+        <div class="fg-leaf a" id="fg-a"></div>
+        <div class="fg-leaf b" id="fg-b"></div>
+        <div class="fg-leaf c" id="fg-c"></div>
+      </div>
+      <div class="intro-title" id="intro-title-box" role="dialog" aria-modal="true" aria-labelledby="intro-title">
         <img src="assets/home/hr_logo.png" alt="HR" width="566" height="313" />
         <p id="intro-title">수풀 너머, 나의 행로</p>
         <button type="button" id="intro-enter">들어가기</button>
@@ -1113,24 +1133,82 @@
       (function setupIntroGate() {
         const gate = document.getElementById('intro-gate');
         const enter = document.getElementById('intro-enter');
+        const pageShell = document.querySelector('.page-shell');
         let seen = false;
         try { seen = sessionStorage.getItem('haengro_intro_seen') === '1'; } catch { seen = false; }
         if (seen) return;
         gate.hidden = false;
         document.body.classList.add('intro-locked');
-        const pageShell = document.querySelector('.page-shell');
         pageShell.setAttribute('aria-hidden', 'true');
         pageShell.inert = true;
         requestAnimationFrame(() => enter.focus());
-        function openGate() {
-          if (gate.classList.contains('is-open')) return;
-          gate.classList.add('is-open');
-          document.body.classList.remove('intro-locked');
+
+        const $id = (id) => document.getElementById(id);
+        const ms = (sec) => sec * 1000;
+        // 각 층의 움직임: [요소, 키프레임, 시작(초), 길이(초), 이징]
+        function play() {
+          const ease = 'cubic-bezier(.5, 0, .25, 1)';
+          const anims = [
+            // 0. 제목은 먼저 사라짐
+            [$id('intro-title-box'), [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(10px) scale(.97)' }], 0, .45, 'ease-out'],
+            // 1. 헤치기 직전 바스락 (앞 수풀 두 장이 살짝 떨림)
+            [$id('hedge-front-right'), [
+              { transform: 'none' }, { transform: 'translateX(-1.2%) rotate(-.5deg)' }, { transform: 'translateX(.8%) rotate(.4deg)' },
+              { transform: 'translateX(4%) rotate(1.2deg)', offset: .22 },
+              { transform: 'translateX(125%) rotate(5deg) scale(1.25)' }], .1, 1.45, ease],
+            [$id('hedge-front-left'), [
+              { transform: 'none' }, { transform: 'translateX(.8%) rotate(.4deg)', offset: .1 },
+              { transform: 'translateX(-1%) rotate(-.3deg)', offset: .2 },
+              { transform: 'translateX(-3%) rotate(-1deg)', offset: .35 },
+              { transform: 'translateX(-125%) rotate(-5deg) scale(1.25)' }], .1, 1.95, ease],
+            // 2. 뒤 수풀은 늦게, 덜 움직임 (멀리 있으니까)
+            [$id('hedge-back-right'), [{ transform: 'none' }, { transform: 'translateX(70%) scale(1.12)' }], .75, 1.5, ease],
+            [$id('hedge-back-left'), [{ transform: 'none' }, { transform: 'translateX(-70%) scale(1.12)' }], .95, 1.5, ease],
+            // 3. 가장 가까운 잎은 크게·빠르게 스쳐 지나감
+            [$id('fg-a'), [{ transform: 'none', filter: 'blur(0px)' }, { transform: 'translate(-45%, 35%) scale(2.1)', filter: 'blur(6px)' }], .35, 1.3, 'ease-in'],
+            [$id('fg-b'), [{ transform: 'none', filter: 'blur(0px)' }, { transform: 'translate(45%, 40%) scale(2.2)', filter: 'blur(6px)' }], .45, 1.3, 'ease-in'],
+            [$id('fg-c'), [{ transform: 'none', filter: 'blur(0px)' }, { transform: 'translate(40%, -40%) scale(2)', filter: 'blur(6px)' }], .55, 1.25, 'ease-in'],
+            // 4. 틈이 벌어질수록 노을빛이 번졌다가 사이트 하늘로 이어지며 사라짐
+            [$id('intro-light'), [{ opacity: 0, transform: 'scale(.4)' }, { opacity: .95, transform: 'scale(1)', offset: .55 }, { opacity: 0, transform: 'scale(1.6)' }], .55, 1.9, 'ease-in-out'],
+            [gate, [{ backgroundColor: '#33412a' }, { backgroundColor: 'rgba(51, 65, 42, 0)' }], 1.3, 1.0, 'ease-out'],
+            [document.querySelector('.intro-shade'), [{ opacity: 1 }, { opacity: 0 }], 1.1, 1.1, 'ease-out'],
+            // 5. 카메라: 틈을 향해 걸어 들어감 — 걸음마다 위아래, 좌우로 살짝 기움
+            [$id('intro-world'), [
+              { transform: 'translate(0, 0) scale(1) rotate(0deg)' },
+              { transform: 'translate(-.4%, .9%) scale(1.04) rotate(-.25deg)', offset: .14 },
+              { transform: 'translate(0, 0) scale(1.08) rotate(0deg)', offset: .28 },
+              { transform: 'translate(.4%, .9%) scale(1.13) rotate(.25deg)', offset: .42 },
+              { transform: 'translate(0, 0) scale(1.18) rotate(0deg)', offset: .56 },
+              { transform: 'translate(-.3%, .7%) scale(1.23) rotate(-.2deg)', offset: .7 },
+              { transform: 'translate(0, 0) scale(1.28) rotate(0deg)', offset: .84 },
+              { transform: 'translate(0, .3%) scale(1.32) rotate(0deg)' }], .3, 2.1, 'linear'],
+            // 6. 안쪽 사이트는 멀리 흐릿하다가 마지막 걸음에 또렷하게 다가옴
+            [pageShell, [
+              { transform: 'scale(.94)', filter: 'blur(3px)' },
+              { transform: 'scale(.95) translateY(5px)', filter: 'blur(3px)', offset: .3 },
+              { transform: 'scale(.975) translateY(0)', filter: 'blur(1.5px)', offset: .6 },
+              { transform: 'scale(.99) translateY(4px)', filter: 'blur(.5px)', offset: .8 },
+              { transform: 'none', filter: 'none' }], .9, 1.8, 'ease-out'],
+          ];
+          const running = anims.map(([el, frames, start, dur, easing]) =>
+            el.animate(frames, { delay: ms(start), duration: ms(dur), easing, fill: 'both' }));
+          return Promise.all(running.map((a) => a.finished));
+        }
+
+        let opened = false;
+        async function openGate() {
+          if (opened) return;
+          opened = true;
           pageShell.removeAttribute('aria-hidden');
           pageShell.inert = false;
           try { sessionStorage.setItem('haengro_intro_seen', '1'); } catch { /* 저장이 막혀도 동작에는 문제 없음 */ }
           const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          setTimeout(() => { gate.hidden = true; }, reduce ? 0 : 1500);
+          if (!reduce && gate.animate) {
+            try { await play(); } catch { /* 애니메이션이 중단돼도 아래에서 정리 */ }
+          }
+          document.body.classList.remove('intro-locked');
+          pageShell.getAnimations().forEach((a) => a.cancel());
+          gate.hidden = true;
         }
         enter.addEventListener('click', openGate);
         gate.addEventListener('keydown', (event) => {
