@@ -4,2052 +4,420 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>메인 - 행로</title>
+    <meta name="description" content="지금까지 걸어온 길과 앞으로 걸어갈 길을 담은 나의 포트폴리오, 행로." />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/home/favicon_32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/home/favicon_180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
     <style>
       :root {
-        --bg-top: #f8fbff;
-        --bg-bottom: #edf6f4;
-        --panel: rgba(255, 255, 255, 0.7);
-        --panel-strong: #ffffff;
-        --line: #dfeae6;
-        --primary: #1c2a35;
-        --secondary: #5d7284;
-        --muted: #798b9a;
-        --soft-blue: #dfeaf9;
-        --soft-green: #dff5ee;
-        --soft-peach: #fcefe7;
-        --shadow: 0 18px 42px rgba(39, 62, 75, 0.12);
+        --paper: #f6e7cc;
+        --paper-deep: #efe6d0;
+        --paper-card: #fbf7ec;
+        --ink: #3b3226;
+        --ink-soft: #5b4e3c;
+        --ink-muted: #6e6150;
+        --line: #d9cdb2;
+        --sage: #6f8a55;
+        --sage-deep: #4f6a3a;
+        --gold: #a7803f;
+        --button: #5d5a3c;
+        --button-hover: #48462d;
+        --shadow: 0 10px 28px rgba(92, 72, 40, 0.12);
+        --hand: "Gaegu", "Nanum Pen Script", cursive;
+        --pen: "Nanum Pen Script", "Gaegu", cursive;
+        --body: "Gowun Dodum", "Pretendard", "Noto Sans KR", sans-serif;
+        --paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .25 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       }
 
       * { box-sizing: border-box; }
-
-      html, body {
-        margin: 0;
-        min-height: 100%;
-        font-family: "Inter", "Pretendard", "Noto Sans KR", sans-serif;
-        background: linear-gradient(135deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
-        color: var(--primary);
-      }
-
+      html { scroll-behavior: smooth; }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+      html, body { margin: 0; overflow-x: clip; }
       body {
-        overflow-x: hidden;
+        min-height: 100vh;
+        font-family: var(--body);
+        color: var(--ink);
+        background: var(--paper-noise), var(--paper);
+        line-height: 1.65;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
       }
+      img { max-width: 100%; }
+      a { color: inherit; }
+      :focus-visible { outline: 3px solid #b8892f; outline-offset: 3px; border-radius: 4px; }
 
-      .page-shell {
-        width: min(1600px, calc(100% - 80px));
-        margin: 0 auto;
-        padding: 28px 0 120px;
-      }
+      .page-shell { position: relative; }
+      .wrap { width: min(1100px, calc(100% - 2 * clamp(20px, 13vw, 210px))); margin: 0 auto; }
 
-      .topbar {
-        position: sticky;
-        top: 18px;
-        z-index: 120;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-      }
-
-      .topbar::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: 0;
-        width: 100vw;
-        margin-left: -50vw;
-        border-bottom: 1px solid rgba(125, 141, 149, 0.28);
-      }
-
+      /* ---------- 상단 메뉴 ---------- */
+      .topbar { position: absolute; inset: 0 0 auto; z-index: 40; }
       .nav-wrap {
-        width: 100%;
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: center;
-        gap: 18px;
-        padding: 14px 0 12px;
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 0;
-        box-shadow: none;
-        backdrop-filter: blur(2px);
+        gap: 16px;
+        padding-top: 18px;
       }
-
-      .nav-left {
-        display: flex;
-        align-items: center;
-        height: 52px;
-      }
-
-      .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-      }
-
-      .nav-brand {
-        color: #6c757d;
-        text-decoration: none;
-        font-size: 19px;
-        font-weight: 900;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        padding: 0;
-        background: transparent;
-        border: none;
-        box-shadow: none;
+      .nav-brand { display: inline-block; line-height: 0; }
+      .nav-brand img { width: clamp(96px, 10vw, 132px); height: auto; display: block; }
+      .nav-right { display: flex; align-items: center; gap: clamp(6px, 1.6vw, 22px); }
+      .nav-item { position: relative; }
+      .nav-button {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 0;
-        height: 100%;
-        font-family: "Georgia", "Times New Roman", serif;
-      }
-
-      .nav-brand-word {
-        display: inline-block;
-        font-size: clamp(38px, 3vw, 54px);
-        line-height: 0.9;
-        letter-spacing: 0.02em;
-        font-weight: 900;
-        color: #5f6770;
-        font-family: "Segoe UI", "Arial", sans-serif;
-        transform: scaleX(1.18) scaleY(1.08);
-        transform-origin: center;
-      }
-
-      .nav-brand-mark {
-        display: none;
-      }
-
-      .nav-item {
-        position: relative;
-      }
-
-      .nav-button {
-        border: none;
-        background: transparent;
-        color: var(--primary);
-        padding: 0;
-        border-radius: 0;
-        font-size: 15px;
-        font-weight: 800;
-        letter-spacing: 1.1px;
-        text-transform: uppercase;
+        gap: 4px;
+        padding: 8px 6px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        color: var(--ink-soft);
+        font: 600 13px/1 var(--body);
+        letter-spacing: .12em;
         text-decoration: none;
         cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
       }
-
-      .nav-button:hover,
-      .nav-button.active {
-        background: transparent;
-        box-shadow: none;
-        opacity: 1;
-      }
-
-      .nav-brand:hover {
-        background: rgba(255, 255, 255, 0.7);
-        box-shadow: 0 10px 24px rgba(67, 90, 103, 0.08);
-      }
-
-      .nav-button .caret {
-        font-size: 11px;
-        opacity: 0.72;
-      }
-
-      .nav-button.current {
-        cursor: default;
-        color: var(--primary);
-        background: rgba(121, 139, 154, 0.22);
-        padding: 8px 16px;
-        border-radius: 10px;
-      }
-
+      .nav-button:hover, .nav-button.active { color: var(--ink); }
+      .nav-button.current { color: var(--ink); border-bottom-color: var(--sage); }
+      .caret { font-size: 8px; transition: transform .2s; }
+      .nav-item.open .caret { transform: rotate(180deg); }
       .dropdown-menu {
         position: absolute;
-        top: calc(100% + 10px);
+        top: calc(100% + 8px);
         right: 0;
-        width: clamp(180px, 60vw, 230px);
-        max-width: calc(100vw - 32px);
-        background: rgba(255, 255, 255, 0.96);
-        border: 1px solid rgba(147, 166, 175, 0.22);
-        border-radius: 20px;
-        box-shadow: 0 18px 38px rgba(38, 54, 64, 0.12);
-        padding: 12px;
+        min-width: 210px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--paper-noise), var(--paper-card);
+        box-shadow: var(--shadow);
         display: none;
-        flex-direction: column;
-        gap: 8px;
+        z-index: 50;
       }
-
-      .nav-item.open .dropdown-menu {
-        display: flex;
-      }
-
+      .nav-item.open .dropdown-menu { display: block; }
       .dropdown-menu a {
-        text-decoration: none;
-        color: var(--primary);
-        padding: 12px 14px;
-        border-radius: 12px;
+        display: block;
+        padding: 9px 12px;
+        border-radius: 7px;
+        color: var(--ink);
         font-size: 14px;
-        font-weight: 600;
-        background: #f8fafc;
+        letter-spacing: 0;
+        text-decoration: none;
       }
+      .dropdown-menu a:hover, .dropdown-menu a:focus-visible { background: #efe5cc; }
 
-      .dropdown-menu a:hover {
-        background: #edf5f4;
-      }
-
+      /* ---------- 히어로 ---------- */
       .hero {
-        margin-top: 40px;
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        align-items: center;
-        gap: 40px;
-        min-height: clamp(420px, 70vh, 620px);
-      }
-
-      .hero-copy {
         position: relative;
-        z-index: 1;
+        display: block;
+        min-height: max(600px, 59.6vw);
+        background: url("assets/home/bg_top.jpg") center bottom / 100% auto no-repeat, linear-gradient(180deg, #c9d8e6 0%, #dfe3e2 60%, #ece6dc 100%);
       }
-
-      .hero-copy .eyebrow {
-        margin: 0 0 18px;
-        font-size: 13px;
-        letter-spacing: 2px;
-        color: var(--muted);
-        font-weight: 700;
-        text-transform: uppercase;
+      .hero-cream {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(249, 242, 226, .82) 0%, rgba(249, 242, 226, .62) 30%, rgba(249, 242, 226, 0) 50%);
+        -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 96%);
+        mask-image: linear-gradient(180deg, #000 70%, transparent 96%);
       }
-
-      .hero-copy h1 {
-        margin: 0;
-        font-size: clamp(42px, 4vw, 72px);
-        line-height: 1.08;
-        letter-spacing: -1.5px;
-        font-weight: 800;
-      }
-
-      .route-def {
-        margin-top: 28px;
+      .hero-inner { position: relative; z-index: 2; padding: clamp(118px, 12vw, 150px) 0 110px; }
+      .hero-copy { max-width: 480px; }
+      .eyebrow {
         display: inline-flex;
         align-items: center;
-        gap: 12px;
-        background: rgba(255,255,255,0.6);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 10px 16px;
-        font-size: 14px;
+        gap: 8px;
+        margin: 0 0 10px;
+        color: var(--sage-deep);
+        font-size: 13px;
         font-weight: 700;
-        color: var(--primary);
+        letter-spacing: .18em;
+        text-transform: uppercase;
+      }
+      .eyebrow img { width: 22px; height: auto; }
+      .hero h1 {
+        margin: 0 0 18px;
+        font: 700 clamp(42px, 5.2vw, 64px)/1.15 var(--hand);
+        color: var(--ink);
+        letter-spacing: -.01em;
+      }
+      .hero h1 span { display: block; }
+      .hero-lead { margin: 0 0 10px; color: var(--ink-soft); font-size: 16px; line-height: 1.8; }
+      .page-purpose {
+        margin: 0 0 26px;
+        padding: 8px 12px;
+        border-left: 3px solid var(--sage);
+        background: rgba(251, 247, 236, .78);
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+      .route-def { display: grid; grid-template-columns: 54px 1fr; gap: 6px 14px; align-items: start; }
+      .route-def img { grid-row: span 2; width: 54px; height: auto; margin-top: 4px; }
+      .route-def h2 { margin: 0; font: 700 24px/1.2 var(--hand); color: var(--ink); }
+      .route-text { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.85; }
+      .hero-quote {
+        position: absolute;
+        top: clamp(110px, 11vw, 150px);
+        right: 0;
+        margin: 0;
+        font: 26px/1.35 var(--pen);
+        color: #4b3f2f;
+        text-align: left;
+        text-shadow: 0 0 10px rgba(255, 246, 228, .95), 0 0 2px rgba(255, 246, 228, .9);
       }
 
-      .route-def .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #1d2c3b, #7a95a9);
-        box-shadow: 0 0 0 6px rgba(29, 44, 59, 0.08);
-      }
-
-      .route-text {
-        max-width: 620px;
-        margin-top: 20px;
-        font-size: 18px;
-        line-height: 1.8;
-        color: var(--secondary);
-      }
-
-      .hero-visual {
-        display: flex;
-        justify-content: center;
+      /* ---------- 나는 이런 사람입니다 ---------- */
+      .summary { position: relative; min-height: 45.9vw; padding: 30px 0 60px; background: url("assets/home/bg_mid.jpg") center top / 100% auto no-repeat, var(--paper); }
+      .summary-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
+      .about-intro h2 { margin: 0 0 14px; font: 700 clamp(30px, 3.4vw, 40px)/1.2 var(--hand); }
+      .about-intro p { margin: 0 0 22px; color: var(--ink-soft); font-size: 15px; line-height: 1.85; }
+      .pill-link {
+        display: inline-flex;
         align-items: center;
+        gap: 6px;
+        padding: 9px 20px;
+        border: 1px solid #9c8c6d;
+        border-radius: 999px;
+        color: var(--ink);
+        font-size: 14px;
+        text-decoration: none;
+        background: rgba(251, 247, 236, .6);
       }
-
-      .feature-frame {
-        width: min(520px, 100%);
-        aspect-ratio: 1 / 1;
-        border-radius: 32px;
-        background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(232,243,247,0.9));
-        border: 1px solid rgba(146, 162, 174, 0.2);
-        box-shadow: var(--shadow);
+      .pill-link:hover { background: #efe5cc; }
+      .cards { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2vw, 26px); padding-top: 34px; }
+      .trail {
+        position: absolute;
+        top: 0;
+        left: -4%;
+        width: 108%;
+        height: 60px;
+        pointer-events: none;
+      }
+      .trail-bird { position: absolute; top: -14px; right: -2%; width: 48px; height: auto; }
+      .summary-card {
         position: relative;
+        padding: 22px 22px 20px;
+        border-radius: 6px;
+        background: var(--paper-noise), var(--paper-card);
+        box-shadow: 0 1px 0 #e7dcc2, 0 10px 22px rgba(92, 72, 40, .10);
+      }
+      .summary-card::after {
+        content: "";
+        position: absolute;
+        inset: 6px -4px -6px 4px;
+        z-index: -1;
+        border-radius: 6px;
+        background: #e9dfc6;
+        transform: rotate(-1deg);
+      }
+      .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+      .card-head img { width: 42px; height: 42px; object-fit: contain; }
+      .card-num { color: #7c6c52; font-size: 14px; letter-spacing: .1em; }
+      .summary-card h3 { margin: 0 0 8px; font: 700 26px/1.2 var(--hand); color: var(--ink); }
+      .summary-card p { margin: 0 0 14px; color: var(--ink-soft); font-size: 14px; line-height: 1.75; }
+      .evidence-toggle {
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--ink);
+        font: 600 14px/1.4 var(--body);
+        cursor: pointer;
+        border-bottom: 1px dashed #9c8c6d;
+      }
+      .evidence-toggle::after { content: " →"; }
+      .evidence-toggle[aria-expanded="true"]::after { content: " ↑"; }
+      .evidence-panel { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+      .sar { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; margin: 0 0 10px; font-size: 13px; line-height: 1.6; }
+      .sar dt { color: var(--sage-deep); font-weight: 700; }
+      .sar dd { margin: 0; color: var(--ink-soft); }
+      .evidence-link { color: var(--sage-deep); font-size: 13px; font-weight: 700; }
+      .signpost {
+        position: absolute;
+        right: clamp(8px, 4vw, 60px);
+        bottom: 10px;
+        z-index: 31;
+        width: clamp(110px, 11vw, 150px);
+        height: auto;
+        pointer-events: none;
+      }
+      .sprout-mark { position: absolute; left: 0; bottom: 40px; width: 38px; height: auto; opacity: .9; }
+
+      /* ---------- 비공개 기록: 수풀 ---------- */
+      .grove {
+        position: relative;
+        padding: 64px 0 80px;
         overflow: hidden;
       }
-
-      .feature-frame::before {
-        content: "";
-        position: absolute;
-        inset: -30px;
-        background: url('Haengro.png') center / cover no-repeat;
-        filter: blur(36px) saturate(1.1);
-        transform: scale(1.15);
-        z-index: 0;
-      }
-
-      .feature-frame img {
+      .grove-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 20px; }
+      .grove-head .eyebrow { margin: 0; }
+      .grove-head h2 { margin: 0; font: 700 30px/1.2 var(--hand); }
+      .grove-body { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 28px; align-items: start; }
+      .grove .passkey-panel, .grove .private-zone {
         position: relative;
-        z-index: 1;
+        padding: 22px 24px;
+        border-radius: 8px;
+        background: var(--paper-noise), rgba(251, 247, 236, .9);
+        box-shadow: var(--shadow);
+      }
+      .panel-title { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font: 700 22px/1.2 var(--hand); }
+      .panel-title img { width: 30px; height: auto; }
+      .private-caption { margin: 0 0 12px; color: var(--ink-muted); font-size: 13px; }
+      .passkey-login-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 4px; }
+      .btn, .passkey-login-row button, .passkey-register-form button, .private-note-save-button {
+        padding: 10px 18px;
+        border: 0;
+        border-radius: 6px;
+        background: var(--button);
+        color: #fffaf0;
+        font: 700 14px/1.2 var(--body);
+        cursor: pointer;
+      }
+      .btn:hover, .passkey-login-row button:hover, .passkey-register-form button:hover, .private-note-save-button:hover { background: var(--button-hover); }
+      button:disabled { opacity: .55; cursor: progress; }
+      #passkey-logout-button { background: transparent; color: var(--ink); border: 1px solid #9c8c6d; }
+      .passkey-message { min-height: 18px; margin: 6px 0; font-size: 13px; }
+      .passkey-message.is-info { color: #2f6b3c; }
+      .passkey-message.is-error { color: #a33a22; }
+      .register-box { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; }
+      .register-box summary { cursor: pointer; color: var(--ink); font-weight: 700; font-size: 14px; }
+      .register-box p { font-size: 13px; color: var(--ink-muted); line-height: 1.7; }
+      .passkey-register-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+      .passkey-register-form input, .private-note textarea, .private-card-edit-textarea {
         width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        -webkit-mask-image: radial-gradient(ellipse 78% 78% at center, black 55%, transparent 94%);
-        mask-image: radial-gradient(ellipse 78% 78% at center, black 55%, transparent 94%);
+        padding: 9px 11px;
+        border: 1px solid #cfc2a3;
+        border-radius: 6px;
+        background: #fffdf6;
+        color: var(--ink);
+        font: 14px/1.5 var(--body);
       }
-
-      .summary {
-        margin-top: 64px;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(220px, 1fr));
-        gap: 28px;
-      }
-
-      .summary-card {
-        background: rgba(255, 255, 255, 0.86);
-        border: 1px solid rgba(142, 163, 177, 0.2);
-        border-radius: 26px;
-        padding: 28px 22px;
-        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
-        min-height: 220px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .summary-card.clickable {
-        cursor: pointer;
-      }
-
-      .summary-card.clickable:hover {
-        transform: translateY(-6px) scale(1.03);
-        box-shadow: 0 20px 38px rgba(85, 108, 121, 0.14);
-      }
-
-      .summary-card:nth-child(1) { background: linear-gradient(180deg, #f9fbff, #edf4ff); }
-      .summary-card:nth-child(2) { background: linear-gradient(180deg, #fffdf7, #f9f1e7); }
-      .summary-card:nth-child(3) { background: linear-gradient(180deg, #f8fffb, #edf9f4); }
-
-      .card-tag {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 90px;
-        padding: 8px 12px;
-        border-radius: 12px;
-        background: rgba(255,255,255,0.75);
-        border: 1px solid rgba(148, 164, 177, 0.15);
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
-        color: var(--primary);
-      }
-
-      .summary-card h3 {
-        margin: 18px 0 10px;
-        font-size: clamp(24px, 2vw, 34px);
-        line-height: 1.2;
-      }
-
-      .summary-card p {
-        margin: 0;
-        color: var(--secondary);
-        font-size: 16px;
-        line-height: 1.7;
-      }
-
-      /* ---- 경계선: 여기서부터 공개 영역과 비공개 영역이 나뉩니다 ---- */
-      .zone-divider {
-        margin: 72px 0 28px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-      }
-
-      .zone-divider::before,
-      .zone-divider::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: repeating-linear-gradient(
-          90deg,
-          rgba(125, 141, 149, 0.5) 0,
-          rgba(125, 141, 149, 0.5) 6px,
-          transparent 6px,
-          transparent 12px
-        );
-      }
-
-      /* ---- 비공개 영역: 공개 영역과 눈에 띄게 다른 톤(어두운 배경 + 잠금 배지)으로 구분 ---- */
-      .private-zone {
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 28px;
-        padding: 32px clamp(20px, 4vw, 40px) 40px;
-        background: linear-gradient(160deg, #17222c 0%, #223140 100%);
-        box-shadow: 0 24px 50px rgba(10, 18, 26, 0.35);
-        color: #e7edf2;
-      }
-
-      .private-zone-header {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 14px;
-        margin-bottom: 22px;
-      }
-
-      .private-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        font-size: 13px;
-        font-weight: 800;
-        letter-spacing: 0.6px;
-      }
-
-      .private-caption {
-        margin: 0;
-        color: #a9b8c4;
-        font-size: 14px;
-      }
-
-      .private-content {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 18px;
-      }
-
-      .private-card {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 18px;
-        padding: 20px;
-      }
-
-      .private-card h4 {
-        margin: 0 0 8px;
-        font-size: 16px;
-      }
-
-      .private-card p {
-        margin: 0;
-        color: #a9b8c4;
-        font-size: 14px;
-        line-height: 1.6;
-      }
-
-      .private-placeholder {
-        grid-column: 1 / -1;
-        margin: 0;
-        padding: 28px 20px;
-        border: 1px dashed rgba(255, 255, 255, 0.2);
-        border-radius: 16px;
-        text-align: center;
-        color: #a9b8c4;
-        font-size: 14px;
-        line-height: 1.7;
-      }
-
-      /* ---- 패스키 등록 패널: 공개/비공개 어느 쪽도 아닌 "계정 관리" 성격이라
-         밝은 톤으로 두 영역 사이에 별도로 구분합니다 ---- */
-      .passkey-panel {
-        margin-top: 28px;
-        border: 1px solid var(--line);
-        border-radius: 26px;
-        padding: 28px clamp(20px, 4vw, 36px) 32px;
-        background: var(--panel-strong);
-        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
-      }
-
-      .passkey-login-row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 10px;
-        margin-top: 16px;
-      }
-
-      .passkey-login-row button {
-        border: 0;
-        border-radius: 12px;
-        padding: 10px 20px;
-        font-size: 14px;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      #passkey-login-button {
-        color: #fff;
-        background: linear-gradient(135deg, #2f7a5c, #4fa27f);
-      }
-
-      #passkey-logout-button {
-        color: var(--primary);
-        background: #eef2f5;
-        border: 1px solid var(--line);
-      }
-
-      .passkey-login-row button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-
-      .passkey-register-form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin: 18px 0 6px;
-      }
-
-      .passkey-register-form input {
-        flex: 1;
-        min-width: 200px;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 10px 14px;
-        font-size: 14px;
-        color: var(--primary);
-        background: #fff;
-      }
-
-      .passkey-register-form button {
-        border: 0;
-        border-radius: 12px;
-        padding: 10px 20px;
-        font-size: 14px;
-        font-weight: 800;
-        color: #fff;
-        background: linear-gradient(135deg, #1d2c3b, #46617a);
-        cursor: pointer;
-      }
-
-      .passkey-register-form button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-
-      .passkey-message {
-        min-height: 18px;
-        margin: 6px 0 20px;
-        font-size: 13px;
-      }
-
-      .passkey-message.is-info { color: #2f7a5c; }
-      .passkey-message.is-error { color: #b3492f; }
-
-      .passkey-list {
-        display: grid;
-        gap: 10px;
-      }
-
-      .passkey-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px 16px;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        background: #f8fafc;
-        font-size: 14px;
-      }
-
-      .passkey-item-info {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        min-width: 0;
-      }
-
-      .passkey-item-date {
-        color: var(--muted);
-        font-size: 12px;
-      }
-
-      .passkey-delete-button {
-        flex-shrink: 0;
-        border: 1px solid #e3b5a8;
-        border-radius: 10px;
-        padding: 6px 12px;
-        color: #b3492f;
-        background: #fff;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-      }
-
-      .passkey-delete-button:hover {
-        background: #fdecea;
-      }
-
-      .passkey-delete-button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-
-      .passkey-account-hint {
-        margin: 4px 0 0;
-        font-size: 12px;
-        color: var(--muted);
-      }
-
-      .private-note {
-        margin-top: 22px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.12);
-      }
-
-      .private-note textarea {
-        width: 100%;
-        margin-top: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 14px;
-        padding: 12px 14px;
-        font-size: 14px;
-        font-family: inherit;
-        color: #e7edf2;
-        background: rgba(255, 255, 255, 0.06);
-        resize: vertical;
-      }
-
-      .private-note textarea::placeholder {
-        color: #7c8a96;
-      }
-
-      .private-note-save-button {
-        margin-top: 10px;
-        border: 0;
-        border-radius: 12px;
-        padding: 8px 18px;
-        font-size: 13px;
-        font-weight: 800;
-        color: #17222c;
-        background: linear-gradient(135deg, #dfeaf9, #bcd4ec);
-        cursor: pointer;
-      }
-
-      .private-note-save-button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-
-      .private-card {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .private-card-text {
-        margin: 0;
-        color: #e7edf2;
-        font-size: 14px;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
-
-      .private-card-actions {
-        display: flex;
-        gap: 8px;
-      }
-
-      .private-card-edit-button,
-      .private-card-delete-button,
-      .private-card-save-button,
-      .private-card-cancel-button {
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 10px;
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.06);
-        color: #e7edf2;
-      }
-
-      .private-card-delete-button {
-        border-color: #e3b5a8;
-        color: #f3b7a6;
-      }
-
-      .private-card-save-button {
-        border-color: #8fd9b6;
-        color: #8fd9b6;
-      }
-
-      .private-card-edit-button:disabled,
-      .private-card-delete-button:disabled,
-      .private-card-save-button:disabled,
-      .private-card-cancel-button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-
-      .private-card textarea {
-        width: 100%;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-size: 14px;
-        font-family: inherit;
-        color: #e7edf2;
-        background: rgba(255, 255, 255, 0.06);
-        resize: vertical;
-      }
-
-      @media (max-width: 1024px) {
-        .page-shell {
-          width: min(100% - 30px, 1200px);
-        }
-
-        .hero {
-          grid-template-columns: 1fr;
-          gap: 26px;
-        }
-
-        .summary {
-          grid-template-columns: 1fr;
-        }
-
-        .feature-frame {
-          width: min(100%, 420px);
-        }
-      }
-
-      @media (max-width: 680px) {
-        .topbar {
-          justify-content: flex-end;
-        }
-
-        .nav-wrap {
-          width: 100%;
-          gap: 12px;
-          justify-content: space-between;
-          flex-wrap: nowrap;
-        }
-
-        .hero-copy h1 {
-          font-size: 42px;
-        }
-      }
-
-      :root {
-        --bg-top: #f6f4ef;
-        --bg-bottom: #f6f4ef;
-        --panel: #fbfaf7;
-        --panel-strong: #fbfaf7;
-        --line: #d9d9d1;
-        --primary: #202623;
-        --secondary: #656d68;
-        --muted: #858b84;
-        --soft-blue: #e7ebe6;
-        --soft-green: #e4ebe5;
-        --soft-peach: #efe9df;
-        --accent: #6e8f83;
-        --shadow: 0 18px 42px rgba(42, 48, 43, 0.08);
-      }
-
-      html, body {
-        font-family: "Pretendard", "SUIT", "Noto Sans KR", sans-serif;
-        background: #f6f4ef;
-        color: var(--primary);
-      }
-
-      body { overflow-x: clip; }
-
-      .page-shell {
-        width: min(1320px, calc(100% - 96px));
-        padding: 20px 0 112px;
-      }
-
-      .topbar { top: 0; }
-
-      .nav-wrap {
-        padding: 12px 0 14px;
-        background: rgba(246, 244, 239, 0.94);
-        backdrop-filter: none;
-      }
-
-      .topbar::after { border-color: rgba(83, 94, 86, 0.2); }
-
-      .nav-brand-word {
-        color: #59655e;
-        font-family: "Georgia", "Noto Serif KR", serif;
-        transform: none;
-      }
-
-      .nav-right { gap: clamp(14px, 2.2vw, 30px); }
-
-      .nav-button {
-        font-size: 13px;
-        letter-spacing: 0.02em;
-        font-weight: 650;
-        transition: color 180ms ease, opacity 180ms ease;
-      }
-
-      .nav-button:hover,
-      .nav-button.active { color: var(--accent); }
-
-      .nav-button.current {
-        background: rgba(91, 113, 99, 0.14);
-        border-radius: 5px;
-        padding: 8px 11px;
-        color: var(--accent);
-        box-shadow: none;
-      }
-
-      .dropdown-menu {
-        top: calc(100% + 12px);
-        border-color: var(--line);
-        border-radius: 4px;
-        background: #fbfaf7;
-        box-shadow: 0 14px 30px rgba(42, 48, 43, 0.1);
-        gap: 2px;
-      }
-
-      .dropdown-menu a {
-        border-radius: 2px;
+      .passkey-register-form input#passkey-label-input { grid-column: 1 / -1; }
+      .passkey-register-form button { grid-column: 1 / -1; justify-self: start; }
+      .passkey-account-hint { margin: 8px 0 0; font-size: 12px; color: var(--ink-muted); }
+      .passkey-list { margin-top: 14px; display: grid; gap: 6px; }
+      .passkey-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 6px; background: #f1e9d4; font-size: 13px; }
+      .passkey-item-info { display: flex; flex-direction: column; }
+      .passkey-item-date { color: var(--ink-muted); font-size: 12px; }
+      .passkey-delete-button, .private-card-actions button {
+        padding: 5px 10px;
+        border: 1px solid #b9ab8c;
+        border-radius: 6px;
         background: transparent;
-        transition: color 160ms ease, background 160ms ease;
+        color: var(--ink);
+        font: 12px/1.3 var(--body);
+        cursor: pointer;
       }
+      .passkey-delete-button:hover, .private-card-actions button:hover { background: #efe5cc; }
+      .private-placeholder { margin: 0; color: var(--ink-muted); font-size: 14px; }
+      .private-content { display: grid; gap: 10px; }
+      .private-card { padding: 12px 14px; border-radius: 6px; background: #fffaf0; border: 1px solid #e3d7bb; }
+      .private-card-text { margin: 0 0 8px; white-space: pre-wrap; color: var(--ink); font-size: 14px; }
+      .private-card-actions { display: flex; gap: 6px; }
+      .private-note { margin-top: 14px; }
+      .private-note textarea { resize: vertical; margin-bottom: 8px; }
+      .note-help { margin: 0 0 6px; font-size: 12px; color: var(--ink-muted); }
+      .grove-lantern { position: absolute; right: -8px; bottom: -40px; width: 120px; height: auto; pointer-events: none; }
 
-      .dropdown-menu a:hover { background: #eeeee8; }
+      /* 수풀: 로그인 전에는 기록 공간 전체를 덮고, 로그인하면 양옆으로 갈라지며 열립니다. */
+      .grove { background: url("assets/home/bg_bottom.jpg") center top / 100% auto no-repeat, #8d9a68; min-height: max(520px, 46.5vw); }
 
-      .hero {
-        position: relative;
-        grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.82fr);
-        gap: clamp(52px, 9vw, 140px);
-        min-height: min(690px, calc(100svh - 100px));
-        margin-top: 26px;
-        padding: 46px 0 62px;
-      }
-
-      .hero-copy { max-width: 650px; }
-
-      .hero-copy .eyebrow {
-        margin-bottom: 28px;
-        color: var(--accent);
-        font-size: 11px;
-        letter-spacing: 0.2em;
-        font-weight: 600;
-      }
-
-      .hero-copy h1 {
-        max-width: 660px;
-        font-size: clamp(52px, 6.1vw, 88px);
-        line-height: 1.12;
-        letter-spacing: 0;
-        font-weight: 680;
-      }
-
-      .hero-copy h1 span {
-        display: block;
-        margin-left: clamp(24px, 5vw, 76px);
-        color: #66716a;
-        font-weight: 420;
-      }
-
-      .route-def {
-        gap: 10px;
-        margin-top: 34px;
-        padding: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        color: var(--secondary);
-        font-size: 13px;
-        font-weight: 600;
-      }
-
-      .route-def .dot {
-        width: 7px;
-        height: 7px;
-        background: var(--accent);
-        box-shadow: none;
-      }
-
-      .route-text {
-        max-width: 490px;
-        margin-top: 18px;
-        font-size: 16px;
-        line-height: 1.95;
-        color: var(--secondary);
-        word-break: keep-all;
-      }
-
-      .hero-visual {
-        position: relative;
-        justify-content: flex-end;
-        padding: 20px 20px 34px 0;
-      }
-
-      .hero-visual::before,
-      .hero-visual::after {
+      /* ---------- 첫 방문: 수풀이 닫혀 있다가 '들어가기'를 누르면 갈라지며 열림 ---------- */
+      .intro-gate { position: fixed; inset: 0; z-index: 100; overflow: hidden; }
+      .intro-gate[hidden] { display: none; }
+      .bush {
         position: absolute;
-        z-index: 2;
-        color: var(--muted);
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.16em;
-      }
-
-      .hero-visual::before {
-        content: "DAEGU, KOREA";
-        top: 0;
-        right: 0;
-      }
-
-      .hero-visual::after {
-        content: "2026  /  NOW";
-        bottom: 0;
-        left: 0;
-      }
-
-      .feature-frame {
-        width: min(440px, 100%);
-        aspect-ratio: 0.88 / 1;
-        border: 0;
-        border-radius: 3px;
-        background: #e7e5dd;
-        box-shadow: 0 20px 52px rgba(42, 48, 43, 0.1);
-        transform: translateY(18px);
-      }
-
-      .feature-frame::before { display: none; }
-
-      .feature-frame img {
-        object-position: center;
-        -webkit-mask-image: none;
-        mask-image: none;
-      }
-
-      .summary {
-        position: relative;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: clamp(28px, 5vw, 76px);
-        margin-top: 64px;
-        padding: 78px 0 34px;
-        border-top: 1px solid var(--line);
-      }
-
-      .summary::before {
-        content: "A PERSONAL JOURNEY";
-        position: absolute;
-        top: 28px;
-        left: 0;
-        color: var(--muted);
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.18em;
-      }
-
-      .summary-card,
-      .summary-card:nth-child(n) {
-        position: relative;
-        min-height: 0;
-        padding: 22px 0 18px;
-        border: 0;
-        border-top: 1px solid rgba(110, 143, 131, 0.45);
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-        transition: color 180ms ease, border-color 180ms ease;
-      }
-
-      .summary-card::before {
-        display: block;
-        margin-bottom: 21px;
-        color: var(--accent);
-        font-family: "Georgia", serif;
-        font-size: 14px;
-        letter-spacing: 0.04em;
-      }
-
-      #strength-card::before { content: "01"; }
-      #preference-card::before { content: "02"; }
-      #plan-card::before { content: "03"; }
-
-      .summary-card.clickable:hover {
-        transform: none;
-        box-shadow: none;
-        border-color: var(--accent);
-      }
-
-      .card-tag {
-        min-width: 0;
-        justify-content: flex-start;
-        padding: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-      }
-
-      .summary-card h3 {
-        margin: 20px 0 14px;
-        font-size: clamp(25px, 2.5vw, 34px);
-        line-height: 1.4;
-        font-weight: 650;
-        word-break: keep-all;
-      }
-
-      .summary-card p {
-        max-width: 34ch;
-        color: var(--secondary);
-        font-size: 15px;
-        line-height: 1.85;
-        word-break: keep-all;
-      }
-
-      .zone-divider {
-        margin: 116px 0 26px;
-        gap: 22px;
-        color: var(--muted);
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.16em;
-      }
-
-      .zone-divider::before,
-      .zone-divider::after {
-        background: var(--line);
-      }
-
-      .passkey-panel {
-        position: relative;
-        margin-top: 0;
-        padding: 38px 0 42px;
-        border: 0;
-        border-top: 1px solid var(--line);
-        border-bottom: 1px solid var(--line);
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .passkey-panel::before {
-        content: "MY PRIVATE JOURNAL";
-        display: block;
-        margin-bottom: 18px;
-        color: var(--accent);
-        font-size: 10px;
-        font-weight: 650;
-        letter-spacing: 0.18em;
-      }
-
-      .passkey-panel .private-zone-header { margin-bottom: 10px; }
-
-      .passkey-panel .card-tag {
-        color: var(--primary);
-        font-size: 18px;
-        letter-spacing: 0;
-      }
-
-      .passkey-panel .private-caption,
-      .passkey-account-hint { color: var(--muted); }
-
-      .passkey-login-row { margin-top: 20px; }
-
-      .passkey-login-row button,
-      .passkey-register-form button,
-      .private-note-save-button {
-        min-height: 44px;
-        border: 1px solid var(--primary);
-        border-radius: 2px;
-        padding: 11px 20px;
-        background: var(--primary);
-        color: #fbfaf7;
-        font-size: 13px;
-        font-weight: 650;
-        transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
-      }
-
-      .passkey-login-row button:hover,
-      .passkey-register-form button:hover,
-      .private-note-save-button:hover {
-        border-color: var(--accent);
-        background: var(--accent);
-      }
-
-      #passkey-login-button,
-      #passkey-register-button,
-      #private-note-save-button {
-        border: 1px solid var(--primary);
-        border-radius: 2px;
-        background: var(--primary);
-        color: #fbfaf7;
-      }
-
-      #passkey-login-button:hover,
-      #passkey-register-button:hover,
-      #private-note-save-button:hover {
-        border-color: var(--accent);
-        background: var(--accent);
-      }
-
-      #passkey-logout-button {
-        border-color: var(--line);
-        background: transparent;
-        color: var(--primary);
-      }
-
-      .passkey-panel .route-text {
-        max-width: 720px;
-        font-size: 14px !important;
-      }
-
-      .passkey-register-form { max-width: 940px; }
-
-      .passkey-register-form input,
-      .private-note textarea,
-      .private-card textarea {
-        border: 1px solid var(--line);
-        border-radius: 2px;
-        background: #fbfaf7;
-        color: var(--primary);
-      }
-
-      .passkey-register-form input:focus,
-      .private-note textarea:focus,
-      .private-card textarea:focus { outline: 2px solid rgba(110, 143, 131, 0.35); }
-
-      .passkey-message { color: var(--secondary); }
-      .passkey-message.is-info { color: #426f5b; }
-      .passkey-message.is-error { color: #a44737; }
-
-      .passkey-list { max-width: 760px; }
-
-      .passkey-item {
-        border-color: var(--line);
-        border-radius: 2px;
-        background: transparent;
-      }
-
-      .passkey-delete-button {
-        border-radius: 2px;
-        border-color: #d8bdb5;
-        background: transparent;
-      }
-
-      .private-zone {
-        margin-top: 50px;
-        padding: 36px 0 0;
-        border: 0;
-        border-top: 1px solid var(--line);
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-        color: var(--primary);
-      }
-
-      .private-zone-header { margin-bottom: 24px; }
-
-      .private-badge {
-        padding: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        color: var(--primary);
-        font-size: 18px;
-        letter-spacing: 0;
-      }
-
-      .private-caption { color: var(--muted); }
-
-      .private-content {
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-        gap: 12px 26px;
-      }
-
-      .private-card {
-        gap: 14px;
-        border: 0;
-        border-top: 1px solid var(--line);
-        border-radius: 0;
-        padding: 18px 0;
-        background: transparent;
-      }
-
-      .private-card-text { color: var(--secondary); }
-
-      .private-placeholder {
-        border-color: var(--line);
-        border-radius: 2px;
-        color: var(--muted);
-      }
-
-      .private-note {
-        border-color: var(--line);
-      }
-
-      .private-note .route-text { color: var(--secondary) !important; }
-      .private-note textarea::placeholder { color: var(--muted); }
-
-      .private-note-save-button {
-        margin-top: 10px;
-        color: #fbfaf7;
-      }
-
-      .private-card-edit-button,
-      .private-card-delete-button,
-      .private-card-save-button,
-      .private-card-cancel-button {
-        border-color: var(--line);
-        border-radius: 2px;
-        background: transparent;
-        color: var(--primary);
-      }
-
-      .private-card-delete-button { color: #a44737; }
-      .private-card-save-button { color: #426f5b; }
-
-      a:focus-visible,
-      button:focus-visible,
-      [role="link"]:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 4px;
-      }
-
-      @media (max-width: 1024px) {
-        .page-shell { width: min(calc(100% - 56px), 900px); }
-        .hero {
-          grid-template-columns: minmax(0, 1fr) minmax(280px, 0.78fr);
-          gap: 38px;
-          min-height: 580px;
-        }
-        .feature-frame { width: min(360px, 100%); }
-        .summary { gap: 28px; }
-      }
-
-      @media (max-width: 680px) {
-        .page-shell { width: calc(100% - 40px); padding: 12px 0 72px; }
-        .nav-wrap { gap: 8px; padding: 10px 0; }
-        .nav-left { height: 38px; }
-        .nav-brand-word { font-size: 33px; }
-        .nav-right { gap: 10px; }
-        .nav-button { font-size: 11px; gap: 4px; }
-        .nav-button.current { padding: 7px 8px; }
-        .nav-button .caret { font-size: 8px; }
-        .hero {
-          grid-template-columns: 1fr;
-          gap: 35px;
-          min-height: 0;
-          margin-top: 32px;
-          padding: 40px 0 26px;
-        }
-        .hero-copy .eyebrow { margin-bottom: 22px; }
-        .hero-copy h1 { font-size: clamp(43px, 12vw, 62px); }
-        .hero-copy h1 span { margin-left: 24px; }
-        .route-def { margin-top: 26px; }
-        .route-text { font-size: 15px; }
-        .hero-visual { justify-content: center; padding: 18px 0 28px; }
-        .hero-visual::before { right: 0; top: 0; }
-        .hero-visual::after { left: 0; bottom: 0; }
-        .feature-frame {
-          width: min(82%, 340px);
-          aspect-ratio: 0.92 / 1;
-          transform: none;
-        }
-        .summary {
-          grid-template-columns: 1fr;
-          gap: 28px;
-          margin-top: 54px;
-          padding: 66px 0 10px;
-        }
-        .summary-card,
-        .summary-card:nth-child(n) { padding: 18px 0 22px; }
-        .summary-card::before { margin-bottom: 12px; }
-        .summary-card h3 { margin: 13px 0 8px; font-size: 27px; }
-        .summary-card p { max-width: 42ch; }
-        .zone-divider { margin: 78px 0 22px; gap: 12px; font-size: 9px; }
-        .passkey-panel { padding: 30px 0; }
-        .passkey-panel .private-zone-header { gap: 8px; }
-        .passkey-register-form { display: grid; grid-template-columns: 1fr; }
-        .passkey-register-form input { min-width: 0; }
-        .passkey-register-form button,
-        .passkey-login-row button { width: 100%; }
-        .private-zone { margin-top: 38px; }
-        .private-zone-header { align-items: flex-start; flex-direction: column; gap: 8px; }
-        .private-card-actions { flex-wrap: wrap; }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after {
-          scroll-behavior: auto !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-
-      .hero { margin-bottom: 0; }
-
-      .summary {
-        gap: clamp(42px, 6vw, 92px);
-        margin-top: 104px;
-        padding-top: 88px;
-      }
-
-      .summary-card,
-      .summary-card:nth-child(n) {
-        border-color: rgba(110, 143, 131, 0.24);
-      }
-
-      .summary-card:nth-child(2) { margin-top: 34px; }
-      .summary-card:nth-child(3) { margin-top: -10px; }
-
-      .summary-card::before {
-        color: #68706a;
-        font-size: 12px;
-      }
-
-      .summary-card h3 { max-width: 15ch; }
-
-      .summary-card p {
-        max-width: 31ch;
-        color: #707771;
-      }
-
-      .zone-divider {
-        margin: 148px 0 34px;
-        justify-content: flex-start;
-        gap: 14px;
-      }
-
-      .zone-divider::before {
-        flex: 0 0 34px;
-      }
-
-      .zone-divider::after { background: rgba(83, 94, 86, 0.14); }
-
-      .passkey-panel {
-        padding: 42px 0 36px;
-        border-bottom: 0;
-      }
-
-      .passkey-panel::before {
-        margin-bottom: 24px;
-        color: #626e66;
-      }
-
-      .passkey-panel .private-zone-header { gap: 18px; }
-
-      .passkey-panel .private-caption {
-        max-width: 58ch;
-        line-height: 1.8;
-      }
-
-      .passkey-login-row { margin-top: 26px; }
-
-      .passkey-register-form {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-        margin-top: 34px;
-      }
-
-      .passkey-register-form button {
-        grid-column: 1 / -1;
-        justify-self: start;
-        min-width: 190px;
-      }
-
-      .passkey-account-hint {
-        max-width: 72ch;
-        line-height: 1.8;
-      }
-
-      .private-zone {
-        margin-top: 68px;
-        padding-top: 42px;
-      }
-
-      .private-zone-header { gap: 18px; }
-
-      .private-caption {
-        max-width: 68ch;
-        line-height: 1.8;
-      }
-
-      .private-content {
-        display: grid;
-        grid-template-columns: minmax(0, 820px);
-        gap: 0;
-      }
-
-      .private-card {
-        border-top-color: rgba(83, 94, 86, 0.18);
-        padding: 22px 0 24px;
-      }
-
-      .private-placeholder {
-        border: 0;
-        border-left: 1px solid var(--line);
-        border-radius: 0;
-        padding: 12px 18px;
-        text-align: left;
-      }
-
-      .private-note {
-        max-width: 820px;
-        margin-top: 36px;
-        padding-top: 26px;
-      }
-
-      @media (max-width: 1024px) {
-        .summary { gap: 32px; }
-        .passkey-register-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .passkey-register-form button { grid-column: 1 / -1; }
-      }
-
-      @media (max-width: 680px) {
-        .summary { gap: 22px; margin-top: 76px; padding-top: 66px; }
-        .summary-card:nth-child(2),
-        .summary-card:nth-child(3) { margin-top: 0; }
-        .summary-card h3 { max-width: 100%; }
-        .zone-divider { margin: 96px 0 28px; }
-        .passkey-panel { padding: 32px 0; }
-        .passkey-panel .private-zone-header { gap: 8px; }
-        .passkey-register-form { grid-template-columns: 1fr; margin-top: 24px; }
-        .passkey-register-form button { grid-column: auto; justify-self: stretch; }
-        .private-zone { margin-top: 42px; padding-top: 32px; }
-        .private-zone-header { align-items: flex-start; flex-direction: column; gap: 8px; }
-      }
-
-      :root {
-        --bg-top: #f5f2ea;
-        --bg-bottom: #f5f2ea;
-        --panel: #faf8f2;
-        --panel-strong: #faf8f2;
-        --line: #d1d0c7;
-        --primary: #202724;
-        --secondary: #59625d;
-        --muted: #68706a;
-        --accent: #5b7163;
-      }
-
-      html, body { background: #f5f2ea; }
-
-      .nav-wrap { background: rgba(245, 242, 234, 0.96); }
-
-      .hero {
-        min-height: min(620px, calc(100svh - 100px));
-        padding-top: 32px;
-        padding-bottom: 34px;
-      }
-
-      .hero-copy .eyebrow {
-        margin-bottom: 22px;
-        color: #5b7163;
-        font-family: "Georgia", "Times New Roman", serif;
-        font-size: 12px;
-        letter-spacing: 0.14em;
-      }
-
-      .hero-copy h1 {
-        font-size: clamp(58px, 6.5vw, 94px);
-        line-height: 1.08;
-        font-weight: 760;
-      }
-
-      .hero-copy h1 span {
-        margin-top: 1px;
-        color: #53665b;
-        font-weight: 600;
-      }
-
-      .route-def {
-        margin-top: 27px;
-        color: #3f4943;
-        font-size: 14px;
-      }
-
-      .route-def .dot { background: #5b7163; }
-
-      .route-text {
-        max-width: 520px;
-        margin-top: 12px;
-        color: #46514a;
-        font-size: 16px;
-        line-height: 1.85;
-      }
-
-      .hero-visual::before,
-      .hero-visual::after {
-        color: #59645d;
-        font-family: "Georgia", "Times New Roman", serif;
-        font-size: 11px;
-        letter-spacing: 0.11em;
-      }
-
-      .feature-frame {
-        box-shadow: 0 15px 32px rgba(38, 43, 38, 0.1);
-        transform: translateY(10px) rotate(0.6deg);
-      }
-
-      .summary {
-        margin-top: 72px;
-        padding-top: 78px;
-        border-top-color: #c6c7bc;
-      }
-
-      .summary::before {
-        top: 25px;
-        color: #5b7163;
-        font-family: "Georgia", "Times New Roman", serif;
-        font-size: 12px;
-        letter-spacing: 0.12em;
-      }
-
-      .summary-card,
-      .summary-card:nth-child(n) { border-top-color: rgba(101, 125, 112, 0.48); }
-
-      .summary-card::before {
-        margin-bottom: 16px;
-        color: #5b7163;
-        font-size: 15px;
-      }
-
-      .card-tag {
-        color: #626a64;
-        font-size: 12px;
-      }
-
-      .summary-card h3 {
-        margin-top: 15px;
-        margin-bottom: 12px;
-        color: #202724;
-        font-size: clamp(27px, 2.8vw, 36px);
-        line-height: 1.34;
-      }
-
-      .summary-card p {
-        color: #46514a;
-        font-size: 15px;
-        line-height: 1.8;
-      }
-
-      .zone-divider {
-        margin-top: 116px;
-        color: #59625d;
-        font-size: 11px;
-      }
-
-      .zone-divider::after { background: #c6c7bc; }
-
-      .passkey-panel::before {
-        color: #59625d;
-        font-family: "Georgia", "Times New Roman", serif;
-        font-size: 12px;
-        letter-spacing: 0.12em;
-      }
-
-      .passkey-panel .private-caption,
-      .passkey-account-hint,
-      .private-caption { color: #59625d; }
-
-      .passkey-panel .route-text {
-        color: #46514a;
-        font-size: 15px !important;
-        line-height: 1.8;
-      }
-
-      .private-zone { border-top-color: #c6c7bc; }
-
-      .private-card-text {
-        color: #46514a;
-        font-size: 15px;
-        line-height: 1.8;
-      }
-
-      .private-placeholder {
-        color: #59625d;
-        font-size: 14px;
-      }
-
-      @media (max-width: 680px) {
-        .hero { padding-top: 30px; padding-bottom: 20px; }
-        .hero-copy h1 { font-size: clamp(46px, 12vw, 62px); }
-        .route-text { font-size: 15px; }
-        .summary { margin-top: 58px; padding-top: 64px; }
-        .summary-card h3 { font-size: 28px; }
-      }
-
-      @media (max-width: 370px) {
-        .hero-copy h1 { font-size: 34px; }
-        .hero-copy h1 span { margin-left: 16px; white-space: nowrap; }
-      }
-
-      .hero { min-height: min(570px, calc(100svh - 120px)); }
-
-      .summary {
-        --chapter-inset: max(48px, calc((100vw - 1320px) / 2));
-        width: 100vw;
-        margin-top: 54px;
-        margin-left: calc(50% - 50vw);
-        padding: 100px var(--chapter-inset) 86px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0;
-        background: transparent;
-        border: 0;
-      }
-
-      .summary::before {
-        top: 40px;
-        left: var(--chapter-inset);
-        color: #52665a;
-        font-size: 12px;
-      }
-
-      .summary-card,
-      .summary-card:nth-child(n) {
-        min-width: 0;
-        margin: 0;
-        padding: 0 30px;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .summary-card:first-child { padding-left: 0; }
-
-      .summary-card + .summary-card {
-        border-left: 1px solid rgba(82, 102, 90, 0.24);
-      }
-
-      .summary-card::before {
-        margin-bottom: 20px;
-        color: #52665a;
-        font-size: 17px;
-      }
-
-      .summary-card .card-tag {
-        color: #59625d;
-        font-size: 12px;
-      }
-
-      .summary-card h3 {
-        max-width: 15ch;
-        margin: 17px 0 14px;
-        color: #202724;
-        font-size: clamp(30px, 3vw, 40px);
-        line-height: 1.34;
-        font-weight: 700;
-      }
-
-      .summary-card h3 .topic-highlight {
-        display: inline-block;
-        padding: 0.08em 0.2em;
-        background: #ded8c9;
-        border-radius: 0.18em;
-      }
-
-      .summary-card p {
-        max-width: 34ch;
-        color: #46514a;
-        font-size: 15px;
-        line-height: 1.85;
-      }
-
-      @media (max-width: 1024px) {
-        .summary { --chapter-inset: max(28px, calc((100vw - 900px) / 2)); }
-        .summary-card,
-        .summary-card:nth-child(n) { padding-right: 22px; padding-left: 22px; }
-        .summary-card:first-child { padding-left: 0; }
-        .summary-card h3 { font-size: clamp(27px, 3vw, 34px); }
-      }
-
-      @media (max-width: 680px) {
-        .hero { min-height: 0; }
-        .summary {
-          --chapter-inset: 20px;
-          margin-top: 42px;
-          padding-top: 82px;
-          padding-bottom: 48px;
-          grid-template-columns: 1fr;
-          gap: 0;
-        }
-        .summary::before { top: 31px; }
-        .summary-card,
-        .summary-card:nth-child(n) {
-          padding: 22px 0 24px;
-          border-left: 0;
-          border-top: 1px solid rgba(82, 102, 90, 0.2);
-        }
-        .summary-card:first-child { padding-top: 8px; border-top: 0; }
-        .summary-card::before { margin-bottom: 12px; }
-        .summary-card h3 { margin: 12px 0 10px; font-size: 30px; }
-        .summary-card p { max-width: 42ch; }
-      }
-
-      .hero-visual-note {
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 2;
-        color: #59645d;
-        font-family: "Georgia", "Times New Roman", serif;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.13em;
-      }
-
-      .hero-visual::before,
-      .hero-visual::after { letter-spacing: 0.14em; }
-
-      .hero-visual::before { top: 2px; }
-      .hero-visual::after { bottom: 2px; }
-
-      .feature-frame {
-        border-radius: 2px;
-        box-shadow: 0 11px 26px rgba(32, 39, 36, 0.12);
-        transform: translateY(14px) rotate(0.65deg);
-      }
-
-      @media (max-width: 680px) {
-        .hero-visual-note { top: 0; left: 0; }
-        .hero-visual::before { top: 0; right: 0; }
-        .hero-visual::after { bottom: 0; left: 0; }
-      }
-
-      .hero-copy .eyebrow,
-      .hero-visual-note,
-      .hero-visual::before,
-      .hero-visual::after,
-      .summary::before,
-      .passkey-panel::before {
-        font-family: Arial, "Helvetica Neue", sans-serif;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-      }
-
-      .hero-visual::before,
-      .hero-visual::after { font-size: 10px; }
-
-      .summary::before { letter-spacing: 0.1em; }
-      .passkey-panel::before { letter-spacing: 0.1em; }
-      .summary-card { container-type: inline-size; }
-
-      .summary-card h3 {
-        max-width: none;
-        font-size: min(clamp(27px, 3vw, 40px), 8.4cqi);
-      }
-
-      .summary-card h3 .line { white-space: nowrap; }
-
-      @media (max-width: 680px) {
-        .summary-card h3 { font-size: min(30px, 8.4cqi); }
-      }
-
-      html, body { background-color: #f5f2ea; }
-
-      body {
-        position: relative;
-        background-image:
-          radial-gradient(ellipse 62% 42% at 78% 12%, rgba(255, 255, 255, 0.42), transparent 100%),
-          radial-gradient(ellipse 76% 44% at 44% 56%, rgba(203, 198, 179, 0.11), transparent 100%);
+        top: -2%;
+        bottom: -2%;
+        width: 76%;
         background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-size: cover;
+        transition: transform 1.5s cubic-bezier(.6, .05, .3, 1), opacity 1.5s ease;
+        filter: drop-shadow(0 6px 22px rgba(40, 55, 25, .3));
       }
-
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        opacity: 0.34;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
-      }
-
-      .page-shell {
-        position: relative;
-        z-index: 1;
-        isolation: isolate;
-      }
-
-      .page-shell::before {
-        content: "";
+      .bush.left { left: -6%; background-image: url("assets/home/curtain_left.webp"); background-position: left center; }
+      .bush.right { right: -6%; background-image: url("assets/home/curtain_right.webp"); background-position: right center; }
+      .intro-veil { position: absolute; inset: 0; background: rgba(238, 228, 200, .82); transition: opacity 1.2s ease; }
+      .intro-card {
         position: absolute;
-        z-index: -1;
-        top: 0;
-        bottom: 0;
         left: 50%;
-        width: 100vw;
-        transform: translateX(-50%);
-        pointer-events: none;
-        opacity: 0.9;
-        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1440 2600' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1230 150 C1360 285 1260 420 1080 520 C850 650 610 690 500 850 C360 1050 650 1110 910 1220 C1160 1330 1080 1510 830 1620 C600 1720 360 1850 480 2040 C570 2180 900 2260 1070 2460' fill='none' stroke='%235b7163' stroke-opacity='.12' stroke-width='1.4'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+        top: 50%;
+        width: min(380px, calc(100% - 40px));
+        transform: translate(-50%, -50%);
+        padding: 28px 26px 26px;
+        border-radius: 12px;
+        background: var(--paper-noise), rgba(251, 247, 236, .96);
+        box-shadow: 0 20px 44px rgba(30, 40, 20, .32);
+        text-align: center;
+        transition: opacity .6s ease, transform .6s ease;
       }
-
-      .summary {
-        background-color: rgba(234, 231, 220, 0.55);
-        background-image: linear-gradient(180deg, rgba(245, 242, 234, 0.12), rgba(234, 231, 220, 0.24) 22%, rgba(234, 231, 220, 0.24) 78%, rgba(245, 242, 234, 0.12));
-      }
-
-      @media (max-width: 680px) {
-        .page-shell::before { opacity: 0.72; }
-      }
-
-      /* ---- T01-C10/C11: 1366x768, 1920x1080 첫 화면에 소개(히어로)·활동/근거(요약 카드)가 함께 보이도록 압축 ---- */
-      .hero {
-        min-height: 0;
-        margin-top: 0;
-        padding: clamp(10px, 2.4svh, 36px) 0 clamp(6px, 1.6svh, 24px);
-        align-items: center;
-        gap: clamp(40px, 7vw, 120px);
-      }
-
-      .hero-copy .eyebrow { margin-bottom: clamp(10px, 1.6svh, 20px); }
-
-      .hero-copy h1 { font-size: clamp(40px, min(5.6vw, 7svh), 84px); }
-
-      .route-def { margin-top: clamp(10px, 2.2svh, 26px); }
-
-      .route-text { margin-top: 8px; font-size: 15px; line-height: 1.7; }
-
-      .hero-visual { justify-self: end; width: fit-content; max-width: 100%; padding: 18px 0; }
-
-      @media (min-width: 681px) {
-        /* 사진 폭이 줄어도 위쪽 라벨 두 개가 겹치지 않도록 위치 라벨을 아래 오른쪽으로 */
-        .hero-visual::before { top: auto; bottom: 2px; right: 0; }
-      }
-
-      .feature-frame {
-        width: auto;
-        height: clamp(220px, calc(100svh - 480px), 470px);
-        max-width: 100%;
-        aspect-ratio: 0.88 / 1;
-        transform: rotate(0.65deg);
-      }
-
-      .summary {
-        margin-top: 0;
-        padding-top: clamp(20px, 3.2svh, 48px);
-        padding-bottom: 56px;
-      }
-
-      .summary::before { top: clamp(4px, 1.4svh, 24px); }
-
-      .summary-card::before { margin-bottom: 8px; }
-
-      .summary-card h3 { margin: 8px 0 8px; line-height: 1.28; }
-
-      .summary-card p { line-height: 1.7; }
-
-      @media (max-width: 680px) {
-        .hero { padding-top: 28px; }
-        .hero-copy h1 { font-size: clamp(40px, 11vw, 56px); }
-        .hero-visual { justify-self: stretch; width: auto; }
-        .feature-frame { width: min(82%, 340px); height: auto; }
-        .summary { padding-top: 64px; }
-      }
-
-      /* ---- T01-C15: 제목 단계 h1 → h2 → h3. 요약 영역 라벨을 CSS 장식(::before)에서 실제 h2로 교체(모양은 동일) ---- */
-      .summary::before { content: none; display: none; }
-
-      .summary-title {
-        position: absolute;
-        top: clamp(4px, 1.4svh, 24px);
-        left: var(--chapter-inset);
-        margin: 0;
-        color: #52665a;
-        font-family: Arial, "Helvetica Neue", sans-serif;
-        font-size: 12px;
-        font-weight: 600;
-        line-height: normal;
-        letter-spacing: 0.1em;
-      }
-
-      /* h2가 .summary의 첫 자식이 되면서 기존 .summary-card:first-child 규칙이 빠지므로 같은 규칙을 first-of-type으로 복원 */
-      .summary-card:first-of-type { padding-left: 0; }
-
-      @media (max-width: 680px) {
-        .summary-card:first-of-type { padding-top: 8px; border-top: 0; }
-      }
-
-      /* ---- T01-C16: 텍스트 대비 4.5:1 미달 5곳 보정 ---- */
-      /* 현재 페이지 표시(메인 화면): #5b7163 on 연녹색 배경 3.96:1 → 더 진한 녹색 */
-      .nav-button.current { color: #3c5144; }
-
-      /* 입력칸 안내 글자: 브라우저 기본 #757575 4.41:1 → 메모 칸과 같은 색 */
-      .passkey-register-form input::placeholder { color: #68706a; opacity: 1; }
-
-      /* 로그인 후 메모 본문: 예전 어두운 테마 색(#a9b8c4)이 남아 1.82:1 → 본문 색 */
-      .private-card .private-card-text { color: #46514a; }
-
-      /* ---- T01-C06~C09, C19~C22: 강점 카드 3개 + 근거 펼치기 ---- */
-      #ability-1::before { content: "01"; }
-      #ability-2::before { content: "02"; }
-      #ability-3::before { content: "03"; }
-
-      .summary-card h3 .line { white-space: nowrap; }
-
-      .evidence-toggle {
-        margin-top: 14px;
-        min-height: 40px;
-        padding: 8px 14px;
-        border: 1px solid #52665a;
-        border-radius: 2px;
-        background: transparent;
-        color: #2f4237;
-        font: inherit;
-        font-size: 13px;
-        font-weight: 650;
-        cursor: pointer;
-        transition: background 160ms ease, color 160ms ease;
-      }
-
-      .evidence-toggle::after { content: " ▾"; }
-      .evidence-toggle[aria-expanded="true"]::after { content: " ▴"; }
-
-      .evidence-toggle:hover,
-      .evidence-toggle[aria-expanded="true"] {
-        background: #2f4237;
-        color: #faf8f2;
-      }
-
-      .evidence-panel {
-        margin-top: 16px;
-        animation: evidence-in 180ms ease-out;
-      }
-
-      @keyframes evidence-in {
-        from { opacity: 0; transform: translateY(-4px); }
-        to { opacity: 1; transform: none; }
-      }
-
-      .sar {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 8px 14px;
-        margin: 0;
-        max-width: 38ch;
-      }
-
-      .sar dt {
-        color: #3c5144;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        line-height: 1.8;
-      }
-
-      .sar dd {
-        margin: 0;
-        color: #3a443e;
-        font-size: 14px;
-        line-height: 1.75;
-        word-break: keep-all;
-      }
-
-      .evidence-link {
-        display: inline-block;
-        margin-top: 14px;
-        color: #2f4237;
-        font-size: 14px;
-        font-weight: 650;
-        text-underline-offset: 3px;
-      }
-
-      .evidence-link:hover { color: #52665a; }
-
+      .intro-card img { width: 150px; height: auto; }
+      .intro-card p { margin: 10px 0 18px; font: 700 26px/1.3 var(--hand); color: var(--ink); }
+      .intro-card button { padding: 12px 28px; border: 0; border-radius: 999px; background: var(--button); color: #fffaf0; font: 700 15px/1.2 var(--body); cursor: pointer; }
+      .intro-card button:hover { background: var(--button-hover); }
+      .intro-gate.is-open .bush.left { transform: translateX(-100%); opacity: .2; }
+      .intro-gate.is-open .bush.right { transform: translateX(100%); opacity: .2; }
+      .intro-gate.is-open .intro-veil { opacity: 0; }
+      .intro-gate.is-open .intro-card { opacity: 0; transform: translate(-50%, -46%); pointer-events: none; }
+      body.intro-locked { overflow: hidden; }
       @media (prefers-reduced-motion: reduce) {
-        .evidence-panel { animation: none; }
+        .bush, .intro-veil, .intro-card { transition: none; }
       }
+      @media (max-width: 720px) { .bush { width: 80%; } }
 
-      /* ---- T01-C03: 대상·목적 한 문장 ---- */
-      .page-purpose {
-        max-width: 560px;
-        margin: clamp(10px, 1.8svh, 20px) 0 0;
-        color: #202724;
-        font-size: 16px;
-        font-weight: 600;
-        line-height: 1.6;
-        word-break: keep-all;
+      /* ---------- 바닥 ---------- */
+      .ground { position: relative; padding: 26px 0 30px; background: var(--paper); }
+      .footer-note { margin: 0; text-align: center; font: 22px/1 var(--pen); color: #3f3424; }
+
+      /* ---------- 반응형 ---------- */
+      @media (max-width: 960px) {
+        .summary-grid { grid-template-columns: 1fr; }
+        .signpost { display: none; }
+        .hero-quote { display: none; }
+        .grove-body { grid-template-columns: 1fr; }
       }
-
-      /* 목적 문장이 들어간 만큼 첫 화면 높이 확보: 장식용 영문 라벨(PERSONAL JOURNEY)은 숨김 */
-      .hero-copy .eyebrow { display: none; }
-      .hero-copy h1 { margin-top: 4px; }
-
-      .route-text { line-height: 1.6; }
-      .hero-copy h1 { font-size: clamp(36px, min(5.6vw, 6svh), 84px); }
-      .page-purpose { font-size: 15px; }
-      .summary-card::before { margin-bottom: 4px; }
-      .evidence-toggle { margin-top: 8px; min-height: 36px; padding: 6px 12px; }
-
-      /* ---- T01-C23: 거주 지역(DAEGU, KOREA) 비공개 ---- */
-      .hero-visual::before { content: none; display: none; }
-
-      /* ---- 홈페이지 기준(예전 설계): 내용이 있는 부분은 모서리가 둥근 박스로 구분, 요약 3개는 균등한 네모 ---- */
-      .summary {
-        gap: clamp(14px, 1.6vw, 24px);
-        padding-top: clamp(26px, 3.6svh, 52px);
-      }
-
-      .summary-title { top: clamp(4px, 1svh, 20px); }
-
-      .summary-card,
-      .summary-card:nth-child(n),
-      .summary-card:first-of-type {
-        padding: clamp(10px, 1.8svh, 22px) clamp(16px, 1.6vw, 24px);
-        border: 1px solid rgba(82, 102, 90, 0.2);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.62);
-        box-shadow: 0 8px 22px rgba(42, 48, 43, 0.06);
-      }
-
-      .summary-card + .summary-card { border-left: 1px solid rgba(82, 102, 90, 0.2); }
-
-      .evidence-toggle,
-      .evidence-toggle:hover { border-radius: 10px; }
-
-      /* 번호(01)와 "강점" 표시를 한 줄로 */
-      .summary-card::before { display: inline-block; margin: 0 10px 0 0; vertical-align: baseline; }
-      .summary-card .card-tag { display: inline-flex; vertical-align: baseline; }
-
-      @media (max-width: 680px) {
-        .summary { gap: 14px; }
-        .summary-card,
-        .summary-card:nth-child(n),
-        .summary-card:first-of-type { padding: 18px; border-top: 1px solid rgba(82, 102, 90, 0.2); }
+      @media (max-width: 720px) {
+        .wrap { width: calc(100% - 32px); }
+        .nav-wrap { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 12px; }
+        .nav-right { gap: 2px; flex-wrap: wrap; }
+        .nav-button { font-size: 12px; letter-spacing: .06em; padding: 8px 6px; }
+        .dropdown-menu { left: 0; right: auto; }
+        .hero { min-height: 0; padding-bottom: 54vw; }
+        .hero-cream { background: linear-gradient(180deg, rgba(248, 241, 226, .96) 0%, rgba(248, 241, 226, .92) 66%, rgba(248, 241, 226, 0) 84%); }
+        .hero-inner { padding: 150px 0 10px; }
+        .cards { grid-template-columns: 1fr; }
+        .trail, .trail-bird { display: none; }
+        .passkey-register-form { grid-template-columns: 1fr; }
       }
     </style>
   </head>
   <body>
+    <div class="intro-gate" id="intro-gate" hidden>
+      <div class="intro-veil"></div>
+      <div class="bush left" aria-hidden="true"></div>
+      <div class="bush right" aria-hidden="true"></div>
+      <div class="intro-card" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+        <img src="assets/home/hr_logo.png" alt="HR" width="566" height="313" />
+        <p id="intro-title">수풀 너머, 나의 행로</p>
+        <button type="button" id="intro-enter">들어가기</button>
+      </div>
+    </div>
+
     <div class="page-shell">
       <header class="topbar">
-        <nav class="nav-wrap" aria-label="메인 네비게이션">
-          <div class="nav-left">
-            <a class="nav-brand" href="index.html" aria-label="HR 로고">
-              <span class="nav-brand-word">HR</span>
-            </a>
-          </div>
+        <nav class="nav-wrap wrap" aria-label="메인 네비게이션">
+          <a class="nav-brand" href="index.html" aria-label="행로 메인으로">
+            <img src="assets/home/hr_logo.png" alt="HR" width="566" height="313" />
+          </a>
 
           <div class="nav-right">
             <div class="nav-item">
-              <span class="nav-button current" aria-current="page">메인 화면</span>
+              <span class="nav-button current" aria-current="page">HOME</span>
             </div>
 
             <div class="nav-item">
-              <a class="nav-button" href="Intro.html">자기소개</a>
-            </div>
-
-            <div class="nav-item">
-              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-route">행로 <span class="caret" aria-hidden="true">▼</span></button>
-              <div class="dropdown-menu" id="menu-route">
+              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-about">ABOUT <span class="caret" aria-hidden="true">▼</span></button>
+              <div class="dropdown-menu" id="menu-about">
+                <a href="Intro.html">자기소개</a>
                 <a href="Strength_page.html">강점</a>
                 <a href="Preference_page.html">취향</a>
                 <a href="Plan_page.html">앞으로의 계획</a>
@@ -2057,11 +425,15 @@
             </div>
 
             <div class="nav-item">
-              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-works">결과물 <span class="caret" aria-hidden="true">▼</span></button>
+              <a class="nav-button" href="#about">JOURNEY</a>
+            </div>
+
+            <div class="nav-item">
+              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-works">PROJECTS <span class="caret" aria-hidden="true">▼</span></button>
               <div class="dropdown-menu" id="menu-works">
-                <a href="minigame/name_entry.html" style="display:flex;align-items:center;gap:8px"><img src="minigame/assets/lumoria_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">미니게임 <span style="color:#7a6a9a;font-size:.86em">LUMORIA</span></a>
+                <a href="minigame/name_entry.html" style="display:flex;align-items:center;gap:8px"><img src="minigame/assets/lumoria_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">미니게임 <span style="color:#6a5a8a;font-size:.86em">LUMORIA</span></a>
                 <a href="studio/studiohomepage.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="studio/assets/studio_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">짤 스튜디오</a>
-                <a href="Weather/weatherhomepage.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="Weather/assets/weather_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">오늘의 날씨 <span style="color:#6f9a52;font-size:.86em">weather note</span></a>
+                <a href="Weather/weatherhomepage.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="Weather/assets/weather_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">오늘의 날씨 <span style="color:#557a3b;font-size:.86em">weather note</span></a>
                 <a href="PDS/PlanDoSee.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="PDS/assets/pds_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">PlanDoSee</a>
                 <a href="cortex/demo/index.html" style="display:flex;align-items:center;gap:8px"><img src="cortex/demo/assets/favicon.svg" alt="" width="24" height="24" style="flex:none;margin:-2px">한눈 <span style="display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#e3f4e8;color:#1b6e33;font-size:11px;font-weight:700;line-height:1.5;vertical-align:1px;letter-spacing:0">제작 중</span></a>
               </div>
@@ -2071,142 +443,160 @@
       </header>
 
       <main class="hero">
-        <section class="hero-copy">
-          <p class="eyebrow">Personal Journey</p>
-          <h1>나의 행로를<span>따라가보세요.</span></h1>
-          <p class="page-purpose">이 페이지는 채용 담당자와 함께 일할 동료에게, 제 강점 세 가지와 그 근거를 보여주는 소개 페이지입니다.</p>
+        <div class="hero-cream" aria-hidden="true"></div>
+        <div class="hero-inner wrap">
+          <section class="hero-copy">
+            <p class="eyebrow"><img src="assets/home/icon_sprout.png" alt="" width="22" height="24" />My Journey</p>
+            <h1>나의 행로를<span>따라가보세요.</span></h1>
+            <p class="hero-lead">지금까지 걸어온 길과,<br />앞으로 걸어갈 길을 담은<br />나의 포트폴리오입니다.</p>
+            <p class="page-purpose">이 페이지는 채용 담당자와 함께 일할 동료에게, 제 강점 세 가지와 그 근거를 보여주는 소개 페이지입니다.</p>
 
-          <div class="route-def">
-            <span class="dot"></span>
-            <span>행로란?</span>
-          </div>
-
-          <p class="route-text">
-            행로(行路)는 다니는 길 또는 길을 가다라는 뜻입니다. 한자로는 다닐 행(行) 자와 길 로(路) 자를 씁니다.
-            보통 사람이 걸어가는 실제 길을 뜻하거나, 비유적으로 인생의 여정을 뜻할 때 쓰입니다.
-          </p>
-        </section>
-
-        <section class="hero-visual" aria-label="메인 이미지 영역">
-          <span class="hero-visual-note">01 / CURRENT JOURNEY</span>
-          <div class="feature-frame">
-            <img src="Haengro.png" alt="행로" />
-          </div>
-        </section>
+            <div class="route-def">
+              <img src="assets/home/prop_lighthouse.png" alt="" width="155" height="176" />
+              <h2>행로란?</h2>
+              <p class="route-text">
+                행로(行路)는 다니는 길 또는 길을 가다라는 뜻입니다. 한자로는 다닐 행(行) 자와 길 로(路) 자를 씁니다.
+                보통 사람이 걸어가는 실제 길을 뜻하거나, 비유적으로 인생의 여정을 뜻할 때 쓰입니다.
+              </p>
+            </div>
+          </section>
+          <p class="hero-quote" aria-hidden="true">“지금도<br />나는,<br />걸어가는 중이야.”</p>
+        </div>
       </main>
 
-      <section class="summary" aria-labelledby="summary-title">
-        <h2 class="summary-title" id="summary-title">A PERSONAL JOURNEY</h2>
-        <article class="summary-card" id="ability-1">
-          <div class="card-tag">강점</div>
-          <h3><span class="topic-highlight"><span class="line">자기조절력</span></span></h3>
-          <p>같은 질문이 몇 번이고 반복돼도 화내지 않고 답합니다.</p>
-          <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-1-detail">근거 펼치기</button>
-          <div class="evidence-panel" id="ability-1-detail" hidden>
-            <dl class="sar">
-              <dt>상황</dt>
-              <dd>K-뉴딜 SKT Aleph 심화 과정 조 활동 첫날, 동료의 추천으로 얼떨결에 조장을 맡았습니다.</dd>
-              <dt>행동</dt>
-              <dd>같은 질문을 몇 번이고 반복하는 동료들에게도 화내지 않고 최대한 친절하게 답했습니다.</dd>
-              <dt>결과</dt>
-              <dd>심화 과정 동안 한 번도 빠지지 않고 출석했고, 중간평가 우수자로 선정되었습니다.</dd>
-            </dl>
-            <a class="evidence-link" href="Intro.html">근거 · 자기소개의 ‘숫자로 보는 활동’</a>
+      <section class="summary" id="about" aria-labelledby="summary-title">
+        <div class="wrap summary-grid">
+          <div class="about-intro">
+            <p class="eyebrow">01 / About me</p>
+            <h2 class="summary-title" id="summary-title">나는 이런 사람입니다.</h2>
+            <p>다양한 경험 속에서 배우고,<br />스스로를 더 깊이 이해하며<br />지금도 성장하고 있는 사람입니다.</p>
+            <a class="pill-link" href="Intro.html">자세히 보기 <span aria-hidden="true">→</span></a>
           </div>
-        </article>
 
-        <article class="summary-card" id="ability-2">
-          <div class="card-tag">강점</div>
-          <h3><span class="topic-highlight"><span class="line">자기동기력</span></span></h3>
-          <p>원하던 결과가 아니어도 있는 그대로 받아들이고 끝까지 붙잡습니다.</p>
-          <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-2-detail">근거 펼치기</button>
-          <div class="evidence-panel" id="ability-2-detail" hidden>
-            <dl class="sar">
-              <dt>상황</dt>
-              <dd>리추얼 기록 26일치를 직접 분석했는데, 지속 기간과 문장 길이 사이에 상관관계가 거의 없다는 예상과 다른 결과가 나왔습니다.</dd>
-              <dt>행동</dt>
-              <dd>원하던 결과는 아니었지만 있는 그대로 받아들이고, 가설을 수정해 다시 적었습니다.</dd>
-              <dt>결과</dt>
-              <dd>수정한 가설까지 담은 논문을 제출했습니다. 아래 링크에서 직접 읽을 수 있습니다.</dd>
-            </dl>
-            <a class="evidence-link" href="Paper.html">근거 · 논문 읽기</a>
-          </div>
-        </article>
+          <div class="cards">
+            <img class="trail-bird" src="assets/home/icon_bird.png" alt="" width="192" height="167" />
 
-        <article class="summary-card" id="ability-3">
-          <div class="card-tag">강점</div>
-          <h3><span class="topic-highlight"><span class="line">대인관계력</span></span></h3>
-          <p>도움이 필요한 순간엔 망설임보다 몸이 먼저 움직입니다.</p>
-          <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-3-detail">근거 펼치기</button>
-          <div class="evidence-panel" id="ability-3-detail" hidden>
-            <dl class="sar">
-              <dt>상황</dt>
-              <dd>학원 건물 앞에서 휠체어를 타신 어르신이 문을 못 열고 계셨습니다.</dd>
-              <dt>행동</dt>
-              <dd>생각하기도 전에 뛰어가 문을 잡아드렸습니다.</dd>
-              <dt>결과</dt>
-              <dd>보상과 상관없이 2달에 한 번씩 헌혈을 이어가고 있습니다.</dd>
-            </dl>
-            <a class="evidence-link" href="Intro.html">근거 · 자기소개 전문</a>
+            <article class="summary-card" id="ability-1">
+              <div class="card-head"><img src="assets/home/icon_compass.png" alt="" width="42" height="42" /><span class="card-num">01 · 강점</span></div>
+              <h3>자기조절력</h3>
+              <p>같은 질문이 몇 번이고 반복돼도 화내지 않고 답합니다.</p>
+              <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-1-detail">근거 펼치기</button>
+              <div class="evidence-panel" id="ability-1-detail" hidden>
+                <dl class="sar">
+                  <dt>상황</dt>
+                  <dd>K-뉴딜 SKT Aleph 심화 과정 조 활동 첫날, 동료의 추천으로 얼떨결에 조장을 맡았습니다.</dd>
+                  <dt>행동</dt>
+                  <dd>같은 질문을 몇 번이고 반복하는 동료들에게도 화내지 않고 최대한 친절하게 답했습니다.</dd>
+                  <dt>결과</dt>
+                  <dd>심화 과정 동안 한 번도 빠지지 않고 출석했고, 중간평가 우수자로 선정되었습니다.</dd>
+                </dl>
+                <a class="evidence-link" href="Intro.html">근거 · 자기소개의 ‘숫자로 보는 활동’</a>
+              </div>
+            </article>
+
+            <article class="summary-card" id="ability-2">
+              <div class="card-head"><img src="assets/home/icon_footprints.png" alt="" width="42" height="42" /><span class="card-num">02 · 강점</span></div>
+              <h3>자기동기력</h3>
+              <p>원하던 결과가 아니어도 있는 그대로 받아들이고 끝까지 붙잡습니다.</p>
+              <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-2-detail">근거 펼치기</button>
+              <div class="evidence-panel" id="ability-2-detail" hidden>
+                <dl class="sar">
+                  <dt>상황</dt>
+                  <dd>리추얼 기록 26일치를 직접 분석했는데, 지속 기간과 문장 길이 사이에 상관관계가 거의 없다는 예상과 다른 결과가 나왔습니다.</dd>
+                  <dt>행동</dt>
+                  <dd>원하던 결과는 아니었지만 있는 그대로 받아들이고, 가설을 수정해 다시 적었습니다.</dd>
+                  <dt>결과</dt>
+                  <dd>수정한 가설까지 담은 논문을 제출했습니다. 아래 링크에서 직접 읽을 수 있습니다.</dd>
+                </dl>
+                <a class="evidence-link" href="Paper.html">근거 · 논문 읽기</a>
+              </div>
+            </article>
+
+            <article class="summary-card" id="ability-3">
+              <div class="card-head"><img src="assets/home/icon_people.png" alt="" width="42" height="42" /><span class="card-num">03 · 강점</span></div>
+              <h3>대인관계력</h3>
+              <p>도움이 필요한 순간엔 망설임보다 몸이 먼저 움직입니다.</p>
+              <button type="button" class="evidence-toggle" aria-expanded="false" aria-controls="ability-3-detail">근거 펼치기</button>
+              <div class="evidence-panel" id="ability-3-detail" hidden>
+                <dl class="sar">
+                  <dt>상황</dt>
+                  <dd>학원 건물 앞에서 휠체어를 타신 어르신이 문을 못 열고 계셨습니다.</dd>
+                  <dt>행동</dt>
+                  <dd>생각하기도 전에 뛰어가 문을 잡아드렸습니다.</dd>
+                  <dt>결과</dt>
+                  <dd>보상과 상관없이 2달에 한 번씩 헌혈을 이어가고 있습니다.</dd>
+                </dl>
+                <a class="evidence-link" href="Intro.html">근거 · 자기소개 전문</a>
+              </div>
+            </article>
           </div>
-        </article>
+        </div>
+        <img class="signpost" src="assets/home/prop_signpost.png" alt="" width="193" height="232" />
       </section>
 
-      <p class="zone-divider">여기서부터 비공개 영역</p>
+      <section class="grove" id="journal" aria-labelledby="grove-title">
+        <div class="wrap">
+          <div class="grove-body" id="grove-body">
+            <section class="passkey-panel" aria-label="패스키 등록 및 로그인">
+              <div class="grove-head">
+                <p class="eyebrow"><img src="assets/home/icon_journal.png" alt="" width="24" height="18" />My private journal</p>
+              </div>
+              <h2 class="panel-title" id="grove-title"><img src="assets/home/icon_lock.png" alt="" width="30" height="40" />패스키</h2>
+              <p class="private-caption" id="passkey-auth-status">로그인 상태 확인 중...</p>
 
-      <section class="passkey-panel" aria-label="패스키 등록 및 로그인">
-        <div class="private-zone-header">
-          <span class="card-tag">🔑 패스키</span>
-          <p class="private-caption" id="passkey-auth-status">로그인 상태 확인 중...</p>
-        </div>
+              <div class="passkey-login-row">
+                <button type="button" id="passkey-login-button">패스키로 로그인</button>
+                <button type="button" id="passkey-logout-button" hidden>로그아웃</button>
+              </div>
+              <p class="passkey-message" id="passkey-login-message"></p>
 
-        <div class="passkey-login-row">
-          <button type="button" id="passkey-login-button">패스키로 로그인</button>
-          <button type="button" id="passkey-logout-button" hidden>로그아웃</button>
-        </div>
-        <p class="passkey-message" id="passkey-login-message"></p>
+              <details class="register-box" id="register-box">
+                <summary>계정 만들기 · 이 기기 추가</summary>
+                <p id="passkey-register-hint">
+                  아직 계정이 없다면 아이디를 정해서 첫 패스키로 계정을 만들어보세요. 계정은 여러 개 만들 수 있고,
+                  계정마다 비공개 영역이 서로 완전히 분리돼요.
+                </p>
+                <div class="passkey-register-form">
+                  <input type="text" id="passkey-username-input" placeholder="아이디" maxlength="30" aria-label="아이디" />
+                  <input type="text" id="passkey-displayname-input" placeholder="표시 이름" maxlength="30" aria-label="표시 이름" />
+                  <input type="text" id="passkey-label-input" placeholder="이 기기 이름 (예: 내 노트북 - 크롬)" maxlength="40" aria-label="이 기기 이름" />
+                  <button type="button" id="passkey-register-button">패스키로 계정 만들기</button>
+                </div>
+                <p class="passkey-message" id="passkey-message"></p>
+                <p class="passkey-account-hint">
+                  이미 계정이 있고 이 기기를 추가로 등록(기기 분실 대비)하려면, 먼저 위에서 로그인한 뒤
+                  다시 눌러주세요 — 버튼이 "내 계정에 새 기기 추가"로 바뀝니다.
+                </p>
+              </details>
 
-        <p class="route-text" style="margin-top: 4px; font-size: 14px;" id="passkey-register-hint">
-          아직 계정이 없다면 아이디를 정해서 첫 패스키로 계정을 만들어보세요. 계정은 여러 개 만들 수 있고,
-          계정마다 비공개 영역이 서로 완전히 분리돼요.
-        </p>
+              <div class="passkey-list" id="passkey-list">
+                <p class="private-placeholder" id="passkey-list-placeholder">로그인하면 내가 등록한 패스키 목록이 여기 보여요.</p>
+              </div>
+            </section>
 
-        <div class="passkey-register-form">
-          <input type="text" id="passkey-username-input" placeholder="아이디" maxlength="30" />
-          <input type="text" id="passkey-displayname-input" placeholder="표시 이름" maxlength="30" />
-          <input type="text" id="passkey-label-input" placeholder="이 기기 이름 (예: 내 노트북 - 크롬)" maxlength="40" />
-          <button type="button" id="passkey-register-button">패스키로 계정 만들기</button>
-        </div>
-        <p class="passkey-message" id="passkey-message"></p>
-        <p class="passkey-account-hint">
-          이미 계정이 있고 이 기기를 추가로 등록(기기 분실 대비)하려면, 먼저 위에서 로그인한 뒤
-          다시 눌러주세요 — 버튼이 "내 계정에 새 기기 추가"로 바뀝니다.
-        </p>
-
-        <div class="passkey-list" id="passkey-list">
-          <p class="private-placeholder" id="passkey-list-placeholder">로그인하면 내가 등록한 패스키 목록이 여기 보여요.</p>
+            <section class="private-zone" aria-label="비공개 영역">
+              <h2 class="panel-title"><img src="assets/home/icon_path.png" alt="" width="32" height="30" />오늘의 기록</h2>
+              <p class="private-caption" id="private-zone-caption">로그인한 나만 볼 수 있는 영역이에요. 로그인 전에는 내용이 아예 내려오지 않고, 다른 계정으로 로그인하면 다른 계정의 메모가 보여요(서로 섞이지 않습니다).</p>
+              <div class="private-content" id="private-content">
+                <p class="private-placeholder" id="private-placeholder">불러오는 중...</p>
+              </div>
+              <div class="private-note" id="private-note-add-block" hidden>
+                <p class="note-help">
+                  아래에 적고 저장하면 위 목록에 새 메모로 추가돼요. 각 메모는 "수정"/"삭제" 버튼으로
+                  직접 고치거나 지울 수 있어요.
+                </p>
+                <textarea id="private-note-textarea" rows="3" maxlength="2000" placeholder="여기에 나만의 메모를 적어보세요." aria-label="새 메모"></textarea>
+                <button type="button" class="private-note-save-button" id="private-note-save-button">메모 추가</button>
+                <p class="passkey-message" id="private-note-message"></p>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
 
-      <section class="private-zone" aria-label="비공개 영역">
-        <div class="private-zone-header">
-          <span class="private-badge">🔒 비공개 영역</span>
-          <p class="private-caption" id="private-zone-caption">로그인한 나만 볼 수 있는 영역이에요. 로그인 전에는 내용이 아예 내려오지 않고, 다른 계정으로 로그인하면 다른 계정의 메모가 보여요(서로 섞이지 않습니다).</p>
-        </div>
-        <div class="private-content" id="private-content">
-          <p class="private-placeholder" id="private-placeholder">불러오는 중...</p>
-        </div>
-        <div class="private-note" id="private-note-add-block" hidden>
-          <p class="route-text" style="margin: 0 0 4px; font-size: 14px; color: #a9b8c4;">
-            아래에 적고 저장하면 위 목록에 새 메모로 추가돼요. 목록의 각 메모는 "수정"/"삭제" 버튼으로
-            직접 고치거나 지울 수 있어요 — 다른 계정으로 로그인하면 이 목록 자체가 그 계정 것으로 통째로 바뀝니다.
-          </p>
-          <textarea id="private-note-textarea" rows="3" maxlength="2000" placeholder="여기에 나만의 메모를 적어보세요."></textarea>
-          <br />
-          <button type="button" class="private-note-save-button" id="private-note-save-button">메모 추가</button>
-          <p class="passkey-message" id="private-note-message"></p>
-        </div>
-      </section>
+      <footer class="ground">
+        <p class="footer-note">지금도 나는, 걸어가는 중이야.</p>
+      </footer>
     </div>
 
     <script src="/vendor/simplewebauthn-browser.js"></script>
@@ -2643,6 +1033,7 @@
           : '🔒 로그인 안 됨';
         applyRegisterFormMode();
         loadPasskeyList(); // 로그인 상태가 바뀌면 목록 대상 계정·삭제 버튼 노출 여부도 다시 그려야 함
+        setGroveOpen(authenticated);
       }
 
       async function refreshAuthStatus() {
@@ -2715,6 +1106,38 @@
           passkeyLogoutButton.disabled = false;
         }
       });
+
+      // ---- 첫 방문: 수풀이 닫혀 있다가 '들어가기'를 누르면 양옆으로 갈라지며 사이트가 보입니다 ----
+      // 같은 탭에서 다른 페이지를 다녀오면 다시 닫지 않도록 세션에 한 번만 보여줍니다.
+      function setGroveOpen() { /* 이전 버전 호환: 로그인과 수풀은 더 이상 연결하지 않음 */ }
+      (function setupIntroGate() {
+        const gate = document.getElementById('intro-gate');
+        const enter = document.getElementById('intro-enter');
+        let seen = false;
+        try { seen = sessionStorage.getItem('haengro_intro_seen') === '1'; } catch { seen = false; }
+        if (seen) return;
+        gate.hidden = false;
+        document.body.classList.add('intro-locked');
+        const pageShell = document.querySelector('.page-shell');
+        pageShell.setAttribute('aria-hidden', 'true');
+        pageShell.inert = true;
+        requestAnimationFrame(() => enter.focus());
+        function openGate() {
+          if (gate.classList.contains('is-open')) return;
+          gate.classList.add('is-open');
+          document.body.classList.remove('intro-locked');
+          pageShell.removeAttribute('aria-hidden');
+          pageShell.inert = false;
+          try { sessionStorage.setItem('haengro_intro_seen', '1'); } catch { /* 저장이 막혀도 동작에는 문제 없음 */ }
+          const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          setTimeout(() => { gate.hidden = true; }, reduce ? 0 : 1500);
+        }
+        enter.addEventListener('click', openGate);
+        gate.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') openGate();
+          if (event.key === 'Tab') { event.preventDefault(); enter.focus(); }
+        });
+      })();
 
       refreshAuthStatus();
     </script>

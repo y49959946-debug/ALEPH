@@ -20,6 +20,7 @@
           "ff-type-personal.webp",
           "ff-type-rest.webp",
           "ritual_scatter.png",
+          "assets/**",
           "Plan_page.html",
           "Preference_page.html",
           "Strength_page.html",
