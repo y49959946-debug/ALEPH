@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>짤 카드 스튜디오</title>
+<link rel="icon" type="image/png" sizes="16x16" href="assets/studio_icon_16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/studio_icon_32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/studio_icon_48.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/studio_icon_192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/studio_icon_180.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+KR:wght@400;700;900&display=swap">
 <style>
 	* { box-sizing: border-box; }
@@ -32,28 +37,10 @@
 		min-width: 0;
 	}
 	.brand-logo {
-		position: relative;
-		width: 34px;
-		height: 40px;
-		flex: 0 0 34px;
-		background: #f5c84c;
-		border: 2px solid #17191f;
-		border-radius: 5px;
-		box-shadow: 3px 3px 0 #7dc4ff;
-		transform: rotate(-5deg);
-	}
-	.brand-logo::before {
-		content: '짤';
-		position: absolute;
-		inset: 4px 3px 4px;
-		display: grid;
-		place-items: center;
-		border: 1px solid rgba(23, 25, 31, .45);
-		border-radius: 2px;
-		color: #17191f;
-		font-family: 'Black Han Sans', sans-serif;
-		font-size: 17px;
-		line-height: 1;
+		width: 36px;
+		height: 36px;
+		flex: 0 0 36px;
+		display: block;
 	}
 	header h1 {
 		margin: 0;
@@ -574,7 +561,7 @@
 
 <header>
 	<div class="brand">
-		<div class="brand-logo" aria-hidden="true"></div>
+		<img class="brand-logo" src="assets/studio_icon_192.png" alt="" aria-hidden="true">
 		<h1>짤 카드 스튜디오</h1>
 	</div>
 	<a class="back-link" href="../index.html">← 메인으로</a>
