@@ -111,8 +111,8 @@
       .hero {
         position: relative;
         display: block;
-        min-height: max(600px, 59.6vw);
-        background: url("assets/home/bg_top.jpg") center bottom / 100% auto no-repeat, linear-gradient(180deg, #c9d8e6 0%, #dfe3e2 60%, #ece6dc 100%);
+        min-height: clamp(560px, 45vw, 660px);
+        background: url("assets/home/bg_top.jpg") center bottom / cover no-repeat, linear-gradient(180deg, #c9d8e6 0%, #dfe3e2 60%, #ece6dc 100%);
       }
       .hero-cream {
         position: absolute;
@@ -121,7 +121,7 @@
         -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 96%);
         mask-image: linear-gradient(180deg, #000 70%, transparent 96%);
       }
-      .hero-inner { position: relative; z-index: 2; padding: clamp(118px, 12vw, 150px) 0 110px; }
+      .hero-inner { position: relative; z-index: 2; padding: clamp(104px, 9vw, 124px) 0 56px; }
       .hero-copy { max-width: 480px; }
       .eyebrow {
         display: inline-flex;
@@ -136,15 +136,15 @@
       }
       .eyebrow img { width: 22px; height: auto; }
       .hero h1 {
-        margin: 0 0 18px;
-        font: 700 clamp(42px, 5.2vw, 64px)/1.15 var(--hand);
+        margin: 0 0 12px;
+        font: 700 clamp(38px, 4.3vw, 56px)/1.12 var(--hand);
         color: var(--ink);
         letter-spacing: -.01em;
       }
       .hero h1 span { display: block; }
-      .hero-lead { margin: 0 0 10px; color: var(--ink-soft); font-size: 16px; line-height: 1.8; }
+      .hero-lead { margin: 0 0 10px; color: var(--ink-soft); font-size: 16px; line-height: 1.7; }
       .page-purpose {
-        margin: 0 0 26px;
+        margin: 0 0 18px;
         padding: 8px 12px;
         border-left: 3px solid var(--sage);
         background: rgba(251, 247, 236, .78);
@@ -154,7 +154,7 @@
       .route-def { display: grid; grid-template-columns: 54px 1fr; gap: 6px 14px; align-items: start; }
       .route-def img { grid-row: span 2; width: 54px; height: auto; margin-top: 4px; }
       .route-def h2 { margin: 0; font: 700 24px/1.2 var(--hand); color: var(--ink); }
-      .route-text { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.85; }
+      .route-text { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.75; }
       .hero-quote {
         position: absolute;
         top: clamp(110px, 11vw, 150px);
@@ -167,7 +167,8 @@
       }
 
       /* ---------- 나는 이런 사람입니다 ---------- */
-      .summary { position: relative; min-height: 45.9vw; padding: 30px 0 60px; background: url("assets/home/bg_mid.jpg") center top / 100% auto no-repeat, var(--paper); }
+      .summary::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 70px; background: linear-gradient(180deg, rgba(246, 231, 204, .95), rgba(246, 231, 204, 0)); pointer-events: none; }
+      .summary { position: relative; padding: 18px 0 56px; background: url("assets/home/bg_mid.jpg") center top / 100% auto no-repeat, var(--paper); }
       .summary-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
       .about-intro h2 { margin: 0 0 14px; font: 700 clamp(30px, 3.4vw, 40px)/1.2 var(--hand); }
       .about-intro p { margin: 0 0 22px; color: var(--ink-soft); font-size: 15px; line-height: 1.85; }
@@ -240,12 +241,13 @@
         height: auto;
         pointer-events: none;
       }
+      .cards-hint { display: none; margin: 0 0 4px; color: var(--ink-muted); font-size: 12px; }
       .sprout-mark { position: absolute; left: 0; bottom: 40px; width: 38px; height: auto; opacity: .9; }
 
       /* ---------- 비공개 기록: 수풀 ---------- */
       .grove {
         position: relative;
-        padding: 64px 0 80px;
+        padding: 52px 0 56px;
         overflow: hidden;
       }
       .grove-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 20px; }
@@ -319,7 +321,8 @@
       .grove-lantern { position: absolute; right: -8px; bottom: -40px; width: 120px; height: auto; pointer-events: none; }
 
       /* 수풀: 로그인 전에는 기록 공간 전체를 덮고, 로그인하면 양옆으로 갈라지며 열립니다. */
-      .grove { background: url("assets/home/bg_bottom.jpg") center top / 100% auto no-repeat, #8d9a68; min-height: max(520px, 46.5vw); }
+      .grove { background: url("assets/home/bg_bottom.jpg") center 70% / cover no-repeat, #8d9a68; }
+      .grove::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 90px; background: linear-gradient(180deg, var(--paper), rgba(246, 231, 204, 0)); pointer-events: none; }
 
       /* ---------- 첫 방문: 수풀을 헤치고 걸어 들어가는 장면 ----------
          층(멀리→가까이): 그늘 → 뒤 수풀 2장 → 앞 수풀 2장 → 흐릿한 앞 잎 3덩이.
@@ -393,10 +396,22 @@
         .nav-right { gap: 2px; flex-wrap: wrap; }
         .nav-button { font-size: 12px; letter-spacing: .06em; padding: 8px 6px; }
         .dropdown-menu { left: 0; right: auto; }
-        .hero { min-height: 0; padding-bottom: 54vw; }
+        .hero { min-height: 0; padding-bottom: 54vw; background-size: 100% auto, auto; }
+        .summary { background: var(--paper-noise), var(--paper); }
         .hero-cream { background: linear-gradient(180deg, rgba(248, 241, 226, .96) 0%, rgba(248, 241, 226, .92) 66%, rgba(248, 241, 226, 0) 84%); }
         .hero-inner { padding: 150px 0 10px; }
-        .cards { grid-template-columns: 1fr; }
+        /* 휴대폰: 강점 카드는 옆으로 넘겨 보기 → 세로 길이를 줄임 */
+        .cards {
+          display: flex;
+          gap: 12px;
+          margin: 0 -16px;
+          padding: 8px 16px 14px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: thin;
+        }
+        .summary-card { flex: 0 0 84%; scroll-snap-align: center; }
+        .cards-hint { display: block; }
         .trail, .trail-bird { display: none; }
         .passkey-register-form { grid-template-columns: 1fr; }
       }
@@ -468,7 +483,7 @@
           <section class="hero-copy">
             <p class="eyebrow"><img src="assets/home/icon_sprout.png" alt="" width="22" height="24" />My Journey</p>
             <h1>나의 행로를<span>따라가보세요.</span></h1>
-            <p class="hero-lead">지금까지 걸어온 길과,<br />앞으로 걸어갈 길을 담은<br />나의 포트폴리오입니다.</p>
+            <p class="hero-lead">지금까지 걸어온 길과, 앞으로 걸어갈 길을 담은<br />나의 포트폴리오입니다.</p>
             <p class="page-purpose">이 페이지는 채용 담당자와 함께 일할 동료에게, 제 강점 세 가지와 그 근거를 보여주는 소개 페이지입니다.</p>
 
             <div class="route-def">
@@ -493,7 +508,8 @@
             <a class="pill-link" href="Intro.html">자세히 보기 <span aria-hidden="true">→</span></a>
           </div>
 
-          <div class="cards">
+          <p class="cards-hint">옆으로 넘겨 강점 세 가지를 볼 수 있어요 →</p>
+          <div class="cards" role="region" aria-label="강점 세 가지" tabindex="0">
             <img class="trail-bird" src="assets/home/icon_bird.png" alt="" width="192" height="167" />
 
             <article class="summary-card" id="ability-1">
