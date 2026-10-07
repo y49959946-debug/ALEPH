@@ -648,9 +648,129 @@
         .nav-right { gap: 7px; }
         .nav-button { font-size: 10px; }
       }
+    
+      /* ===== 수채화 잎 프레임 (장식 전용) ===== */
+      body { position: relative; }
+      .page-shell { position: relative; z-index: 1; padding-bottom: clamp(190px, 21vw, 300px); }
+      .leaf-frame {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+        user-select: none;
+      }
+      .leaf-frame img { position: absolute; display: block; height: auto; max-width: none; }
+      .lf-tl { top: 0; left: 0; width: clamp(150px, 21vw, 320px); }
+      .lf-tr { top: 0; right: 0; width: clamp(120px, 16vw, 240px); }
+      .lf-bird {
+        top: 100px;
+        right: calc(clamp(120px, 16vw, 240px) * 0.05);
+        width: calc(clamp(120px, 16vw, 240px) * 0.92);
+        transform-origin: 18% 80%;
+        animation: lf-sway 7s ease-in-out infinite;
+      }
+      .lf-bl { bottom: 0; left: 0; width: clamp(170px, 25vw, 380px); }
+      .lf-br { bottom: 0; right: 0; width: clamp(160px, 23vw, 340px); }
+      .lf-path {
+        left: 50%;
+        bottom: clamp(26px, 4.2vw, 64px);
+        width: min(60vw, 880px);
+        transform: translateX(-50%);
+        clip-path: inset(0 0 0 0);
+        transition: clip-path 2.8s cubic-bezier(.45, .05, .3, 1);
+      }
+      .lf-path.is-waiting { clip-path: inset(0 100% 0 0); }
+      @keyframes lf-sway {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-2.4deg); }
+      }
+      main { position: relative; }
+      .page-motif {
+        position: absolute;
+        top: clamp(70px, 9vw, 130px);
+        right: clamp(150px, 17vw, 260px);
+        width: clamp(170px, 18vw, 270px);
+        height: auto;
+        pointer-events: none;
+        user-select: none;
+      }
+      /* 잎 위에 겹치는 글자는 종이색 테두리로 가독성 유지 */
+      .nav-brand-word,
+      .nav-button,
+      .hero-copy .eyebrow,
+      .pager-link,
+      .page-foot p { text-shadow: 0 0 6px rgba(245, 242, 234, .95), 0 0 14px rgba(245, 242, 234, .9); }
+      /* 맨 위에서는 헤더를 투명하게 해 잎이 보이고, 스크롤하면 화면 끝까지 종이색 바탕 */
+      .nav-wrap { background: transparent !important; }
+      .topbar::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        bottom: 0;
+        left: 50%;
+        width: 100vw;
+        margin-left: -50vw;
+        background: rgb(245, 242, 234);
+        opacity: 0;
+        transition: opacity 220ms ease;
+        z-index: -1;
+      }
+      body.is-scrolled .topbar::before { opacity: 1; }
+      @media (max-width: 1240px) {
+        .page-motif:not(.keep) { display: none; }
+      }
+      @media (max-width: 960px) {
+        .page-motif { display: none; }
+      }
+      @media (max-width: 680px) {
+        .page-shell { padding-bottom: 170px; }
+        .lf-tl { width: 118px; opacity: .85; }
+        .lf-tr { width: 92px; opacity: .85; }
+        .lf-bird { top: 64px; right: calc(92px * .05); width: calc(92px * .92); }
+        .lf-bl { width: 160px; }
+        .lf-br { width: 150px; }
+        .lf-path { width: 74vw; bottom: 30px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lf-bird { animation: none; }
+        .lf-path, .lf-path.is-waiting { transition: none; clip-path: none; }
+      }
+      .page-motif { top: 395px; right: clamp(120px, 14vw, 230px); }
+      @media (max-width: 1180px) { .page-motif { display: none; } }
+      /* 배경 그림 위에서도 작은 글씨 대비 4.5:1 이상 유지 */
+      .hero-copy .eyebrow,
+      .story-card-label,
+      .pager-link span,
+      .quote-source,
+      .sar dt,
+      .turning-point .mark,
+      .work-go { color: #3d5246 !important; }
+      .number-card .source,
+      .work-quote span,
+      .page-foot p { color: #4a524c !important; }
+      /* 큰 제목 뒤 배경색 제거 */
+      .hero-copy h1 .topic-highlight { padding: 0; background: transparent; border-radius: 0; }
+      /* ---- 흐린 수채화 배경 (화면에 고정) ---- */
+      .page-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background: url("assets/home/bg_plan.webp") 42% 100% / cover no-repeat;
+      }
     </style>
   </head>
   <body>
+    <div class="page-bg" aria-hidden="true"></div>
+    <div class="leaf-frame" aria-hidden="true">
+      <img class="lf-tl" src="assets/home/leaf_tl.webp" alt="" width="440" height="600" decoding="async">
+      <img class="lf-tr" src="assets/home/leaf_tr.webp" alt="" width="306" height="540" decoding="async">
+      <img class="lf-bird" src="assets/home/bird_branch.webp" alt="" width="320" height="170" decoding="async">
+      <img class="lf-bl" src="assets/home/leaf_bl.webp" alt="" width="470" height="334" loading="lazy" decoding="async">
+      <img class="lf-br" src="assets/home/leaf_br.webp" alt="" width="416" height="364" loading="lazy" decoding="async">
+      <img class="lf-path" src="assets/home/trail_path.webp" alt="" width="945" height="110" loading="lazy" decoding="async">
+    </div>
     <div class="page-shell">
       <header class="topbar">
         <nav class="nav-wrap" aria-label="메인 네비게이션">
@@ -788,6 +908,24 @@
           });
         }
       });
+    </script>
+    <script>
+      (() => {
+        const setScrolled = () => document.body.classList.toggle('is-scrolled', window.scrollY > 4);
+        window.addEventListener('scroll', setScrolled, { passive: true });
+        setScrolled();
+        const path = document.querySelector('.lf-path');
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!path || reduce || !('IntersectionObserver' in window)) return;
+        path.classList.add('is-waiting');
+        const io = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            path.classList.remove('is-waiting');
+            io.disconnect();
+          }
+        }, { threshold: 0.4 });
+        io.observe(path);
+      })();
     </script>
   </body>
 </html>

@@ -648,9 +648,169 @@
         .nav-right { gap: 7px; }
         .nav-button { font-size: 10px; }
       }
+    
+      /* ===== 수채화 잎 프레임 (장식 전용) ===== */
+      body { position: relative; }
+      .page-shell { position: relative; z-index: 1; padding-bottom: clamp(190px, 21vw, 300px); }
+      .leaf-frame {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+        user-select: none;
+      }
+      .leaf-frame img { position: absolute; display: block; height: auto; max-width: none; }
+      .lf-tl { top: 0; left: 0; width: clamp(150px, 21vw, 320px); }
+      .lf-tr { top: 0; right: 0; width: clamp(120px, 16vw, 240px); }
+      .lf-bird {
+        top: 100px;
+        right: calc(clamp(120px, 16vw, 240px) * 0.05);
+        width: calc(clamp(120px, 16vw, 240px) * 0.92);
+        transform-origin: 18% 80%;
+        animation: lf-sway 7s ease-in-out infinite;
+      }
+      .lf-bl { bottom: 0; left: 0; width: clamp(170px, 25vw, 380px); }
+      .lf-br { bottom: 0; right: 0; width: clamp(160px, 23vw, 340px); }
+      .lf-path {
+        left: 50%;
+        bottom: clamp(26px, 4.2vw, 64px);
+        width: min(60vw, 880px);
+        transform: translateX(-50%);
+        clip-path: inset(0 0 0 0);
+        transition: clip-path 2.8s cubic-bezier(.45, .05, .3, 1);
+      }
+      .lf-path.is-waiting { clip-path: inset(0 100% 0 0); }
+      @keyframes lf-sway {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-2.4deg); }
+      }
+      main { position: relative; }
+      .page-motif {
+        position: absolute;
+        top: clamp(70px, 9vw, 130px);
+        right: clamp(150px, 17vw, 260px);
+        width: clamp(170px, 18vw, 270px);
+        height: auto;
+        pointer-events: none;
+        user-select: none;
+      }
+      /* 잎 위에 겹치는 글자는 종이색 테두리로 가독성 유지 */
+      .nav-brand-word,
+      .nav-button,
+      .hero-copy .eyebrow,
+      .pager-link,
+      .page-foot p { text-shadow: 0 0 6px rgba(245, 242, 234, .95), 0 0 14px rgba(245, 242, 234, .9); }
+      /* 맨 위에서는 헤더를 투명하게 해 잎이 보이고, 스크롤하면 화면 끝까지 종이색 바탕 */
+      .nav-wrap { background: transparent !important; }
+      .topbar::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        bottom: 0;
+        left: 50%;
+        width: 100vw;
+        margin-left: -50vw;
+        background: rgb(245, 242, 234);
+        opacity: 0;
+        transition: opacity 220ms ease;
+        z-index: -1;
+      }
+      body.is-scrolled .topbar::before { opacity: 1; }
+      @media (max-width: 1240px) {
+        .page-motif:not(.keep) { display: none; }
+      }
+      @media (max-width: 960px) {
+        .page-motif { display: none; }
+      }
+      @media (max-width: 680px) {
+        .page-shell { padding-bottom: 170px; }
+        .lf-tl { width: 118px; opacity: .85; }
+        .lf-tr { width: 92px; opacity: .85; }
+        .lf-bird { top: 64px; right: calc(92px * .05); width: calc(92px * .92); }
+        .lf-bl { width: 160px; }
+        .lf-br { width: 150px; }
+        .lf-path { width: 74vw; bottom: 30px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lf-bird { animation: none; }
+        .lf-path, .lf-path.is-waiting { transition: none; clip-path: none; }
+      }
+      /* ---- 강점 페이지: 메인 화면 강점 3개(T01)와 같은 내용 ---- */
+      .story-panel .quote-source {
+        margin-top: 10px;
+        color: #536b5e;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .summary-card .strength-title {
+        margin: 6px 0 10px;
+        color: #202724;
+        font-size: clamp(21px, 2vw, 26px);
+        line-height: 1.38;
+        font-weight: 700;
+        word-break: keep-all;
+      }
+      .sar { display: grid; gap: 16px; margin: 0; }
+      .sar dt {
+        margin-bottom: 3px;
+        color: #536b5e;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      .sar dd {
+        margin: 0;
+        color: #46514a;
+        font-size: 15px;
+        line-height: 1.85;
+        word-break: keep-all;
+      }
+      .evidence-link {
+        align-self: flex-start;
+        margin-top: 20px;
+        padding-bottom: 2px;
+        color: #2f4a3c;
+        font-size: 14px;
+        font-weight: 650;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(47, 74, 60, 0.4);
+        transition: color 180ms ease, border-color 180ms ease;
+      }
+      .evidence-link:hover { color: #1f3329; border-color: currentColor; }
+      /* 배경 그림 위에서도 작은 글씨 대비 4.5:1 이상 유지 */
+      .hero-copy .eyebrow,
+      .story-card-label,
+      .pager-link span,
+      .quote-source,
+      .sar dt,
+      .turning-point .mark,
+      .work-go { color: #3d5246 !important; }
+      .number-card .source,
+      .work-quote span,
+      .page-foot p { color: #4a524c !important; }
+      /* 큰 제목 뒤 배경색 제거 */
+      .hero-copy h1 .topic-highlight { padding: 0; background: transparent; border-radius: 0; }
+      /* ---- 흐린 수채화 배경 (화면에 고정) ---- */
+      .page-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background: url("assets/home/bg_strength.webp") 72% 100% / cover no-repeat;
+      }
     </style>
   </head>
   <body>
+    <div class="page-bg" aria-hidden="true"></div>
+    <div class="leaf-frame" aria-hidden="true">
+      <img class="lf-tl" src="assets/home/leaf_tl.webp" alt="" width="440" height="600" decoding="async">
+      <img class="lf-tr" src="assets/home/leaf_tr.webp" alt="" width="306" height="540" decoding="async">
+      <img class="lf-bird" src="assets/home/bird_branch.webp" alt="" width="320" height="170" decoding="async">
+      <img class="lf-bl" src="assets/home/leaf_bl.webp" alt="" width="470" height="334" loading="lazy" decoding="async">
+      <img class="lf-br" src="assets/home/leaf_br.webp" alt="" width="416" height="364" loading="lazy" decoding="async">
+      <img class="lf-path" src="assets/home/trail_path.webp" alt="" width="945" height="110" loading="lazy" decoding="async">
+    </div>
     <div class="page-shell">
       <header class="topbar">
         <nav class="nav-wrap" aria-label="메인 네비게이션">
@@ -693,70 +853,83 @@
       </header>
 
       <main>
+        <img class="page-motif" src="assets/home/motif_compass.webp" alt="" aria-hidden="true" width="265" height="155" decoding="async">
         <section class="hero-copy">
           <p class="eyebrow">Personal Journey · 강점</p>
-          <h1><span class="topic-highlight">나는 칼 같은 사람입니다.</span></h1>
+          <h1><span class="topic-highlight">나를 움직이는 세 가지 강점</span></h1>
           <p>
-            칼은 갈고닦을수록 날카로워지고, 사용하는 목적에 따라 그 쓰임이 달라집니다.
-            복잡한 상황에서도 구조를 정리하고 실용적인 해결책을 찾아내는 능력이 저의 강점입니다.
+            자기조절력, 자기동기력, 대인관계력. 메인 화면에서 짧게 소개한 세 가지 강점을
+            실제로 있었던 일의 상황·행동·결과로 조금 더 자세히 적었습니다.
           </p>
         </section>
 
-        <section class="story-panel" aria-label="성장 이야기 인용">
+        <section class="story-panel" aria-label="강점을 한 문장으로">
           <div class="quote-mark">“</div>
           <p>
-            경험은 칼을 갈아주는 숫돌과 같습니다. 아직 완성된 칼은 아니지만, 새로운 경험을 쌓고 부족한
-            부분을 연마할수록 더 날카롭고 정확한 사람이 되어갈 것입니다.
+            끝까지 붙잡고, 끝까지 도우며, 이제는 저를 잃지 않으면서 그 일을 해나가겠습니다.
           </p>
+          <p class="quote-source">— 자기소개 중에서</p>
         </section>
 
         <section class="story-grid" aria-label="강점 상세">
-          <article class="summary-card">
-            <span class="story-card-label">SITUATION — 상황</span>
-            <h3>처음엔 막막했지만</h3>
-            <p>
-              웹 개발을 처음 접했을 때는 HTML, CSS, JavaScript와 같은 기술들이 각각 어떤 역할을 하는지조차
-              명확하게 알지 못했습니다. 처음에는 코드를 따라 작성하는 것만으로도 결과물이 만들어졌지만,
-              조금만 원하는 형태에서 벗어나면 어디서 문제가 발생했는지 찾기 어려웠습니다.
-            </p>
-            <p>
-              특히 직접 포트폴리오 웹사이트를 만들면서 제가 생각한 디자인과 실제 화면의 차이를 해결하는 과정에서
-              부족한 부분을 많이 느꼈습니다.
-            </p>
+          <article class="summary-card" id="strength-1">
+            <span class="story-card-label">01 — 자기조절력</span>
+            <h2 class="strength-title">감정을 다스리는 것도 제 몫이었습니다</h2>
+            <dl class="sar">
+              <div>
+                <dt>상황</dt>
+                <dd>K-뉴딜 SKT Aleph 심화 과정 조 활동 첫날, 동료의 추천으로 얼떨결에 조장을 맡았습니다. 스스로 나선 자리는 아니었지만 피하지 않았습니다.</dd>
+              </div>
+              <div>
+                <dt>행동</dt>
+                <dd>같은 질문을 몇 번이고 반복하는 동료들에게도 화내지 않고 최대한 친절하게 답했습니다. 그 순간의 감정을 다스리는 것도 조장인 저의 몫이라 생각했습니다.</dd>
+              </div>
+              <div>
+                <dt>결과</dt>
+                <dd>심화 과정 동안 한 번도 빠지지 않고 출석했고, 중간평가 우수자로 선정되었습니다.</dd>
+              </div>
+            </dl>
+            <a class="evidence-link" href="Intro.html">근거 · 자기소개의 ‘숫자로 보는 활동’ →</a>
           </article>
 
-          <article class="summary-card">
-            <span class="story-card-label">ACTION — 행동</span>
-            <h3>이해하는 데 집중했습니다</h3>
-            <p>
-              그래서 단순히 코드를 복사해서 사용하는 것보다 왜 이렇게 작성해야 하는지 이해하는 것에
-              집중했습니다.
-            </p>
-            <p>
-              문제가 발생하면 바로 다른 코드를 가져오기보다 현재 작성한 코드가 어떤 방식으로 동작하는지
-              확인하고, 하나씩 수정하면서 결과를 비교했습니다. 또한 새롭게 배운 HTML, CSS, JavaScript를
-              직접 포트폴리오에 적용해보면서 배운 내용을 실제 결과물로 연결하려고 했습니다.
-            </p>
-            <p>
-              이해하기 어려운 개념은 작은 예제를 만들어 직접 실행해보고, 같은 기능을 여러 가지 방법으로
-              구현해보며 차이를 비교했습니다.
-            </p>
+          <article class="summary-card" id="strength-2">
+            <span class="story-card-label">02 — 자기동기력</span>
+            <h2 class="strength-title">원하던 결과가 아니어도 끝까지 붙잡습니다</h2>
+            <dl class="sar">
+              <div>
+                <dt>상황</dt>
+                <dd>리추얼 기록 26일치를 직접 분석해 논문으로 정리했는데, 지속 기간과 문장 길이 사이에 상관관계가 거의 없다는 예상과 다른 결과가 나왔습니다.</dd>
+              </div>
+              <div>
+                <dt>행동</dt>
+                <dd>원하던 결과는 아니었지만 있는 그대로 받아들이고, 가설을 수정해 다시 적었습니다. 실습이 사흘 내내 풀리지 않을 때도 포기하지 않고 끝까지 답을 찾아냈던 것처럼, 끝을 보고서야 마음이 놓였습니다.</dd>
+              </div>
+              <div>
+                <dt>결과</dt>
+                <dd>수정한 가설까지 담은 논문을 제출했습니다. 아래 링크에서 직접 읽을 수 있습니다.</dd>
+              </div>
+            </dl>
+            <a class="evidence-link" href="Paper.html">근거 · 논문 읽기 →</a>
           </article>
 
-          <article class="summary-card">
-            <span class="story-card-label">RESULT — 결과</span>
-            <h3>점점 더 성장하고 있습니다</h3>
-            <p>
-              그 과정을 반복하면서 처음에는 단순히 코드를 따라 작성하는 수준이었다면, 지금은 원하는 결과를
-              만들기 위해 어떤 기술과 방법을 사용해야 할지 스스로 고민하는 단계까지 발전하고 있습니다.
-            </p>
-            <p>
-              아직 많은 프로젝트나 실무 경험을 가진 사람은 아니지만, 새로운 기술을 접했을 때 두려워하기보다
-              직접 부딪혀보고 부족한 부분을 찾아 채워가는 방법을 배웠습니다.
-            </p>
-            <p>
-              앞으로도 경험을 하나씩 쌓아가며 제 부족한 부분을 끊임없이 갈고닦는 사람이 되고 싶습니다.
-            </p>
+          <article class="summary-card" id="strength-3">
+            <span class="story-card-label">03 — 대인관계력</span>
+            <h2 class="strength-title">도움이 필요한 순간엔 몸이 먼저 움직입니다</h2>
+            <dl class="sar">
+              <div>
+                <dt>상황</dt>
+                <dd>학원 건물 앞에서 휠체어를 타신 어르신이 문을 못 열고 계셨습니다.</dd>
+              </div>
+              <div>
+                <dt>행동</dt>
+                <dd>생각하기도 전에 뛰어가 문을 잡아드렸습니다. 2026년&nbsp;9월&nbsp;16일에는 버스 창밖으로 사람이 쓰러지는 걸 보고, 하차벨을 누르고 뛰어내려 달려갔습니다.</dd>
+              </div>
+              <div>
+                <dt>결과</dt>
+                <dd>보상과 상관없이, 누군가에게 도움이 되길 바라는 마음으로 2달에 한 번씩 헌혈을 이어가고 있습니다.</dd>
+              </div>
+            </dl>
+            <a class="evidence-link" href="Intro.html">근거 · 자기소개 전문 →</a>
           </article>
         </section>
         <nav class="journey-pager" aria-label="행로 페이지 이동">
@@ -796,6 +969,24 @@
           });
         }
       });
+    </script>
+    <script>
+      (() => {
+        const setScrolled = () => document.body.classList.toggle('is-scrolled', window.scrollY > 4);
+        window.addEventListener('scroll', setScrolled, { passive: true });
+        setScrolled();
+        const path = document.querySelector('.lf-path');
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!path || reduce || !('IntersectionObserver' in window)) return;
+        path.classList.add('is-waiting');
+        const io = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            path.classList.remove('is-waiting');
+            io.disconnect();
+          }
+        }, { threshold: 0.4 });
+        io.observe(path);
+      })();
     </script>
   </body>
 </html>
