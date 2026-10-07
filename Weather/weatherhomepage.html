@@ -329,6 +329,25 @@
 		.t04-history .t04-history-date { color: var(--muted); font-weight: 700; }
 		.t04-history .t04-history-time { color: var(--history-time-text); font-weight: 500; }
 		.t04-history .t04-history-value { font-weight: 800; color: var(--ink); }
+		.t04-history .t04-history-src { display: block; margin-top: 2px; color: var(--history-time-text); font-size: 10px; font-weight: 500; }
+		.t04-next { margin: -4px 0 12px; color: var(--note-text); font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5; }
+		.t04-next[hidden] { display: none; }
+		.t04-retry:disabled { opacity: .55; cursor: not-allowed; }
+		.t04-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+		.t04-receipt { margin: 10px 0 0; padding: 10px 12px; border: 1px dashed var(--track-row-border); border-radius: 6px; background: var(--track-row-bg); font-family: Consolas, monospace; font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+		.t04-receipt[hidden] { display: none; }
+		.t04-sub { margin: 0 0 12px; color: var(--muted); font-family: Arial, sans-serif; font-size: 12px; line-height: 1.55; }
+		.t04-table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; }
+		.t04-table th, .t04-table td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; word-break: break-word; }
+		.t04-table th { color: var(--muted); font-size: 10px; font-weight: 700; }
+		.t04-table td.num { font-weight: 800; color: var(--ink); white-space: nowrap; }
+		.t04-replay-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+		.t04-replay-grid button { padding: 6px 10px; border: 1px solid var(--track-row-border); border-radius: 6px; color: var(--hover-text); background: var(--hover-bg); font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+		.t04-replay-grid button:hover { background: var(--hover-bg-strong); }
+		.t04-replay-grid .t04-group-label { align-self: center; margin-right: 4px; color: var(--muted); font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; }
+		.t04-replay-log { margin: 10px 0 0; color: var(--muted); font-family: Consolas, monospace; font-size: 11px; }
+		.t04-hash-ok { color: var(--success-text); font-weight: 700; }
+		.t04-hash-bad { color: var(--error-text); font-weight: 700; }
 
 		/* ---- Chart utility components (see chart-utils.js / CHART_GUIDE.md) ---- */
 		.detail--gauge { display: flex; flex-direction: column; }
@@ -477,10 +496,51 @@
 				<div><dt>조회 시각</dt><dd id="t04-fetched-at">-</dd></div>
 			</dl>
 			<p class="t04-status" id="t04-status">아직 조회된 값이 없어요.</p>
+			<p class="t04-next" id="t04-next" hidden></p>
 			<button class="t04-retry" id="t04-retry" type="button" hidden>다시 시도</button>
 			<div class="t04-history-wrap">
 				<p class="t04-history-title">저장된 날짜별 기록</p>
 				<ul class="t04-history" id="t04-history"><li class="t04-history-empty">아직 저장된 기록이 없어요.</li></ul>
+			</div>
+			<div class="t04-tools">
+				<button class="t04-retry" id="t04-export" type="button">오늘 기록 내보내기 (JSON)</button>
+				<button class="t04-retry" id="t04-receipt-toggle" type="button">영수증용 값 보기</button>
+			</div>
+			<pre class="t04-receipt" id="t04-receipt" hidden></pre>
+		</section>
+
+		<section class="t04-panel" id="t04-preserved" aria-label="보존된 실제 일별 기록">
+			<div class="t04-heading"><strong>보존된 실제 일별 기록</strong><span id="t04-preserved-sub">공개 원천 · Asia/Seoul 날짜 기준</span></div>
+			<p class="t04-sub">브라우저 저장소가 아니라 저장소에 올린 파일(<code>Weather/t04-daily-records.json</code>)에서 읽습니다. 누가 어느 브라우저로 열어도 같은 기록이 보입니다.</p>
+			<div id="t04-preserved-body"><p class="t04-sub">기록을 불러오는 중…</p></div>
+		</section>
+
+		<section class="t04-panel" id="t04-replay" aria-label="합성 재생" aria-live="polite">
+			<div class="t04-heading"><strong>합성 재생 — 실패 다섯 가지와 회복</strong><span>공개 fixture · 합성 시험값만 사용</span></div>
+			<p class="t04-sub">아래는 과제 공개 꾸러미의 fixture 9개를 그대로 재생합니다. 실제 기록과 완전히 분리된 합성 상태라 위의 실제 값·기록에는 영향을 주지 않고, 새로고침하면 처음으로 돌아갑니다.</p>
+			<div class="t04-replay-grid" id="t04-replay-buttons"></div>
+			<p class="t04-value-row">
+				<span class="t04-value" id="t04r-value">--</span>
+				<span class="t04-stale-badge" id="t04r-stale-badge" hidden>오래된 값</span>
+			</p>
+			<p class="t04-delta" id="t04r-delta">전날 비교 데이터가 아직 없어요.</p>
+			<dl class="t04-meta">
+				<div><dt>출처</dt><dd id="t04r-source">-</dd></div>
+				<div><dt>출처 시각</dt><dd id="t04r-source-time">-</dd></div>
+				<div><dt>조회 시각(합성 시계)</dt><dd id="t04r-fetched-at">-</dd></div>
+				<div><dt>상태 (freshness / error_code)</dt><dd id="t04r-code">-</dd></div>
+			</dl>
+			<p class="t04-status" id="t04r-status">초기화 상태예요. 위 버튼으로 재생해 보세요.</p>
+			<p class="t04-next" id="t04r-next" hidden></p>
+			<button class="t04-retry" id="t04r-retry" type="button" hidden>다시 시도</button>
+			<div class="t04-history-wrap">
+				<p class="t04-history-title">합성 일별 기록 (<span id="t04r-row-count">0</span>건)</p>
+				<ul class="t04-history" id="t04r-history"><li class="t04-history-empty">비어 있어요.</li></ul>
+			</div>
+			<p class="t04-replay-log" id="t04r-log"></p>
+			<div class="t04-history-wrap">
+				<p class="t04-history-title">공개 꾸러미 확인 — <span id="t04r-package">-</span></p>
+				<div id="t04r-hashes" class="t04-sub">fixture 파일 해시를 확인하는 중…</div>
 			</div>
 		</section>
 
@@ -953,7 +1013,16 @@
 				return '서울';
 			}
 		})();
+		// 실제 조회 상태(브라우저 저장)와 합성 재생 상태(메모리 전용)는 서로 다른 객체입니다.
+		// 합성 fixture가 실제 기록에 섞이지 않게 하려는 분리입니다 (T04-C26).
 		let t04State = window.T04Signal ? T04Signal.loadState() : null;
+		let t04ReplayState = window.T04Signal ? T04Signal.resetEvaluationState() : null;
+		let t04LiveRetryUntil = 0;
+		let t04ReplayRetryUntil = 0;
+
+		function t04Esc(value) {
+			return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+		}
 
 		function t04FormatKst(iso) {
 			if (!iso) return '-';
@@ -978,112 +1047,399 @@
 			}
 		}
 
+		function t04UnitLabel(unit) {
+			return unit === 'C' ? '°C' : ` ${unit}`;
+		}
+
 		function t04MessageForError(code) {
 			const messages = {
-				timeout: '⏱ 서버 응답이 너무 늦어 시간 초과됐어요.',
-				auth: '🔒 인증에 실패했어요 (API 키 문제).',
-				rate_limit: '🚦 API 호출 한도를 초과했어요.',
+				timeout: '⏱ 원천 서버 응답이 너무 늦어 시간 초과됐어요.',
+				auth: '🔒 원천이 이 사이트의 호출을 거절했어요 (401/403).',
+				rate_limit: '🚦 원천의 호출 한도를 넘었어요 (429).',
 				offline: '📡 네트워크에 연결할 수 없어요.',
-				schema_error: '⚠ 받아온 데이터 형식이 예상과 달라요.',
+				schema_error: '⚠ 받아온 데이터 형식이 예상과 달라 저장하지 않았어요.',
 			};
 			return messages[code] || '알 수 없는 오류가 발생했어요.';
 		}
 
-		function t04DeltaText(comparison) {
+		// 실패 종류마다 사용자가 할 수 있는 다음 행동이 다르므로 따로 안내합니다.
+		function t04NextAction(code, waitSeconds) {
+			const actions = {
+				timeout: '잠시 뒤 아래 "다시 시도"를 눌러 주세요. 원천이 느릴 뿐이라 보통 다시 하면 돼요.',
+				auth: '다시 눌러도 같은 결과일 가능성이 커요. 사이트 관리자가 원천 키를 확인해야 해요. 그동안 마지막 정상값을 참고하세요.',
+				rate_limit: waitSeconds > 0
+					? `호출 한도가 풀릴 때까지 ${waitSeconds}초 기다린 뒤 다시 시도할 수 있어요.`
+					: '이제 다시 시도할 수 있어요.',
+				offline: '인터넷 연결(와이파이·모바일 데이터)을 확인한 뒤 "다시 시도"를 눌러 주세요.',
+				schema_error: '원천이 응답 형식을 바꾼 것 같아요. 다시 시도해도 같을 수 있어 관리자 확인이 필요해요. 잘못된 값은 저장하지 않았어요.',
+			};
+			return actions[code] || '잠시 뒤 다시 시도해 주세요.';
+		}
+
+		function t04DeltaText(comparison, unit) {
 			if (!comparison || comparison.state === 'insufficient') return '전날 비교 데이터가 아직 없어요.';
 			if (comparison.state === 'unit_mismatch') return '단위가 달라 전날과 비교할 수 없어요.';
-			const mag = Number(comparison.magnitude).toFixed(1);
-			if (comparison.direction === 'increase') return `전날보다 ${mag}°C 올랐어요.`;
-			if (comparison.direction === 'decrease') return `전날보다 ${mag}°C 내렸어요.`;
+			// 저장값끼리의 차이를 소수 둘째 자리까지 그대로 보여줍니다 (반올림으로 재계산과 어긋나지 않게).
+			const mag = Number(Number(comparison.magnitude).toFixed(2));
+			const u = t04UnitLabel(unit || comparison.unit).trim();
+			if (comparison.direction === 'increase') return `전날보다 ${mag}${u} 올랐어요.`;
+			if (comparison.direction === 'decrease') return `전날보다 ${mag}${u} 내렸어요.`;
 			return '전날과 같아요.';
 		}
 
+		// 한 정보판(실제 또는 합성)을 그립니다. ids는 각 요소 id 접두사입니다.
+		function t04RenderBoard(p, view) {
+			const { shown, status, rows, comparison, retryUntil } = view;
+			const isStale = !!(status && status.freshness === 'stale' && shown);
+			if (shown) {
+				$(p + 'value').textContent = `${shown.normalized_value}${t04UnitLabel(shown.unit)}`;
+				$(p + 'source-time').textContent = t04FormatKst(shown.source_time);
+				$(p + 'fetched-at').textContent = t04FormatKst(shown.fetched_at);
+			} else {
+				$(p + 'value').textContent = '--';
+				$(p + 'source-time').textContent = '-';
+				$(p + 'fetched-at').textContent = '-';
+			}
+			$(p + 'stale-badge').hidden = !isStale;
+			$(p + 'delta').textContent = t04DeltaText(comparison, shown && shown.unit);
+
+			const historyEl = $(p + 'history');
+			if (!rows.length) {
+				historyEl.innerHTML = '<li class="t04-history-empty">아직 저장된 기록이 없어요.</li>';
+			} else {
+				historyEl.innerHTML = rows.map((row) => `
+					<li><span class="t04-history-date">${t04Esc(row.record_date)} <span class="t04-history-time">${t04FormatKstTime(row.last_fetched_at)} 기준</span></span><span class="t04-history-value">${t04Esc(row.normalized_value)}${t04Esc(t04UnitLabel(row.unit))}</span></li>
+				`).join('');
+			}
+
+			const statusEl = $(p + 'status');
+			const nextEl = $(p + 'next');
+			const retryBtn = $(p + 'retry');
+			const wait = Math.max(0, Math.ceil((retryUntil - Date.now()) / 1000));
+			if (!status) {
+				statusEl.textContent = '아직 조회된 값이 없어요.';
+				statusEl.className = 't04-status';
+				nextEl.hidden = true;
+				retryBtn.hidden = true;
+			} else if (status.freshness === 'fresh') {
+				statusEl.textContent = '✅ 최신 값이에요.';
+				statusEl.className = 't04-status fresh';
+				nextEl.hidden = true;
+				retryBtn.hidden = true;
+			} else {
+				statusEl.textContent = (shown ? '마지막 정상값을 보여드리고 있어요. ' : '') + t04MessageForError(status.error_code);
+				statusEl.className = 't04-status stale';
+				nextEl.textContent = '다음 행동: ' + t04NextAction(status.error_code, status.error_code === 'rate_limit' ? wait : 0);
+				nextEl.hidden = false;
+				retryBtn.hidden = false;
+				retryBtn.disabled = status.error_code === 'rate_limit' && wait > 0;
+				retryBtn.textContent = retryBtn.disabled ? `다시 시도 (${wait}초 뒤)` : '다시 시도';
+			}
+		}
+
 		function renderT04Panel() {
-			if (!t04State) return;
-			const trackedSignalId = window.T04Signal ? T04Signal.signalIdForCity(t04TrackedCity, CITY_QUERY[t04TrackedCity]) : null;
+			if (!t04State || !window.T04Signal) return;
+			const trackedSignalId = T04Signal.signalIdForCity(t04TrackedCity, CITY_QUERY[t04TrackedCity]);
 			const rows = t04State.daily_readings
 				.filter((row) => row.signal_id === trackedSignalId)
 				.slice()
 				.sort((a, b) => a.record_date.localeCompare(b.record_date));
 			const lastRow = rows[rows.length - 1];
-			const currentIsTracked = t04State.current_reading && t04State.current_reading.signal_id === trackedSignalId;
+			const currentIsTracked = !!(t04State.current_reading && t04State.current_reading.signal_id === trackedSignalId);
 			const shown = (currentIsTracked ? t04State.current_reading : null) || (lastRow && lastRow.reading) || null;
-			const status = currentIsTracked || (t04State.last_run && t04State.last_run.outcome === 'error') ? t04State.status : (shown ? { freshness: 'fresh', error_code: 'none' } : null);
-			const isStale = !!(status && status.freshness === 'stale' && shown);
+			// 상태는 지금 추적 중인 도시의 조회 결과일 때만 그대로 씁니다.
+			const status = currentIsTracked ? t04State.status : (shown ? { freshness: 'fresh', error_code: 'none' } : null);
 
 			$('t04-heading-sub').textContent = `${t04TrackedCity} 현재 기온 · Asia/Seoul 기준`;
 			$('t04-current-browse-city').textContent = currentDashboardCity;
 			$('t04-track-btn').disabled = currentDashboardCity === t04TrackedCity;
 			$('t04-track-btn').textContent = currentDashboardCity === t04TrackedCity ? '현재 추적 중인 도시예요' : '이 도시로 저장';
-
 			if (shown) {
-				$('t04-value').textContent = `${shown.normalized_value}°${shown.unit === 'C' ? 'C' : shown.unit}`;
 				$('t04-source-link').textContent = shown.source_name;
 				$('t04-source-link').href = shown.source_url;
-				$('t04-source-time').textContent = t04FormatKst(shown.source_time);
-				$('t04-fetched-at').textContent = t04FormatKst(shown.fetched_at);
 			} else {
-				$('t04-value').textContent = '--°C';
 				$('t04-source-link').textContent = '-';
 				$('t04-source-link').removeAttribute('href');
-				$('t04-source-time').textContent = '-';
-				$('t04-fetched-at').textContent = '-';
 			}
+			t04RenderBoard('t04-', {
+				shown,
+				status,
+				rows,
+				comparison: lastRow ? T04Signal.comparisonFor(rows, lastRow) : { state: 'insufficient' },
+				retryUntil: t04LiveRetryUntil,
+			});
+			t04UpdateReceipt(rows);
+		}
 
-			const comparison = (window.T04Signal && lastRow) ? T04Signal.comparisonFor(rows, lastRow) : { state: 'insufficient' };
-			$('t04-stale-badge').hidden = !isStale;
-			$('t04-delta').textContent = t04DeltaText(comparison);
+		// 플랫폼 과정 영수증(t04_day)에 넣을 네 값: 오늘(Asia/Seoul) 행 기준.
+		function t04TodayRow(rows) {
+			const today = T04Signal.kstDate(new Date().toISOString());
+			return rows.find((row) => row.record_date === today) || null;
+		}
 
-			const historyEl = $('t04-history');
-			if (!rows.length) {
-				historyEl.innerHTML = '<li class="t04-history-empty">아직 저장된 기록이 없어요.</li>';
-			} else {
-				historyEl.innerHTML = rows.map((row) => `
-					<li><span class="t04-history-date">${row.record_date} <span class="t04-history-time">${t04FormatKstTime(row.last_fetched_at)} 기준</span></span><span class="t04-history-value">${row.normalized_value}°${row.unit === 'C' ? 'C' : row.unit}</span></li>
-				`).join('');
-			}
-
-			const statusEl = $('t04-status');
-			const retryBtn = $('t04-retry');
-			if (!status) {
-				statusEl.textContent = '아직 조회된 값이 없어요.';
-				statusEl.className = 't04-status';
-				retryBtn.hidden = true;
-			} else if (status.freshness === 'fresh') {
-				statusEl.textContent = '✅ 최신 값이에요.';
-				statusEl.className = 't04-status fresh';
-				retryBtn.hidden = true;
-			} else {
-				statusEl.textContent = (shown ? '마지막 정상값을 보여드리고 있어요. ' : '') + t04MessageForError(status.error_code);
-				statusEl.className = 't04-status stale';
-				retryBtn.hidden = false;
-			}
+		function t04UpdateReceipt(rows) {
+			const box = $('t04-receipt');
+			if (box.hidden) return;
+			const row = t04TodayRow(rows);
+			box.textContent = row
+				? [
+					`record_date: ${row.record_date} (Asia/Seoul)`,
+					`source_url: ${row.reading.source_url}`,
+					`source_observed_at: ${row.reading.source_time}`,
+					`normalized_value: ${row.normalized_value}`,
+					`unit: ${row.unit}`,
+				].join('\n')
+				: '오늘(Asia/Seoul) 저장된 정상 기록이 아직 없어요. 조회가 성공하면 여기에 나타나요.';
 		}
 
 		async function t04FetchCityCurrent(city) {
 			const q = encodeURIComponent(CITY_QUERY[city]);
 			const res = await fetchWithTimeout(`${WORKER_BASE}?endpoint=weather&q=${q}&lang=kr`);
+			if (res.status === 429) {
+				const header = Number(res.headers.get('retry-after'));
+				const err = new WeatherFetchError('rate_limit', 'API 호출 한도를 초과했어요.');
+				err.retryAfter = Number.isFinite(header) && header > 0 ? header : 60;
+				throw err;
+			}
 			assertOk(res);
-			const data = await res.json();
+			let data;
+			try {
+				data = await res.json();
+			} catch {
+				throw new WeatherFetchError('format', '날씨 데이터 형식이 올바르지 않아요.');
+			}
 			if (!data || !data.main || typeof data.main.temp !== 'number' || !Array.isArray(data.weather)) {
 				throw new WeatherFetchError('format', '날씨 데이터 형식이 올바르지 않아요.');
 			}
 			return data;
 		}
 
+		// 원자료에서 정규화에 쓴 필드만 그대로 남깁니다 (원자료·저장값·화면값 대조용, T04-C10).
+		function t04RawExcerpt(owm) {
+			return {
+				name: owm.name ?? null,
+				id: owm.id ?? null,
+				dt: owm.dt ?? null,
+				timezone: owm.timezone ?? null,
+				main: { temp: owm.main.temp },
+			};
+		}
+
 		async function syncTrackedCitySignal() {
 			if (!window.T04Signal) return;
+			if (Date.now() < t04LiveRetryUntil) return;
 			try {
 				const current = await t04FetchCityCurrent(t04TrackedCity);
 				const reading = T04Signal.normalizeCityTemp(t04TrackedCity, CITY_QUERY[t04TrackedCity], current, new Date().toISOString());
 				t04State = T04Signal.applySuccessfulReading(t04State, reading, { virtual_now: reading.fetched_at });
+				const row = t04State.daily_readings.find((r) => r.signal_id === reading.signal_id && r.record_date === reading.record_date);
+				if (row) row.raw_excerpt = t04RawExcerpt(current);
+				t04LiveRetryUntil = 0;
 			} catch (err) {
 				const code = (err && err.type) ? T04Signal.classifyLiveError(err.type) : 'schema_error';
-				t04State = T04Signal.applyError(t04State, code, { virtual_now: new Date().toISOString() });
-				console.error(err);
+				const retryAfter = code === 'rate_limit' ? (err.retryAfter || 60) : null;
+				t04State = T04Signal.applyError(t04State, code, { virtual_now: new Date().toISOString(), retry_after_seconds: retryAfter });
+				if (retryAfter) t04LiveRetryUntil = Date.now() + retryAfter * 1000;
+				console.warn('[T04] 실제 조회 실패:', code, err && err.message);
 			}
 			T04Signal.saveState(t04State);
 			renderT04Panel();
+		}
+
+		function t04ExportToday() {
+			const trackedSignalId = T04Signal.signalIdForCity(t04TrackedCity, CITY_QUERY[t04TrackedCity]);
+			const rows = t04State.daily_readings.filter((row) => row.signal_id === trackedSignalId);
+			const payload = {
+				format: 'aleph-t04-daily-export-v1',
+				exported_at: new Date().toISOString(),
+				city: t04TrackedCity,
+				signal_id: trackedSignalId,
+				record_timezone: 'Asia/Seoul',
+				rows: rows.map((row) => ({
+					record_id: row.record_id,
+					record_date: row.record_date,
+					normalized_value: row.normalized_value,
+					unit: row.unit,
+					source_name: row.reading.source_name,
+					source_url: row.reading.source_url,
+					source_observed_at: row.reading.source_time,
+					first_fetched_at: row.first_fetched_at,
+					last_fetched_at: row.last_fetched_at,
+					raw_excerpt: row.raw_excerpt || null,
+				})),
+			};
+			const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `t04-day-${T04Signal.kstDate(new Date().toISOString())}.json`;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 2000);
+		}
+
+		// ---- 보존된 실제 기록: 저장소의 JSON 파일을 읽어 표시하고 변화값을 다시 계산합니다 ----
+		async function t04LoadPreserved() {
+			const body = $('t04-preserved-body');
+			let data;
+			try {
+				const res = await fetch('t04-daily-records.json', { cache: 'no-store' });
+				if (!res.ok) throw new Error(String(res.status));
+				data = await res.json();
+			} catch {
+				body.innerHTML = '<p class="t04-sub">보존 기록 파일을 읽지 못했어요. 잠시 뒤 새로고침해 주세요.</p>';
+				return;
+			}
+			const records = Array.isArray(data.records) ? data.records.slice().sort((a, b) => a.record_date.localeCompare(b.record_date)) : [];
+			$('t04-preserved-sub').textContent = `${data.city || ''} 기온 · ${records.length}/2건 · Asia/Seoul 날짜 기준`;
+			if (!records.length) {
+				body.innerHTML = '<p class="t04-sub">아직 보존된 실제 기록이 없어요. 서로 다른 날짜의 실제 조회 2건이 모이면 여기에 보이고, 두 값으로 전날 대비 변화를 다시 계산해요.</p>';
+				return;
+			}
+			const rowsForCompare = records.map((r) => ({ signal_id: data.signal_id, record_date: r.record_date, normalized_value: r.normalized_value, unit: r.unit }));
+			const last = rowsForCompare[rowsForCompare.length - 1];
+			const comparison = T04Signal.comparisonFor(rowsForCompare, last);
+			body.innerHTML = `
+				<table class="t04-table">
+					<thead><tr><th>날짜 (Asia/Seoul)</th><th>값</th><th>원천 관측 시각</th><th>조회 시각</th><th>공개 원천 URL</th><th>원자료 main.temp</th></tr></thead>
+					<tbody>${records.map((r) => `
+						<tr>
+							<td>${t04Esc(r.record_date)}</td>
+							<td class="num">${t04Esc(r.normalized_value)}${t04Esc(t04UnitLabel(r.unit))}</td>
+							<td>${t04Esc(t04FormatKst(r.source_observed_at))}</td>
+							<td>${t04Esc(t04FormatKst(r.last_fetched_at))}</td>
+							<td><a href="${t04Esc(r.source_url)}" target="_blank" rel="noopener">${t04Esc(r.source_url)}</a></td>
+							<td>${r.raw_excerpt && r.raw_excerpt.main ? t04Esc(r.raw_excerpt.main.temp) : '-'}</td>
+						</tr>`).join('')}
+					</tbody>
+				</table>
+				<p class="t04-delta" style="margin-top:12px" id="t04-preserved-delta">${t04Esc(t04DeltaText(comparison, last.unit))}</p>`;
+		}
+
+		// ---- 합성 재생: 공개 꾸러미 fixture를 그대로 읽어 메모리 상태에서만 재생합니다 ----
+		const T04_FIXTURE_FILES = {
+			'T04-NORMAL-D1-A': 'normal-d1-a.json',
+			'T04-NORMAL-D1-B': 'normal-d1-b.json',
+			'T04-NORMAL-D2': 'normal-d2.json',
+			'T04-TIMEOUT': 'timeout.json',
+			'T04-AUTH-401': 'auth-401.json',
+			'T04-RATE-429': 'rate-429.json',
+			'T04-OFFLINE': 'offline.json',
+			'T04-SCHEMA-BREAK': 'schema-break.json',
+			'T04-RECOVER-D2': 'recover-d2.json',
+		};
+		const t04FixtureCache = {};
+		let t04ReplayLog = [];
+
+		async function t04LoadFixture(id) {
+			if (t04FixtureCache[id]) return t04FixtureCache[id];
+			const res = await fetch(`t04-fixtures/fixtures/${T04_FIXTURE_FILES[id]}`, { cache: 'no-store' });
+			if (!res.ok) throw new Error(`fixture ${id} ${res.status}`);
+			t04FixtureCache[id] = await res.json();
+			return t04FixtureCache[id];
+		}
+
+		function renderT04Replay() {
+			const st = t04ReplayState;
+			const rows = st.daily_readings.slice().sort((a, b) => a.record_date.localeCompare(b.record_date));
+			const lastRow = rows[rows.length - 1];
+			const shown = st.current_reading || (lastRow && lastRow.reading) || null;
+			$('t04r-source').textContent = shown ? `${shown.source_name} (${shown.source_url})` : '-';
+			$('t04r-code').textContent = st.status ? `${st.status.freshness} / ${st.status.error_code}` : '-';
+			$('t04r-row-count').textContent = String(rows.length);
+			t04RenderBoard('t04r-', {
+				shown,
+				status: st.status,
+				rows,
+				comparison: lastRow ? T04Signal.comparisonFor(rows, lastRow) : { state: 'insufficient' },
+				retryUntil: t04ReplayRetryUntil,
+			});
+			$('t04r-log').textContent = t04ReplayLog.length ? '재생 순서: reset → ' + t04ReplayLog.join(' → ') : '재생 순서: reset';
+		}
+
+		async function t04Replay(ids, { reset = false } = {}) {
+			if (reset) {
+				t04ReplayState = T04Signal.resetEvaluationState();
+				t04ReplayLog = [];
+				t04ReplayRetryUntil = 0;
+			}
+			for (const id of ids) {
+				const fixture = await t04LoadFixture(id);
+				t04ReplayState = T04Signal.runFixture(t04ReplayState, fixture);
+				t04ReplayLog.push(id);
+				const after = t04ReplayState.last_run;
+				t04ReplayRetryUntil = after && after.error_code === 'rate_limit' && after.retry_after_seconds
+					? Date.now() + after.retry_after_seconds * 1000
+					: 0;
+			}
+			renderT04Replay();
+			return t04ReplayState;
+		}
+
+		function t04BuildReplayButtons() {
+			const groups = [
+				['정상·일별 저장', [['reset', '초기화', () => t04Replay([], { reset: true })],
+					['T04-NORMAL-D1-A', 'D1-A (100)', () => t04Replay(['T04-NORMAL-D1-A'])],
+					['T04-NORMAL-D1-B', 'D1-B (105)', () => t04Replay(['T04-NORMAL-D1-B'])],
+					['T04-NORMAL-D2', 'D2 (120)', () => t04Replay(['T04-NORMAL-D2'])]]],
+				['실패 (reset → D1-A → D1-B → 실패)', [
+					['T04-TIMEOUT', '느린 응답', () => t04Replay(['T04-NORMAL-D1-A', 'T04-NORMAL-D1-B', 'T04-TIMEOUT'], { reset: true })],
+					['T04-AUTH-401', '401 거절', () => t04Replay(['T04-NORMAL-D1-A', 'T04-NORMAL-D1-B', 'T04-AUTH-401'], { reset: true })],
+					['T04-RATE-429', '호출 제한 429', () => t04Replay(['T04-NORMAL-D1-A', 'T04-NORMAL-D1-B', 'T04-RATE-429'], { reset: true })],
+					['T04-OFFLINE', '오프라인', () => t04Replay(['T04-NORMAL-D1-A', 'T04-NORMAL-D1-B', 'T04-OFFLINE'], { reset: true })],
+					['T04-SCHEMA-BREAK', '형식 변경', () => t04Replay(['T04-NORMAL-D1-A', 'T04-NORMAL-D1-B', 'T04-SCHEMA-BREAK'], { reset: true })]]],
+			];
+			const wrap = $('t04-replay-buttons');
+			wrap.innerHTML = '';
+			groups.forEach(([label, buttons]) => {
+				const tag = document.createElement('span');
+				tag.className = 't04-group-label';
+				tag.textContent = label;
+				wrap.appendChild(tag);
+				buttons.forEach(([id, text, fn]) => {
+					const b = document.createElement('button');
+					b.type = 'button';
+					b.dataset.fixture = id;
+					b.textContent = text;
+					b.addEventListener('click', () => fn().catch((e) => { $('t04r-log').textContent = 'fixture를 읽지 못했어요: ' + e.message; }));
+					wrap.appendChild(b);
+				});
+				const br = document.createElement('span');
+				br.style.flexBasis = '100%';
+				wrap.appendChild(br);
+			});
+		}
+
+		// 실패 상태의 "다시 시도" = 공개 asset T04-RECOVER-D2 재생 (T04-C19)
+		function t04ReplayRetry() {
+			if (Date.now() < t04ReplayRetryUntil) return;
+			t04Replay(['T04-RECOVER-D2']);
+		}
+
+		// 공개 꾸러미의 asset-manifest.json과 실제로 받은 fixture 파일 바이트의 SHA-256을 대조합니다.
+		async function t04VerifyPackage() {
+			const out = $('t04r-hashes');
+			if (!(window.crypto && crypto.subtle)) {
+				out.textContent = '이 브라우저에서는 해시 계산을 할 수 없어요.';
+				return;
+			}
+			try {
+				const manifest = await (await fetch('t04-fixtures/asset-manifest.json', { cache: 'no-store' })).json();
+				$('t04r-package').textContent = manifest.package_id;
+				const targets = manifest.files.filter((f) => f.path.startsWith('fixtures/'));
+				const results = await Promise.all(targets.map(async (f) => {
+					const buf = await (await fetch(`t04-fixtures/${f.path}`, { cache: 'no-store' })).arrayBuffer();
+					const digest = await crypto.subtle.digest('SHA-256', buf);
+					const hex = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+					return { path: f.path, ok: hex === f.sha256, hex };
+				}));
+				const okCount = results.filter((r) => r.ok).length;
+				out.innerHTML = `<span class="${okCount === results.length ? 't04-hash-ok' : 't04-hash-bad'}">fixture ${okCount}/${results.length}개 SHA-256 일치</span><br>`
+					+ results.map((r) => `${r.ok ? '✔' : '✘'} ${t04Esc(r.path)} · ${t04Esc(r.hex.slice(0, 16))}…`).join('<br>');
+			} catch (e) {
+				out.textContent = '꾸러미 파일을 읽지 못했어요: ' + e.message;
+			}
 		}
 
 		if (window.T04Signal) {
@@ -1094,24 +1450,36 @@
 				try { localStorage.setItem(T04_SELECTED_CITY_KEY, t04TrackedCity); } catch { /* localStorage 불가 환경은 조용히 무시 */ }
 				syncTrackedCitySignal();
 			});
+			$('t04-export').addEventListener('click', t04ExportToday);
+			$('t04-receipt-toggle').addEventListener('click', () => {
+				const box = $('t04-receipt');
+				box.hidden = !box.hidden;
+				$('t04-receipt-toggle').textContent = box.hidden ? '영수증용 값 보기' : '영수증용 값 숨기기';
+				renderT04Panel();
+			});
+			$('t04r-retry').addEventListener('click', t04ReplayRetry);
+			t04BuildReplayButtons();
 			renderT04Panel();
+			renderT04Replay();
+			t04LoadPreserved();
+			t04VerifyPackage();
+			// 429 대기 카운트다운 갱신
+			setInterval(() => {
+				if (t04LiveRetryUntil > Date.now() - 1500) renderT04Panel();
+				if (t04ReplayRetryUntil > Date.now() - 1500) renderT04Replay();
+			}, 1000);
 
-			// 채점/디버깅용: 콘솔에서 window.applyT04Fixture(fixtureJson) 또는
-			// window.resetT04State() 로 fixture 재생 시나리오를 그대로 재현해볼 수 있습니다.
+			// 채점/디버깅용 콘솔 API. fixture는 언제나 합성 재생 상태에만 적용됩니다.
 			window.applyT04Fixture = function (fixtureJson) {
-				t04State = T04Signal.runFixture(t04State, fixtureJson);
-				T04Signal.saveState(t04State);
-				renderT04Panel();
-				return t04State;
+				t04ReplayState = T04Signal.runFixture(t04ReplayState, fixtureJson);
+				t04ReplayLog.push(fixtureJson && fixtureJson.fixture_id);
+				renderT04Replay();
+				return t04ReplayState;
 			};
-			window.resetT04State = function () {
-				t04State = T04Signal.resetStoredState();
-				renderT04Panel();
-				return t04State;
-			};
-			window.getT04State = function () {
-				return t04State;
-			};
+			window.replayT04 = (ids, opts) => t04Replay(ids, opts);
+			window.resetT04Replay = () => t04Replay([], { reset: true });
+			window.getT04ReplayState = () => t04ReplayState;
+			window.getT04State = () => t04State;
 		}
 
 		renderCityList('전체');

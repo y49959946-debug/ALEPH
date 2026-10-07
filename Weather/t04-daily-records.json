@@ -1,0 +1,8 @@
+{
+  "format": "aleph-t04-preserved-records-v1",
+  "note": "서로 다른 Asia/Seoul 실제 날짜에 조회한 공개 원천 기록. 각 날짜에 앱의 '오늘 기록 내보내기'로 받은 값을 그대로 옮깁니다.",
+  "city": "대구",
+  "signal_id": "daegu-kr-temp-c",
+  "record_timezone": "Asia/Seoul",
+  "records": []
+}
