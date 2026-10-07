@@ -247,7 +247,7 @@
       /* ---------- 비공개 기록: 수풀 ---------- */
       .grove {
         position: relative;
-        padding: 52px 0 56px;
+        padding: 52px 0 34px;
         overflow: hidden;
       }
       .grove-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 20px; }
@@ -380,8 +380,16 @@
       body.intro-locked .page-shell { transform: scale(.94); filter: blur(3px); }
 
       /* ---------- 바닥 ---------- */
-      .ground { position: relative; padding: 26px 0 30px; background: var(--paper); }
-      .footer-note { margin: 0; text-align: center; font: 22px/1 var(--pen); color: #3f3424; }
+      .grove-footer { position: relative; z-index: 1; margin-top: 34px; text-align: center; }
+      .footer-note {
+        display: inline-block;
+        margin: 0;
+        padding: 10px 26px;
+        font: 30px/1.2 var(--pen);
+        color: #fffaf0;
+        text-shadow: 0 1px 2px rgba(30, 38, 18, .8), 0 0 14px rgba(30, 38, 18, .6);
+        background: radial-gradient(closest-side, rgba(40, 50, 25, .38), rgba(40, 50, 25, 0));
+      }
 
       /* ---------- 반응형 ---------- */
       @media (max-width: 960px) {
@@ -628,11 +636,11 @@
             </section>
           </div>
         </div>
+        <footer class="grove-footer">
+          <p class="footer-note">지금도 나는, 걸어가는 중이야.</p>
+        </footer>
       </section>
 
-      <footer class="ground">
-        <p class="footer-note">지금도 나는, 걸어가는 중이야.</p>
-      </footer>
     </div>
 
     <script src="/vendor/simplewebauthn-browser.js"></script>
