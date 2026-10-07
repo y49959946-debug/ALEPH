@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="assets/home/favicon_180.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
     <style>
       :root {
         --paper: #f6e7cc;
@@ -25,8 +25,8 @@
         --button: #5d5a3c;
         --button-hover: #48462d;
         --shadow: 0 10px 28px rgba(92, 72, 40, 0.12);
-        --hand: "Gaegu", "Nanum Pen Script", cursive;
-        --pen: "Nanum Pen Script", "Gaegu", cursive;
+        --hand: "Gowun Batang", "Nanum Myeongjo", serif;
+        --pen: "Nanum Pen Script", cursive;
         --body: "Gowun Dodum", "Pretendard", "Noto Sans KR", sans-serif;
         --paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .25 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       }
@@ -73,8 +73,8 @@
         border-bottom: 2px solid transparent;
         background: none;
         color: var(--ink-soft);
-        font: 600 13px/1 var(--body);
-        letter-spacing: .12em;
+        font: 650 13px/1 var(--body);
+        letter-spacing: .02em;
         text-decoration: none;
         cursor: pointer;
       }
@@ -111,7 +111,7 @@
       .hero {
         position: relative;
         display: block;
-        min-height: clamp(560px, 45vw, 660px);
+        min-height: clamp(560px, 45vw, 640px);
         background: url("assets/home/bg_top.jpg") center bottom / cover no-repeat, linear-gradient(180deg, #c9d8e6 0%, #dfe3e2 60%, #ece6dc 100%);
       }
       .hero-cream {
@@ -168,7 +168,7 @@
 
       /* ---------- 나는 이런 사람입니다 ---------- */
       .summary::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 70px; background: linear-gradient(180deg, rgba(246, 231, 204, .95), rgba(246, 231, 204, 0)); pointer-events: none; }
-      .summary { position: relative; padding: 18px 0 56px; background: url("assets/home/bg_mid.jpg") center top / 100% auto no-repeat, var(--paper); }
+      .summary { position: relative; padding: 10px 0 56px; background: url("assets/home/bg_mid.jpg") center top / 100% auto no-repeat, var(--paper); }
       .summary-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
       .about-intro h2 { margin: 0 0 14px; font: 700 clamp(30px, 3.4vw, 40px)/1.2 var(--hand); }
       .about-intro p { margin: 0 0 22px; color: var(--ink-soft); font-size: 15px; line-height: 1.85; }
@@ -402,7 +402,7 @@
         .wrap { width: calc(100% - 32px); }
         .nav-wrap { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 12px; }
         .nav-right { gap: 2px; flex-wrap: wrap; }
-        .nav-button { font-size: 12px; letter-spacing: .06em; padding: 8px 6px; }
+        .nav-button { font-size: 12px; letter-spacing: 0; padding: 8px 6px; }
         .dropdown-menu { left: 0; right: auto; }
         .hero { min-height: 0; padding-bottom: 54vw; background-size: 100% auto, auto; }
         .summary { background: var(--paper-noise), var(--paper); }
@@ -422,6 +422,35 @@
         .cards-hint { display: block; }
         .trail, .trail-bird { display: none; }
         .passkey-register-form { grid-template-columns: 1fr; }
+      }
+
+      /* ---- 첫 화면 맞춤: 높이가 낮은 PC 화면(1366×768 등)에서도 강점 카드 3개가 스크롤 없이 보이게 (T01 C10) ---- */
+      .route-def-alt { display: none; }
+      @media (min-width: 900px) and (max-height: 760px) {
+        .nav-wrap { padding-top: 10px; }
+        .nav-brand img { width: 100px; }
+        .hero { min-height: max(360px, calc(100vh - 262px)); background-position: center 74%, 0 0; }
+        .hero-inner { padding: 84px 0 16px; }
+        .hero-copy { max-width: 600px; }
+        .eyebrow { margin-bottom: 6px; }
+        .hero h1 { margin-bottom: 6px; font-size: 40px; }
+        .hero h1 span { display: inline; }
+        .hero h1 span::before { content: " "; }
+        .hero-lead { margin-bottom: 8px; font-size: 15px; line-height: 1.6; }
+        .hero-lead br { display: none; }
+        .page-purpose { margin-bottom: 0; padding: 6px 12px; }
+        .hero .route-def { display: none; }
+        .route-def-alt { display: grid; margin-top: 26px; }
+        .hero-quote { top: 84px; font-size: 22px; }
+        .summary { padding-top: 4px; }
+        .cards { padding-top: 22px; }
+        .summary-card { padding: 15px 18px 15px; }
+        .card-head { margin-bottom: 6px; }
+        .card-head img { width: 34px; height: 34px; }
+        .summary-card h3 { margin-bottom: 4px; font-size: 23px; }
+        .summary-card p { margin-bottom: 8px; line-height: 1.65; }
+        .about-intro h2 { margin-bottom: 8px; font-size: 30px; }
+        .about-intro p { margin-bottom: 14px; line-height: 1.7; }
       }
     </style>
   </head>
@@ -454,13 +483,16 @@
 
           <div class="nav-right">
             <div class="nav-item">
-              <span class="nav-button current" aria-current="page">HOME</span>
+              <span class="nav-button current" aria-current="page">메인 화면</span>
             </div>
 
             <div class="nav-item">
-              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-about">ABOUT <span class="caret" aria-hidden="true">▼</span></button>
-              <div class="dropdown-menu" id="menu-about">
-                <a href="Intro.html">자기소개</a>
+              <a class="nav-button" href="Intro.html">자기소개</a>
+            </div>
+
+            <div class="nav-item">
+              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-route">행로 <span class="caret" aria-hidden="true">▼</span></button>
+              <div class="dropdown-menu" id="menu-route">
                 <a href="Strength_page.html">강점</a>
                 <a href="Preference_page.html">취향</a>
                 <a href="Plan_page.html">앞으로의 계획</a>
@@ -468,11 +500,7 @@
             </div>
 
             <div class="nav-item">
-              <a class="nav-button" href="#about">JOURNEY</a>
-            </div>
-
-            <div class="nav-item">
-              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-works">PROJECTS <span class="caret" aria-hidden="true">▼</span></button>
+              <button class="nav-button" type="button" aria-expanded="false" aria-controls="menu-works">결과물 <span class="caret" aria-hidden="true">▼</span></button>
               <div class="dropdown-menu" id="menu-works">
                 <a href="minigame/name_entry.html" style="display:flex;align-items:center;gap:8px"><img src="minigame/assets/lumoria_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">미니게임 <span style="color:#6a5a8a;font-size:.86em">LUMORIA</span></a>
                 <a href="studio/studiohomepage.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="studio/assets/studio_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">짤 스튜디오</a>
@@ -491,7 +519,7 @@
           <section class="hero-copy">
             <p class="eyebrow"><img src="assets/home/icon_sprout.png" alt="" width="22" height="24" />My Journey</p>
             <h1>나의 행로를<span>따라가보세요.</span></h1>
-            <p class="hero-lead">지금까지 걸어온 길과, 앞으로 걸어갈 길을 담은<br />나의 포트폴리오입니다.</p>
+            <p class="hero-lead">지금까지 걸어온 길과, 앞으로 걸어갈 길을 담은 <br />나의 포트폴리오입니다.</p>
             <p class="page-purpose">이 페이지는 채용 담당자와 함께 일할 동료에게, 제 강점 세 가지와 그 근거를 보여주는 소개 페이지입니다.</p>
 
             <div class="route-def">
@@ -514,6 +542,14 @@
             <h2 class="summary-title" id="summary-title">나는 이런 사람입니다.</h2>
             <p>다양한 경험 속에서 배우고,<br />스스로를 더 깊이 이해하며<br />지금도 성장하고 있는 사람입니다.</p>
             <a class="pill-link" href="Intro.html">자세히 보기 <span aria-hidden="true">→</span></a>
+            <div class="route-def route-def-alt">
+              <img src="assets/home/prop_lighthouse.png" alt="" width="155" height="176" />
+              <h2>행로란?</h2>
+              <p class="route-text">
+                행로(行路)는 다니는 길 또는 길을 가다라는 뜻입니다. 한자로는 다닐 행(行) 자와 길 로(路) 자를 씁니다.
+                보통 사람이 걸어가는 실제 길을 뜻하거나, 비유적으로 인생의 여정을 뜻할 때 쓰입니다.
+              </p>
+            </div>
           </div>
 
           <p class="cards-hint">옆으로 넘겨 강점 세 가지를 볼 수 있어요 →</p>
