@@ -1,10 +1,10 @@
 {
-  "format": "aleph-t04-preserved-records-v1",
-  "note": "서로 다른 Asia/Seoul 실제 날짜에 조회한 공개 원천 기록. 각 날짜에 앱의 '오늘 기록 내보내기'로 받은 값을 그대로 옮깁니다.",
+  "format": "aleph-t04-daily-export-v1",
+  "exported_at": "2026-10-07T23:50:50.060Z",
   "city": "대구",
   "signal_id": "daegu-kr-temp-c",
   "record_timezone": "Asia/Seoul",
-  "records": [
+  "rows": [
     {
       "record_id": "demo-daegu-kr-temp-c-2026-10-07",
       "record_date": "2026-10-07",
@@ -12,19 +12,18 @@
       "unit": "C",
       "source_name": "OpenWeatherMap (대구)",
       "source_url": "https://openweathermap.org/find?q=Daegu%2CKR",
-      "source_observed_at": "2026-10-07T02:23:33.000Z",
+      "source_observed_at": "2026-10-07T02:50:06.000Z",
       "first_fetched_at": "2026-10-07T01:52:35.149Z",
-      "last_fetched_at": "2026-10-07T02:24:27.306Z",
+      "last_fetched_at": "2026-10-07T02:49:29.135Z",
       "raw_excerpt": {
         "name": "Daegu",
         "id": 1835327,
-        "dt": 1791339813,
+        "dt": 1791341406,
         "timezone": 32400,
         "main": {
           "temp": 21.47
         }
-      },
-      "export_file": "t04-days/t04-day-2026-10-07.json"
+      }
     },
     {
       "record_id": "demo-daegu-kr-temp-c-2026-10-08",
@@ -44,8 +43,7 @@
         "main": {
           "temp": 16.22
         }
-      },
-      "export_file": "t04-days/t04-day-2026-10-08.json"
+      }
     }
   ]
 }
