@@ -1,0 +1,89 @@
+{
+  "format": "aleph-t04-daily-export-v1",
+  "exported_at": "2026-10-13T00:00:58.914Z",
+  "city": "대구",
+  "signal_id": "daegu-kr-temp-c",
+  "record_timezone": "Asia/Seoul",
+  "rows": [
+    {
+      "record_id": "demo-daegu-kr-temp-c-2026-10-07",
+      "record_date": "2026-10-07",
+      "normalized_value": 21.47,
+      "unit": "C",
+      "source_name": "OpenWeatherMap (대구)",
+      "source_url": "https://openweathermap.org/find?q=Daegu%2CKR",
+      "source_observed_at": "2026-10-07T02:50:06.000Z",
+      "first_fetched_at": "2026-10-07T01:52:35.149Z",
+      "last_fetched_at": "2026-10-07T02:49:29.135Z",
+      "raw_excerpt": {
+        "name": "Daegu",
+        "id": 1835327,
+        "dt": 1791341406,
+        "timezone": 32400,
+        "main": {
+          "temp": 21.47
+        }
+      }
+    },
+    {
+      "record_id": "demo-daegu-kr-temp-c-2026-10-08",
+      "record_date": "2026-10-08",
+      "normalized_value": 16.22,
+      "unit": "C",
+      "source_name": "OpenWeatherMap (대구)",
+      "source_url": "https://openweathermap.org/find?q=Daegu%2CKR",
+      "source_observed_at": "2026-10-08T00:15:29.000Z",
+      "first_fetched_at": "2026-10-07T23:50:43.579Z",
+      "last_fetched_at": "2026-10-08T00:15:00.085Z",
+      "raw_excerpt": {
+        "name": "Daegu",
+        "id": 1835327,
+        "dt": 1791418529,
+        "timezone": 32400,
+        "main": {
+          "temp": 16.22
+        }
+      }
+    },
+    {
+      "record_id": "demo-daegu-kr-temp-c-2026-10-12",
+      "record_date": "2026-10-12",
+      "normalized_value": 20.92,
+      "unit": "C",
+      "source_name": "OpenWeatherMap (대구)",
+      "source_url": "https://openweathermap.org/find?q=Daegu%2CKR",
+      "source_observed_at": "2026-10-12T00:25:36.000Z",
+      "first_fetched_at": "2026-10-12T00:25:22.275Z",
+      "last_fetched_at": "2026-10-12T00:25:22.275Z",
+      "raw_excerpt": {
+        "name": "Daegu",
+        "id": 1835327,
+        "dt": 1791764736,
+        "timezone": 32400,
+        "main": {
+          "temp": 20.92
+        }
+      }
+    },
+    {
+      "record_id": "demo-daegu-kr-temp-c-2026-10-13",
+      "record_date": "2026-10-13",
+      "normalized_value": 22.06,
+      "unit": "C",
+      "source_name": "OpenWeatherMap (대구)",
+      "source_url": "https://openweathermap.org/find?q=Daegu%2CKR",
+      "source_observed_at": "2026-10-12T23:55:52.000Z",
+      "first_fetched_at": "2026-10-12T23:59:13.688Z",
+      "last_fetched_at": "2026-10-12T23:59:13.688Z",
+      "raw_excerpt": {
+        "name": "Daegu",
+        "id": 1835327,
+        "dt": 1791849352,
+        "timezone": 32400,
+        "main": {
+          "temp": 22.06
+        }
+      }
+    }
+  ]
+}
