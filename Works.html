@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>결과물 - 행로</title>
+    <meta name="description" content="박성민이 직접 만들고 지켜 본 결과물 모음." />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/home/favicon_32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/home/favicon_180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="assets/site.css" />
+    <style>
+      .works-hero { position: relative; padding: 56px 0 32px; }
+      .works-hero .page-title { margin-top: 4px; }
+      .works-hero .section-desc { font-size: 16px; }
+      .works-hero .motif { position: absolute; right: 0; bottom: 8px; width: 300px; opacity: .9; }
+      .works-hero .hand-note { position: absolute; right: 300px; top: 30px; font-size: 24px; }
+      .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; padding: 0; list-style: none; }
+      .filters button { padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink-2); font: 500 14px/1 var(--sans); cursor: pointer; }
+      .filters button:hover { border-color: var(--olive); }
+      .filters button[aria-pressed="true"] { background: var(--sage); border-color: var(--sage); color: #fff; }
+      .project-grid { grid-template-columns: repeat(3, 1fr); }
+      .project-thumb { aspect-ratio: 16 / 9; }
+      .t-dark { background-image: linear-gradient(rgba(54, 66, 48, .55), rgba(54, 66, 48, .55)), url("assets/home/bg_bottom.jpg"); }
+      .t-mist { background-image: url("assets/home/bg_strength.webp"); }
+      .t-paper { background-image: url("assets/home/bg_mid.jpg"); }
+      .project-card[hidden] { display: none; }
+      .works-note { margin: 28px 0 0; color: var(--ink-3); font-size: 13.5px; }
+      @media (max-width: 960px) { .project-grid { grid-template-columns: repeat(2, 1fr); } .works-hero .motif, .works-hero .hand-note { display: none; } }
+      @media (max-width: 760px) { .project-grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header class="site-header" id="site-header">
+      <nav class="site-nav wrap" aria-label="메인 메뉴">
+        <a class="site-logo" href="index.html" aria-label="행로 홈">HR.</a>
+        <ul class="site-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="Intro.html">About</a></li>
+          <li><a href="Works.html" aria-current="page">Works</a></li>
+          <li><a href="Plan_page.html">Journey</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="wrap">
+      <section class="works-hero">
+        <p class="section-label">Works</p>
+        <h1 class="page-title">만든 것과 해결한 문제들.</h1>
+        <p class="section-desc">아이디어에서 구현까지, 직접 만들고 지켜 본 과정을 기록했습니다.</p>
+        <p class="hand-note" aria-hidden="true">“만들어 본 경험이<br />지키는 힘이 됐어요.”</p>
+        <img class="motif" src="assets/home/motif_lighthouse.webp" alt="" />
+      </section>
+
+      <ul class="filters" aria-label="분야로 거르기">
+        <li><button type="button" data-filter="all" aria-pressed="true">전체</button></li>
+        <li><button type="button" data-filter="security" aria-pressed="false">보안</button></li>
+        <li><button type="button" data-filter="web" aria-pressed="false">웹 앱</button></li>
+        <li><button type="button" data-filter="etc" aria-pressed="false">연구 · 게임</button></li>
+      </ul>
+
+      <div class="project-grid" id="project-grid">
+        <a class="project-card" data-cat="security" href="ByteBack.html">
+          <div class="project-thumb t-dark"><img class="icon" src="assets/byteback_icon.svg" alt="" /></div>
+          <div class="project-body">
+            <h3>BYTE BACK 방어전</h3>
+            <p>가상의 메모 자료실을 운영하며, 단계마다 거세지는 공격을 막아 낸 22단계 웹 서비스 방어 과제입니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">보안</li><li class="badge badge-done">22단계 완주</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="security" href="https://github.com/y49959946-debug/keshev-dashboard" target="_blank" rel="noopener">
+          <div class="project-thumb t-dark"><img class="icon" src="assets/veil_icon.svg" alt="" /></div>
+          <div class="project-body">
+            <h3>Veil</h3>
+            <p>방어전을 토대로 만든 보안 에이전트를, 내 PC에서 쓰는 관제 대시보드 앱으로 만들고 있습니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">보안</li><li class="badge badge-wip">제작 중</li></ul><span class="arrow" aria-hidden="true">↗</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="web" href="FactorFinder.html">
+          <div class="project-thumb t-paper"><img class="icon" src="ff-icon-144.png" alt="" /></div>
+          <div class="project-body">
+            <h3>성찰 요인 탐색기</h3>
+            <p>오래 쓰면 성찰이 저절로 깊어질까요? 내 리추얼 기록으로 직접 확인해 보는 데이터 저널 앱입니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">웹 앱</li><li class="badge badge-done">완성</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="web" href="PDS/PlanDoSee.html">
+          <div class="project-thumb t-paper"><img class="icon" src="PDS/assets/pds_icon_32.png" alt="" /></div>
+          <div class="project-body">
+            <h3>PlanDoSee</h3>
+            <p>계획하고, 실행하고, 돌아보는 다이어리입니다. 로그인한 계정마다 기록이 따로 저장됩니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">웹 앱</li><li class="badge badge-done">완성</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="web" href="cortex/demo/index.html">
+          <div class="project-thumb t-mist"><img class="icon" src="cortex/demo/assets/favicon.svg" alt="" /></div>
+          <div class="project-body">
+            <h3>한눈</h3>
+            <p>프리미엄 과제로 만들고 있는 앱입니다. 데모 화면을 먼저 열어 볼 수 있어요.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">웹 앱</li><li class="badge badge-wip">제작 중</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="web" href="Weather/weatherhomepage.html">
+          <div class="project-thumb t-mist"><img class="icon" src="Weather/assets/weather_icon_32.png" alt="" /></div>
+          <div class="project-body">
+            <h3>오늘의 날씨</h3>
+            <p>그날의 날씨를 확인하고 기록해 두는 웨더 노트입니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">웹 앱</li><li class="badge badge-done">완성</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="web" href="studio/studiohomepage.html">
+          <div class="project-thumb t-paper"><img class="icon" src="studio/assets/studio_icon_32.png" alt="" /></div>
+          <div class="project-body">
+            <h3>짤 카드 스튜디오</h3>
+            <p>나만의 짤 카드를 만들어 보는 스튜디오입니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">웹 앱</li><li class="badge badge-done">완성</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="etc" href="Paper.html">
+          <div class="project-thumb t-mist"><img class="icon" src="assets/home/icon_journal.png" alt="" /></div>
+          <div class="project-body">
+            <h3>리추얼과 문장 길이</h3>
+            <p>26일간의 리추얼 기록으로, 지속 기간이 성찰 문장 길이에 영향을 주는지 직접 분석한 자기관찰 연구입니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">연구</li><li class="badge badge-done">완성</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="etc" href="minigame/name_entry.html">
+          <div class="project-thumb t-dark"><img class="icon" src="minigame/assets/lumoria_icon_180.png" alt="" /></div>
+          <div class="project-body">
+            <h3>LUMORIA</h3>
+            <p>브라우저에서 바로 즐기는 미니게임입니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">게임</li><li class="badge badge-done">완성</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+      </div>
+      <p class="works-note">↗ 표시는 GitHub 같은 바깥 페이지로 이동해요.</p>
+    </main>
+
+    <footer class="site-footer" style="margin-top:72px">
+      <div class="wrap">
+        <span><span class="wordmark" aria-hidden="true">HR.</span>© 2026 박성민. 지금도 나는, 걸어가는 중이야.</span>
+        <a href="https://github.com/y49959946-debug" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        const header = document.getElementById('site-header');
+        const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        // 분야 필터: 누른 버튼만 aria-pressed="true", 해당 분야 카드만 보입니다.
+        const buttons = document.querySelectorAll('.filters button');
+        const cards = document.querySelectorAll('#project-grid .project-card');
+        buttons.forEach((btn) => btn.addEventListener('click', () => {
+          const f = btn.dataset.filter;
+          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          cards.forEach((c) => { c.hidden = f !== 'all' && c.dataset.cat !== f; });
+        }));
+      })();
+    </script>
+  </body>
+</html>

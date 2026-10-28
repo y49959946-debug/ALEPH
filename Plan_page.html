@@ -3,931 +3,111 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>계획 - 행로</title>
+    <title>성장 기록 - 행로</title>
+    <meta name="description" content="박성민이 걸어온 길과 앞으로의 계획." />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/home/favicon_32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/home/favicon_180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="assets/site.css" />
     <style>
-      :root {
-        --bg-top: #f8fbff;
-        --bg-bottom: #edf6f4;
-        --panel: rgba(255, 255, 255, 0.7);
-        --panel-strong: #ffffff;
-        --line: #dfeae6;
-        --primary: #1c2a35;
-        --secondary: #5d7284;
-        --muted: #798b9a;
-        --soft-blue: #dfeaf9;
-        --soft-green: #dff5ee;
-        --soft-peach: #fcefe7;
-        --shadow: 0 18px 42px rgba(39, 62, 75, 0.12);
-      }
-
-      * { box-sizing: border-box; }
-
-      html, body {
-        margin: 0;
-        min-height: 100%;
-        font-family: "Inter", "Pretendard", "Noto Sans KR", sans-serif;
-        background: linear-gradient(135deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
-        color: var(--primary);
-      }
-
-      body {
-        overflow-x: hidden;
-      }
-
-      .page-shell {
-        width: min(1600px, calc(100% - 80px));
-        margin: 0 auto;
-        padding: 28px 0 120px;
-      }
-
-      .topbar {
-        position: sticky;
-        top: 18px;
-        z-index: 120;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-      }
-
-      .topbar::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: 0;
-        width: 100vw;
-        margin-left: -50vw;
-        border-bottom: 1px solid rgba(125, 141, 149, 0.28);
-      }
-
-      .nav-wrap {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 18px;
-        padding: 14px 0 12px;
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 0;
-        box-shadow: none;
-        backdrop-filter: blur(2px);
-      }
-
-      .nav-left {
-        display: flex;
-        align-items: center;
-        height: 52px;
-      }
-
-      .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-      }
-
-      .nav-brand {
-        color: #6c757d;
-        text-decoration: none;
-        font-size: 19px;
-        font-weight: 900;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        padding: 0;
-        background: transparent;
-        border: none;
-        box-shadow: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
-        height: 100%;
-        font-family: "Georgia", "Times New Roman", serif;
-      }
-
-      .nav-brand-word {
-        display: inline-block;
-        font-size: clamp(38px, 3vw, 54px);
-        line-height: 0.9;
-        letter-spacing: 0.02em;
-        font-weight: 900;
-        color: #5f6770;
-        font-family: "Segoe UI", "Arial", sans-serif;
-        transform: scaleX(1.18) scaleY(1.08);
-        transform-origin: center;
-      }
-
-      .nav-brand-mark {
-        display: none;
-      }
-
-      .nav-item {
-        position: relative;
-      }
-
-      .nav-button {
-        border: none;
-        background: transparent;
-        color: var(--primary);
-        padding: 0;
-        border-radius: 0;
-        font-size: 15px;
-        font-weight: 800;
-        letter-spacing: 1.1px;
-        text-transform: uppercase;
-        text-decoration: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-      }
-
-      .nav-button:hover,
-      .nav-button.active {
-        background: transparent;
-        box-shadow: none;
-        opacity: 1;
-      }
-
-      .nav-brand:hover {
-        background: rgba(255, 255, 255, 0.7);
-        box-shadow: 0 10px 24px rgba(67, 90, 103, 0.08);
-      }
-
-      .nav-button .caret {
-        font-size: 11px;
-        opacity: 0.72;
-      }
-
-      .nav-badge {
-        color: var(--primary);
-        background: rgba(121, 139, 154, 0.22);
-        padding: 8px 16px;
-        border-radius: 10px;
-      }
-
-      .nav-button.current {
-        cursor: default;
-      }
-
-      .dropdown-menu {
-        position: absolute;
-        top: calc(100% + 10px);
-        right: 0;
-        width: clamp(180px, 60vw, 230px);
-        max-width: calc(100vw - 32px);
-        background: rgba(255, 255, 255, 0.96);
-        border: 1px solid rgba(147, 166, 175, 0.22);
-        border-radius: 20px;
-        box-shadow: 0 18px 38px rgba(38, 54, 64, 0.12);
-        padding: 12px;
-        display: none;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .nav-item.open .dropdown-menu {
-        display: flex;
-      }
-
-      .dropdown-menu a {
-        text-decoration: none;
-        color: var(--primary);
-        padding: 12px 14px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 600;
-        background: #f8fafc;
-      }
-
-      .dropdown-menu a:hover {
-        background: #edf5f4;
-      }
-
-      .hero-copy {
-        margin-top: 40px;
-        max-width: 760px;
-      }
-
-      .hero-copy .eyebrow {
-        margin: 0 0 18px;
-        font-size: 13px;
-        letter-spacing: 2px;
-        color: var(--muted);
-        font-weight: 700;
-        text-transform: uppercase;
-      }
-
-      .hero-copy h1 {
-        margin: 0;
-        font-size: clamp(36px, 4vw, 60px);
-        line-height: 1.15;
-        letter-spacing: -1px;
-        font-weight: 800;
-      }
-
-      .hero-copy p {
-        max-width: 620px;
-        margin-top: 20px;
-        font-size: 18px;
-        line-height: 1.8;
-        color: var(--secondary);
-      }
-
-      .story-panel {
-        margin-top: 64px;
-        background: rgba(255, 255, 255, 0.75);
-        border: 1px solid rgba(142, 163, 177, 0.2);
-        border-radius: 30px;
-        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
-        padding: 34px 30px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .story-panel::before {
-        content: "";
-        position: absolute;
-        width: 220px;
-        height: 220px;
-        top: -60px;
-        right: -30px;
-        border-radius: 50%;
-        background: rgba(177, 214, 255, 0.28);
-      }
-
-      .story-panel::after {
-        content: "";
-        position: absolute;
-        width: 220px;
-        height: 220px;
-        left: -30px;
-        bottom: -70px;
-        border-radius: 28px;
-        background: rgba(160, 232, 201, 0.25);
-      }
-
-      .quote-mark {
-        position: relative;
-        z-index: 1;
-        font-size: 72px;
-        line-height: 1;
-        color: rgba(80, 96, 108, 0.32);
-      }
-
-      .story-panel p {
-        position: relative;
-        z-index: 1;
-        margin: 0;
-        font-size: 19px;
-        line-height: 1.9;
-        color: var(--secondary);
-      }
-
-      .story-grid {
-        margin-top: 72px;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(220px, 1fr));
-        gap: 28px;
-      }
-
-      .summary-card {
-        background: rgba(255, 255, 255, 0.86);
-        border: 1px solid rgba(142, 163, 177, 0.2);
-        border-radius: 26px;
-        padding: 28px 22px;
-        box-shadow: 0 14px 30px rgba(85, 108, 121, 0.08);
-        min-height: 200px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .summary-card:nth-child(1) { background: linear-gradient(180deg, #f9fbff, #edf4ff); }
-      .summary-card:nth-child(2) { background: linear-gradient(180deg, #fffdf7, #f9f1e7); }
-      .summary-card:nth-child(3) { background: linear-gradient(180deg, #f8fffb, #edf9f4); }
-
-      .card-tag {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 90px;
-        padding: 8px 12px;
-        border-radius: 12px;
-        background: rgba(255,255,255,0.75);
-        border: 1px solid rgba(148, 164, 177, 0.15);
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
-        color: var(--primary);
-      }
-
-      .summary-card h3 {
-        margin: 0;
-        font-size: clamp(22px, 2vw, 28px);
-        line-height: 1.25;
-      }
-
-      .summary-card p {
-        margin: 0;
-        color: var(--secondary);
-        font-size: 15px;
-        line-height: 1.7;
-      }
-
-      .story-card-label {
-        display: inline-block;
-        margin-bottom: 2px;
-        font-size: 11px;
-        letter-spacing: 1.15px;
-        text-transform: uppercase;
-        font-weight: 800;
-        color: var(--primary);
-      }
-
-      @media (max-width: 1024px) {
-        .page-shell {
-          width: min(100% - 30px, 1200px);
-        }
-
-        .summary {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 680px) {
-        .nav-wrap {
-          width: 100%;
-          gap: 12px;
-          justify-content: space-between;
-          flex-wrap: nowrap;
-        }
-
-        .hero-copy h1 {
-          font-size: 36px;
-        }
-      }
-      /* 메인·자기소개 페이지와 같은 톤으로 맞춘 리디자인 */
-      :root {
-        --bg-top: #f5f2ea;
-        --bg-bottom: #f5f2ea;
-        --line: #d1d0c7;
-        --primary: #202724;
-        --secondary: #46514a;
-        --muted: #68706a;
-        --accent: #5b7163;
-      }
-
-      html, body {
-        font-family: "Pretendard", "SUIT", "Noto Sans KR", sans-serif;
-        background: #f5f2ea;
-        color: var(--primary);
-      }
-
-      body { overflow-x: clip; }
-
-      .page-shell {
-        width: min(1240px, calc(100% - 96px));
-        padding: 20px 0 100px;
-      }
-
-      .topbar { top: 0; }
-      .topbar::after { border-color: rgba(83, 94, 86, 0.2); }
-
-      .nav-wrap {
-        padding: 12px 0 14px;
-        background: rgba(245, 242, 234, 0.96);
-        backdrop-filter: none;
-      }
-
-      .nav-brand:hover { background: transparent; box-shadow: none; }
-
-      .nav-brand-word {
-        color: #59655e;
-        font-family: "Georgia", "Noto Serif KR", serif;
-        transform: none;
-      }
-
-      .nav-right { gap: clamp(14px, 2.2vw, 30px); }
-
-      .nav-button {
-        font-size: 13px;
-        letter-spacing: 0.02em;
-        font-weight: 650;
-        transition: color 180ms ease;
-      }
-
-      .nav-button:hover,
-      .nav-button.active { color: var(--accent); }
-
-      .nav-button.current-section {
-        background: rgba(91, 113, 99, 0.14);
-        border-radius: 5px;
-        padding: 8px 11px;
-        color: var(--accent);
-        box-shadow: none;
-      }
-
-      .dropdown-menu {
-        top: calc(100% + 12px);
-        border-color: var(--line);
-        border-radius: 4px;
-        background: #fbfaf7;
-        box-shadow: 0 14px 30px rgba(42, 48, 43, 0.1);
-        gap: 2px;
-      }
-
-      .dropdown-menu a {
-        border-radius: 2px;
-        background: transparent;
-      }
-
-      .dropdown-menu a:hover { background: #eeeee8; }
-
-      .dropdown-menu a[aria-current="page"] {
-        background: #eeeee8;
-        color: var(--accent);
-        font-weight: 700;
-      }
-
-      .hero-copy {
-        max-width: 940px;
-        margin-top: clamp(82px, 11vh, 124px);
-      }
-
-      .hero-copy .eyebrow {
-        margin-bottom: 18px;
-        color: var(--accent);
-        font-family: Arial, "Helvetica Neue", sans-serif;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-      }
-
-      .hero-copy h1 {
-        color: #202724;
-        font-size: clamp(38px, 4.4vw, 58px);
-        line-height: 1.2;
-        letter-spacing: 0;
-        font-weight: 760;
-        word-break: keep-all;
-      }
-
-      .hero-copy h1 .topic-highlight {
-        display: inline-block;
-        padding: 0.08em 0.2em;
-        background: #ded8c9;
-        border-radius: 0.18em;
-      }
-
-      .hero-copy p {
-        max-width: 720px;
-        margin-top: 22px;
-        color: #46514a;
-        font-size: 17px;
-        line-height: 1.8;
-        font-weight: 500;
-        word-break: keep-all;
-      }
-
-      .story-panel {
-        max-width: 910px;
-        margin: 64px 0 0 7%;
-        padding: 4px 0 4px clamp(24px, 5vw, 60px);
-        border: 0;
-        border-left: 2px solid var(--accent);
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-        overflow: visible;
-      }
-
-      .story-panel::before,
-      .story-panel::after { display: none; }
-
-      .quote-mark {
-        margin-bottom: 4px;
-        color: rgba(91, 113, 99, 0.45);
-        font-family: "Georgia", serif;
-        font-size: 48px;
-      }
-
-      .story-panel p {
-        max-width: 60ch;
-        color: #202724;
-        font-size: 18px;
-        line-height: 1.9;
-        font-weight: 500;
-        word-break: keep-all;
-      }
-
-      .story-grid {
-        margin-top: 110px;
-        padding-top: 40px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0;
-        border-top: 1px solid rgba(83, 94, 86, 0.28);
-      }
-
-      .summary-card,
-      .summary-card:nth-child(n) {
-        min-width: 0;
-        min-height: 0;
-        padding: 0 30px;
-        gap: 12px;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .summary-card:first-child { padding-left: 0; }
-      .summary-card:last-child { padding-right: 0; }
-
-      .summary-card + .summary-card {
-        border-left: 1px solid rgba(82, 102, 90, 0.24);
-      }
-
-      .story-card-label {
-        color: #536b5e;
-        font-family: Arial, "Helvetica Neue", sans-serif;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-      }
-
-      .summary-card h3 {
-        margin: 6px 0 8px;
-        color: #202724;
-        font-size: clamp(22px, 2.2vw, 28px);
-        line-height: 1.36;
-        font-weight: 700;
-        word-break: keep-all;
-      }
-
-      .summary-card p {
-        color: #46514a;
-        font-size: 15px;
-        line-height: 1.85;
-        word-break: keep-all;
-      }
-
-      .journey-pager {
-        display: flex;
-        justify-content: space-between;
-        gap: 24px;
-        margin-top: 120px;
-        padding-top: 22px;
-        border-top: 1px solid rgba(83, 94, 86, 0.28);
-      }
-
-      .pager-link {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        color: #202724;
-        text-decoration: none;
-        font-size: clamp(18px, 2vw, 22px);
-        font-weight: 700;
-        transition: color 180ms ease;
-      }
-
-      .pager-link span {
-        color: #536b5e;
-        font-family: Arial, "Helvetica Neue", sans-serif;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-      }
-
-      .pager-link.next {
-        align-items: flex-end;
-        text-align: right;
-      }
-
-      .pager-link:hover { color: #3f5b4c; }
-
-      a:focus-visible,
-      button:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 4px;
-      }
-
-      @media (max-width: 1024px) {
-        .page-shell { width: min(calc(100% - 56px), 900px); }
-        .story-grid { grid-template-columns: 1fr; }
-        .summary-card,
-        .summary-card:nth-child(n) { padding: 28px 0; }
-        .summary-card:first-child { padding-top: 0; }
-        .summary-card + .summary-card {
-          border-left: 0;
-          border-top: 1px solid rgba(82, 102, 90, 0.2);
-        }
-      }
-
-      @media (max-width: 680px) {
-        .page-shell { width: calc(100% - 40px); padding: 12px 0 72px; }
-        .nav-wrap { gap: 8px; padding: 10px 0; }
-        .nav-left { height: 38px; }
-        .nav-brand-word { font-size: 33px; }
-        .nav-right { gap: 10px; }
-        .nav-button { font-size: 11px; gap: 4px; }
-        .nav-button.current-section { padding: 7px 8px; }
-        .nav-button .caret { font-size: 8px; }
-        .hero-copy { margin-top: 62px; }
-        .hero-copy h1 { font-size: 32px; }
-        .hero-copy p { font-size: 16px; }
-        .story-panel { margin: 44px 0 0 4%; padding-left: 20px; }
-        .story-panel p { font-size: 16px; }
-        .story-grid { margin-top: 72px; padding-top: 30px; }
-        .journey-pager { margin-top: 80px; }
-        .pager-link { font-size: 17px; }
-      }
-
-      @media (max-width: 370px) {
-        .nav-right { gap: 7px; }
-        .nav-button { font-size: 10px; }
-      }
-    
-      /* ===== 수채화 잎 프레임 (장식 전용) ===== */
-      body { position: relative; }
-      .page-shell { position: relative; z-index: 1; padding-bottom: clamp(190px, 21vw, 300px); }
-      .leaf-frame {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        overflow: hidden;
-        pointer-events: none;
-        user-select: none;
-      }
-      .leaf-frame img { position: absolute; display: block; height: auto; max-width: none; }
-      .lf-tl { top: 0; left: 0; width: clamp(150px, 21vw, 320px); }
-      .lf-tr { top: 0; right: 0; width: clamp(120px, 16vw, 240px); }
-      .lf-bird {
-        top: 100px;
-        right: calc(clamp(120px, 16vw, 240px) * 0.05);
-        width: calc(clamp(120px, 16vw, 240px) * 0.92);
-        transform-origin: 18% 80%;
-        animation: lf-sway 7s ease-in-out infinite;
-      }
-      .lf-bl { bottom: 0; left: 0; width: clamp(170px, 25vw, 380px); }
-      .lf-br { bottom: 0; right: 0; width: clamp(160px, 23vw, 340px); }
-      .lf-path {
-        left: 50%;
-        bottom: clamp(26px, 4.2vw, 64px);
-        width: min(60vw, 880px);
-        transform: translateX(-50%);
-        clip-path: inset(0 0 0 0);
-        transition: clip-path 2.8s cubic-bezier(.45, .05, .3, 1);
-      }
-      .lf-path.is-waiting { clip-path: inset(0 100% 0 0); }
-      @keyframes lf-sway {
-        0%, 100% { transform: rotate(0deg); }
-        50% { transform: rotate(-2.4deg); }
-      }
-      main { position: relative; }
-      .page-motif {
-        position: absolute;
-        top: clamp(70px, 9vw, 130px);
-        right: clamp(150px, 17vw, 260px);
-        width: clamp(170px, 18vw, 270px);
-        height: auto;
-        pointer-events: none;
-        user-select: none;
-      }
-      /* 잎 위에 겹치는 글자는 종이색 테두리로 가독성 유지 */
-      .nav-brand-word,
-      .nav-button,
-      .hero-copy .eyebrow,
-      .pager-link,
-      .page-foot p { text-shadow: 0 0 6px rgba(245, 242, 234, .95), 0 0 14px rgba(245, 242, 234, .9); }
-      /* 맨 위에서는 헤더를 투명하게 해 잎이 보이고, 스크롤하면 화면 끝까지 종이색 바탕 */
-      .nav-wrap { background: transparent !important; }
-      .topbar::before {
-        content: "";
-        position: absolute;
-        top: -40px;
-        bottom: 0;
-        left: 50%;
-        width: 100vw;
-        margin-left: -50vw;
-        background: rgb(245, 242, 234);
-        opacity: 0;
-        transition: opacity 220ms ease;
-        z-index: -1;
-      }
-      body.is-scrolled .topbar::before { opacity: 1; }
-      @media (max-width: 1240px) {
-        .page-motif:not(.keep) { display: none; }
-      }
-      @media (max-width: 960px) {
-        .page-motif { display: none; }
-      }
-      @media (max-width: 680px) {
-        .page-shell { padding-bottom: 170px; }
-        .lf-tl { width: 118px; opacity: .85; }
-        .lf-tr { width: 92px; opacity: .85; }
-        .lf-bird { top: 64px; right: calc(92px * .05); width: calc(92px * .92); }
-        .lf-bl { width: 160px; }
-        .lf-br { width: 150px; }
-        .lf-path { width: 74vw; bottom: 30px; }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .lf-bird { animation: none; }
-        .lf-path, .lf-path.is-waiting { transition: none; clip-path: none; }
-      }
-      .page-motif { top: 395px; right: clamp(120px, 14vw, 230px); }
-      @media (max-width: 1180px) { .page-motif { display: none; } }
-      /* 배경 그림 위에서도 작은 글씨 대비 4.5:1 이상 유지 */
-      .hero-copy .eyebrow,
-      .story-card-label,
-      .pager-link span,
-      .quote-source,
-      .sar dt,
-      .turning-point .mark,
-      .work-go { color: #3d5246 !important; }
-      .number-card .source,
-      .work-quote span,
-      .page-foot p { color: #4a524c !important; }
-      /* 큰 제목 뒤 배경색 제거 */
-      .hero-copy h1 .topic-highlight { padding: 0; background: transparent; border-radius: 0; }
-      /* ---- 흐린 수채화 배경 (화면에 고정) ---- */
-      .page-bg {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background: url("assets/home/bg_plan.webp") 42% 100% / cover no-repeat;
-      }
+      @media (max-width: 760px) { .stack .detail-block { grid-template-columns: 1fr !important; } }
     </style>
   </head>
   <body>
-    <div class="page-bg" aria-hidden="true"></div>
-    <div class="leaf-frame" aria-hidden="true">
-      <img class="lf-tl" src="assets/home/leaf_tl.webp" alt="" width="440" height="600" decoding="async">
-      <img class="lf-tr" src="assets/home/leaf_tr.webp" alt="" width="306" height="540" decoding="async">
-      <img class="lf-bird" src="assets/home/bird_branch.webp" alt="" width="320" height="170" decoding="async">
-      <img class="lf-bl" src="assets/home/leaf_bl.webp" alt="" width="470" height="334" loading="lazy" decoding="async">
-      <img class="lf-br" src="assets/home/leaf_br.webp" alt="" width="416" height="364" loading="lazy" decoding="async">
-      <img class="lf-path" src="assets/home/trail_path.webp" alt="" width="945" height="110" loading="lazy" decoding="async">
-    </div>
-    <div class="page-shell">
-      <header class="topbar">
-        <nav class="nav-wrap" aria-label="메인 네비게이션">
-          <div class="nav-left">
-            <a class="nav-brand" href="index.html" aria-label="HR 로고">
-              <span class="nav-brand-word">HR</span>
-            </a>
-          </div>
+    <header class="site-header" id="site-header">
+      <nav class="site-nav wrap" aria-label="메인 메뉴">
+        <a class="site-logo" href="index.html" aria-label="행로 홈">HR.</a>
+        <ul class="site-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="Intro.html">About</a></li>
+          <li><a href="Works.html">Works</a></li>
+          <li><a href="Plan_page.html" aria-current="page">Journey</a></li>
+        </ul>
+      </nav>
+    </header>
 
-          <div class="nav-right">
-            <div class="nav-item">
-              <a class="nav-button" href="index.html">메인 화면</a>
-            </div>
+    <main>
+      <section class="page-hero tinted">
+        <div class="wrap" style="position:relative">
+          <p class="section-label">Journey</p>
+          <h1 class="page-title">아직 가고 있는 길.</h1>
+          <p class="section-desc">지금까지 걸어온 길과, 앞으로 도전할 일을 기록합니다. 계획은 방향을 정해 주는 나침반과 같습니다.</p>
+          <p class="hand-note" aria-hidden="true">“지금도 나는,<br />걸어가는 중이야.”</p>
+          <img class="motif" src="assets/home/motif_sunset.webp" alt="" />
+        </div>
+      </section>
 
-            <div class="nav-item">
-              <a class="nav-button" href="Intro.html">자기소개</a>
-            </div>
-
-            <div class="nav-item">
-              <button class="nav-button current-section" type="button">행로 <span class="caret">▼</span></button>
-              <div class="dropdown-menu">
-                <a href="Strength_page.html">강점</a>
-                <a href="Preference_page.html">취향</a>
-                <a href="Plan_page.html" aria-current="page">앞으로의 계획</a>
+      <section class="section" aria-labelledby="tl-title">
+        <div class="wrap">
+          <h2 class="sub-head" id="tl-title">My Timeline</h2>
+          <p class="sub-desc">걸어온 길, 지금 걷는 길, 다음에 걸을 길.</p>
+          <ol class="timeline">
+            <li class="timeline-item">
+              <div class="timeline-card">
+                <p class="when">지나온 길</p>
+                <h3>길을 의심하고, 다시 움직이다</h3>
+                <ul>
+                  <li>영상 편집 독학, 유튜브 채널 운영. 뚜렷한 성과 없이 번아웃</li>
+                  <li>학원 5개월: C언어·파이썬·DBMS·바이브 코딩</li>
+                  <li>K-뉴딜 SKT Aleph 심화 과정 조장, 개근, 중간평가 우수자</li>
+                  <li>리추얼 26일 기록을 분석한 논문 제출</li>
+                </ul>
               </div>
-            </div>
-
-            <div class="nav-item">
-              <button class="nav-button" type="button">결과물 <span class="caret">▼</span></button>
-              <div class="dropdown-menu" style="width:max-content">
-                <a href="minigame/name_entry.html" style="display:flex;align-items:center;gap:8px"><img src="minigame/assets/lumoria_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">미니게임 <span style="color:#7a6a9a;font-size:.86em">LUMORIA</span></a>
-                <a href="studio/studiohomepage.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="studio/assets/studio_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">짤 스튜디오</a>
-                <a href="Weather/weatherhomepage.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="Weather/assets/weather_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">오늘의 날씨 <span style="color:#6f9a52;font-size:.86em">weather note</span></a>
-                <a href="PDS/PlanDoSee.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="PDS/assets/pds_icon_32.png" alt="" width="20" height="20" style="flex:none;image-rendering:auto">PlanDoSee</a>
-                <a href="ByteBack.html" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="assets/byteback_icon.svg" alt="" width="20" height="20" style="flex:none">BYTE BACK 방어전 <span style="color:#4f6b5c;font-size:.86em">22-stage defense</span></a>
-                <a href="cortex/demo/index.html" style="display:flex;align-items:center;gap:8px"><img src="cortex/demo/assets/favicon.svg" alt="" width="24" height="24" style="flex:none;margin:-2px">한눈 <span style="display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#e3f4e8;color:#1b6e33;font-size:11px;font-weight:700;line-height:1.5;vertical-align:1px;letter-spacing:0">제작 중</span></a>
-                <a href="https://github.com/y49959946-debug/keshev-dashboard" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;white-space:nowrap"><img src="assets/veil_icon.svg" alt="" width="20" height="20" style="flex:none">Veil <span style="color:#4e6472;font-size:.86em">security dashboard</span> <span style="display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#e3f4e8;color:#1b6e33;font-size:11px;font-weight:700;line-height:1.5;vertical-align:1px;letter-spacing:0">제작 중</span></a>
+            </li>
+            <li class="timeline-item now">
+              <div class="timeline-card">
+                <p class="when">지금</p>
+                <h3>지키는 법을 배우는 중</h3>
+                <ul>
+                  <li>정보보안 공부: 네트워크·보안 장비·리눅스·SQL·모의 침투</li>
+                  <li><a href="ByteBack.html">BYTE BACK 방어전</a> 22단계 완주</li>
+                  <li>보안 관제 앱 Veil 제작 중</li>
+                </ul>
               </div>
-            </div>
-          </div>
-        </nav>
-      </header>
+            </li>
+            <li class="timeline-item">
+              <div class="timeline-card">
+                <p class="when">다음</p>
+                <h3>만들고, 정리하고, 나누기</h3>
+                <ul>
+                  <li>작은 프로젝트를 하나씩 완성해 결과물로 연결</li>
+                  <li>왜 이렇게 구현했는지 매번 정리하기</li>
+                  <li>Veil을 설치 프로그램으로 포장해 누구나 쓸 수 있게 하기</li>
+                </ul>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
 
-      <main>
-        <section class="hero-copy">
-          <p class="eyebrow">Personal Journey · 계획</p>
-          <h1><span class="topic-highlight">앞으로의 성장을 설계하고 있습니다.</span></h1>
-          <p>
-            지금까지 배운 것을 바탕으로, 더 넓은 기술과 더 깊은 이해를 쌓아가며 앞으로 나아가고 싶습니다.
-            단순히 결과만을 쫓기보다, 꾸준히 성장할 수 있는 방향을 설정하고 실천해 나가고 있습니다.
-          </p>
-        </section>
-
-        <section class="story-panel" aria-label="계획 이야기 인용">
-          <div class="quote-mark">“</div>
-          <p>
-            계획은 방향을 정해주는 나침반과 같습니다. 앞으로 어떤 길을 걸어갈지 미리 생각해두면,
-            불확실한 순간에도 더 침착하게 선택을 내릴 수 있습니다.
-          </p>
-        </section>
-
-        <section class="story-grid" aria-label="계획 상세">
-          <article class="summary-card">
-            <span class="story-card-label">PLAN — 목표</span>
-            <h3>기술을 더 깊이 이해하고 싶습니다</h3>
-            <p>
-              지금까지는 기능을 구현하는 데 집중해 왔지만, 앞으로는 더 넓은 관점에서 웹 개발을 바라보고 싶습니다.
-              단순히 화면을 만드는 것을 넘어서 사용자 경험, 구조적 설계, 유지보수 가능성을 함께 고려하는 개발자가 되고 싶습니다.
-            </p>
-            <p>
-              HTML, CSS, JavaScript를 넘어서 더 많은 기술들을 익히고, 각각이 왜 중요한지 이해하며 실력을 확장해 나가고 있습니다.
-            </p>
+      <div class="wrap stack">
+        <h2 class="sub-head">My Plan</h2>
+        <p class="sub-desc">결과만 쫓기보다, 꾸준히 성장할 수 있는 방향을 정하고 실천합니다.</p>
+          <article class="detail-block" style="display:grid;grid-template-columns:240px 1fr;gap:8px 40px">
+            <div><p class="section-label" style="margin:0">목표</p><h2>기술을 더 깊이 이해하고 싶습니다</h2></div>
+            <div class="prose"><p>지금까지는 기능을 구현하는 데 집중해 왔지만, 앞으로는 더 넓은 관점에서 웹 개발을 바라보고 싶습니다. 단순히 화면을 만드는 것을 넘어서 사용자 경험, 구조적 설계, 유지보수 가능성을 함께 고려하는 개발자가 되고 싶습니다.</p><p>HTML, CSS, JavaScript를 넘어서 더 많은 기술들을 익히고, 각각이 왜 중요한지 이해하며 실력을 확장해 나가고 있습니다.</p></div>
           </article>
-
-          <article class="summary-card">
-            <span class="story-card-label">ACTION — 실행</span>
-            <h3>꾸준히 만들고, 꾸준히 정리합니다</h3>
-            <p>
-              앞으로는 작은 프로젝트를 하나씩 완성해 나가며 배운 내용을 실제 결과물로 연결하는 습관을 계속 이어갈 계획입니다.
-              작업을 끝낸 뒤에는 왜 이렇게 구현했는지 정리하고, 더 나은 방법은 없는지 고민하는 시간을 갖겠습니다.
-            </p>
-            <p>
-              또한 실습 기록을 남기고, 문제를 해결한 과정을 정리하며 앞으로의 성장 방향을 점검하는 방식을 유지할 생각입니다.
-            </p>
-            <p>
-              꾸준한 실천은 제 가장 큰 강점이자 앞으로의 성장 엔진이 될 것이라고 믿습니다.
-            </p>
+          <article class="detail-block" style="display:grid;grid-template-columns:240px 1fr;gap:8px 40px">
+            <div><p class="section-label" style="margin:0">실행</p><h2>꾸준히 만들고, 꾸준히 정리합니다</h2></div>
+            <div class="prose"><p>앞으로는 작은 프로젝트를 하나씩 완성해 나가며 배운 내용을 실제 결과물로 연결하는 습관을 계속 이어갈 계획입니다. 작업을 끝낸 뒤에는 왜 이렇게 구현했는지 정리하고, 더 나은 방법은 없는지 고민하는 시간을 갖겠습니다.</p><p>또한 실습 기록을 남기고, 문제를 해결한 과정을 정리하며 앞으로의 성장 방향을 점검하는 방식을 유지할 생각입니다. 꾸준한 실천은 제 가장 큰 강점이자 앞으로의 성장 엔진이 될 것이라고 믿습니다.</p></div>
           </article>
-
-          <article class="summary-card">
-            <span class="story-card-label">RESULT — 기대</span>
-            <h3>더 단단한 사람이 되고 싶습니다</h3>
-            <p>
-              지금의 계획은 단지 기술을 배우는 것을 넘어, 더 안정적이고 책임감 있는 사람이 되는 과정입니다.
-              복잡한 문제를 바라볼 때 체계적으로 접근하고, 방향을 잃지 않고 꾸준히 나아가며 결과를 만들어낼 수 있는 사람이 되고 싶습니다.
-            </p>
-            <p>
-              앞으로 한 번 더 성장할 때마다, 제 작업과 생각의 깊이는 더 넓어질 것입니다.
-            </p>
-            <p>
-              장기적으로는 내가 만든 결과물이 사람들에게 의미 있고, 나 자신에게도 확실한 자산이 되도록 만들고 싶습니다.
-            </p>
+          <article class="detail-block" style="display:grid;grid-template-columns:240px 1fr;gap:8px 40px">
+            <div><p class="section-label" style="margin:0">기대</p><h2>더 단단한 사람이 되고 싶습니다</h2></div>
+            <div class="prose"><p>지금의 계획은 단지 기술을 배우는 것을 넘어, 더 안정적이고 책임감 있는 사람이 되는 과정입니다. 복잡한 문제를 바라볼 때 체계적으로 접근하고, 방향을 잃지 않고 꾸준히 나아가며 결과를 만들어낼 수 있는 사람이 되고 싶습니다.</p><p>앞으로 한 번 더 성장할 때마다, 제 작업과 생각의 깊이는 더 넓어질 것입니다. 장기적으로는 내가 만든 결과물이 사람들에게 의미 있고, 나 자신에게도 확실한 자산이 되도록 만들고 싶습니다.</p></div>
           </article>
-        </section>
-        <nav class="journey-pager" aria-label="행로 페이지 이동">
-          <a class="pager-link prev" href="Preference_page.html"><span>← 이전</span>취향</a>
-          <a class="pager-link next" href="index.html"><span>다음 →</span>메인 화면</a>
-        </nav>
-      </main>
-    </div>
+        <nav class="pager" aria-label="이전·다음 페이지"><a href="Preference_page.html">이전<b>취향</b></a><a class="next" href="Works.html">다음<b>결과물</b></a></nav>
+      </div>
+    </main>
 
-    <script>
-      const navItems = document.querySelectorAll('.nav-item');
-
-      navItems.forEach((item) => {
-        if (!item.querySelector('.dropdown-menu')) return;
-        const button = item.querySelector('.nav-button');
-        button.addEventListener('click', () => {
-          const isOpen = item.classList.contains('open');
-          navItems.forEach((other) => {
-            other.classList.remove('open');
-            other.querySelector('.nav-button').classList.remove('active');
-          });
-
-          if (!isOpen) {
-            item.classList.add('open');
-            button.classList.add('active');
-          }
-        });
-      });
-
-      document.addEventListener('click', (event) => {
-        if (!event.target.closest('.nav-item')) {
-          navItems.forEach((item) => {
-            item.classList.remove('open');
-            item.querySelector('.nav-button').classList.remove('active');
-          });
-        }
-      });
-    </script>
-    <script>
-      (() => {
-        const setScrolled = () => document.body.classList.toggle('is-scrolled', window.scrollY > 4);
-        window.addEventListener('scroll', setScrolled, { passive: true });
-        setScrolled();
-        const path = document.querySelector('.lf-path');
-        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!path || reduce || !('IntersectionObserver' in window)) return;
-        path.classList.add('is-waiting');
-        const io = new IntersectionObserver((entries) => {
-          if (entries.some((e) => e.isIntersecting)) {
-            path.classList.remove('is-waiting');
-            io.disconnect();
-          }
-        }, { threshold: 0.4 });
-        io.observe(path);
-      })();
-    </script>
+    <footer class="site-footer" style="margin-top:72px">
+      <div class="wrap">
+        <span><span class="wordmark" aria-hidden="true">HR.</span>© 2026 박성민. 지금도 나는, 걸어가는 중이야.</span>
+        <a href="https://github.com/y49959946-debug" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+    <script src="assets/site.js"></script>
   </body>
 </html>
