@@ -7,3 +7,6 @@ logs/
 Claude outputs/인증_구현_설명서.docx
 Claude outputs/인증_구현_설명서.md
 *.zip
+_backup_haengro/
+index_haengro_backup.html
+index_security_v1.html

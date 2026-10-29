@@ -305,3 +305,77 @@ main .works-hero .hand-note { right: 56px; top: 44px; }
 .filters button[aria-pressed="true"] { background: var(--sage); color: var(--ink); border-color: rgba(205, 214, 189, .45); }
 .works-note { color: var(--ink-3); }
 @media (max-width: 760px) { main .works-hero { padding: 26px 22px; } }
+
+/* =====================================================================
+   v5: 등대 배경 + 빛을 받는 유리 패널 + IBM Plex Sans KR
+   - 빛은 오른쪽 위(등대)에서 들어옵니다. 광택·테두리 모두 그 방향으로 밝습니다.
+   ===================================================================== */
+:root {
+  --bg-photo: url("home/bg_lighthouse.webp");
+  --serif: "IBM Plex Sans KR", system-ui, sans-serif;
+  --sans: "IBM Plex Sans KR", system-ui, sans-serif;
+  --glass: rgba(16, 20, 34, .34);
+  --glass-strong: rgba(13, 17, 28, .56);
+  --glass-soft: rgba(255, 255, 255, .06);
+  --blur: blur(22px) saturate(120%);
+  --sage: #36425e;
+  --sage-hover: #43506f;
+  --accent: #e3c58e;
+  --olive: rgba(227, 197, 142, .5);
+  --line: rgba(255, 255, 255, .12);
+  /* 빛 방향(오른쪽 위 → 왼쪽 아래) */
+  --light-angle: 225deg;
+  --edge: linear-gradient(var(--light-angle), rgba(255, 228, 176, .62), rgba(255, 255, 255, .16) 32%, rgba(255, 255, 255, .05) 62%, rgba(255, 228, 176, .14));
+  --sheen: radial-gradient(130% 90% at 100% 0%, rgba(255, 214, 150, .13), rgba(255, 214, 150, .03) 45%, transparent 65%),
+           linear-gradient(var(--light-angle), rgba(255, 255, 255, .06), transparent 40%);
+  --lift: 0 18px 44px rgba(4, 6, 14, .38), inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+body { background: #10141f; }
+body::before { inset: -40px; filter: blur(14px); background: linear-gradient(rgba(12, 16, 28, .36), rgba(12, 16, 28, .48)), var(--bg-photo) 82% 18% / cover no-repeat; }
+body.home::before { background: linear-gradient(90deg, rgba(12, 16, 28, .42), rgba(12, 16, 28, .1) 65%, rgba(12, 16, 28, .18)), var(--bg-photo) 82% 18% / cover no-repeat; }
+
+/* 빛을 받는 유리 */
+.glass, .project-card, .tile, .moment, .strength-card, .stat, .timeline-card, .info-card, .quote-band,
+.paper .abstract, .paper .stat-tile, .paper .judged, .principle, .site-nav, .page-hero > .wrap,
+.section > .wrap > .prose, .stack, .strength-detail, .detail > div:first-child, .paper, main .works-hero, .journal-panel, .filters button {
+  position: relative;
+  border: 0;
+  background: var(--sheen), var(--glass);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--lift);
+}
+.site-nav, .section > .wrap > .prose, .stack, .strength-detail, .detail > div:first-child, .paper { background: var(--sheen), var(--glass-strong); }
+/* 그라데이션 테두리 (빛 쪽이 밝음) */
+.glass::after, .project-card::after, .tile::after, .moment::after, .strength-card::after, .stat::after, .timeline-card::after, .info-card::after, .quote-band::after,
+.paper .abstract::after, .paper .stat-tile::after, .paper .judged::after, .principle::after, .site-nav::after, .page-hero > .wrap::after,
+.section > .wrap > .prose::after, .stack::after, .strength-detail::after, .detail > div:first-child::after, .paper::after, main .works-hero::after, .journal-panel::after, .filters button::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: var(--edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+/* 패널 안에 들어간 카드는 한 겹 얇게 */
+.mini-projects .project-card, .journal-panel { background: linear-gradient(var(--light-angle), rgba(255, 228, 176, .07), rgba(255, 255, 255, .025) 50%); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+.filters button { box-shadow: none; }
+.filters button[aria-pressed="true"] { background: var(--sheen), var(--sage); }
+.moment, .principle { border-left: 3px solid var(--gold); }
+.project-thumb::after { background: rgba(10, 14, 26, .3); }
+
+/* 버튼 */
+.btn-primary { background: linear-gradient(var(--light-angle), #4a5878, var(--sage)); border-color: rgba(227, 197, 142, .45); color: #f6f1e6; }
+.btn-primary:hover { background: linear-gradient(var(--light-angle), #56658a, var(--sage-hover)); }
+.badge-done { background: rgba(227, 197, 142, .16); color: var(--accent); }
+.marker { background: rgba(227, 197, 142, .14); }
+.timeline-item::before { background: #10141f; }
+.timeline-item.now::before { box-shadow: 0 0 0 4px rgba(227, 197, 142, .18); }
+
+/* 글꼴: IBM Plex Sans KR 하나로. 제목은 굵게, 자간 살짝 좁게 */
+.panel-hero h1, .panel h2, .page-title, .sub-head, .section-title, .project-body h3, .strength-card h3,
+.timeline-card h3, .detail-block h2, .info-card h2, .steps b, .stat b, .paper h1, .paper h2, .paper .stat-tile .value,
+.project-banner h1, .quote-band p, .journal-panel h3, .pager a b { font-weight: 600 !important; letter-spacing: -.02em; }
+.site-logo, .site-footer .wordmark { font-family: var(--sans); font-weight: 700; letter-spacing: -.01em; }
+.prose p { line-height: 1.85; }
+/* 배경 C안(깊은 밤): 이미지가 이미 어두우니 덮는 막을 옅게 */
+body::before { background: linear-gradient(rgba(10, 13, 24, .22), rgba(10, 13, 24, .34)), var(--bg-photo) 82% 18% / cover no-repeat; }
+body.home::before { background: linear-gradient(90deg, rgba(10, 13, 24, .3), rgba(10, 13, 24, 0) 65%, rgba(10, 13, 24, .08)), var(--bg-photo) 82% 18% / cover no-repeat; }
