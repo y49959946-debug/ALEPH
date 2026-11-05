@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>한눈 - 행로</title>
+    <meta name="description" content="자기소개서를 여러 AI가 서로 다른 눈으로 읽고 토론하는 웹앱, 한눈." />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/home/favicon_32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/home/favicon_180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/site.css" />
+    <style>
+      .project-banner { position: relative; margin-top: 24px; border-radius: var(--radius); overflow: hidden; color: #fff; background: linear-gradient(90deg, rgba(12, 16, 28, .9) 30%, rgba(12, 16, 28, .4)), url("assets/home/bg_bottom.jpg") center / cover; box-shadow: 0 18px 44px rgba(4, 6, 14, .38); }
+      .project-banner::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; background: var(--edge); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+      .project-banner .inner { padding: 48px 44px; max-width: 620px; }
+      .project-banner .icon { width: 56px; height: 56px; padding: 10px; border-radius: 50%; background: rgba(255,255,255,.92); margin-bottom: 18px; }
+      .project-banner h1 { margin: 0; font: 400 clamp(30px, 4vw, 40px)/1.3 var(--serif); }
+      .project-banner p { margin: 10px 0 18px; color: var(--ink-2); }
+      .project-banner .tag { background: rgba(255,255,255,.16); color: #fff; }
+      .tabs { display: flex; gap: 4px; margin: 28px 0 36px; padding: 0; list-style: none; border-bottom: 1px solid var(--line); overflow-x: auto; }
+      .tabs a { display: block; padding: 12px 16px; font-size: 14.5px; text-decoration: none; color: var(--ink-2); white-space: nowrap; }
+      .tabs a:hover { color: var(--ink); }
+      .principle { margin: 18px 0 0; padding: 18px 22px; border-left: 3px solid var(--gold); background: var(--card); border-radius: 0 var(--radius) var(--radius) 0; font: 400 18px/1.6 var(--serif); }
+      .stat-grid.three { grid-template-columns: repeat(3, 1fr); margin-top: 6px; }
+      .detail-block .sar { margin-top: 6px; }
+      @media (max-width: 760px) { .project-banner .inner { padding: 32px 22px; } .stat-grid.three { grid-template-columns: 1fr; } }
+      .stages { display: grid; gap: 10px; margin-top: 8px; }
+      .stage { border-radius: 12px; background: linear-gradient(var(--light-angle), rgba(255, 228, 176, .06), rgba(255, 255, 255, .02) 55%); border: 1px solid var(--line); }
+      .stage summary { display: grid; grid-template-columns: 74px 1fr auto; gap: 12px; align-items: center; padding: 14px 18px; cursor: pointer; list-style: none; }
+      .stage summary::-webkit-details-marker { display: none; }
+      .stage summary::after { content: "+"; color: var(--ink-3); font-size: 18px; line-height: 1; }
+      .stage[open] summary::after { content: "−"; }
+      .stage .no { font-size: 13px; font-weight: 600; color: var(--accent); }
+      .stage .ttl b { display: block; font-weight: 600; font-size: 15.5px; }
+      .stage .ttl span { font-size: 13px; color: var(--ink-3); }
+      .stage .body { padding: 0 18px 18px 104px; }
+      .stage .body .sar { grid-template-columns: 52px 1fr; }
+      .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; padding: 1px 6px; border-radius: 5px; background: rgba(255, 255, 255, .08); color: var(--accent); white-space: nowrap; }
+      .note-line { margin-top: 14px; font-size: 14px; color: var(--ink-3); }
+      .compare { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14.5px; }
+      .compare th, .compare td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+      .compare th { color: var(--ink-3); font-weight: 500; }
+      .compare td b { color: var(--accent); }
+      .phase { margin-top: 14px; }
+      .phase h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
+      .phase ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 14.5px; }
+      .phase li + li { margin-top: 6px; }
+      @media (max-width: 760px) { .stage summary { grid-template-columns: 56px 1fr auto; } .stage .body { padding: 0 16px 16px; } }
+    </style>
+  </head>
+  <body>
+    <header class="site-header" id="site-header">
+      <nav class="site-nav wrap" aria-label="메인 메뉴">
+        <a class="site-logo" href="index.html" aria-label="행로 홈">HR.</a>
+        <ul class="site-menu">
+          <li><a href="index.html">메인 화면</a></li>
+          <li><a href="Intro.html">자기소개</a></li>
+          <li><a href="Plan_page.html">행로</a></li>
+          <li><a href="Works.html" aria-current="page">결과물</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="wrap">
+      <p class="section-label" style="margin-top:28px"><a href="Works.html" style="text-decoration:none">결과물</a> / 웹 앱</p>
+      <section class="project-banner" style="background-image: linear-gradient(90deg, rgba(12, 16, 28, .9) 30%, rgba(12, 16, 28, .4)), url('assets/home/bg_strength.webp')">
+        <div class="inner">
+          <img class="icon" src="cortex/demo/assets/favicon.svg" alt="" />
+          <h1>한눈</h1>
+          <p>자기소개서 한 편을 채용 담당자·기술 전문가·비개발 직군 면접관 AI가 서로 다른 눈으로 읽고 토론해, 무엇부터 고칠지 정리해 주는 웹앱입니다.</p>
+          <ul class="tags"><li class="tag">AI · 웹 앱</li><li class="tag">실험 설계</li><li class="badge badge-done">최종 제출</li></ul>
+        </div>
+      </section>
+
+      <ul class="tabs" aria-label="이 페이지의 내용"><li><a href="#overview">개요</a></li><li><a href="#process">만든 과정</a></li><li><a href="#result">측정 결과</a></li><li><a href="#limit">한계</a></li><li><a href="#demo">데모</a></li></ul>
+      <div class="detail">
+        <div>
+          <section class="detail-block" id="overview">
+            <h2>왜 만들었나</h2>
+            <p>자기소개서는 보통 한 사람이 한 번 읽고 고칩니다. 하지만 읽는 사람에 따라 보이는 약점이 다르다는 점에 주목해, 한 글을 여러 AI가 각자의 기준으로 읽게 했습니다.</p>
+            <p>코드로 문장과 문단을 나눈 뒤 분석가 AI가 첫인상을 읽고, 평가자 3명이 서로의 평가를 보지 않고 각자 평가합니다. 이어서 이름을 가린 채 서로의 평가를 읽고 토론한 뒤, 의장 AI가 우선 개선 사항을 정리합니다. AI가 원문에 없는 문장 번호를 근거로 대면 코드가 걸러 내고 기록합니다.</p>
+          </section>
+          <section class="detail-block" id="process">
+            <h2>만든 과정</h2>
+            <div class="phase"><h3>1차 · 기본 흐름 V0 (2026.09.30 – 10.01)</h3><ul>
+              <li>설계서(plan.md)를 ChatGPT와 Gemini에게 검토받고, 의견이 갈린 부분은 이유를 따져 직접 결정하며 하루 동안 v1에서 v5까지 고쳤습니다.</li>
+              <li>문장 분리처럼 정확해야 하는 일은 코드가, 해석은 AI가 맡도록 나눴습니다.</li>
+              <li>결과 화면이 “보고서 같다”는 반응을 받고, 원인이 디자인이 아니라 AI 평가 글의 길이와 말투라는 걸 찾아 화면용 짧은 글을 만드는 편집자 단계를 설계했습니다.</li>
+            </ul></div>
+            <div class="phase"><h3>2차 · 토론과 공정한 비교 (10.01 – 10.02)</h3><ul>
+              <li>설득력이 약한 “일반 독자” 평가자를 “비개발 직군 면접관”으로 바꿨습니다.</li>
+              <li>직함의 권위 효과와 순서 효과를 막으려고 이름을 가린 채 동시에 답하게 하고, 판단 변화를 ‘유지 / 근거 있는 변경 / 근거 없는 변경’으로 코드가 기록하게 했습니다.</li>
+              <li>AI 하나에 기준 13개를 주는 방식과 “평가해 줘” 한 줄만 주는 방식을 같은 글·같은 모델로 비교했습니다.</li>
+              <li>하루 무료 한도를 넘지 않게 실행당 요청 14번·재시도 2번 상한을 걸고, 멈춰도 끝난 단계는 저장되게 했습니다.</li>
+            </ul></div>
+            <div class="phase"><h3>최종 · 사용자 확인과 개선 (10.02 – 10.26)</h3><ul>
+              <li>같은 조 2명에게 직접 써 보게 하고 의견을 기록했습니다. “첫 화면이 두 칸이라 헷갈리고 글씨가 많다”는 의견을 받아 글 넣기 화면을 3페이지로 나눴습니다.</li>
+              <li>점수 우열이 아니라 “짚어야 할 점을 각 방식이 찾았는지”를 표로 보여 주는 비교 장을 만들었습니다.</li>
+              <li>발표 자료 14장을 만들고 최종 제출했습니다.</li>
+            </ul></div>
+          </section>
+          <section class="detail-block" id="result">
+            <h2>측정 결과</h2>
+            <p>샘플 자기소개서 6편마다 꼭 짚어야 할 점을 정답지로 정리하고, 같은 글·같은 모델(Gemini)로 각 방식이 몇 개를 찾았는지 자동 채점했습니다.</p>
+            <table class="compare">
+              <tr><th>방식</th><th>찾은 수 (19개 중)</th><th>AI 호출</th></tr>
+              <tr><td>한눈 (평가자 3명 + 토론)</td><td><b>18개</b></td><td>9번</td></tr>
+              <tr><td>AI 하나 · 기준 13개 제공</td><td>16개</td><td>1번</td></tr>
+              <tr><td>AI 하나 · “평가해 줘” 한 줄</td><td>14개</td><td>1번</td></tr>
+            </table>
+            <p style="margin-top:14px">뚜렷한 문제는 모든 방식이 찾았고, 차이는 미묘한 문제에서 났습니다. 전문 용어 접근성, “다양한”의 추상성은 비개발 직군 면접관이 있는 한눈만 찾았습니다. 세 방식이 모두 놓친 것은 샘플 02의 “망설임”(AI 판단 항목) 하나였습니다. 토론에서는 평가자 판단 18번 중 3번이 바뀌었고, 3번 모두 원문 근거가 있는 변경이었습니다. 원문에 없는 근거가 남은 경우는 6편 모두 0건이었습니다.</p>
+          </section>
+          <section class="detail-block" id="limit">
+            <h2>한계</h2>
+            <p>결과를 “증명”이 아니라 “관찰”로 기록했습니다. 샘플이 6편뿐이고, 샘플과 정답지를 모두 AI가 만들어 “AI끼리 통념이 같을” 위험이 있으며, AI 호출 수도 9번 대 1번으로 차이가 납니다. 그래서 객관 항목과 주관 항목을 나눠 표시하고 근거 출처를 붙였습니다.</p>
+          </section>
+          <section class="detail-block" id="demo" style="border-bottom:0">
+            <h2>데모</h2>
+            <p>샘플 자기소개서를 넣었을 때의 결과 화면을 공개해 두었습니다. 캐릭터 4명이 둥근 책상에 앉아 토론하는 장면도 함께 볼 수 있어요.</p>
+            <a class="btn btn-primary" href="cortex/demo/index.html" style="margin-top:8px">한눈 데모 열기</a>
+          </section>
+        </div>
+        <aside class="info-card" aria-label="프로젝트 정보">
+          <h2>프로젝트 정보</h2>
+          <dl>
+            <dt>기간</dt><dd>2026.09.30 – 10.26</dd>
+            <dt>역할</dt><dd>1인: 기획·설계·개발·화면</dd>
+            <dt>사용</dt><dd>Gemini, Vercel</dd>
+            <dt>결과</dt><dd>짚어야 할 점 19개 중 18개 발견</dd>
+            <dt>상태</dt><dd><span class="badge badge-done">최종 제출</span></dd>
+          </dl>
+          <a class="btn btn-primary" href="cortex/demo/index.html">데모 열기</a>
+        </aside>
+      </div>
+      <nav class="pager" aria-label="이전·다음 페이지"><a href="ZeroTrust.html">이전<b>제로트러스트·XDR 보안 서비스</b></a><a class="next" href="Works.html">다음<b>결과물 목록</b></a></nav>
+    </main>
+
+    <footer class="site-footer" style="margin-top:72px">
+      <div class="wrap">
+        <span><span class="wordmark" aria-hidden="true">HR.</span>© 2026 박성민</span>
+        <a href="https://github.com/y49959946-debug" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

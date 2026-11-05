@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>제로트러스트·XDR 보안 서비스 - 행로</title>
+    <meta name="description" content="접근 제어(ZTNA)와 위협 탐지·대응(XDR)을 묶은 보안 서비스와 관제 앱 Veil." />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/home/favicon_32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/home/favicon_180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/site.css" />
+    <style>
+      .project-banner { position: relative; margin-top: 24px; border-radius: var(--radius); overflow: hidden; color: #fff; background: linear-gradient(90deg, rgba(12, 16, 28, .9) 30%, rgba(12, 16, 28, .4)), url("assets/home/bg_bottom.jpg") center / cover; box-shadow: 0 18px 44px rgba(4, 6, 14, .38); }
+      .project-banner::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; background: var(--edge); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+      .project-banner .inner { padding: 48px 44px; max-width: 620px; }
+      .project-banner .icon { width: 56px; height: 56px; padding: 10px; border-radius: 50%; background: rgba(255,255,255,.92); margin-bottom: 18px; }
+      .project-banner h1 { margin: 0; font: 400 clamp(30px, 4vw, 40px)/1.3 var(--serif); }
+      .project-banner p { margin: 10px 0 18px; color: var(--ink-2); }
+      .project-banner .tag { background: rgba(255,255,255,.16); color: #fff; }
+      .tabs { display: flex; gap: 4px; margin: 28px 0 36px; padding: 0; list-style: none; border-bottom: 1px solid var(--line); overflow-x: auto; }
+      .tabs a { display: block; padding: 12px 16px; font-size: 14.5px; text-decoration: none; color: var(--ink-2); white-space: nowrap; }
+      .tabs a:hover { color: var(--ink); }
+      .principle { margin: 18px 0 0; padding: 18px 22px; border-left: 3px solid var(--gold); background: var(--card); border-radius: 0 var(--radius) var(--radius) 0; font: 400 18px/1.6 var(--serif); }
+      .stat-grid.three { grid-template-columns: repeat(3, 1fr); margin-top: 6px; }
+      .detail-block .sar { margin-top: 6px; }
+      @media (max-width: 760px) { .project-banner .inner { padding: 32px 22px; } .stat-grid.three { grid-template-columns: 1fr; } }
+      .stages { display: grid; gap: 10px; margin-top: 8px; }
+      .stage { border-radius: 12px; background: linear-gradient(var(--light-angle), rgba(255, 228, 176, .06), rgba(255, 255, 255, .02) 55%); border: 1px solid var(--line); }
+      .stage summary { display: grid; grid-template-columns: 74px 1fr auto; gap: 12px; align-items: center; padding: 14px 18px; cursor: pointer; list-style: none; }
+      .stage summary::-webkit-details-marker { display: none; }
+      .stage summary::after { content: "+"; color: var(--ink-3); font-size: 18px; line-height: 1; }
+      .stage[open] summary::after { content: "−"; }
+      .stage .no { font-size: 13px; font-weight: 600; color: var(--accent); }
+      .stage .ttl b { display: block; font-weight: 600; font-size: 15.5px; }
+      .stage .ttl span { font-size: 13px; color: var(--ink-3); }
+      .stage .body { padding: 0 18px 18px 104px; }
+      .stage .body .sar { grid-template-columns: 52px 1fr; }
+      .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; padding: 1px 6px; border-radius: 5px; background: rgba(255, 255, 255, .08); color: var(--accent); white-space: nowrap; }
+      .note-line { margin-top: 14px; font-size: 14px; color: var(--ink-3); }
+      .compare { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14.5px; }
+      .compare th, .compare td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+      .compare th { color: var(--ink-3); font-weight: 500; }
+      .compare td b { color: var(--accent); }
+      .phase { margin-top: 14px; }
+      .phase h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
+      .phase ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 14.5px; }
+      .phase li + li { margin-top: 6px; }
+      @media (max-width: 760px) { .stage summary { grid-template-columns: 56px 1fr auto; } .stage .body { padding: 0 16px 16px; } }
+    </style>
+  </head>
+  <body>
+    <header class="site-header" id="site-header">
+      <nav class="site-nav wrap" aria-label="메인 메뉴">
+        <a class="site-logo" href="index.html" aria-label="행로 홈">HR.</a>
+        <ul class="site-menu">
+          <li><a href="index.html">메인 화면</a></li>
+          <li><a href="Intro.html">자기소개</a></li>
+          <li><a href="Plan_page.html">행로</a></li>
+          <li><a href="Works.html" aria-current="page">결과물</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="wrap">
+      <p class="section-label" style="margin-top:28px"><a href="Works.html" style="text-decoration:none">결과물</a> / 보안</p>
+      <section class="project-banner" style="background-image: linear-gradient(90deg, rgba(12, 16, 28, .9) 30%, rgba(12, 16, 28, .4)), url('assets/home/bg_lighthouse.webp')">
+        <div class="inner">
+          <img class="icon" src="assets/zt_icon.svg" alt="" />
+          <h1>제로트러스트·XDR 보안 서비스</h1>
+          <p>접근 제어(ZTNA)와 위협 탐지·대응(XDR)을 하나로 묶은 보안 서비스를 설계·개발하고, 설치 문서와 시스템 구성도를 갖춘 배포 패키지로 제품화했습니다.</p>
+          <ul class="tags"><li class="tag">보안</li><li class="tag">ZTNA · XDR</li><li class="badge badge-done">v1.0 출시</li></ul>
+        </div>
+      </section>
+
+      <ul class="tabs" aria-label="이 페이지의 내용"><li><a href="#overview">개요</a></li><li><a href="#role">맡은 일</a></li><li><a href="#features">만든 기능</a></li><li><a href="#lesson">배운 점</a></li><li><a href="#veil">Veil</a></li></ul>
+      <div class="detail">
+        <div>
+          <section class="detail-block" id="overview">
+            <h2>프로젝트 개요</h2>
+            <p>BYTE BACK 방어전 13~22단계에 해당하는 보안 서비스 개발 과제입니다. 접근 제어와 위협 탐지·대응을 한 서비스로 묶고, 실시간 공격 시나리오 속에서 운영하며 v1.0까지 출시했습니다.</p>
+            <div class="stat-grid three" style="margin-top:14px">
+              <div class="stat"><span>개발 단계</span><b>22 / 22</b><small>보안 서비스 개발 22단계를 모두 통과했습니다.</small></div>
+              <div class="stat"><span>검증</span><b>13–22단계</b><small>제출한 소스 코드를 AI 판정 시스템으로 검증받았습니다.</small></div>
+              <div class="stat"><span>출시</span><b>v1.0</b><small>회귀 테스트를 거쳐 출시했습니다.</small></div>
+            </div>
+          </section>
+          <section class="detail-block" id="role">
+            <h2>맡은 일</h2>
+            <p>개인 프로젝트입니다. 13~20단계에서는 과정이 제공한 시작 틀(서버·화면·연결 코드) 위에, 사용자·세션, 접근 판정, 접속 기록·XDR 경보, 상태·오류, AI 연결 점검, AI 사건 설명, 조치 상태, 취약점 조회 결과를 보여 주는 표시 함수 8개를 작성했습니다.</p>
+            <p>21~22단계에서는 실행 설명서·구성도와 새 환경 재현 기록을 작성했고, 과정이 끝난 뒤 관제 대시보드와 설치 프로그램은 새 저장소에서 직접 확장했습니다. 코드는 AI 코딩 도구의 도움을 받아 작성했습니다.</p>
+          </section>
+          <section class="detail-block" id="features">
+            <h2>만든 기능</h2>
+            <dl class="sar"><dt>사고 대응</dt><dd>승인 기반 사고 대응, 보안 정책 버전 관리·롤백, 백업과 선택 복구 기능을 개발해 사고 뒤 원래 상태로 되돌릴 수 있게 했습니다.</dd><dt>운영</dt><dd>실시간 공격 시나리오에서 정책 변경 요구를 처리했고, 방어에 실패한 요청마다 Postmortem을 남긴 뒤 회귀 테스트를 거쳐 v1.0을 출시했습니다.</dd><dt>배포</dt><dd>설치 문서·시스템 구성도를 포함한 배포 패키지로 제품화했습니다.</dd></dl>
+          </section>
+          <section class="detail-block" id="lesson">
+            <h2>배운 점</h2>
+            <p>보안 화면에서 가장 위험한 것은 “확인하지 못한 것”을 “문제없음”처럼 보여 주는 것이라는 점을 배웠습니다. 그래서 모든 값에 출처를 붙이고, 확인하지 못한 기능은 설명서에도 미확인으로 남겼습니다.</p>
+            <p>다음에는 실제 연결 환경을 먼저 확보해, 화면이 아니라 실제 경보와 조치 결과로 동작을 검증하겠습니다.</p>
+          </section>
+          <section class="detail-block" id="veil" style="border-bottom:0">
+            <h2>이어진 작업: Veil <span class="badge badge-done" style="vertical-align:4px">0.1.0 배포</span></h2>
+            <p>과정이 끝난 뒤 관제 대시보드를 새 저장소에서 확장해, PC에서 쓰는 관제 앱 Veil로 만들었습니다. 상단 상태 카드 4개와 추이·기록을 한 화면에서 보며, 설치 프로그램 0.1.0을 GitHub 릴리스로 배포했습니다.</p>
+          </section>
+        </div>
+        <aside class="info-card" aria-label="프로젝트 정보">
+          <h2>프로젝트 정보</h2>
+          <dl>
+            <dt>기간</dt><dd>2026.10.19 – 10.26</dd>
+            <dt>소속</dt><dd>K-뉴딜 SKT ALEPH 과정</dd>
+            <dt>역할</dt><dd>개인 프로젝트</dd>
+            <dt>기술</dt><dd>보안 관제, 로그·경보 분석, 보안 앱 개발, 배포·패키징, 기술 문서 작성</dd>
+            <dt>결과</dt><dd>22단계 통과, v1.0 출시</dd>
+            <dt>상태</dt><dd><span class="badge badge-done">완료</span></dd>
+          </dl>
+          <a class="btn btn-primary" href="https://github.com/y49959946-debug/keshev-dashboard/releases" target="_blank" rel="noopener">Veil 0.1.0 내려받기</a>
+          <a class="btn btn-secondary" href="https://github.com/y49959946-debug/keshev-dashboard" target="_blank" rel="noopener">Veil 소스 코드</a>
+        </aside>
+      </div>
+      <nav class="pager" aria-label="이전·다음 페이지"><a href="ByteBack.html">이전<b>BYTE BACK 방어전</b></a><a class="next" href="Hannun.html">다음<b>한눈</b></a></nav>
+    </main>
+
+    <footer class="site-footer" style="margin-top:72px">
+      <div class="wrap">
+        <span><span class="wordmark" aria-hidden="true">HR.</span>© 2026 박성민</span>
+        <a href="https://github.com/y49959946-debug" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+    <script src="assets/site.js"></script>
+  </body>
+</html>

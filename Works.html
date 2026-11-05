@@ -26,6 +26,7 @@
       .t-dark { background-image: linear-gradient(rgba(54, 66, 48, .55), rgba(54, 66, 48, .55)), url("assets/home/bg_bottom.jpg"); }
       .t-mist { background-image: url("assets/home/bg_strength.webp"); }
       .t-paper { background-image: url("assets/home/bg_mid.jpg"); }
+      .t-zt { background-image: url("assets/home/bg_lighthouse.webp"); background-position: 80% 20%; }
       .project-card[hidden] { display: none; }
       .works-note { margin: 28px 0 0; color: var(--ink-3); font-size: 13.5px; }
       @media (max-width: 960px) { .project-grid { grid-template-columns: repeat(2, 1fr); } .works-hero .motif, .works-hero .hand-note { display: none; } }
@@ -69,12 +70,20 @@
             <div class="project-meta"><ul class="tags"><li class="tag">보안</li><li class="badge badge-done">22단계 완주</li></ul><span class="arrow" aria-hidden="true">→</span></div>
           </div>
         </a>
-        <a class="project-card" data-cat="security" href="https://github.com/y49959946-debug/keshev-dashboard" target="_blank" rel="noopener">
+        <a class="project-card" data-cat="security" href="ZeroTrust.html">
+          <div class="project-thumb t-zt"><img class="icon" src="assets/zt_icon.svg" alt="" /></div>
+          <div class="project-body">
+            <h3>제로트러스트·XDR 보안 서비스</h3>
+            <p>접근 제어(ZTNA)와 위협 탐지·대응(XDR)을 묶은 보안 서비스를 개발하고, 배포 패키지로 제품화했습니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">보안</li><li class="badge badge-done">v1.0 출시</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+          </div>
+        </a>
+        <a class="project-card" data-cat="security" href="https://github.com/y49959946-debug/keshev-dashboard/releases" target="_blank" rel="noopener">
           <div class="project-thumb t-dark"><img class="icon" src="assets/veil_icon.svg" alt="" /></div>
           <div class="project-body">
             <h3>Veil</h3>
-            <p>방어전을 토대로 만든 보안 에이전트를, 내 PC에서 쓰는 관제 대시보드 앱으로 만들고 있습니다.</p>
-            <div class="project-meta"><ul class="tags"><li class="tag">보안</li><li class="badge badge-wip">제작 중</li></ul><span class="arrow" aria-hidden="true">↗</span></div>
+            <p>방어전에서 만든 보안 에이전트를 PC용 관제 대시보드 앱으로 완성하고, 설치 프로그램으로 배포했습니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">보안</li><li class="badge badge-done">0.1.0 배포</li></ul><span class="arrow" aria-hidden="true">↗</span></div>
           </div>
         </a>
         <a class="project-card" data-cat="web" href="FactorFinder.html">
@@ -93,12 +102,12 @@
             <div class="project-meta"><ul class="tags"><li class="tag">웹 앱</li><li class="badge badge-done">완성</li></ul><span class="arrow" aria-hidden="true">→</span></div>
           </div>
         </a>
-        <a class="project-card" data-cat="web" href="cortex/demo/index.html">
+        <a class="project-card" data-cat="web" href="Hannun.html">
           <div class="project-thumb t-mist"><img class="icon" src="cortex/demo/assets/favicon.svg" alt="" /></div>
           <div class="project-body">
             <h3>한눈</h3>
-            <p>프리미엄 과제로 만들고 있는 앱입니다. 데모 화면을 먼저 열어 볼 수 있어요.</p>
-            <div class="project-meta"><ul class="tags"><li class="tag">웹 앱</li><li class="badge badge-wip">제작 중</li></ul><span class="arrow" aria-hidden="true">→</span></div>
+            <p>자기소개서 한 편을 여러 AI가 서로 다른 눈으로 읽고 토론해, 무엇부터 고칠지 정리해 주는 웹앱입니다.</p>
+            <div class="project-meta"><ul class="tags"><li class="tag">AI · 웹 앱</li><li class="badge badge-done">최종 제출</li></ul><span class="arrow" aria-hidden="true">→</span></div>
           </div>
         </a>
         <a class="project-card" data-cat="web" href="Weather/weatherhomepage.html">
